@@ -1371,13 +1371,36 @@ END FUNCTION
 FUNCTION QPStrL$(LongInt&)
 END FUNCTION
 
-FUNCTION QPTrim$(Work$)
+FUNCTION QPTrim$(inputValue$)
+  QPTrim$ = QPLTrim$(QPRTrim$(inputValue$))
 END FUNCTION
 
-FUNCTION QPLTrim$(Work$)
+FUNCTION QPLTrim$(inputValue$)
+  result$ = inputvalue$
+  DO
+    IF LEN(result$) = 0 THEN EXIT DO
+    ch$ = LEFT$(result$, 1)
+    SELECT CASE ch$
+      CASE CHR$(0), " " ', CHR$(9), CHR$(13), CHR$(10)
+        result$ = RIGHT$(result$, LEN(result$) - 1)
+      CASE ELSE: EXIT DO
+    END SELECT
+  LOOP
+  QPLTrim$ = result$
 END FUNCTION
 
-FUNCTION QPRTrim$(Work$)
+FUNCTION QPRTrim$(inputValue$)
+  result$ = inputvalue$
+  DO
+    IF LEN(result$) = 0 THEN EXIT DO
+    ch$ = RIGHT$(result$, 1)
+    SELECT CASE ch$
+      CASE CHR$(0), " " ', CHR$(9), CHR$(13), CHR$(10)
+        result$ = LEFT$(result$, LEN(result$) - 1)
+      CASE ELSE: EXIT DO
+    END SELECT
+  LOOP
+  QPRTrim$ = result$
 END FUNCTION
 
 FUNCTION QPValI% (X$)

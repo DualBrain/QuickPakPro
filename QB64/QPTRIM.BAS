@@ -1,19 +1,22 @@
-'********* QPTrim.Bas - demonstrates QPLTrim$, QPRTrim$, and QPTrim$
+' ********* QPTrim.Bas - demonstrates QPLTrim$, QPRTrim$, and QPTrim$
 
-'Copyright (c) 1988 Ethan Winer
+' Copyright (c) 1988 Ethan Winer
+' Modifications (c) 2022 Cory Smith
 
 DEFINT A-Z
 
-DECLARE FUNCTION QPLTrim$ (X$)
-DECLARE FUNCTION QPRTrim$ (X$)
-DECLARE FUNCTION QPTrim$ (X$)
+DECLARE FUNCTION QPLTrim$ (x$)
+DECLARE FUNCTION QPRTrim$ (x$)
+DECLARE FUNCTION QPTrim$ (x$)
 
 CLS
-Zero$ = STRING$(5, 0)
-X$ = Zero$ + "    This is a very silly sort of test       " + Zero$
 
-PRINT "Original ===> {"; X$; "}"
-PRINT "QPLTrim  ===> {"; QPLTrim$(X$); "}"
-PRINT "QPRTrim  ===> {"; QPRTrim$(X$); "}"
-PRINT "QPTrim   ===> {"; QPTrim$(X$); "}"
+zero$ = STRING$(5, 0)
+x$ = zero$ + "    This is a very silly sort of test       " + zero$
 
+PRINT "Original ===> {"; x$; "}"
+PRINT "QPLTrim  ===> {"; QPLTrim$(x$); "}"
+PRINT "QPRTrim  ===> {"; QPRTrim$(x$); "}"
+PRINT "QPTrim   ===> {"; QPTrim$(x$); "}"
+
+'$INCLUDE: 'QPPRO.BAS'
