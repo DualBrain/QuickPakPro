@@ -1454,6 +1454,12 @@ END SUB
 ' Chapter 9 - Video Routines
 ' ****************************************
 
+' BPrint will print either a conventional or fixed-length string at the 
+' current cursor position through DOS. 
+SUB BPrint(X$)
+  PRINT X$;
+END SUB
+
 SUB ClearScr0 (UlRow%, UlCol%, LrRow%, LrCol%, Colr%)
   FOR r = UlRow% TO LrRow%
     FOR c = UlCol% TO LrCol%

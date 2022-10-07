@@ -1,15 +1,16 @@
-'********** BPRINT.BAS - prints BASIC strings through DOS
+' ********** BPRINT.BAS - prints BASIC strings through DOS
 
-'Copyright (C) 1988
-
+' Copyright (C) 1988
+' Modifications (c) 2022 Cory Smith
 
 DEFINT A-Z
 
 DECLARE SUB BPrint (X$)
+
 DIM FixLen AS STRING * 30
 
-FixLen$ = "This string has a fixed length..."   'dots show how assigning to a
-                                                'fixed length string truncates
+FixLen$ = "This string has a fixed length..."   ' dots show how assigning to a
+                                                ' fixed length string truncates
 Normal$ = "This is a normal BASIC string"
 Value! = 143.801
 
@@ -20,3 +21,4 @@ CALL BPrint("This is a number:" + STR$(Value!) + CHR$(13) + CHR$(10))
 LOCATE 20, 20
 CALL BPrint("This shows that BPrint honors the current cursor location")
 
+'$INCLUDE: 'QPPRO.BAS'
