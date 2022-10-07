@@ -1475,19 +1475,20 @@ SUB BPrint(X$)
   PRINT X$;
 END SUB
 
-SUB ClearScr (UlRow%, UlCol%, LrRow%, LrCol%, Colr%, Page%)
-  'NOTE: Page% is currently not implemented.
-  FOR r = UlRow% TO LrRow%
-    FOR c = UlCol% TO LrCol%
-      QPRINTRC " ", r, c, Colr%
+SUB ClearScr (ulRow%, ulCol%, lrRow%, lrCol%, colr%, page%)
+  ' NOTE: page% is currently not implemented.
+  ' page% of -1 is "current page"
+  FOR r = ulRow% TO lrRow%
+    FOR c = ulCol% TO lrCol%
+      QPRINTRC " ", r, c, colr%
     NEXT
   NEXT
 END SUB
 
-SUB ClearScr0 (UlRow%, UlCol%, LrRow%, LrCol%, Colr%)
-  FOR r = UlRow% TO LrRow%
-    FOR c = UlCol% TO LrCol%
-      QPRINTRC " ", r, c, Colr%
+SUB ClearScr0 (ulRow%, ulCol%, lrRow%, lrCol%, colr%)
+  FOR r = ulRow% TO lrRow%
+    FOR c = ulCol% TO lrCol%
+      QPRINTRC " ", r, c, colr%
     NEXT
   NEXT
 END SUB
