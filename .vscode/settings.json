@@ -1,0 +1,11 @@
+{
+		"files.exclude": {
+			"**/*.bas-bak": true,
+			"**/*.bi-bak": true,
+			"**/*.bm-bak": true,
+			"**/*.cmp-out": true,
+			"**/*.json-bak": true
+		},
+		"files.defaultLanguage": "QB64",
+		"editor.multiCursorModifier": "ctrlCmd"
+	}

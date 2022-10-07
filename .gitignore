@@ -348,3 +348,20 @@ MigrationBackup/
 
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
+
+# Remove the ASM folder - only for internal reference.
+ASM/
+
+# Currently not using the SHARED folder, so ignore for now.
+SHARED/
+
+# Go ahead and ignore all .MAK files for the time being
+# as QB64 doesn't support these (yet?).
+*.mak
+
+# The .scr files are currently "not working" (at the very least, not verified).
+# These are used as part of the WIPES.BAS example.
+*.scr
+
+# QB64
+*.exe
