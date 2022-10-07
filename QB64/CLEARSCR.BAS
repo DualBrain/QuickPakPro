@@ -30,3 +30,4 @@ WHILE INKEY$ = "": WEND
 
 CALL ClearScr(ULRow, ULCol, LRRow, LRCol, Colr, Page)
 
+'$INCLUDE: 'QPPRO.BAS'

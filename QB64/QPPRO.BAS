@@ -1475,6 +1475,15 @@ SUB BPrint(X$)
   PRINT X$;
 END SUB
 
+SUB ClearScr (UlRow%, UlCol%, LrRow%, LrCol%, Colr%, Page%)
+  'NOTE: Page% is currently not implemented.
+  FOR r = UlRow% TO LrRow%
+    FOR c = UlCol% TO LrCol%
+      QPRINTRC " ", r, c, Colr%
+    NEXT
+  NEXT
+END SUB
+
 SUB ClearScr0 (UlRow%, UlCol%, LrRow%, LrCol%, Colr%)
   FOR r = UlRow% TO LrRow%
     FOR c = UlCol% TO LrCol%
