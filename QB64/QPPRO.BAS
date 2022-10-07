@@ -1,3 +1,9 @@
+' *********** QPPRO.BAS - added value functionality for QB64
+'                         inspired by QuickPak Professional 
+'                         for QB45/PDS71/VBDOS10
+
+' Copyright (c) 2022 Cory Smith
+
 ' ****************************************
 ' Chapter 2 - Array Routines 
 ' ****************************************
@@ -1535,8 +1541,8 @@ SUB MScrnSave (UlRow%, UlCol%, LrRow%, LrCol%, Element%())
   'TODO: Capture the region for restoration later.
 END SUB
 
-FUNCTION OneColor% (FG%, BG%)
-  OneColor% = (FG% AND 16) * 8 + ((BG% AND 7) * 16) + (FG% AND 15)
+FUNCTION OneColor% (fg%, bg%)
+  OneColor% = (fg% AND 16) * 8 + ((bg% AND 7) * 16) + (fg% AND 15)
 END FUNCTION
 
 SUB QPrint (text$, colr%, page%)
@@ -1550,7 +1556,22 @@ SUB QPrint (text$, colr%, page%)
   END IF
   PRINT text$;
   IF ofg% <> -1 AND obg% <> -1 THEN
-    COLOR obg%, obg%
+    COLOR ofg%, obg%
+  END IF
+END SUB
+
+SUB QPrint0 (text$, colr%)
+  ofg% = -1: obg% = -1
+  IF colr% = -1 THEN
+    ' Maintain existing color...
+  ELSE
+     ofg% = _DEFAULTCOLOR: obg% = _BACKGROUNDCOLOR
+     SplitColor colr%, fg%, bg%
+     COLOR fg%, bg%
+  END IF
+  PRINT text$;
+  IF ofg% <> -1 AND obg% <> -1 THEN
+    COLOR ofg%, obg%
   END IF
 END SUB
 
