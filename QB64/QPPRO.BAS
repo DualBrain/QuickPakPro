@@ -687,9 +687,6 @@ END SUB
 SUB MASCIIPick(Char%, Color1%, Color2%, ExitCode%)
 END SUB
 
-SUB CapNum
-END SUB
-
 SUB ColorPick(Colr%, BoxColor%, ExitCode%)
 END SUB
 
@@ -1116,7 +1113,25 @@ END SUB
 FUNCTION PDQTimer&
 END FUNCTION
 
-FUNCTION Peek1%(Segment%, Address%)
+FUNCTION Peek1%(segment%, address%)
+  SELECT CASE segment%
+    CASE 0
+      SELECT CASE address%
+        CASE &H463 ' Color Monitor?
+          ' IF Peek1%(0, &H463) <> &HB4 THEN ColorMon = 1   ' see what monitor is active
+        CASE &H417 ' Capslock and Numlock status?
+          result% = 0
+          IF _CAPSLOCK THEN result% = result% + &H40
+          IF _NUMLOCK THEN result% = result% + &H20
+          Peek1% = result%
+          ' CapStatus = Peek1%(0, &H417) AND &H40        'get BIOS status of Caps Lock
+          ' NumStatus = Peek1%(0, &H417) AND &H20        'get BIOS status of Num Lock
+          ' &H40 Capslock Active
+          ' &H20 Numlock Active
+        CASE ELSE
+      END SELECT
+    CASE ELSE
+  END SELECT
 END FUNCTION
 
 FUNCTION Peek2%(Segment%, Address%)
@@ -1513,6 +1528,21 @@ END SUB
 FUNCTION OneColor% (FG%, BG%)
   OneColor% = (FG% AND 16) * 8 + ((BG% AND 7) * 16) + (FG% AND 15)
 END FUNCTION
+
+SUB QPrint (text$, colr%, page%)
+  ofg% = -1: obg% = -1
+  IF colr% = -1 THEN
+    ' Maintain existing color...
+  ELSE
+     ofg% = _DEFAULTCOLOR: obg% = _BACKGROUNDCOLOR
+     SplitColor colr%, fg%, bg%
+     COLOR fg%, bg%
+  END IF
+  PRINT text$;
+  IF ofg% <> -1 AND obg% <> -1 THEN
+    COLOR obg%, obg%
+  END IF
+END SUB
 
 SUB QPrintRC (TXT$, R%, C%, CLR%)
   OFG% = -1: OBG% = -1

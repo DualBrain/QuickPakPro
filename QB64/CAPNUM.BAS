@@ -1,12 +1,16 @@
-'********** CAPNUM.BAS - prints status of Cap and NumLock keys
+' ********** CAPNUM.BAS - prints status of Cap and NumLock keys
 
-'Copyright (c) 1987 Ethan Winer
-
+' Copyright (c) 1987 Ethan Winer
+' Modifications (c) 2022 Cory Smith
 
 DEFINT A-Z
 
 DECLARE FUNCTION Peek1% (Segment, Address)
 DECLARE SUB QPrint (X$, Colr, Page)
+
+DO
+  CapNum
+LOOP
 
 SUB CapNum STATIC
 
@@ -42,3 +46,4 @@ QCapNumExit:
 
 END SUB
 
+'$INCLUDE: 'QPPRO.BAS'
