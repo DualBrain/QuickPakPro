@@ -752,9 +752,6 @@ END SUB
 SUB QEdit(Array$(), Ky$, Action%, Ed)
 END SUB
 
-SUB ScrollIn(Edit$, Start%, Wide%, MaxLen%, Filter%, Ky%, EdClr%, NormalClr%)
-END SUB
-
 SUB Spread(Wks$(), Format$(), ColumnWidths%(), Wide%, Rows%, Action%)
 END SUB
 
@@ -997,10 +994,11 @@ END SUB
 FUNCTION WaitScan%
 END FUNCTION
 
+' WaitUp halts a program's execution until no mouse buttons are being depressed. 
 SUB WaitUp
   DO
-    Call GetCursor(X%, Y%, Button%)
-  LOOP WHILE Button%
+    Call GetCursor(x%, y%, button%)
+  LOOP WHILE button%
 END SUB
 
 ' **************************************
@@ -1174,7 +1172,11 @@ SUB Pause3 (milliseconds%, fudg&)
   _DELAY milliseconds% / 1000
 END SUB
 
+' PDQTimer is an integer-only TIMER replacement that avoids the 
+' inclusion of BASIC's floating point code in your programs. 
 FUNCTION PDQTimer&
+  ' The documentation sample suggests that the resolution is in 1/10th of a second.
+  PDQTimer& = INT(TIMER * 10)
 END FUNCTION
 
 FUNCTION Peek1%(segment%, address%)
