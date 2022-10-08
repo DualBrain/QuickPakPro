@@ -785,14 +785,21 @@ END FUNCTION
 ' was pressed since the last time it was called. It also returns the X/Y 
 ' coordinates where the mouse cursor was located when that button 
 ' was last pressed. 
-SUB ButtonPress (Button%, Status%, Count%, X%, Y%)
+SUB ButtonPress (button%, status%, count%, x%, y%)
 
-  ' Button% is the button of interest, with a 1 indicating button 1, 2 
-  ' meaning button 2, and 3 for button 3 (if the mouse has a third 
-  ' button). 
+  ' button% is the button of interest, with a 1 indicating button 1,  
+  ' 2 meaning button 2, and 3 for button 3 (if the mouse has a third button). 
 
-  ' Status% is the current button status, and has the same meaning as 
+  ' status% is the current button status, and has the same meaning as 
   ' the information returned by the GetCursor mouse routine. 
+
+    button1% = _MOUSEBUTTON(1)
+    button2% = _MOUSEBUTTON(2)
+    button3% = _MOUSEBUTTON(3)
+    status% = 0
+    IF button% = 1 AND button1% THEN status% = 1
+    IF button% = 2 AND button2% THEN status% = status% + 2
+    IF button% = 3 AND button3% THEN status% = status% + 4
 
   ' Count% tells how many times the button has been pressed since 
   ' ButtonPress was last called. X% and Y% hold the mouse cursor 
@@ -800,16 +807,30 @@ SUB ButtonPress (Button%, Status%, Count%, X%, Y%)
   ' routine to determine the current mouse cursor location. 
 
   IF _MOUSEINPUT THEN 
-    WHILE _MOUSEBUTTON(Button%)
-      IF Button% = 1 THEN Count1% = Count1% + 1
-      IF Button% = 2 THEN Count2% = Count2% + 1
-      IF Button% = 3 THEN Count3% = Count3% + 1
-    WEND
+    ' WHILE _MOUSEBUTTON(button%)
+    '   IF button% = 1 THEN count1% = count1% + 1
+    '   IF button% = 2 THEN count2% = count2% + 1
+    '   IF button% = 3 THEN count3% = count3% + 1
+    ' WEND
+    IF _MOUSEBUTTON(button%) THEN
+      IF button% = 1 THEN count1% = count1% + 1
+      IF button% = 2 THEN count2% = count2% + 1
+      IF button% = 3 THEN count3% = count3% + 1
+    END IF
+    col% = _MOUSEX
+    row% = _MOUSEY
+    x% = (col% - 1) * 8
+    y% = (row% - 1) * 8
+    lastX% = x%
+    lastY% = y%
+  ELSE
+    x% = lastX%
+    y% = lastY%
   END IF
   
-  IF Button% = 1 THEN Count% = Count1%: Count1% = 0
-  IF Button% = 2 THEN Count% = Count2%: Count2% = 0
-  IF Button% = 3 THEN Count% = Count3%: Count3% = 0
+  IF button% = 1 THEN count% = count1%: count1% = 0
+  IF button% = 2 THEN count% = count2%: count2% = 0
+  IF button% = 3 THEN count% = count3%: count3% = 0
 
 END SUB
 
@@ -830,27 +851,29 @@ END FUNCTION
 
 ' GetCursor reports the current location of the mouse cursor, and 
 ' which mouse buttons are currently depressed. 
-SUB GetCursor (X%, Y%, Button%) STATIC
-  ' X% and Y% return holding the current mouse cursor coordinates, 
-  ' and Button% is bit coded to indicate which buttons are currently 
+SUB GetCursor (x%, y%, button%) STATIC
+  ' x% and y% return holding the current mouse cursor coordinates, 
+  ' and button% is bit coded to indicate which buttons are currently 
   ' down. 
   IF _MOUSEINPUT THEN
-    X% = _MOUSEX
-    Y% = _MOUSEY
-    Button1% = _MOUSEBUTTON(1)
-    Button2% = _MOUSEBUTTON(2)
-    Button3% = _MOUSEBUTTON(3)
-    Button% = 0
-    IF Button1% THEN Button% = 1
-    IF Button2% THEN Button% = Button% + 2
-    IF Button3% THEN Button% = Button% + 4
-    LastX% = X%
-    LastY% = Y%
-    LastButton% = Button%
+    col% = _MOUSEX
+    row% = _MOUSEY
+    x% = (col% - 1) * 8
+    y% = (row% - 1) * 8
+    button1% = _MOUSEBUTTON(1)
+    button2% = _MOUSEBUTTON(2)
+    button3% = _MOUSEBUTTON(3)
+    button% = 0
+    IF button1% THEN button% = 1
+    IF button2% THEN button% = button% + 2
+    IF button3% THEN button% = button% + 4
+    lastX% = x%
+    lastY% = y%
+    lastButton% = button%
   ELSE
-    X% = LastX%
-    Y% = LastY%
-    Button% = LastButton%
+    x% = lastX%
+    y% = lastY%
+    button% = lastButton%
   END IF
 END SUB
 
@@ -864,7 +887,11 @@ SUB HideCursor
   _MOUSEHIDE
 END SUB
 
-SUB InitMouse(There%)
+' InitMouse is used both to determine if a mouse is present in the host 
+' PC, and to reset the mouse driver software to its default values. 
+SUB InitMouse(there%)
+  ' there% receives -1 if a mouse is present, or O if no mouse is installed. 
+  there% = -1 ' we are working on modern platforms, of course there is a mouse.
 END SUB
 
 FUNCTION InStat%

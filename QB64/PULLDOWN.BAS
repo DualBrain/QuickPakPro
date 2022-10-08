@@ -183,9 +183,8 @@ SUB PullDown (choice$(), stat(), menu, choice, ky$, action, cnf AS Config) STATI
        IF cnf.Mouse THEN
           ButtonPress 1, down, presses, x, y
           IF presses = 0 THEN GetCursor x, y, button
-          mRow = (Y \ nPixLines) + 1
-          mCol = (X \ 8) + 1
-
+          mRow = (y \ nPixLines) + 1
+          mCol = (x \ 8) + 1
           IF (mRow <> lMRow OR mCol <> lMCol OR presses) AND down = 1 THEN
              
              IF mRow - BAR_LINE - 1 <= lastChoice AND mRow - BAR_LINE - 1 > 0 AND mCol > startCol AND mCol < enBar THEN
