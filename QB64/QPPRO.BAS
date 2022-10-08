@@ -1326,10 +1326,18 @@ END FUNCTION
 FUNCTION FUsing$(Number$, Image$)
 END FUNCTION
 
+' InCount will quickly report how many times one string occurs 
+' within another, and the case-sensitive search string may contain 
+' any number of "?" wild cards. 
 FUNCTION InCount%(Source$, SearchValue$)
+  ' TODO: Need to leverage QInstr%
 END FUNCTION
 
+' InCount2 will quickly report how many times one string occurs 
+' within another, and the case-insensitive search string may contain 
+' any number of "?" wild cards. 
 FUNCTION InCount2%(Source$, SearchValue$)
+  ' TODO: Need to leverage QInstr%
 END FUNCTION
 
 FUNCTION InCountTbl%(Source$, Table$)
@@ -1385,7 +1393,7 @@ FUNCTION QInstr%(startPosition%, sourceValue$, searchValue$)
   ' Setting position to 0 will return 0; matching QB behavior.
   IF startPosition% = 0 THEN QInstr% = 0: EXIT FUNCTION
 
-  position% = 1
+  position% = startPosition%
   DO
     segment$ = MID$(sourceValue$, position%, LEN(searchValue$))
     IF LEN(segment$) <> LEN(searchValue$) THEN EXIT DO
@@ -1412,7 +1420,7 @@ FUNCTION QInstr2%(startPosition%, sourceValue$, searchValue$)
   ' Setting position to 0 will return 0; matching QB behavior.
   IF startPosition% = 0 THEN QInstr2% = 0: EXIT FUNCTION
 
-  position% = 1
+  position% = startPosition%
   DO
     segment$ = MID$(sourceValue$, position%, LEN(searchValue$))
     IF LEN(segment$) <> LEN(searchValue$) THEN EXIT DO
