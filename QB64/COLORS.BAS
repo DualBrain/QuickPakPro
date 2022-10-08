@@ -25,7 +25,7 @@ DATA Black, Blue, Green, Cyan, Red, Magenta, Brown, White, Gray
 
 LOCATE 2, 23
 COLOR 9
-PRINT "  Quick Pak Professional Color Chart  "
+PRINT "  QuickPak Professional Color Chart  "
 
 FOR BG = 0 TO 7
 
