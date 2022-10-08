@@ -421,7 +421,8 @@ PullDisplay:                                 'Restore the screen
     END IF
     HideCursor
 
-    QPrintAny CHR$(213) + STRING$(wdth + 2, CHR$(205)) + CHR$(184), cnf.MenBox, -cnf.MonTyp, BAR_LINE + 1, startCol
+    'QPrintAny CHR$(213) + STRING$(wdth + 2, CHR$(205)) + CHR$(184), cnf.MenBox, -cnf.MonTyp, BAR_LINE + 1, startCol
+    QPrintAny CHR$(218) + STRING$(wdth + 2, CHR$(196)) + CHR$(191), cnf.MenBox, -cnf.MonTyp, BAR_LINE + 1, startCol
 
     temp$ = SPACE$(wdth)
     FOR c = 1 TO lastChoice

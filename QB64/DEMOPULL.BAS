@@ -22,7 +22,8 @@ DECLARE SUB HideCursor ()
 
 CLS
 
-QPrint0 STRING$(22 * 80, CHR$(254)), 23       ' make a background for the demo
+QPrint0 STRING$(24 * 80, CHR$(250)), 23       ' make a background for the demo
+QPrintRC STRING$(80, CHR$(250)), 25, 1, 23
 
 '----- Define the Menu Choices here
 
