@@ -1027,7 +1027,44 @@ END SUB
 SUB Calendar(Month%, Day%, Year%, ULRow%, ULCol%, Color1%, Color2%, Action%)
 END SUB
 
-SUB Chime(Number%)
+' Chime provides five different types of beep tones, and five short 
+' attention-getting trill sounds.
+SUB Chime(number%)
+
+  SELECT CASE number%
+    CASE 1: QPSound 100, 5
+    CASE 2: QPSound 200, 5
+    CASE 3: QPSound 400, 5
+    CASE 4: QPSound 800, 5
+    CASE 5: QPSound 1600, 5
+    CASE 6
+      QPSound 659, 1
+      QPSound 523, 1
+      QPSound 659, 1
+      QPSound 523, 1
+    CASE 7
+      FOR i = 300 TO 750 STEP 50
+        QPSound i, 1
+      NEXT
+    CASE 8
+      FOR i = 1000 TO 1700 STEP 100
+        QPSound i, 1
+      NEXT
+    CASE 9
+      FOR i = 1 TO 6
+        QPSound 200 * i, 1
+      NEXT
+    CASE 10
+      QPSound 220, 1
+      QPSound 330, 1
+      QPSound 440, 1
+      QPSound 660, 1
+      QPSound 880, 1
+      QPSound 1319, 1
+      QPSound 1760, 1
+    CASE ELSE
+  END SELECT
+
 END SUB
 
 SUB Clock(Row%, Column%, Colr%, Mode%)
@@ -1232,8 +1269,17 @@ END SUB
 SUB QPPlay(Tune$)
 END SUB
 
-SUB QPSound(Frequency%, Duration%)
-  SOUND Frequency%, Duration%
+' QPSound is nearly identical to BASIC's SOUND statement, but provides
+' a considerable reduction in the amount of code added to a program. 
+SUB QPSound(frequency%, duration%)
+  ' The only real difference between QPSound and BASIC's SOUND is 
+  ' that the sound is played in the "foreground" only. Where BASIC's 
+  ' SOUND returns to your program immediately and continues to play 
+  ' the tone in the background, QPSound waits until it has completed 
+  ' before returning. QPSound is demonstrated in the QPSOUND.BAS 
+  ' example program. 
+  SOUND frequency%, duration%
+  SOUND 20000, 1
 END SUB
 
 FUNCTION QPSegAdr&(Any$)
