@@ -1,23 +1,26 @@
-'********** QInstr.Bas - tests QInstr.Asm
+' ********** QINSTR.BAS - tests QInstr.Asm
 
-'Copyright (c) 1988 Ethan Winer
-
+' Copyright (c) 1988 Ethan Winer
+' Modifications (c) 2020 Cory Smith
 
 DEFINT A-Z
-DECLARE FUNCTION QInstr% (Start, Source$, Search$)
+
+DECLARE FUNCTION QInstr% (start, source$, searchValue$)
 
 CLS
-Start = 7
-Source$ = "This is a test of the QInstr routine"
-Search$ = "I???"
 
-Position = QInstr%(Start, Source$, Search$)
+start = 7
+source$ = "This is a test of the QInstr routine"
+searchValue$ = "I???"
 
-PRINT Source$
-IF Position THEN
-   PRINT TAB(Position); Search$
-   PRINT TAB(Position); MID$(STR$(Position), 2)
+position = QInstr%(start, source$, searchValue$)
+
+PRINT source$
+IF position THEN
+  PRINT TAB(position); searchValue$
+  PRINT TAB(position); MID$(STR$(position), 2)
 ELSE
-   PRINT "Not Found"
+  PRINT "Not Found"
 END IF
 
+'$INCLUDE: 'QPPRO.BAS'

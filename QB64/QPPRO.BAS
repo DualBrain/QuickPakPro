@@ -1381,18 +1381,54 @@ END SUB
 ' QInstr serves the same purpose as BASIC's INSTR function, 
 ' except it accepts any number of "?" wild cards.
 FUNCTION QInstr%(startPosition%, sourceValue$, searchValue$)
+
+  ' Setting position to 0 will return 0; matching QB behavior.
   IF startPosition% = 0 THEN QInstr% = 0: EXIT FUNCTION
-  QInstr% = INSTR(startPosition%, sourceValue$, searchValue$)
+
+  position% = 1
+  DO
+    segment$ = MID$(sourceValue$, position%, LEN(searchValue$))
+    IF LEN(segment$) <> LEN(searchValue$) THEN EXIT DO
+    isMatch% = 1
+    FOR index = 1 TO LEN(searchValue$)
+      character$ = MID$(searchValue$, index, 1)
+      IF character$ <> "?" THEN
+        IF MID$(segment$, index, 1) <> character$ THEN isMatch% = 0 : EXIT FOR
+      END IF
+      IF isMatch% THEN QInstr% = position% : EXIT FUNCTION
+    NEXT
+    position% = position% + 1
+  LOOP
+
+  QInstr% = 0
+
 END FUNCTION
 
 ' QInstr2 serves the same purpose as BASIC's INSTR function, except 
 ' it accepts any number of "?" wild cards and it ignores capitalization 
 ' when examining the strings.
 FUNCTION QInstr2%(startPosition%, sourceValue$, searchValue$)
+
+  ' Setting position to 0 will return 0; matching QB behavior.
   IF startPosition% = 0 THEN QInstr2% = 0: EXIT FUNCTION
-  sourceLowered$ = sourceValue$: Lower(sourceLowered$)
-  searchLowered$ = searchValue$: Lower(searchLowered$)
-  QInstr2% = INSTR(startPosition%, sourceLowered$, searchLowered$)
+
+  position% = 1
+  DO
+    segment$ = MID$(sourceValue$, position%, LEN(searchValue$))
+    IF LEN(segment$) <> LEN(searchValue$) THEN EXIT DO
+    isMatch% = 1
+    FOR index% = 1 TO LEN(searchValue$)
+      character$ = LCASE$(MID$(searchValue$, index%, 1))
+      IF character$ <> "?" THEN
+        IF LCASE$(MID$(segment$, index%, 1)) <> character$ THEN isMatch% = 0 : EXIT FOR
+      END IF
+      IF isMatch% THEN QInstr2% = position% : EXIT FUNCTION
+    NEXT
+    position% = position% + 1
+  LOOP
+
+  QInstr2% = 0
+
 END FUNCTION
 
 FUNCTION QInstrB%(StartPos%, Source$, SearchValue$)
