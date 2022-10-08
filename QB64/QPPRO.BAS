@@ -1476,40 +1476,32 @@ END SUB
 ' different string (case-sensitive). Both the string being searched 
 ' for and its replacement may be any length.
 SUB ReplaceString (sourceValue$, oldValue$, newValue$) STATIC
-
-    oldLen = LEN(oldValue$)
-    newLen = LEN(newValue$)
-    pointer = 1
-
+  oldLen = LEN(oldValue$)
+  newLen = LEN(newValue$)
+  pointer = 1
 Again:
-    pointer = QInstr%(pointer, sourceValue$, oldValue$)' case-sensitive
-
-    IF pointer THEN
-       sourceValue$ = LEFT$(sourceValue$, pointer - 1) + newValue$ + MID$(sourceValue$, pointer + oldLen)
-       pointer = pointer + newLen
-       GOTO Again
-    END IF
-
+  pointer = QInstr%(pointer, sourceValue$, oldValue$)' case-sensitive
+  IF pointer THEN
+    sourceValue$ = LEFT$(sourceValue$, pointer - 1) + newValue$ + MID$(sourceValue$, pointer + oldLen)
+    pointer = pointer + newLen
+    GOTO Again
+  END IF
 END SUB
 
 ' ReplaceString2 replaces all occurrences of a specified string with a 
 ' different string (case-insensitive). Both the string being searched 
 ' for and its replacement may be any length.
 SUB ReplaceString2 (sourceValue$, oldValue$, newValue$) STATIC
-
-    oldLen = LEN(oldValue$)
-    newLen = LEN(newValue$)
-    pointer = 1
-
+  oldLen = LEN(oldValue$)
+  newLen = LEN(newValue$)
+  pointer = 1
 Again:
-    pointer = QInstr2%(pointer, sourceValue$, oldValue$)' case-insensitive
-
-    IF pointer THEN
-       sourceValue$ = LEFT$(sourceValue$, pointer - 1) + newValue$ + MID$(sourceValue$, pointer + oldLen)
-       pointer = pointer + newLen
-       GOTO Again
-    END IF
-
+  pointer = QInstr2%(pointer, sourceValue$, oldValue$)' case-insensitive
+  IF pointer THEN
+    sourceValue$ = LEFT$(sourceValue$, pointer - 1) + newValue$ + MID$(sourceValue$, pointer + oldLen)
+    pointer = pointer + newLen
+    GOTO Again
+  END IF
 END SUB
 
 SUB ReplaceTbl(Work$, Table$)

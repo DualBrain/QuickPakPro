@@ -1,17 +1,16 @@
-'********** Replace.Bas
+' ********** REPLACE.BAS
 
-'replaces all occurences of one string with another without regard
-'to capitalization
+' replaces all occurences of one string with another without regard
+' to capitalization
 
-'Copyright (c) 1988 Ethan Winer
-
+' Copyright (c) 1988 Ethan Winer
+' Modifications (c) 2022 Cory Smith
 
 DEFINT A-Z
 
-DECLARE SUB ReplaceString (Work$, Old$, New$)
-DECLARE SUB ReplaceChar (Work$, Old$, New$)
-DECLARE SUB ReplaceChar2 (Work$, Old$, New$)
-DECLARE FUNCTION QInstr2 (Start%, Str1$, Str2$)
+DECLARE SUB ReplaceString2 (text$, old$, new$)
+DECLARE SUB ReplaceChar (text$, old$, new$)
+DECLARE SUB ReplaceChar2 (text$, old$, new$)
 
 CLS
 
@@ -20,7 +19,7 @@ Old$ = "this"
 New$ = "And now this"
 
 PRINT Work$
-ReplaceString Work$, Old$, New$
+ReplaceString2 Work$, Old$, New$
 PRINT Work$
 
 PRINT
@@ -35,21 +34,32 @@ PRINT Work$
 ReplaceChar2 Work$, "a", "e"
 PRINT Work$
 
-SUB ReplaceString (Work$, Old$, New$) STATIC
+' Moved ReplaceString ReplaceString2 into QPPRO.BAS.
+'
+' SUB ReplaceString (sourceValue$, oldValue$, newValue$) STATIC
+'   oldLen = LEN(oldValue$)
+'   newLen = LEN(newValue$)
+'   pointer = 1
+' Again:
+'   pointer = QInstr%(pointer, sourceValue$, oldValue$) ' case-sensitive
+'   IF pointer THEN
+'     sourceValue$ = LEFT$(sourceValue$, pointer - 1) + newValue$ + MID$(sourceValue$, pointer + oldLen)
+'     pointer = pointer + newLen
+'     GOTO Again
+'   END IF
+' END SUB
 
-    OldLen = LEN(Old$)
-    NewLen = LEN(New$)
-    Pointer = 1
+' SUB ReplaceString2 (sourceValue$, oldValue$, newValue$) STATIC
+'   oldLen = LEN(oldValue$)
+'   newLen = LEN(newValue$)
+'   pointer = 1
+' Again:
+'   pointer = QInstr2%(pointer, sourceValue$, oldValue$) ' case-insensitive
+'   IF pointer THEN
+'     sourceValue$ = LEFT$(sourceValue$, pointer - 1) + newValue$ + MID$(sourceValue$, pointer + oldLen)
+'     pointer = pointer + newLen
+'     GOTO Again
+'   END IF
+' END SUB
 
-Again:
-    'change the QInstr2 to QInstr to make searching case sensitive
-    Pointer = QInstr2%(Pointer, Work$, Old$)
-
-    IF Pointer THEN
-       Work$ = LEFT$(Work$, Pointer - 1) + New$ + MID$(Work$, Pointer + OldLen)
-       Pointer = Pointer + NewLen
-       GOTO Again
-    END IF
-
-END SUB
-
+'$INCLUDE: 'QPPRO.BAS'
