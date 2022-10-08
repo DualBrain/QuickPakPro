@@ -708,7 +708,7 @@ END SUB
 SUB Editor(Ed$, ActiveLength%, ScanCode%, NumOnly%, IsCapsOn%, NormalColor%, EditColor%, Row%, Column%)
 END SUB
 
-SUB Lts2Menu(Item$(), Prompt$(), Choice%, Colr%)
+SUB Lts2Menu(Item$(), PromptParam$(), Choice%, Colr%)
 END SUB
 
 SUB LtsMenu(Item$(), Choice%, Colr%)
@@ -764,7 +764,7 @@ END SUB
 SUB VertMenu(Item$(), Choice%, MaxLen%, BoxBot%, Ky$, Action%, Cnf)
 END SUB
 
-SUB YesNo(YN$, Prompt$, ScanCode%, NormalColor%, EditColor%, Row%, Column%)
+SUB YesNo(YN$, PromptParam$, ScanCode%, NormalColor%, EditColor%, Row%, Column%)
 END SUB
 
 SUB YesNoB(YN$, ExitCode%, Colr%)
@@ -786,6 +786,11 @@ END FUNCTION
 ' coordinates where the mouse cursor was located when that button 
 ' was last pressed. 
 SUB ButtonPress (button%, status%, count%, x%, y%)
+
+  ' NOTE: it appears that button press count is monitored "outside" of
+  '       this method; it is reset within this method to 0 (I think?), 
+  '       but will need to figure out a way to determine the number of
+  '       presses (clicks) some other way.
 
   ' button% is the button of interest, with a 1 indicating button 1,  
   ' 2 meaning button 2, and 3 for button 3 (if the mouse has a third button). 
@@ -817,10 +822,15 @@ SUB ButtonPress (button%, status%, count%, x%, y%)
       IF button% = 2 THEN count2% = count2% + 1
       IF button% = 3 THEN count3% = count3% + 1
     END IF
-    col% = _MOUSEX
-    row% = _MOUSEY
-    x% = (col% - 1) * 8
-    y% = (row% - 1) * 8
+    IF _PIXELSIZE = 0 THEN
+      col% = _MOUSEX
+      row% = _MOUSEY
+      x% = (col% - 1) * 8
+      y% = (row% - 1) * 8
+    ELSE
+      x% = _MOUSEX
+      y% = _MOUSEY
+    END IF
     lastX% = x%
     lastY% = y%
   ELSE
@@ -856,10 +866,15 @@ SUB GetCursor (x%, y%, button%) STATIC
   ' and button% is bit coded to indicate which buttons are currently 
   ' down. 
   IF _MOUSEINPUT THEN
-    col% = _MOUSEX
-    row% = _MOUSEY
-    x% = (col% - 1) * 8
-    y% = (row% - 1) * 8
+    IF _PIXELSIZE = 0 THEN
+      col% = _MOUSEX
+      row% = _MOUSEY
+      x% = (col% - 1) * 8
+      y% = (row% - 1) * 8
+    ELSE
+      x% = _MOUSEX
+      y% = _MOUSEY
+    END IF
     button1% = _MOUSEBUTTON(1)
     button2% = _MOUSEBUTTON(2)
     button3% = _MOUSEBUTTON(3)
@@ -880,7 +895,14 @@ END SUB
 SUB GetCursorT(Col%, Row%, Button%)
 END SUB
 
-SUB GrafCursor(X%, Y%, Cursor%)
+' GrafCursor greatly simplifies defining the shape of the mouse 
+' cursor for use in graphics mode. 
+SUB GrafCursor(x%, y%, cursor$)
+  ' x% and y% define the cursor "hot spot", and cursor$ is either a 
+  ' conventional or fixed-length string that contains the new cursor shape. 
+
+  ' NOT IMPLEMENTED
+
 END SUB
 
 SUB HideCursor
