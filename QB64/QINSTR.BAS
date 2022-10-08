@@ -5,19 +5,19 @@
 
 DEFINT A-Z
 
-DECLARE FUNCTION QInstr% (start, source$, searchValue$)
+DECLARE FUNCTION QInstr% (start, source$, pattern$)
 
 CLS
 
 start = 7
 source$ = "This is a test of the QInstr routine"
-searchValue$ = "I???"
+pattern$ = "I???"
 
-position = QInstr%(start, source$, searchValue$)
+position = QInstr%(start, source$, pattern$)
 
 PRINT source$
 IF position THEN
-  PRINT TAB(position); searchValue$
+  PRINT TAB(position); pattern$
   PRINT TAB(position); MID$(STR$(position), 2)
 ELSE
   PRINT "Not Found"
