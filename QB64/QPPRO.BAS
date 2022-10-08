@@ -746,9 +746,6 @@ END SUB
 SUB PickList(Item$(), Picked%(), NPicked%, Cnf)
 END SUB
 
-SUB PullDown(Choice$(), Status%(), Menu%, Choice%, Ky$, Action%, Cnf)
-END SUB
-
 SUB PullDnMS(Choice$(), Stat%(), Menu%, Choice%, Ky$, Action%)
 END SUB
 
@@ -897,7 +894,8 @@ END SUB
 SUB MSetState(Buffer$)
 END SUB
 
-SUB MouseTrap(ULRow%, ULCol%, LRRow%, LRCol%)
+' MouseTrap will establish the allowable range of movement for the mouse cursor. 
+SUB MouseTrap(ulRow%, ulCol%, lrRow%, lrCol%)
 END SUB
 
 FUNCTION NumLock%
@@ -934,11 +932,18 @@ END SUB
 SUB TextCursor(FG%, BG%)
 END SUB
 
-FUNCTION WaitKey%
+' FUNCTION WaitKey%
+'   WHILE INKEY$ <> "": WEND ' Clear any pending key strokes.
+'   WHILE INKEY$ = "": WEND ' Wait for a key.
+'   ' TODO: Return the key value.
+' END FUNCTION
+
+' WaitKey first clears the keyboard buffer of any keys that may be 
+' pending, and then waits until a key is pressed. 
+SUB WaitKey
   WHILE INKEY$ <> "": WEND ' Clear any pending key strokes.
   WHILE INKEY$ = "": WEND ' Wait for a key.
-  ' TODO: Return the key value.
-END FUNCTION
+END SUB
 
 FUNCTION WaitScan%
 END FUNCTION
@@ -1350,16 +1355,21 @@ END FUNCTION
 SUB QInstrH(Segment%, Address%, SearchValue$, NumBytes&)
 END SUB
 
-FUNCTION QPLeft$(Work$, NumChars%)
+FUNCTION QPLeft$(text$, numChars%)
+  QPLeft$ = LEFT$(text$, numChars%)
 END FUNCTION
 
-FUNCTION QPMid$(Work$, StartChar%, NumChars%)
+FUNCTION QPMid$(text$, startChar%, numChars%)
+  QPMid$ = MID$(text$, startChar%, numChars%)
 END FUNCTION
 
-FUNCTION QPRight$(Work$, NumChars%)
+FUNCTION QPRight$(text$, numChars%)
+  QPRight$ = RIGHT$(text$, numChars%)
 END FUNCTION
 
-FUNCTION QPLen%(Work$)
+' QPLen serves the same purpose as BASIC's LEN function, but it is considerably faster.
+FUNCTION QPLen%(text$)
+  QPLen% = LEN(text$)
 END FUNCTION
 
 FUNCTION QPSadd%(Work$)
@@ -1498,6 +1508,12 @@ END SUB
 ' Chapter 9 - Video Routines
 ' ****************************************
 
+' ArraySize will quickly calculate how many elements are needed in an
+' integer array that is intended to hold a portion of the display screen.
+FUNCTION ArraySize%(ulRow%, ulCol%, lrRow%, lrCol%)
+  ArraySize% = (lrRow% - ulRow% + 1) * (lrCol% - ulCol% + 1)
+END FUNCTION
+
 ' BPrint will print either a conventional or fixed-length string at the 
 ' current cursor position through DOS. 
 SUB BPrint(X$)
@@ -1522,46 +1538,60 @@ SUB ClearScr0 (ulRow%, ulCol%, lrRow%, lrCol%, colr%)
   NEXT
 END SUB
 
-SUB GetVMode (Mode%, Page%, PageSize%, Rows%, Columns%)
+' GetVMode will report the current video mode, the currently active 
+' display page, the page size, and the number of rows and columns. 
+SUB GetVMode (mode%, page%, pageSize%, rows%, columns%)
   'TODO: Need to implement other values.
-  Rows% = _HEIGHT
+  columns% = _WIDTH
+  rows% = _HEIGHT
 END SUB
 
 FUNCTION Monitor%
+  ' NOTE: The documentation for QPrintAny() and Monitor% don't appear to align????
   Monitor% = 7 ' VGA adapter with a color monitor.
 END FUNCTION
 
-SUB MPaintBox (UlRow%, UlCol%, LrRow%, LrCol%, Colr%)
+' MPaintBox is similar to PaintBox, except it always turns off the 
+' mouse cursor before painting the screen. When it is finished the 
+' cursor is turned back on. 
+SUB MPaintBox (ulRow%, ulCol%, lrRow%, lrCol%, colr%)
   ' Paint a portion of the screen; leaving text intact (only change color).
-  FOR r = UlRow% TO LrRow%
-    FOR c = UlCol% TO LrCol%
+  FOR r = ulRow% TO lrRow%
+    FOR c = ulCol% TO lrCol%
       ch = SCREEN(r, c)
-      QPrintRC CHR$(ch), r, c, Colr%
+      QPrintRC CHR$(ch), r, c, colr%
     NEXT
   NEXT
 END SUB
 
-SUB MQPrint (TXT$, Colr%)
-  OFG% = -1: OBG% = -1
-  IF Colr% = -1 THEN
+' MQPrint is similar to QPrint, except it always turns off the mouse cursor
+' before printing. When it is finished the cursor is turned back on. 
+SUB MQPrint (txt$, colr%)
+  ofg% = -1: obg% = -1
+  IF colr% = -1 THEN
     ' Maintain existing color...
   ELSE
-     OFG% = _DEFAULTCOLOR: OBG% = _BACKGROUNDCOLOR
-     SplitColor Colr%, FG%, BG%
-     COLOR FG%, BG%
+     ofg% = _DEFAULTCOLOR: obg% = _BACKGROUNDCOLOR
+     SplitColor colr%, fg%, bg%
+     COLOR fg%, bg%
   END IF
-  PRINT TXT$;
-  IF OFG% <> -1 AND OBG% <> -1 THEN
-    COLOR OFG%, OBG%
+  PRINT txt$;
+  IF ofg% <> -1 AND obg% <> -1 THEN
+    COLOR ofg%, obg%
   END IF
 END SUB
 
-SUB MScrnRest (UlRow%, UlCol%, LrRow%, LrCol%, Element%())
-  'TODO: Restore a previously captured region.
+' MScrnRest is similar to ScrnRest, except it always turn off 
+' the mouse cursor while it is working. 
+SUB MScrnRest (ulRow%, ulCol%, lrRow%, lrCol%, element%())
+  ScrnRest0 ulRow%, ulCol%, lrRow%, lrCol%, element%()
 END SUB
 
-SUB MScrnSave (UlRow%, UlCol%, LrRow%, LrCol%, Element%())
+' MScrnSave is similar to ScrnSave, except it always turn off 
+' the mouse cursor while it is working. 
+SUB MScrnSave (ulRow%, ulCol%, lrRow%, lrCol%, element%())
   'TODO: Capture the region for restoration later.
+  ScrnSave0 ulRow%, ulCol%, lrRow%, lrCol%, element%()
 END SUB
 
 FUNCTION OneColor% (fg%, bg%)
@@ -1598,6 +1628,28 @@ SUB QPrint0 (text$, colr%)
   END IF
 END SUB
 
+' QPrintAny provides a simple way for a BASIC program to utilize 
+' two monitors at the same time. 
+SUB QPrintAny (txt$, clr%, monCode%, row%, column%)
+  ' NOTE: monCode% is currently not active.
+  '       1 - Monochrome monitor at segment &HB000
+  '       2 - CGA monitor at segment &HB800
+  '       3 - EGA or VGA monitor at segment &HB800
+  ofg% = -1: obg% = -1
+  IF clr% = -1 THEN
+    ' Maintain existing color...
+  ELSE
+     ofg% = _DEFAULTCOLOR: obg% = _BACKGROUNDCOLOR
+     SplitColor clr%, fg%, bg%
+     COLOR fg%, bg%
+  END IF
+  LOCATE row%, column%
+  PRINT txt$;
+  IF ofg% <> -1 AND obg% <> -1 THEN
+    COLOR ofg%, obg%
+  END IF
+END SUB
+
 SUB QPrintRC (TXT$, R%, C%, CLR%)
   OFG% = -1: OBG% = -1
   IF CLR% = -1 THEN
@@ -1614,7 +1666,83 @@ SUB QPrintRC (TXT$, R%, C%, CLR%)
   END IF
 END SUB
 
-SUB SplitColor (Colr%, FG%, BG%)
-  FG% = (Colr% AND 128) \ 8 + (Colr% AND 15) 
-  BG% = (Colr% AND 112) \ 16 
+' ScrnRest will restore a screen that had previously been saved with 
+' ScrnSave or ScrnSave0. 
+SUB ScrnRest (ulRow%, ulCol%, lrRow%, lrCol%, element%(), page%)
+  ' NOTE: page% is currently not implemented
+  cols% = lrCol% - ulCol%
+  rows% = lrRow% - ulRow%
+  FOR c% = 0 TO cols%
+    FOR r% = 0 TO rows%
+      index% = (r% * cols%) + c%
+      clr% = element%(index%) AND &H00FF ' split color
+      ch% = ((element%(index%) AND &HFF00) \ 256) AND &H00FF ' split character
+      QPrintRC CHR$(ch%), ulRow% + r%, ulCol% + c%, clr%
+    NEXT
+  NEXT
 END SUB
+
+' ScrnRest0 will restore a screen that had previously been saved with 
+' ScrnSave or ScrnSave0. 
+SUB ScrnRest0 (ulRow%, ulCol%, lrRow%, lrCol%, element%())
+  ScrnRest ulRow%, ulCol%, lrRow%, lrCol%, element%(), 0
+END SUB
+
+' ScrnSave will save all or part of a text screen into an integer array, 
+' to allow restoring it again at a later time. 
+SUB ScrnSave (ulRow%, ulCol%, lrRow%, lrCol%, element%(), page%)
+  ' NOTE: page% is currently not implemented
+  cols% = lrCol% - ulCol%
+  rows% = lrRow% - ulRow%
+  FOR c% = 0 TO cols%
+    FOR r% = 0 TO rows%
+      index% = (r% * cols%) + c%
+      ch% = SCREEN(ulRow% + r%, ulCol% + c%, 0)
+      clr% = SCREEN(ulRow% + r%, ulCol% + c%, 1)
+      element%(index%) = (ch% * 256) + clr% ' combine
+    NEXT
+  NEXT
+END SUB
+
+' ScrnSave will save all or part of a text screen into an integer array, 
+' to allow restoring it again at a later time. 
+SUB ScrnSave0 (ulRow%, ulCol%, lrRow%, lrCol%, element%())
+  ScrnSave ulRow%, ulCol%, lrRow%, lrCol%, element%(), 0
+END SUB
+
+SUB SplitColor (colr%, fg%, bg%)
+  fg% = (colr% AND 128) \ 8 + (colr% AND 15) 
+  bg% = (colr% AND 112) \ 16 
+END SUB
+
+' Chapter Next
+
+FUNCTION BitShift% (value%, cmd$, bits%)
+  mult% = 2
+  SELECT CASE bits%
+    CASE 1 ' already set
+    CASE 2: mult% = 4
+    CASE 3: mult% = 8
+    CASE 4: mult% = 16
+    CASE 5: mult% = 32
+    CASE 6: mult% = 64
+    CASE 7: mult% = 128
+    CASE 8: mult% = 256
+    CASE 9: mult% = 512
+    CASE 10: mult% = 1024
+    CASE 11: mult% = 2048
+    CASE 12: mult% = 4096
+    CASE 13: mult% = 8192
+    CASE 14: mult% = 16384
+    CASE 15: mult% = 32768
+    CASE 16: mult% = 65536
+    CASE ELSE
+  END SELECT
+  IF cmd$ = "<<" THEN ' "value%" has to be shifted "bits%" bit(s) to the left.
+    ' formula: x = x * 2 ^ y
+    BitShift% = ((value% * mult%) AND &HFFFF)
+  ELSEIF cmd$ = ">>" THEN ' "value%" has to be shifted "bits%" bit(s) to the right.
+    ' formula: x = x / 2 ^ y
+    BitShift% = value% \ mult%
+  END IF
+END FUNCTION
