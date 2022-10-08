@@ -1687,6 +1687,19 @@ FUNCTION OneColor% (fg%, bg%)
   OneColor% = (fg% AND 16) * 8 + ((bg% AND 7) * 16) + (fg% AND 15)
 END FUNCTION
 
+' PaintBox will paint any rectangular area of the screen, without 
+' disturbing the text that is already present. 
+SUB PaintBox (ulRow%, ulCol%, lrRow%, lrCol%, colr%, page%)
+  ' NOTE: page% isn't currently used.
+  ' If page% = -1 then current active screen should be used.
+  FOR r = ulRow% TO lrRow%
+    FOR c = ulCol% TO lrCol%
+      ch = SCREEN(r, c)
+      QPrintRC CHR$(ch), r, c, colr%
+    NEXT
+  NEXT
+END SUB
+
 SUB QPrint (text$, colr%, page%)
   ofg% = -1: obg% = -1
   IF colr% = -1 THEN
