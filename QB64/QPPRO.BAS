@@ -1154,20 +1154,24 @@ END FUNCTION
 FUNCTION Num2Time$(Time&)
 END FUNCTION
 
-SUB Pause(Ticks%)
+' Pause will pause a program's execution for a specified period of 
+' time to a resolution as small as 1/18th of a second. 
+SUB Pause(ticks%)
+  resolution! = 1 / 18.2
+  _DELAY ticks% * resolution!
 END SUB
 
-SUB Pause2(Microseconds%)
+' Pause2 will pause a program's execution for a specified number of microseconds. 
+SUB Pause2(microseconds%)
+  _DELAY microseconds% / 1000000
 END SUB
 
-' Pause3 provides a simple method for obtaining delays with a 
-' resolution of 1 millisecond, without having to reprogram the PC's 
-' timer chips. 
-SUB Pause3 (MillaSec%, Fudg&)
-  ' MilliSeconds % is the desired number of milliseconds to delay, and 
-  ' Fudge& was previously obtained using the QuickPak Professional 
-  ' FudgeFactor function. 
-  _DELAY MillaSec% / 1000
+' Pause3 provides a simple method for obtaining delays with a resolution
+' of 1 millisecond, without having to reprogram the PC's timer chips
+SUB Pause3 (milliseconds%, fudg&)
+  ' milliseconds% is the desired number of milliseconds to delay, 
+  ' and fudg& was previously obtained using the FudgeFactor function. 
+  _DELAY milliseconds% / 1000
 END SUB
 
 FUNCTION PDQTimer&
@@ -1602,6 +1606,89 @@ END SUB
 FUNCTION ArraySize%(ulRow%, ulCol%, lrRow%, lrCol%)
   ArraySize% = (lrRow% - ulRow% + 1) * (lrCol% - ulCol% + 1)
 END FUNCTION
+
+' Box will quickly draw a box frame on the screen. 
+SUB Box(ulRow%, ulCol%, lrRow%, lrCol%, char%, colr%, page%)
+  ' NOTE: page% isn't currently implemented
+  ' If page% = -1 then use current active page.
+  SELECT CASE char%
+    CASE 1 ' single line all around
+      ' first row
+      QPrintRC CHR$(218), ulRow%, ulCol%, colr%
+      QPrintRC STRING$((lrCol% - ulCol%) - 1, 196), ulRow%, ulCol% + 1, colr%
+      QPrintRC CHR$(191), ulRow%, lrCol%, colr%
+      ' middle
+      FOR r% = ulRow% + 1 TO lrRow% - 1
+        QPrintRC CHR$(179), r%, ulCol%, colr%
+        QPrintRC CHR$(179), r%, lrCol%, colr%
+      NEXT
+      ' last row
+      QPrintRC CHR$(192), lrRow%, ulCol%, colr%
+      QPrintRC STRING$((lrCol% - ulCol%) - 1, 196), lrRow%, ulCol% + 1, colr%
+      QPrintRC CHR$(217), lrRow%, lrCol%, colr%
+    CASE 2 ' double line all around
+      ' first row
+      QPrintRC CHR$(201), ulRow%, ulCol%, colr%
+      QPrintRC STRING$((lrCol% - ulCol%) - 1, 205), ulRow%, ulCol% + 1, colr%
+      QPrintRC CHR$(187), ulRow%, lrCol%, colr%
+      ' middle
+      FOR r% = ulRow% + 1 TO lrRow% - 1
+        QPrintRC CHR$(186), r%, ulCol%, colr%
+        QPrintRC CHR$(186), r%, lrCol%, colr%
+      NEXT
+      ' last row
+      QPrintRC CHR$(200), lrRow%, ulCol%, colr%
+      QPrintRC STRING$((lrCol% - ulCol%) - 1, 205), lrRow%, ulCol% + 1, colr%
+      QPrintRC CHR$(188), lrRow%, lrCol%, colr%
+    CASE 3 ' double line horizontally, single line vertically
+      ' first row
+      QPrintRC CHR$(213), ulRow%, ulCol%, colr%
+      QPrintRC STRING$((lrCol% - ulCol%) - 1, 205), ulRow%, ulCol% + 1, colr%
+      QPrintRC CHR$(184), ulRow%, lrCol%, colr%
+      ' middle
+      FOR r% = ulRow% + 1 TO lrRow% - 1
+        QPrintRC CHR$(179), r%, ulCol%, colr%
+        QPrintRC CHR$(179), r%, lrCol%, colr%
+      NEXT
+      ' last row
+      QPrintRC CHR$(212), lrRow%, ulCol%, colr%
+      QPrintRC STRING$((lrCol% - ulCol%) - 1, 205), lrRow%, ulCol% + 1, colr%
+      QPrintRC CHR$(190), lrRow%, lrCol%, colr%
+    CASE 4 ' single line horizontally, double line vertically
+      ' first row
+      QPrintRC CHR$(214), ulRow%, ulCol%, colr%
+      QPrintRC STRING$((lrCol% - ulCol%) - 1, 196), ulRow%, ulCol% + 1, colr%
+      QPrintRC CHR$(183), ulRow%, lrCol%, colr%
+      ' middle
+      FOR r% = ulRow% + 1 TO lrRow% - 1
+        QPrintRC CHR$(186), r%, ulCol%, colr%
+        QPrintRC CHR$(186), r%, lrCol%, colr%
+      NEXT
+      ' last row
+      QPrintRC CHR$(211), lrRow%, ulCol%, colr%
+      QPrintRC STRING$((lrCol% - ulCol%) - 1, 196), lrRow%, ulCol% + 1, colr%
+      QPrintRC CHR$(189), lrRow%, lrCol%, colr%
+    CASE ELSE ' ASCII character will be used for entire box
+      ' first row
+      QPrintRC CHR$(char%), ulRow%, ulCol%, colr%
+      QPrintRC STRING$((lrCol% - ulCol%) - 1, char%), ulRow%, ulCol% + 1, colr%
+      QPrintRC CHR$(char%), ulRow%, lrCol%, colr%
+      ' middle
+      FOR r% = ulRow% + 1 TO lrRow% - 1
+        QPrintRC CHR$(char%), r%, ulCol%, colr%
+        QPrintRC CHR$(char%), r%, lrCol%, colr%
+      NEXT
+      ' last row
+      QPrintRC CHR$(char%), lrRow%, ulCol%, colr%
+      QPrintRC STRING$((lrCol% - ulCol%) - 1, char%), lrRow%, ulCol% + 1, colr%
+      QPrintRC CHR$(char%), lrRow%, lrCol%, colr%
+  END SELECT
+END SUB
+
+' Box0 will quickly draw a box frame on the screen.
+SUB Box0(ulRow%, ulCol%, lrRow%, lrCol%, char%, colr%)
+  CALL Box(ulRow%, ulCol%, lrRow%, lrCol%, char%, colr%, 0)
+END SUB
 
 ' BPrint will print either a conventional or fixed-length string at the 
 ' current cursor position through DOS. 
