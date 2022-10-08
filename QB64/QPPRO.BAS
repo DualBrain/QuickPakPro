@@ -1387,7 +1387,11 @@ FUNCTION QPLeft$(text$, numChars%)
 END FUNCTION
 
 FUNCTION QPMid$(text$, startChar%, numChars%)
-  QPMid$ = MID$(text$, startChar%, numChars%)
+  IF numChars% = -1 THEN
+    QPMid$ = MID$(text$, startChar%)
+  ELSE
+    QPMid$ = MID$(text$, startChar%, numChars%)
+  END IF
 END FUNCTION
 
 FUNCTION QPRight$(text$, numChars%)

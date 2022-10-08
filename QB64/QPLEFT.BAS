@@ -1,21 +1,23 @@
-'********* QPLeft.Bas - demonstrates QPLeft$, QPRight$, and QPMid$
+' ********* QPLEFT.BAS - demonstrates QPLeft$, QPRight$, and QPMid$
 
-'Copyright (c) 1988 Ethan Winer
-
+' Copyright (c) 1988 Ethan Winer
+' Modifications (c) Cory Smith
 
 DEFINT A-Z
 
-DECLARE FUNCTION QPMid$ (X$, MidArg%, NumChars%)
-DECLARE FUNCTION QPLeft$ (X$, LeftArg%)
-DECLARE FUNCTION QPRight$ (X$, RightArg%)
+DECLARE FUNCTION QPMid$ (text$, midArg%, numChars%)
+DECLARE FUNCTION QPLeft$ (text$, leftArg%)
+DECLARE FUNCTION QPRight$ (text$, rightArg%)
 
 CLS
-X$ = "This is a very silly sort of test"
+
+text$ = "This is a very silly sort of test"
 Arg = 2
 
-PRINT "{"; X$; "}"
-PRINT "{"; QPLeft$(X$, Arg); "}"
-PRINT "{"; QPRight$(X$, Arg); "}"
-PRINT "{"; QPMid$(X$, Arg, -1); "}"     'a negative value means take all of
-                                        'the characters through the end
+PRINT "{"; text$; "}"
+PRINT "{"; QPLeft$(text$, arg); "}"
+PRINT "{"; QPRight$(text$, arg); "}"
+PRINT "{"; QPMid$(text$, arg, -1); "}"     'a negative value means take all of
+                                           'the characters through the end
 
+'$INCLUDE: 'QPPRO.BAS'
