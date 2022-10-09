@@ -3,7 +3,7 @@
 ' Copyright (c) 1988 Ethan Winer
 ' Modified (c) 2022 Cory Smith
 
-_FULLSCREEN
+_FULLSCREEN _SQUAREPIXELS
 
 DEFINT A-Z  ' use integers throughout - faster and requires less variable space
   

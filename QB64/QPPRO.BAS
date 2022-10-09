@@ -780,9 +780,6 @@ END SUB
 SUB PickList(Item$(), Picked%(), NPicked%, Cnf)
 END SUB
 
-SUB PullDnMS(Choice$(), Stat%(), Menu%, Choice%, Ky$, Action%)
-END SUB
-
 SUB QEdit(Array$(), Ky$, Action%, Ed)
 END SUB
 
