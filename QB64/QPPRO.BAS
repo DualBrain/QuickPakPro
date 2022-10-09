@@ -1749,7 +1749,7 @@ SUB ClearScr (ulRow%, ulCol%, lrRow%, lrCol%, colr%, page%)
   ' page% of -1 is "current page"
   FOR r = ulRow% TO lrRow%
     FOR c = ulCol% TO lrCol%
-      QPRINTRC " ", r, c, colr%
+      QPrintRC " ", r, c, colr%
     NEXT
   NEXT
 END SUB
@@ -1757,7 +1757,7 @@ END SUB
 SUB ClearScr0 (ulRow%, ulCol%, lrRow%, lrCol%, colr%)
   FOR r = ulRow% TO lrRow%
     FOR c = ulCol% TO lrCol%
-      QPRINTRC " ", r, c, colr%
+      QPrintRC " ", r, c, colr%
     NEXT
   NEXT
 END SUB
@@ -1799,7 +1799,10 @@ SUB MQPrint (txt$, colr%)
      SplitColor colr%, fg%, bg%
      COLOR fg%, bg%
   END IF
+  pr% = CSRLIN
+  pc% = POS(0)
   PRINT txt$;
+  LOCATE pr%, pc%
   IF ofg% <> -1 AND obg% <> -1 THEN
     COLOR ofg%, obg%
   END IF
@@ -1844,7 +1847,10 @@ SUB QPrint (text$, colr%, page%)
      SplitColor colr%, fg%, bg%
      COLOR fg%, bg%
   END IF
+  pr% = CSRLIN
+  pc% = POS(0)
   PRINT text$;
+  LOCATE pr%, pc%
   IF ofg% <> -1 AND obg% <> -1 THEN
     COLOR ofg%, obg%
   END IF
@@ -1859,7 +1865,10 @@ SUB QPrint0 (text$, colr%)
      SplitColor colr%, fg%, bg%
      COLOR fg%, bg%
   END IF
+  pr% = CSRLIN
+  pc% = POS(0)
   PRINT text$;
+  LOCATE pr%, pc%
   IF ofg% <> -1 AND obg% <> -1 THEN
     COLOR ofg%, obg%
   END IF
@@ -1880,26 +1889,32 @@ SUB QPrintAny (txt$, clr%, monCode%, row%, column%)
      SplitColor clr%, fg%, bg%
      COLOR fg%, bg%
   END IF
+  pr% = CSRLIN
+  pc% = POS(0)
   LOCATE row%, column%
   PRINT txt$;
+  LOCATE pr%, pc%
   IF ofg% <> -1 AND obg% <> -1 THEN
     COLOR ofg%, obg%
   END IF
 END SUB
 
-SUB QPrintRC (TXT$, R%, C%, CLR%)
-  OFG% = -1: OBG% = -1
-  IF CLR% = -1 THEN
+SUB QPrintRC (txt$, r%, c%, clr%)
+  ofg% = -1: obg% = -1
+  IF clr% = -1 THEN
     ' Maintain existing color...
   ELSE
-     OFG% = _DEFAULTCOLOR: OBG% = _BACKGROUNDCOLOR
-     SplitColor CLR%, FG%, BG%
-     COLOR FG%, BG%
+     ofg% = _DEFAULTCOLOR: obg% = _BACKGROUNDCOLOR
+     SplitColor clr%, fg%, bg%
+     COLOR fg%, bg%
   END IF
-  LOCATE R%, C%
-  PRINT TXT$;
-  IF OFG% <> -1 AND OBG% <> -1 THEN
-    COLOR OFG%, OBG%
+  pr% = CSRLIN
+  pc% = POS(0)
+  LOCATE r%, c%
+  PRINT txt$;
+  LOCATE pr%, pc%
+  IF ofg% <> -1 AND obg% <> -1 THEN
+    COLOR ofg%, obg%
   END IF
 END SUB
 
@@ -1907,10 +1922,10 @@ END SUB
 ' ScrnSave or ScrnSave0. 
 SUB ScrnRest (ulRow%, ulCol%, lrRow%, lrCol%, element%(), page%)
   ' NOTE: page% is currently not implemented
-  cols% = lrCol% - ulCol%
-  rows% = lrRow% - ulRow%
-  FOR c% = 0 TO cols%
-    FOR r% = 0 TO rows%
+  rows% = (lrRow% - ulRow%) + 1
+  cols% = (lrCol% - ulCol%) + 1
+  FOR r% = 0 TO rows% - 1
+    FOR c% = 0 TO cols% - 1
       index% = (r% * cols%) + c%
       clr% = element%(index%) AND &H00FF ' split color
       ch% = ((element%(index%) AND &HFF00) \ 256) AND &H00FF ' split character
@@ -1929,10 +1944,10 @@ END SUB
 ' to allow restoring it again at a later time. 
 SUB ScrnSave (ulRow%, ulCol%, lrRow%, lrCol%, element%(), page%)
   ' NOTE: page% is currently not implemented
-  cols% = lrCol% - ulCol%
-  rows% = lrRow% - ulRow%
-  FOR c% = 0 TO cols%
-    FOR r% = 0 TO rows%
+  rows% = (lrRow% - ulRow%) + 1
+  cols% = (lrCol% - ulCol%) + 1
+  FOR r% = 0 TO rows% - 1
+    FOR c% = 0 TO cols% - 1
       index% = (r% * cols%) + c%
       ch% = SCREEN(ulRow% + r%, ulCol% + c%, 0)
       clr% = SCREEN(ulRow% + r%, ulCol% + c%, 1)
@@ -1945,6 +1960,86 @@ END SUB
 ' to allow restoring it again at a later time. 
 SUB ScrnSave0 (ulRow%, ulCol%, lrRow%, lrCol%, element%())
   ScrnSave ulRow%, ulCol%, lrRow%, lrCol%, element%(), 0
+END SUB
+
+' ScrollD will scroll any portion of the display screen down a 
+' specified number of lines.
+SUB ScrollD(ulRow%, ulCol%, lrRow%, lrCol%, lines%, page%)
+  
+  ' NOTE: page% is currently not implemented.
+  ' If page% = -1 then current screen will be scrolled.
+
+  tr% = (lrRow% - ulRow%) + 1
+  IF tr% < lines% THEN
+    ' If the number of lines to scroll is greater than the area to scroll, just clear.
+    CALL ClearScr (ulRow%, ulCol%, lrRow%, lrCol%, -1, page%)
+  ELSE
+    DIM array%(ArraySize%(ulRow% + lines%, ulCol%, lrRow%, lrCol%))
+    CALL ScrnSave (ulRow%, ulCol%, lrRow% - lines%, lrCol%, array%(), page%)
+    CALL ScrnRest (ulRow% + lines%, ulCol%, lrRow%, lrCol%, array%(), page%)
+    CALL ClearScr (ulRow%, ulCol%, ulRow% + (lines% - 1), lrCol%, -1, page%)
+  END IF
+
+END SUB
+
+' ScrollL will scroll any portion of the display screen left a 
+' specified number of columns.
+SUB ScrollL(ulRow%, ulCol%, lrRow%, lrCol%, columns%, page%)
+
+  ' NOTE: page% is currently not implemented.
+  ' If page% = -1 then current screen will be scrolled.
+
+  tc% = (lrCol% - ulCol%) + 1
+  IF tc% < columns% THEN
+    ' If the number of columns to scroll is greater than the area to scroll, just clear.
+    CALL ClearScr (ulRow%, ulCol%, lrRow%, lrCol%, -1, page%)
+  ELSE
+    DIM array%(ArraySize%(ulRow%, ulCol% + columns%, lrRow%, lrCol%))
+    CALL ScrnSave (ulRow%, ulCol% + columns%, lrRow%, lrCol%, array%(), page%)
+    CALL ScrnRest (ulRow%, ulCol%, lrRow%, lrCol% - columns%, array%(), page%)
+    CALL ClearScr (ulRow%, lrCol% - (columns% - 1), lrRow%, lrCol%, -1, page%)
+  END IF
+
+END SUB
+
+' ScrollR will scroll any portion of the display screen right a 
+' specified number of columns.
+SUB ScrollR(ulRow%, ulCol%, lrRow%, lrCol%, columns%, page%)
+
+  ' NOTE: page% is currently not implemented.
+  ' If page% = -1 then current screen will be scrolled.
+
+  tc% = (lrCol% - ulCol%) + 1
+  IF tc% < columns% THEN
+    ' If the number of columns to scroll is greater than the area to scroll, just clear.
+    CALL ClearScr (ulRow%, ulCol%, lrRow%, lrCol%, -1, page%)
+  ELSE
+    DIM array%(ArraySize%(ulRow%, ulCol%, lrRow%, lrCol% - columns%))
+    CALL ScrnSave (ulRow%, ulCol%, lrRow%, lrCol% - columns%, array%(), page%)
+    CALL ScrnRest (ulRow%, ulCol% + columns%, lrRow%, lrCol%, array%(), page%)
+    CALL ClearScr (ulRow%, ulCol%, lrRow%, ulCol% + (columns% - 1), -1, page%)
+  END IF
+
+END SUB
+
+' ScrollU will scroll any portion of the display screen up a 
+' specified number of lines.
+SUB ScrollU(ulRow%, ulCol%, lrRow%, lrCol%, lines%, page%)
+
+  ' NOTE: page% is currently not implemented.
+  ' If page% = -1 then current screen will be scrolled.
+
+  tr% = (lrRow% - ulRow%) + 1
+  IF tr% < lines% THEN
+    ' If the number of lines to scroll is greater than the area to scroll, just clear.
+    CALL ClearScr (ulRow%, ulCol%, lrRow%, lrCol%, -1, page%)
+  ELSE
+    DIM array%(ArraySize%(ulRow%, ulCol%, lrRow% - lines%, lrCol%))
+    CALL ScrnSave (ulRow% + lines%, ulCol%, lrRow%, lrCol%, array%(), page%)
+    CALL ScrnRest (ulRow%, ulCol%, lrRow% - lines%, lrCol%, array%(), page%)
+    CALL ClearScr (lrRow% - (lines% - 1), ulCol%, lrRow%, lrCol%, -1, page%)
+  END IF
+
 END SUB
 
 SUB SplitColor (colr%, fg%, bg%)

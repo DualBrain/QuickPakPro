@@ -1,28 +1,29 @@
-'********** Scroll.Bas - demonstrates the four QuickPak scroll routines
+' ********** SCROLL.BAS - demonstrates the four QuickPak scroll routines
 
-'Copyright (c) 1988 Ethan Winer
-
+' Copyright (c) 1988 Ethan Winer
+' Modifications (c) 2022 Cory Smith
 
 DEFINT A-Z
-DECLARE SUB ScrollU (ULRow, ULCol, LRRow, LRCol, Lines, Page)
-DECLARE SUB ScrollD (ULRow, ULCol, LRRow, LRCol, Lines, Page)
-DECLARE SUB ScrollL (ULRow, ULCol, LRRow, LRCol, Lines, Page)
-DECLARE SUB ScrollR (ULRow, ULCol, LRRow, LRCol, Lines, Page)
 
-Wide = 80
-High = 25
-Lines = 4
-Page = -1
+DECLARE SUB ScrollU (ulRow, ulCol, lrRow, lrCol, lines, page)
+DECLARE SUB ScrollD (ulRow, ulCol, lrRow, lrCol, lines, page)
+DECLARE SUB ScrollL (ulRow, ulCol, lrRow, lrCol, lines, page)
+DECLARE SUB ScrollR (ulRow, ulCol, lrRow, lrCol, lines, page)
 
-ULRow = 7
-ULCol = Wide \ 8
-LRRow = 16
-LRCol = Wide - Wide \ 8
+wide = 80
+high = 25
+lines = 4
+page = -1
+
+ulRow = 7
+ulCol = wide \ 8
+lrRow = 16
+lrCol = wide - wide \ 8
 
 CLS
 COLOR 7, 4
-FOR X = 1 TO High - 3
-    PRINT STRING$(Wide, X + 32);        'display test pattern
+FOR x = 1 TO high - 3
+  PRINT STRING$(wide, x + 32);        'display test pattern
 NEXT
 
 PRINT
@@ -32,13 +33,14 @@ PRINT "Scroll Up or Down? ";
 LOCATE , , 1
 
 DO
-   X$ = INKEY$
-LOOP UNTIL LEN(X$)
+  x$ = INKEY$
+LOOP UNTIL LEN(x$)
 
-IF UCASE$(X$) = "U" THEN
-   ScrollU ULRow, ULCol, LRRow, LRCol, Lines, Page
+'Box0 ulRow, ulCol, lrRow, lrCol, 33, OneColor(7,0)
+IF UCASE$(x$) = "U" THEN
+  ScrollU ulRow, ulCol, lrRow, lrCol, lines, page
 ELSE
-   ScrollD ULRow, ULCol, LRRow, LRCol, Lines, Page
+  ScrollD ulRow, ulCol, lrRow, lrCol, lines, page
 END IF
 
 LOCATE , 1
@@ -48,13 +50,13 @@ CALL WaitKey
 COLOR 7
 CLS
 COLOR , 4
-Test$ = SPACE$(Wide)
+test$ = SPACE$(wide)
 
-FOR X = 1 TO Wide
-    MID$(Test$, X, 1) = CHR$(X + 32)
+FOR x = 1 TO wide
+  MID$(test$, x, 1) = CHR$(x + 32)
 NEXT
-FOR X = 1 TO High - 3
-    PRINT Test$;
+FOR x = 1 TO high - 3
+  PRINT test$;
 NEXT
 
 PRINT
@@ -63,12 +65,13 @@ COLOR 2, 0
 PRINT "Scroll Left or Right? ";
 
 DO
-   X$ = INKEY$
-LOOP UNTIL LEN(X$)
+  x$ = INKEY$
+LOOP UNTIL LEN(x$)
 
-IF UCASE$(X$) = "L" THEN
-   ScrollL ULRow, ULCol, LRRow, LRCol, Lines, Page
+IF UCASE$(x$) = "L" THEN
+  ScrollL ulRow, ulCol, lrRow, lrCol, lines, page
 ELSE
-   ScrollR ULRow, ULCol, LRRow, LRCol, Lines, Page
+  ScrollR ulRow, ulCol, lrRow, lrCol, lines, page
 END IF
 
+'$INCLUDE: 'QPPRO.BAS'
