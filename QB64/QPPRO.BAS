@@ -380,13 +380,53 @@ END FUNCTION
 FUNCTION GetAttr%(FileName$)
 END FUNCTION
 
-FUNCTION GetDir$(Drive$)
+' GetDir will return the current directory for either a specified drive 
+' or the default drive. 
+FUNCTION GetDir$(drive$)
+ 
+  ' Parameter may be given as either upper or lower case, and only the first character is considered
+  ' Returns the complete directory name, minus the drive letter and colon.
+
+  ' _CWD$ (function) returns the current working directory as a STRING value.
+  ' _STARTDIR$ (function) returns the user's program calling path as a STRING.
+
+  ch$ = MID$(_CWD$, 1, 1)
+  a% = ASC(UCASE$(ch$))
+  SELECT CASE a%
+    CASE ASC("A") TO ASC("Z")
+      GetDir$ = MID$(_CWD$, 3)
+    CASE ELSE
+      GetDir$ = _CWD$
+  END SELECT
+
 END FUNCTION
 
 FUNCTION GetDisketteType%(DriveNumber%)
 END FUNCTION
 
+' GetDrive returns the current default disk drive. 
 FUNCTION GetDrive%
+  ' Drive$ is assigned to a value representing an ASCII character that 
+  ' holds the current default drive. GetDrive actually returns an integer 
+  ' result, which can be easily turned into a string as shown above.
+
+  ' GetDrive returns a value that represents an upper case ASCII drive 
+  ' letter. For example, if the current default drive is A, then GetDrive 
+  ' will return the value 65. Likewise, if the current drive is C, 
+  ' GetDrive would return 67.
+
+  ' _CWD$ (function) returns the current working directory as a STRING value.
+  ' _STARTDIR$ (function) returns the user's program calling path as a STRING.
+
+  ch$ = MID$(_CWD$, 1, 1)
+  a% = ASC(UCASE$(ch$))
+  SELECT CASE a%
+    CASE ASC("A") TO ASC("Z")
+      GetDrive% = a%
+    CASE ELSE
+      GetDrive% = 0
+  END SELECT
+
 END FUNCTION
 
 FUNCTION GetVol$(Drive$)

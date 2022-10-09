@@ -1,29 +1,34 @@
-'********** GetDir.Bas - retrieves the current drive/directory
+' ********** GETDIR.BAS - retrieves the current drive/directory
 
-'Copyright (c) 1988 Ethan Winer
+' Copyright (c) 1988 Ethan Winer
+' Modified (c) 2022 Cory Smith
 
+_FULLSCREEN
 
 DEFINT A-Z
-DECLARE FUNCTION GetDir$ (Drive$)
+
+DECLARE FUNCTION GetDir$ (drive$)
 DECLARE FUNCTION GetDrive%
 
 CLS
+
 PRINT "Which drive (press ENTER for default drive): ";
 LOCATE , , 1
 
 DO
-    Drive$ = INKEY$
-LOOP UNTIL LEN(Drive$)
-IF Drive$ = CHR$(13) THEN Drive$ = ""       'null means use default drive
+  drive$ = INKEY$
+LOOP UNTIL LEN(drive$)
+IF drive$ = CHR$(13) THEN drive$ = ""    ' null means use default drive
 
 PRINT : PRINT
 PRINT "The current directory is ";
 
-IF LEN(Drive$) THEN
-   PRINT UCASE$(Drive$);        'drive was specified, print it
+IF LEN(drive$) THEN
+  PRINT UCASE$(drive$);        ' drive was specified, print it
 ELSE
-   PRINT CHR$(GetDrive%);       'print the current drive as part of the path
+  PRINT CHR$(GetDrive%);       ' print the current drive as part of the path
 END IF
 
-PRINT ":"; GetDir$(Drive$)
+PRINT ":"; GetDir$(drive$)
 
+'$INCLUDE: 'QPPRO.BAS'
