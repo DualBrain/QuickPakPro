@@ -739,9 +739,6 @@ END SUB
 SUB MColorPick(Colr%, BoxColor%, ExitCode%)
 END SUB
 
-SUB DateIn(D$, ExitCode%, Colr%)
-END SUB
-
 SUB DirFile(Array$(), Count%, ScanCode%, MsgColor%, FileColor%, HiLiteColor%, BoxColor%)
 END SUB
 
@@ -780,9 +777,6 @@ END FUNCTION
 SUB MMenuVert(Array$(), Selection%, Start%, ScanCode%, NormalColr%, Hilight%, NumRows%, Row%, Column%)
 END SUB
 
-SUB NumIn(Number#, Max%, Places%, ExitCode%, Colr%)
-END SUB
-
 SUB PickList(Item$(), Picked%(), NPicked%, Cnf)
 END SUB
 
@@ -795,16 +789,10 @@ END SUB
 SUB Spread(Wks$(), Format$(), ColumnWidths%(), Wide%, Rows%, Action%)
 END SUB
 
-SUB TextIn(Text$, Max%, NumOnly%, IsCapsOn%, ExitCode%, Colr%)
-END SUB
-
 SUB VertMenu(Item$(), Choice%, MaxLen%, BoxBot%, Ky$, Action%, Cnf)
 END SUB
 
 SUB YesNo(YN$, PromptParam$, ScanCode%, NormalColor%, EditColor%, Row%, Column%)
-END SUB
-
-SUB YesNoB(YN$, ExitCode%, Colr%)
 END SUB
 
 ' ****************************************
@@ -1412,7 +1400,37 @@ END SUB
 FUNCTION Far2Str$(Segment%, Address%)
 END FUNCTION
 
-FUNCTION FUsing$(Number$, Image$)
+' FUsing accepts an incoming number and image string, and returns 
+' it as a formatted string much like BASIC's PRINT USING would. 
+FUNCTION FUsing$ (number$, image$)
+  
+  ' Number is any number whether integer, single, or double precision, 
+  ' and Image$ indicates how the result is to be formatted. If the 
+  ' number will not fit within the allotted space, the first digit of the 
+  ' returned string will be replaced with a percent sign ( % ) . 
+
+  ' It is very important that you not include any blank spaces within the 
+  ' image string. For example 11 ##.## 11 is perfectly legal, while 
+  ' "## .##" will not work as expected. 
+
+  ' The table below summarizes FUsing's capabilities: 
+
+  '     # represents each digit position 
+  '     . specifies a decimal point 
+  '     + causes the sign of the number ( + or -) to be added (the 
+  '       sign must be the first character in the field) 
+  '    ** replaces leading spaces in the field with asterisks
+  '    $$ adds a dollar sign to the left of the number  
+  '   **$ combines the effects of ** and $$ 
+  '     , specifies that commas are to be added to the formatted string
+  
+  ' FUsing is demonstrated in the DEMOCM.BAS example program. 
+ 
+  ' Although BASIC accepts multiple commas in the image string, 
+  ' FUsing requires only one. If there is a decimal point within the 
+  ' string, the comma must be placed just before it. Otherwise, the 
+  ' comma must be the last character. 
+
 END FUNCTION
 
 ' InCount will quickly report how many times one string occurs 
@@ -1779,6 +1797,18 @@ END SUB
 ' current cursor position through DOS. 
 SUB BPrint(X$)
   PRINT X$;
+END SUB
+
+' ClearEOL (Clear to End of Line) erases the current screen line 
+' starting at the current cursor position. 
+SUB ClearEOL(clr%)
+  ' colr% specifies the display color. 
+  ' If -1 is used for Colr%, the current screen 
+  ' colors will be maintained. 
+  r% = CSRLIN
+  c% = POS(0)
+  columns% = _WIDTH
+  QPrintRC Space$(columns% - c%), r%, c%, clr% 
 END SUB
 
 SUB ClearScr (ulRow%, ulCol%, lrRow%, lrCol%, colr%, page%)

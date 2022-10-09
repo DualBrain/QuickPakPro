@@ -1,6 +1,7 @@
-'********** TEXTIN.BAS - text input subprogram
+' ********** TEXTIN.BAS - text input subprogram
 
-'Copyright (c) 1987 - 1990 Ethan Winer
+' Copyright (c) 1987 - 1990 Ethan Winer
+' Modifications (c) 2022 Cory Smith
 
 DEFINT A-Z
 
@@ -14,7 +15,7 @@ DECLARE SUB QPrint (X$, Colr, Page)
 'T$  = string to be input or edited (use the name of your choice)
 'Max = maximum number of characters allowed
 'Colr is the combined foreground and background colors that will be used
-'CapsOn = force automatic conversion to upper case if 1
+'isCapsOn = force automatic conversion to upper case if 1
 'NumOnly = allow only numeric input if 1
 '
 '----- exit parameters
@@ -34,7 +35,7 @@ DECLARE SUB QPrint (X$, Colr, Page)
 'Clr = 1 if the monitor is a color monitor, for setting cursor size
 'A and A$ are temporary scratch variables
 '
-SUB TextIn (T$, Max, NumOnly, CapsOn, ExitCode, Colr) STATIC
+SUB TextIn (T$, Max, NumOnly, isCapsOn, ExitCode, Colr) STATIC
 
 TInitialize:
    Clr = 0                                      'determine monitor type
@@ -222,7 +223,7 @@ TRegularKey:
       GOTO TGetKey                      'none of the above
    END IF
 
-   IF CapsOn THEN                       'convert to upper case if requested
+   IF isCapsOn THEN                       'convert to upper case if requested
       IF A$ >= "a" AND A$ <= "z" THEN A$ = CHR$(ASC(A$) AND 95)
    END IF
 

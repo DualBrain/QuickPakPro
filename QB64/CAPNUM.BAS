@@ -8,10 +8,6 @@ DEFINT A-Z
 DECLARE FUNCTION Peek1% (Segment, Address)
 DECLARE SUB QPrint (X$, Colr, Page)
 
-DO
-  CapNum
-LOOP
-
 SUB CapNum STATIC
 
    CapStatus = Peek1%(0, &H417) AND &H40        'get BIOS status of Caps Lock
@@ -45,5 +41,3 @@ QCapNumExit:
    LOCATE V, H                                  'restore cursor position
 
 END SUB
-
-'$INCLUDE: 'QPPRO.BAS'
