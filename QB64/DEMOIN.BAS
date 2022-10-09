@@ -143,7 +143,7 @@ DisplayScreen:                          ' display screen w/any existing values
   PRINT TAB(26);
   QPrint "QuickPak Input Routine Demo", 15, -1
   PRINT
-  QPrint STRING$(80, "+"), 15, -1
+  QPrint STRING$(80, CHR$(205)), 15, -1
   LOCATE 5, 1: QPrint "Name", 15, -1
   LOCATE , 6:  QPrint FnExt$(nam$, 32), colr, -1
   LOCATE 7, 1: QPrint "Addr ", 15, -1

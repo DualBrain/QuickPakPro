@@ -4,6 +4,14 @@
 
 ' Copyright (c) 2022 Cory Smith
 
+TYPE Area                    ' Type definition for MouseRange
+  ULRow AS INTEGER
+  ULCol AS INTEGER
+  LRRow AS INTEGER
+  LRCol AS INTEGER
+  NumWindow AS INTEGER
+END TYPE
+
 ' ****************************************
 ' Chapter 2 - Array Routines 
 ' ****************************************
@@ -953,7 +961,9 @@ END SUB
 SUB Mouse(AX%, BX%, CX%, DX%)
 END SUB
 
-SUB MouseRange(Array(), NumEls%, Row%, Col%, Button%, RangeNum%)
+' MouseRange will return a range number that tells where the mouse 
+' cursor is located, based on an array of screen coordinates. 
+SUB MouseRange(array() AS Area, numEls%, row%, col%, button%, rangeNum%)
 END SUB
 
 FUNCTION MBuffSize%
@@ -1940,6 +1950,22 @@ SUB ClearScr0 (ulRow%, ulCol%, lrRow%, lrCol%, colr%)
   NEXT
 END SUB
 
+' FillScrn will fill any rectangular portion of the display screen with 
+' the specified character. 
+SUB FillScrn(ulRow%, ulCol%, lrRow%, lrCol%, colr%, char%, page%)
+  ' NOTE: page% is currently not implemented.
+  ' If page% = -1 then current active page is used.
+  FOR r% = ulRow% TO lrRow%
+    QPrintRC STRING$(lrCol% - ulCol% + 1, char%), r%, ulCol%, colr%
+  NEXT
+END SUB
+
+' Fil1Scrn0 will fill any rectangular portion of the display screen with 
+' the specified character. 
+SUB FillScrn0(ulRow%, ulCol%, lrRow%, lrCol%, colr%, char%)
+  CALL FillScrn (ulRow%, ulCol%, lrRow%, lrCol%, colr%, char%, 0)
+END SUB
+
 ' GetVMode will report the current video mode, the currently active 
 ' display page, the page size, and the number of rows and columns. 
 SUB GetVMode (mode%, page%, pageSize%, rows%, columns%)
@@ -1958,12 +1984,7 @@ END FUNCTION
 ' cursor is turned back on. 
 SUB MPaintBox (ulRow%, ulCol%, lrRow%, lrCol%, colr%)
   ' Paint a portion of the screen; leaving text intact (only change color).
-  FOR r = ulRow% TO lrRow%
-    FOR c = ulCol% TO lrCol%
-      ch = SCREEN(r, c)
-      QPrintRC CHR$(ch), r, c, colr%
-    NEXT
-  NEXT
+  CALL PaintBox0 (ulRow%, ulCol%, lrRow%, lrCol%, colr%)
 END SUB
 
 ' MQPrint is similar to QPrint, except it always turns off the mouse cursor
@@ -2014,6 +2035,12 @@ SUB PaintBox (ulRow%, ulCol%, lrRow%, lrCol%, colr%, page%)
       QPrintRC CHR$(ch), r, c, colr%
     NEXT
   NEXT
+END SUB
+
+' PaintBox0 will paint any rectangular area of the screen, without 
+' disturbing the text that is already present. 
+SUB PaintBox0 (ulRow%, ulCol%, lrRow%, lrCol%, colr%)
+  CALL PaintBox (ulRow%, ulCol%, lrRow%, lrCol%, colr%, 0)
 END SUB
 
 SUB QPrint (text$, colr%, page%)
