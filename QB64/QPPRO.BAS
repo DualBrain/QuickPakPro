@@ -1130,9 +1130,6 @@ SUB LockUp
   DO:LOOP
 END SUB
 
-SUB Marquee(X$, Row%, Colr%)
-END SUB
-
 FUNCTION MathChip%
 END FUNCTION
 
@@ -1843,9 +1840,9 @@ SUB QPrint (text$, colr%, page%)
   IF colr% = -1 THEN
     ' Maintain existing color...
   ELSE
-     ofg% = _DEFAULTCOLOR: obg% = _BACKGROUNDCOLOR
-     SplitColor colr%, fg%, bg%
-     COLOR fg%, bg%
+    ofg% = _DEFAULTCOLOR: obg% = _BACKGROUNDCOLOR
+    SplitColor colr%, fg%, bg%
+    COLOR fg%, bg%
   END IF
   pr% = CSRLIN
   pc% = POS(0)

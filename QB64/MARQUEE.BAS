@@ -1,43 +1,48 @@
-'********** Marquee.Bas
+' ********** MARQUEE.BAS
 
-'demonstrates a cute way to display a message while waiting for a key press
+' demonstrates a cute way to display a message while waiting for a key press
 
-'Copyright (c) 1988 Ethan Winer
-
+' Copyright (c) 1988 Ethan Winer
+' Modifications (c) 2022 Cory Smith
 
 DEFINT A-Z
-DECLARE SUB Marquee (Message$, Row, Colr)
-DECLARE SUB Pause (Ticks)
-DECLARE SUB QPrint (X$, Colr, Page)
+
+DECLARE SUB Marquee (message$, row, colr)
+DECLARE SUB Pause (ticks)
+DECLARE SUB QPrint (txt$, colr, page)
 
 CLS
-Message$ = "This is a scrolling message . . . "
+
+message$ = "This is a scrolling message . . . "
+
 PRINT "Press a key when you feel like it"
 PRINT
 
 DO
-   X$ = INKEY$
-   Marquee Message$, 24, 112    'do it on row 24 in black on white
-LOOP UNTIL LEN(X$)
+  x$ = INKEY$
+  marquee message$, 24, 112    ' do it on row 24 in black on white
+LOOP UNTIL LEN(x$)
   
-PRINT "You pressed "; CHR$(34); X$; CHR$(34)
+PRINT "You pressed "; CHR$(34); x$; CHR$(34)
 
-SUB Marquee (X$, Row%, Colr%) STATIC
+SUB Marquee (x$, row%, colr%) STATIC
 
-    STATIC P%                   'remembers the current position between calls
+  STATIC p%                   ' remembers the current position between calls
 
-    H% = POS(0)                 'save the current cursor position
-    V% = CSRLIN
-    L% = LEN(X$)                'we need to know the length
+  h% = POS(0)                 ' save the current cursor position
+  v% = CSRLIN
+  l% = LEN(x$)                ' we need to know the length
 
-    P% = P% + 1                 'advance to the next character
-    IF P% > L% THEN P% = 1      'wrap around at the end
+  p% = p% + 1                 ' advance to the next character
+  IF p% > l% THEN p% = 1      ' wrap around at the end
 
-    LOCATE Row%, 40 - L% \ 2
-    QPrint RIGHT$(X$, L% - P% + 1) + LEFT$(X$, P% - 1), Colr%, -1
+  LOCATE row%, 40 - l% \ 2
+  QPrint RIGHT$(x$, l% - p% + 1) + LEFT$(x$, p% - 1), colr%, -1
 
-    Pause (2)                   'pause a bit to slow down the scrolling
-    LOCATE V%, H%               'restore the cursor position
+  Pause (2)                   ' pause a bit to slow down the scrolling
+
+  LOCATE v%, h%               ' restore the cursor position
 
 END SUB
 
+'$INCLUDE: 'QPPRO.BAS'
