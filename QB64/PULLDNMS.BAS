@@ -1,150 +1,150 @@
-'$SubTitle:'Pull Down Menu routines'
-'***** PullDnMS.Bas - Pull Down menu subprogram with Hot Key support.
-'                     Resembles and behaves like MicroSoft's pull downs.
+' $SubTitle:'Pull Down Menu routines'
+' ***** PULLDNMS.BAS - Pull Down menu subprogram with Hot Key support.
+'                      Resembles and behaves like MicroSoft's pull downs.
 
-'Copyright (c) 1989-1990 Crescent Software
-'by Don Malin
-
+' Copyright (c) 1989-1990 Crescent Software
+' by Don Malin
+' Modifications (c) 2022 Cory Smith
 
 DEFINT A-Z
 
-DECLARE SUB BarPrint (Choice$(), Stat())
-DECLARE SUB Box0 (UlRow, UlCol, BrRow, BrCol, BoxType, Clr)
-DECLARE SUB ButtonPress (Button, Status, Count, X, Y)
-DECLARE SUB GetCursor (X, Y, Button)
-DECLARE SUB GetVMode (Mode, Page, PageSize, Rows, Columns)
+DECLARE SUB BarPrint (choice$(), stat())
+DECLARE SUB Box0 (ulRow, ulCol, brRow, brCol, boxType, clr)
+DECLARE SUB ButtonPress (button, status, count, x, y)
+DECLARE SUB GetCursor (x, y, button)
+DECLARE SUB GetVMode (mode, page, pageSize, rows, columns)
 DECLARE SUB HideCursor ()
-DECLARE SUB MouseTrap (UlRow, UlCol, LRRow, LRCol)
-DECLARE SUB MQPrint (X$, Colr)
-DECLARE SUB MPaintBox (UlRow, UlCol, LRRow, LRCol, Colr)
-DECLARE SUB MScrnSave (UlRow, UlCol, LRRow, LRCol, SEG Address)
-DECLARE SUB MScrnRest (UlRow, UlCol, LRRow, LRCol, SEG Address)
-DECLARE SUB QPrintRC (X$, Row%, Col%, Clr%)
+DECLARE SUB MouseTrap (ulRow, ulCol, lrRow, lrCol)
+DECLARE SUB MQPrint (txt$, colr)
+DECLARE SUB MPaintBox (ulRow, ulCol, lrRow, lrCol, colr)
+DECLARE SUB MScrnSave (ulRow, ulCol, lrRow, lrCol, SEG address)
+DECLARE SUB MScrnRest (ulRow, ulCol, lrRow, lrCol, SEG address)
+DECLARE SUB QPrintRC (txt$, row%, col%, clr%)
 DECLARE SUB ShowCursor ()
 
-DECLARE FUNCTION ASCII% (Text$)
+DECLARE FUNCTION ASCII% (text$)
 DECLARE FUNCTION AltKey% ()
 DECLARE FUNCTION DOSVer% ()
 DECLARE FUNCTION InStat% ()
-DECLARE FUNCTION PullMenKey% (Ky$, Choice$(), Stat%())
+DECLARE FUNCTION PullMenKey% (ky$, choice$(), stat%())
 
-CONST BarLine = 1               'Line number for the menu bar
-CONST BarLCol = 1               'Left column where the bar starts
-CONST BarRCol = 80              'Right column where the bar ends
+CONST BAR_LINE = 1               ' Line number for the menu bar
+CONST BAR_LCOL = 1               ' Left column where the bar starts
+CONST BAR_RCOL = 80              ' Right column where the bar ends
 
-CONST MenuClr = 112             'Menu Color
-CONST InActClr = 120            'Inactive choice color
-CONST HiliteClr = 7             'Highlight bar color
+CONST MENU_CLR = 112             ' Menu Color
+CONST INACT_CLR = 120            ' Inactive choice color
+CONST HILITE_CLR = 7             ' Highlight bar color
 
-DIM SHARED HotLtrClr            'Menu Hot Key letter color
-DIM SHARED HiliteHotClr         'Highlight hot key color
+DIM SHARED HotLtrClr             ' Menu Hot Key letter color
+DIM SHARED HiliteHotClr          ' Highlight hot key color
 
-                                'Alt Key translation table
-CONST AltChars$ = "1234567890     QWERTYUIOP    ASDFGHJKL     ZXCVBNM"
+                                 ' Alt Key translation table
+CONST ALT_CHARS$ = "1234567890     QWERTYUIOP    ASDFGHJKL     ZXCVBNM"
 
-
-DIM SHARED Temp, N, LastMenu, MRow, MCol, LCol, RCol, Button, AltUsed
+DIM SHARED tempVar, n, lastMenu, mRow, mCol, lCol, rCol, button, altUsed
 
 '****************************************************************************
-'Displays the menu bar on the line specified by the constant "BarLine".
-'Also initializes a "Hot Key" table for use with "PullMenKey"
+' Displays the menu bar on the line specified by the constant "BAR_LINE".
+' Also initializes a "Hot Key" table for use with "PullMenKey"
 '
-'   Choice$() -
+'   choice$() -
 '     The "Choice$" Array holds the Menu Choices.
 '     Choice$(0, Menus) hold the Bar Titles.
 '
-'   Stat() -
+'   stat() -
 '     This is an integer array parallel to the Choice$ array.
 '     A value in the low byte of elements (M, 0) indicates the offset + 2
 '     from the left menu title to display.  The high byte of the element
 '     indicates the offset of the hot key letter.
 '
-'Note: This is separate so your Program can display the Menu Bar before it
-'      makes any calls to the PullMenKey or PullDnMS Sub Programs.
+' Note: This is separate so your Program can display the Menu Bar before it
+'       makes any calls to the PullMenKey or PullDnMS Sub Programs.
 '****************************************************************************
 '
-SUB BarPrint (Choice$(), Stat()) STATIC
+SUB BarPrint (choice$(), stat()) STATIC
 
-    SHARED HotKeys$                             'Share "Menu" Hot key table
+  SHARED hotKeys$                             ' Share "Menu" Hot key table
 
-    IF NOT BeenHere THEN
-       Cmd$ = UCASE$(COMMAND$)
-       BeenHere = -1
-    END IF
-    IF INSTR(Cmd$, "/NOHI") THEN                'Check for command line color
-       IF INSTR(Cmd$, "/B") THEN                '  overrides.
-          HotLtrClr = 7                         'Menu Hot Key letter color
-          HiliteHotClr = 112                    'Highlight hot key color
-       ELSE
-          HotLtrClr = 116
-          HiliteHotClr = 2
-       END IF
+  IF NOT beenHere THEN
+    cmd$ = UCASE$(COMMAND$)
+    beenHere = -1
+  END IF
+  IF INSTR(cmd$, "/NOHI") THEN                ' Check for command line color
+    IF INSTR(cmd$, "/B") THEN                 ' overrides.
+      hotLtrClr = 7                           ' Menu Hot Key letter color
+      hiliteHotClr = 112                      ' Highlight hot key color
     ELSE
-       HotLtrClr = 127
-       HiliteHotClr = 15
+      hotLtrClr = 116
+      hiliteHotClr = 2
     END IF
+  ELSE
+    hotLtrClr = 127
+    hiliteHotClr = 15
+  END IF
    
-    LastMenu = UBOUND(Choice$, 2)               'Get the last menu number
-    HotKeys$ = STRING$(LastMenu + 1, 0)         'Make string for Hot key table
-    Bar$ = SPACE$(BarRCol - BarLCol + 1)        'Make a string for Menu Bar
-    Temp = 4                                    'Put first Menu title @ pos. 4
+  lastMenu = UBOUND(choice$, 2)               ' Get the last menu number
+  hotKeys$ = STRING$(lastMenu + 1, 0)         ' Make string for Hot key table
+  bar$ = SPACE$(BAR_RCOL - BAR_LCOL + 1)      ' Make a string for Menu Bar
+  tempVar = 4                                 ' Put first Menu title @ pos. 4
 
-    FOR N = 0 TO LastMenu                       'Examine each Menu title
-                                                'Get the Hot key character
-                                                '  from the given offset
-        HotChr$ = UCASE$(MID$(Choice$(0, N), Stat(0, N) \ 256 + 1, 1))
-        HotKey = INSTR(AltChars$, HotChr$)      'Get it's position in table
-        IF HotKey <= 15 THEN                    'Is it a number?
-           HotKey = 119 + HotKey                'Add 119
-           IF HotKey = 119 THEN HotKey = 0      'Special case for "M"
-        END IF
-        MID$(HotKeys$, N + 1) = CHR$(HotKey)    'Put the character in table
+  FOR n = 0 TO lastMenu                       ' Examine each Menu title
+                                              ' Get the Hot key character
+                                              ' from the given offset
+    hotChr$ = UCASE$(MID$(choice$(0, n), stat(0, n) \ 256 + 1, 1))
+    hotKey = INSTR(ALT_CHARS$, hotChr$)       ' Get it's position in table
+    IF hotKey <= 15 THEN                      ' Is it a number?
+      hotKey = 119 + hotKey                   ' Add 119
+      IF hotKey = 119 THEN hotKey = 0         ' Special case for "M"
+    END IF
+    MID$(hotKeys$, n + 1) = CHR$(hotKey)      ' Put the character in table
 
-        MID$(Bar$, Temp) = Choice$(0, N)        'Put Menu title in Bar string
-        IF N < LastMenu THEN                    'Get position for next title
-           Temp = Temp + Stat(0, N + 1) MOD 256 + LEN(Choice$(0, N)) + 2
-        END IF
-    NEXT
+    MID$(bar$, tempVar) = choice$(0, N)       ' Put Menu title in Bar string
+    IF n < lastMenu THEN                      ' Get position for next title
+      tempVar = tempVar + Stat(0, n + 1) MOD 256 + LEN(choice$(0, n)) + 2
+    END IF
+  NEXT
 
-    HideCursor
-    QPrintRC Bar$, BarLine, BarLCol, MenuClr    'Print the Menu title line
-    ShowCursor
+  HideCursor
+  QPrintRC Bar$, BAR_LINE, BAR_LCOL, MENU_CLR  ' Print the Menu title line
+  ShowCursor
 
 END SUB
 
 '****************************************************************************
-' Description: Pull Down Menu Sub Program
-'          by: Don Malin,  (C) Crescent Software 1988
-'
+'   Description: Pull Down Menu Sub Program
+'            by: Don Malin,  (C) Crescent Software 1988
+' Modifications: Cory Smith, (c) 2022
+' 
 ' Parameters:
 '
-'   Choice$() -
-'     The "Choice$" Array holds the Menu Choices.
-'     Choice$(0, Menus) hold the Bar Titles.
-'     Choice$(Choices, Menu) hold the Window Choices.
+'   choice$() -
+'     The "choice$" Array holds the menu choices.
+'     choice$(0, menus) hold the bar titles.
+'     choice$(choices, menu) hold the window choices.
 '     A "-" value for a choice indicates a dividing line across the menu.
 '
-'   Stat() -
-'     This is an integer array parallel to the Choice$ array.
+'   stat() -
+'     This is an integer array parallel to the choice$ array.
 '     Any value in the low byte of an element indicates that the choice is
-'     inactive (Non Selectable).  The high byte of the element indicates
+'     inactive (Non-Selectable). The high byte of the element indicates
 '     the offset (0 based) of the hot key letter.
 '
-'   Menu -
-'     Current Menu Number.  A nonzero value on entry will cause that menu
+'   menu -
+'     Current menu number. A nonzero value on entry will cause that menu
 '     to be displayed.
 '
-'   Choice -
-'     Current Menu Choice.  A nonzero value on entry will cause that
+'   choice -
+'     Current menu choice. A nonzero value on entry will cause that
 '     choice to be displayed.
 '
-'   Ky$ -
+'   ky$ -
 '     This string will contain the character or key code that was used to
 '     exit the routine.
 '
-'   Action -
+'   action -
 '     Action is a flag which can be used to control the routine in a
-'     multi tasking (polled) mode.  The Action commands are as follows:
+'     multi tasking (polled) mode.  The action commands are as follows:
 '
 '       0 - PullDnMS will take control until an active choice is selected
 '           or the [Esc] key is pressed.  (Single Tasking Mode)
@@ -161,162 +161,159 @@ END SUB
 '
 '****************************************************************************
 '
-SUB PullDnMs (Choice$(), Stat(), Menu, Choice, Ky$, Action) STATIC
+SUB PullDnMs (choice$(), stat(), menu, choice, ky$, action) STATIC
 
-    LOCATE , , 0
+  LOCATE , , 0
 
-    IF Action = 4 THEN Action = 1       'See if they forgot to reinit. Action
-    IF Action < 3 THEN                  'Redisplaying?
-       IF Action < 2 THEN               'Redisplaying whole menu?
-          LastMenu = UBOUND(Choice$, 2) 'Find Last Bar Menu Choice
-          LastChoice = 0
-          Wdth = 0
-                                        'Find screen rows to save
-          Temp = 80 * (UBOUND(Choice$, 1) + BarLine + 3)
-          REDIM ScrBuf(Temp)            'Allocate screen memory
-          REDIM BarLin(80)              'Save the Bar Line
-          MScrnSave BarLine, 1, BarLine, 80, BarLin(0)
+  IF Action = 4 THEN Action = 1       ' See if they forgot to reinit. Action
+  IF Action < 3 THEN                  ' Redisplaying?
+    IF Action < 2 THEN                ' Redisplaying whole menu?
+      LastMenu = UBOUND(Choice$, 2)   ' Find Last Bar Menu Choice
+      LastChoice = 0
+      Wdth = 0
+                                      ' Find screen rows to save
+      tempVar = 80 * (UBOUND(Choice$, 1) + BAR_LINE + 3)
+      REDIM ScrBuf(tempVar)           ' Allocate screen memory
+      REDIM BarLin(80)                ' Save the Bar Line
+      MScrnSave BAR_LINE, 1, BAR_LINE, 80, BarLin()
                                         
-          BarPrint Choice$(), Stat()    'Display the Menu Bar
+      BarPrint Choice$(), Stat()      ' Display the Menu Bar
           
-          GetVMode 0, 0, 0, Temp, 0     'Setup the mouse
-          MouseTrap 1, 1, Temp, 80
-          NPixLines = 8
-          IF Temp > 43 AND DOSVer% >= 1000 THEN NPixLines = 7
+      GetVMode 0, 0, 0, tempVar, 0    ' Setup the mouse
+      MouseTrap 1, 1, tempVar, 80
+      NPixLines = 8
+      IF tempVar > 43 AND DOSVer% >= 1000 THEN NPixLines = 7
           
-       END IF
+    END IF
 
-       ArrayEnd = UBOUND(Choice$, 1)
+    ArrayEnd = UBOUND(Choice$, 1)
 
-       GOSUB PullDisplay                'Display the Menu box
+    GOSUB PullDisplay                 ' Display the Menu box
        
-       IF Action THEN Action = 3        'Reset the Action flag to idle state
+    IF Action THEN Action = 3         ' Reset the Action flag to idle state
 
-       PrevChoice = Choice
-       PrevMenu = Menu
-       ButtonPress 1, Down, Presses, MCol, MRow
-       IF Down = 0 THEN GOSUB PullHilite
-    END IF
+    PrevChoice = Choice
+    PrevMenu = Menu
+    ButtonPress 1, Down, Presses, MCol, MRow
+    IF Down = 0 THEN GOSUB PullHilite
+  END IF
 
-                                        'If Action flag=5, Restore the screen
-    IF Action = 5 AND UBOUND(ScrBuf) > 1 THEN
-       GOSUB CleanUp
-       PrevChoice = Choice
-       PrevMenu = Menu
-       AltUsed = 0
-       EXIT SUB                         'Bail out
-    END IF
+                                      ' If Action flag=5, Restore the screen
+  IF Action = 5 AND UBOUND(ScrBuf) > 1 THEN
+    GOSUB CleanUp
+    PrevChoice = Choice
+    PrevMenu = Menu
+    AltUsed = 0
+    EXIT SUB                           ' Bail out
+  END IF
 
-    IF Choice <> PrevChoice THEN GOSUB PullHilite
-    IF Menu <> PrevMenu THEN GOSUB PullDisplay
+  IF Choice <> PrevChoice THEN GOSUB PullHilite
+  IF Menu <> PrevMenu THEN GOSUB PullDisplay
 
+  DO
+                                       ' If we have a Window, Highlight Choice
+                                       ' Get typed characters
+    Ky$ = INKEY$
 
+    'MMMMMMMMMMMMMMMM Start of Mouse Handling Code MMMMMMMMMMMMMMMMMMM
+    'MM   If you hate rodents, exterminate the code from here to    MM
+    'MM   the next set of "MMM" comments.                           MM
+    'MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+    ButtonPress 1, Down, Presses, MCol, MRow
+    IF Presses = 0 THEN GetCursor MCol, MRow, Button
+    MRow = (MRow \ NPixLines) + 1
+    MCol = (MCol \ 8) + 1
 
-    DO
-                                        'If we have a Window, Highlight Choice
-                                        'Get typed characters
-       Ky$ = INKEY$
-
-       'MMMMMMMMMMMMMMMM Start of Mouse Handling Code MMMMMMMMMMMMMMMMMMM
-       'MM   If you hate rodents, exterminate the code from here to    MM
-       'MM   the next set of "MMM" comments.                           MM
-       'MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
-       ButtonPress 1, Down, Presses, MCol, MRow
-       IF Presses = 0 THEN GetCursor MCol, MRow, Button
-       MRow = (MRow \ NPixLines) + 1
-       MCol = (MCol \ 8) + 1
-
-       IF (MRow <> LMRow OR MCol <> LMCol OR Presses) AND Down = 1 THEN
-          WasPressed = -1
-          IF MRow - BarLine - 1 <= LastChoice AND MRow - BarLine - 1 > 0 AND MCol >= StartCol AND MCol <= EnBar THEN
-             Choice = MRow - BarLine - 1
-             IF Choice$(Choice, Menu) = "-" THEN
-                Choice = PrevChoice
-                WasPressed = 0
-             END IF
-             GOSUB PullHilite
-          ELSEIF MRow = BarLine THEN
-             Temp = BarLCol + 2
-             FOR N = 0 TO LastMenu
-                 IF MCol >= Temp AND MCol <= Temp + LEN(Choice$(0, N)) + 1 THEN EXIT FOR
-                 IF N < LastMenu THEN
-                    Temp = Temp + Stat(0, N + 1) MOD 256 + LEN(Choice$(0, N)) + 2
-                 END IF
-             NEXT
-             IF N <= LastMenu THEN Menu = N
-             IF Menu <> PrevMenu THEN GOSUB PullDisplay
-          END IF
-          
-       ELSEIF Button AND 2 THEN
-          Ky$ = CHR$(27)
-          DO
-             GetCursor MCol, MRow, Button
-          LOOP WHILE Button AND 2
-       END IF
-
-       IF Down = 0 AND WasPressed THEN
+    IF (MRow <> LMRow OR MCol <> LMCol OR Presses) AND Down = 1 THEN
+      WasPressed = -1
+      IF MRow - BAR_LINE - 1 <= LastChoice AND MRow - BAR_LINE - 1 > 0 AND MCol >= StartCol AND MCol <= EnBar THEN
+        Choice = MRow - BAR_LINE - 1
+        IF Choice$(Choice, Menu) = "-" THEN
+          Choice = PrevChoice
           WasPressed = 0
-          IF MRow - BarLine - 1 <= LastChoice AND MRow - BarLine - 1 > 0 AND MCol >= StartCol AND MCol <= EnBar THEN
-             Ky$ = CHR$(13)
-          ELSEIF MRow = BarLine THEN
-             IF Wdth = 0 THEN
-                Ky$ = CHR$(13)
-             ELSE
-                GOSUB PullHilite
-             END IF
-          ELSE
-             Ky$ = CHR$(27)
+        END IF
+        GOSUB PullHilite
+      ELSEIF MRow = BAR_LINE THEN
+        tempVar = BAR_LCOL + 2
+        FOR N = 0 TO LastMenu
+          IF MCol >= tempVar AND MCol <= tempVar + LEN(Choice$(0, N)) + 1 THEN EXIT FOR
+          IF N < LastMenu THEN
+            tempVar = tempVar + Stat(0, N + 1) MOD 256 + LEN(Choice$(0, N)) + 2
           END IF
-       END IF
+        NEXT
+        IF N <= LastMenu THEN Menu = N
+        IF Menu <> PrevMenu THEN GOSUB PullDisplay
+      END IF
           
-       IF Down = 0 THEN
-          LMRow = -1
-          LMCol = -1
-       ELSE
-          LMRow = MRow
-          LMCol = MCol
-       END IF
-       'MMMMMMMMMMMMMMMMMMM End of mouse handling code MMMMMMMMMMMMMMMMMMMMMM
+    ELSEIF Button AND 2 THEN
+      Ky$ = CHR$(27)
+      DO
+        GetCursor MCol, MRow, Button
+      LOOP WHILE Button AND 2
+    END IF
 
+    IF Down = 0 AND WasPressed THEN
+      WasPressed = 0
+      IF MRow - BAR_LINE - 1 <= LastChoice AND MRow - BAR_LINE - 1 > 0 AND MCol >= StartCol AND MCol <= EnBar THEN
+        Ky$ = CHR$(13)
+      ELSEIF MRow = BAR_LINE THEN
+        IF Wdth = 0 THEN
+          Ky$ = CHR$(13)
+        ELSE
+          GOSUB PullHilite
+        END IF
+      ELSE
+        Ky$ = CHR$(27)
+      END IF
+    END IF
+          
+    IF Down = 0 THEN
+      LMRow = -1
+      LMCol = -1
+    ELSE
+      LMRow = MRow
+      LMCol = MCol
+    END IF
+    'MMMMMMMMMMMMMMMMMMM End of mouse handling code MMMMMMMMMMMMMMMMMMMMMM
 
-       IF LEN(Ky$) THEN
+    IF LEN(Ky$) THEN
 
-          K = ASCII(RIGHT$(Ky$, 1))
-          IF LEN(Ky$) = 2 THEN
-             IF AltKey THEN
-                IF K >= 120 THEN K = K - 119
-                K = ASCII(MID$(AltChars$, K, 1))
-             ELSE
-                K = -K
-             END IF
+      K = ASCII(RIGHT$(Ky$, 1))
+      IF LEN(Ky$) = 2 THEN
+        IF AltKey THEN
+          IF K >= 120 THEN K = K - 119
+            K = ASCII(MID$(ALT_CHARS$, K, 1))
+          ELSE
+            K = -K
           END IF
+        END IF
 
-          SELECT CASE K
-             CASE 13, 27
-                IF Stat(Choice, Menu) MOD 256 = 0 OR K = 27 THEN
-                   IF Action = 0 THEN
-                      GOSUB CleanUp
-                      EXIT SUB
-                   ELSE
-                      Action = 4
-                   END IF
-                ELSEIF K = 13 THEN
-                   Ky$ = ""
-                END IF
+        SELECT CASE K
+          CASE 13, 27
+            IF Stat(Choice, Menu) MOD 256 = 0 OR K = 27 THEN
+              IF Action = 0 THEN
+                GOSUB CleanUp
+                EXIT SUB
+              ELSE
+                Action = 4
+              END IF
+            ELSEIF K = 13 THEN
+              Ky$ = ""
+            END IF
 
-             CASE 32 TO 254
-                IF Wdth AND K <> 45 THEN 'See if User pressed a Choice Letter
+          CASE 32 TO 254
+            IF Wdth AND K <> 45 THEN 'See if User pressed a Choice Letter
                                                 'Make Key Uppercase
                    IF K >= 97 AND K <= 122 THEN K = K - 32
 
-                   Temp = 0
+                   tempVar = 0
              
                    DO
                       Choice = Choice + 1
                       IF Choice > LastChoice THEN
-                         IF Temp THEN EXIT DO
+                         IF tempVar THEN EXIT DO
                          Choice = 1
-                         Temp = Choice
+                         tempVar = Choice
                       END IF
                       Ltr = ASCII(UCASE$(MID$(Choice$(Choice, Menu), Stat(Choice, Menu) \ 256 + 1, 1)))
                    LOOP WHILE K <> Ltr OR Stat(Choice, Menu) MOD 256
@@ -386,15 +383,15 @@ PullHilite:
     IF Wdth THEN
        IF PrevChoice THEN
           IF Stat(PrevChoice, Menu) MOD 256 THEN
-             Clr = InActClr
+             Clr = INACT_CLR
           ELSE
-             Clr = MenuClr
+             Clr = MENU_CLR
           END IF
-          Row = PrevChoice + BarLine + 1
+          Row = PrevChoice + BAR_LINE + 1
           LCol = StartCol
           RCol = EnBar
           GOSUB PaintIt
-          IF Clr = MenuClr THEN
+          IF Clr = MENU_CLR THEN
              LCol = StartCol + 1 + (Stat(PrevChoice, Menu) \ 256)
              RCol = LCol
              Clr = HotLtrClr
@@ -403,10 +400,10 @@ PullHilite:
        END IF
 
        IF Choice THEN
-          Row = Choice + BarLine + 1
+          Row = Choice + BAR_LINE + 1
           LCol = StartCol
           RCol = EnBar
-          Clr = HiliteClr
+          Clr = HILITE_CLR
           GOSUB PaintIt
           IF Stat(Choice, Menu) MOD 256 = 0 THEN
              LCol = StartCol + 1 + (Stat(Choice, Menu) \ 256)
@@ -416,7 +413,7 @@ PullHilite:
           END IF
        END IF
     END IF
-    LOCATE Choice + BarLine + 1, StartCol + 1
+    LOCATE Choice + BAR_LINE + 1, StartCol + 1
 RETURN
 
 
@@ -425,14 +422,14 @@ PullDisplay:
     IF Menu <> PrevMenu OR Action < 2 THEN
 
        IF Wdth THEN
-          MScrnRest BarLine + 1, StartCol - 1, LastChoice + BarLine + 3, EnBar + 3, ScrBuf(0)
+          MScrnRest BAR_LINE + 1, StartCol - 1, LastChoice + BAR_LINE + 3, EnBar + 3, ScrBuf()
        END IF
                                         'Repaint the Menu bar
        IF StartCol THEN
-          Row = BarLine
+          Row = BAR_LINE
           LCol = StartCol
           RCol = EnCol
-          Clr = MenuClr
+          Clr = MENU_CLR
           GOSUB PaintIt
        END IF
        IF Menu <> PrevMenu OR Choice = 0 THEN Choice = 1
@@ -440,16 +437,16 @@ PullDisplay:
     END IF
     PrevMenu = Menu                     'Save the menu number
 
-    StartCol = BarLCol + 2              'Find the column positions to start
+    StartCol = BAR_LCOL + 2              'Find the column positions to start
     FOR C = 0 TO Menu - 1               '  and end the highlight on Bar Menu
         StartCol = StartCol + LEN(Choice$(0, C)) + 2 + Stat(0, C + 1) MOD 256
     NEXT
     EnCol = StartCol + LEN(Choice$(0, Menu)) + 1
                                         'Highlight the Bar Menu Choice
-    Row = BarLine
+    Row = BAR_LINE
     LCol = StartCol
     RCol = EnCol
-    Clr = HiliteClr
+    Clr = HILITE_CLR
     GOSUB PaintIt
    
     Wdth = 0                            'Find the Width and # of Choices of
@@ -472,28 +469,28 @@ PullDisplay:
     IF Wdth THEN                        'If there are window choices, print
                                         '  them
        IF Action <> 2 THEN
-          MScrnSave BarLine + 1, StartCol - 1, LastChoice + BarLine + 3, EnBar + 3, ScrBuf(0)
+          MScrnSave BAR_LINE + 1, StartCol - 1, LastChoice + BAR_LINE + 3, EnBar + 3, ScrBuf()
        END IF
        HideCursor
 
-       Box0 BarLine + 1, StartCol - 1, LastChoice + BarLine + 2, EnBar + 1, 1, MenuClr
+       Box0 BAR_LINE + 1, StartCol - 1, LastChoice + BAR_LINE + 2, EnBar + 1, 1, MENU_CLR
        Buf$ = SPACE$(Wdth + 2)
 
        FOR C = 1 TO LastChoice
            IF Choice$(C, Menu) = "-" THEN
-              QPrintRC "Ã" + STRING$(Wdth + 2, "Ä") + "´", C + BarLine + 1, StartCol - 1, MenuClr
+              QPrintRC CHR$(195) + STRING$(Wdth + 2, CHR$(196)) + CHR$(180), C + BAR_LINE + 1, StartCol - 1, MENU_CLR
            ELSE
 
               LSET Buf$ = " " + Choice$(C, Menu)
               IF Stat(C, Menu) MOD 256 THEN
-                 Clr = InActClr
+                 Clr = INACT_CLR
               ELSE
-                 Clr = MenuClr
+                 Clr = MENU_CLR
               END IF
-              QPrintRC Buf$, C + BarLine + 1, StartCol, Clr
+              QPrintRC Buf$, C + BAR_LINE + 1, StartCol, Clr
            END IF
            IF Stat(C, Menu) MOD 256 = 0 AND Choice$(C, Menu) <> "-" THEN
-              Row = C + BarLine + 1
+              Row = C + BAR_LINE + 1
               LCol = StartCol + 1 + (Stat(C, Menu) \ 256)
               RCol = LCol
               Clr = HotLtrClr
@@ -504,9 +501,9 @@ PullDisplay:
        ShowCursor
 
        IF StartCol + Wdth + 4 <= 80 THEN
-          MPaintBox BarLine + 2, EnBar + 2, C + BarLine + 2, EnBar + 3, 8
+          MPaintBox BAR_LINE + 2, EnBar + 2, C + BAR_LINE + 2, EnBar + 3, 8
        END IF
-       Row = C + BarLine + 2
+       Row = C + BAR_LINE + 2
        LCol = StartCol + 1
        RCol = EnBar + 1
        Clr = 8
@@ -521,9 +518,9 @@ RETURN
 
 
 CleanUp:
-    MScrnRest BarLine, 1, BarLine, 80, BarLin(0)
+    MScrnRest BAR_LINE, 1, BAR_LINE, 80, BarLin()
     IF Wdth THEN
-       MScrnRest BarLine + 1, StartCol - 1, LastChoice + BarLine + 3, EnBar + 3, ScrBuf(0)
+       MScrnRest BAR_LINE + 1, StartCol - 1, LastChoice + BAR_LINE + 3, EnBar + 3, ScrBuf()
     END IF
     ERASE ScrBuf, BarLin             'Clean up memory
 RETURN
@@ -564,16 +561,16 @@ FUNCTION PullMenKey% (Ky$, Choice$(), Stat()) STATIC
     IF Button THEN
        LastMenu = UBOUND(Choice$, 2)
        MRow = (MRow \ 8) + 1
-       IF MRow = BarLine THEN
+       IF MRow = BAR_LINE THEN
           MCol = (MCol \ 8) + 1
-          Temp = BarLCol + 2
+          tempVar = BAR_LCOL + 2
           FOR N = 0 TO LastMenu
-              IF MCol >= Temp AND MCol <= Temp + LEN(Choice$(0, N)) + 1 THEN
+              IF MCol >= tempVar AND MCol <= tempVar + LEN(Choice$(0, N)) + 1 THEN
                  Menu = N
                  EXIT FOR
               END IF
               IF N < LastMenu THEN
-                 Temp = Temp + Stat(0, N + 1) MOD 256 + LEN(Choice$(0, N)) + 2
+                 tempVar = tempVar + Stat(0, N + 1) MOD 256 + LEN(Choice$(0, N)) + 2
               END IF
           NEXT
        END IF
@@ -587,14 +584,14 @@ FUNCTION PullMenKey% (Ky$, Choice$(), Stat()) STATIC
              WasDown = -1
              IF NOT Bar THEN
                 LastMenu = UBOUND(Choice$, 2)
-                Temp = BarLCol + 2
+                tempVar = BAR_LCOL + 2
                 Clr = HotLtrClr
                 FOR N = 0 TO LastMenu
-                    LCol = Temp + (Stat(0, N) \ 256) + 1
+                    LCol = tempVar + (Stat(0, N) \ 256) + 1
                     RCol = LCol
                     GOSUB PaintIt2
                     IF N < LastMenu THEN
-                       Temp = Temp + LEN(Choice$(0, N)) + 2 + Stat(0, N + 1) MOD 256
+                       tempVar = tempVar + LEN(Choice$(0, N)) + 2 + Stat(0, N + 1) MOD 256
                     END IF
                 NEXT
                 LOCATE , , 0
@@ -679,7 +676,7 @@ HiLiteBar:
        IF StartCol THEN
           LCol = StartCol
           RCol = EnCol
-          Clr = MenuClr
+          Clr = MENU_CLR
           GOSUB PaintIt2
           
           LCol = StartCol + 1 + (Stat(0, PrevBarCh) \ 256)
@@ -690,7 +687,7 @@ HiLiteBar:
     END IF
     PrevBarCh = BarCh                   'Save the menu number
                                      
-    StartCol = BarLCol + 2              'Find the column positions to start
+    StartCol = BAR_LCOL + 2              'Find the column positions to start
     FOR N = 0 TO BarCh - 1              '  and end the highlight on Bar Menu
         StartCol = StartCol + LEN(Choice$(0, N)) + 2 + Stat(0, N + 1) MOD 256
     NEXT
@@ -698,7 +695,7 @@ HiLiteBar:
                                         'Highlight the Bar Menu Choice
     LCol = StartCol
     RCol = EnCol
-    Clr = HiliteClr
+    Clr = HILITE_CLR
     GOSUB PaintIt2
     
     LCol = StartCol + 1 + (Stat(0, BarCh) \ 256)
@@ -709,7 +706,7 @@ HiLiteBar:
 RETURN
 
 PaintIt2:
-    MPaintBox BarLine, LCol, BarLine, RCol, Clr
+    MPaintBox BAR_LINE, LCol, BAR_LINE, RCol, Clr
 RETURN
 
 
