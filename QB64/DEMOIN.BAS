@@ -161,7 +161,7 @@ DisplayScreen:                          ' display screen w/any existing values
   LOCATE 13, 44: QPrint "Amt Due ", 15, -1
   LOCATE , 52:   QPrint FUsing$(STR$(amtDue#), "########.##"), colr, -1
   LOCATE 15, 44: QPrint "Date Paid ", 15, -1
-  LOCATE , 54:   QPrint FnSlash$(dtPaid$), colr, -1
+  LOCATE , 54:   QPrint dtPaid$, colr, -1 'QPrint FnSlash$(dtPaid$), colr, -1
   LOCATE 19, 1: QPrint "Memo ", 15, -1
   LOCATE , 6:   QPrint FnExt$(memo$, 74), colr, -1
   RETURN

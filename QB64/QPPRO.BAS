@@ -1428,6 +1428,120 @@ FUNCTION FUsing$ (number$, image$)
   ' string, the comma must be placed just before it. Otherwise, the 
   ' comma must be the last character. 
 
+  result$ = ""
+
+  number# = VAL(number$)
+  format$ = image$
+
+  IF INSTR(format$, "#") = 0 THEN using$ = format$ + "#"
+
+  leadingPlus = LEFT$(format$, 1) = "+"
+  dollarSign = INSTR(format$, "$") > 0
+  doubleDollarSign = INSTR(format$, "$$") > 0
+  asteriskFillDollarSign = INSTR(format$, "**$") > 0
+
+  exponential = INSTR(format$, "^^^^") > 0
+  trailingMinus = RIGHT$(format$, 1) = "-"
+  hundreds = INSTR(format$, ",") > 0
+  float = INSTR(format$, ".") > 0
+  precision = 0
+
+  IF float THEN
+    positionStart = INSTR(format$, ".")
+    positionEnd = positionStart + 1
+    DO
+      SELECT CASE MID$(format$, positionEnd, 1)
+        CASE "#": positionEnd = positionEnd + 1
+        CASE ELSE
+          positionEnd = positionEnd -1
+          EXIT DO
+      END SELECT
+      IF positionEnd > LEN(format$) THEN
+        positionEnd = positionEnd - 1
+        EXIT DO
+      END IF
+    LOOP
+    precision = positionEnd - positionStart
+  END IF
+
+  length = _INSTRREV(format$, "#") - INSTR(format$, "#") + 1
+  IF INSTR(format$, ".") > 0 AND INSTR(format$, ".") = INSTR(format$, "#") - 1 THEN
+    ' Numeric format stars with a period...
+    length = length + 1
+  END IF
+  IF asteriskFillDollarSign THEN
+    length = length + 1
+  ELSEIF asteriskFill THEN
+    length = length + 2
+  END IF
+  IF exponential THEN length = length + 4
+  IF NOT float THEN number# = CINT(number#)
+  sign$ = " "
+  IF number# < 0 THEN
+    sign$ = "-"
+  ELSEIF leadingPlus THEN
+    sign$ = "+"
+  END IF
+  IF dollarSign THEN length = length + 1
+
+  value$ = LTRIM$(STR$(ABS(number#)))
+
+  IF float THEN
+    IF INSTR(value$, ".") = 0 THEN ' a whole number, just extend decimal place as desired
+      value$ = value$ + "." + STRING$(precision, "0")
+    ELSE
+      DO
+        SELECT CASE LEN(value$) - _INSTRREV(value$, ".") 
+          CASE IS > precision
+            value$ = LEFT$(value$, LEN(value$) - 1)
+          CASE IS < precision
+            value$ = value$ + "0"
+          CASE ELSE
+            EXIT DO
+        END SELECT
+      LOOP
+    END IF
+  ELSE
+    PRINT "not a float"
+  END IF
+  IF hundreds THEN
+    ' the whole number value need to have comma(s) (,) inserted at every three whole numbers.
+  END IF
+
+  IF exponential THEN
+    numericOnly$ = MID$(format$, INSTR(format$, "#"), _INSTRREV(format$, "#") - INSTR(format$, "#") + 1)
+    CALL ReplaceString (numericOnly$, "#", "0")
+    IF INSTR(format$, ".") > 0 AND INSTR(format$, ".") = INSTR(format$, "#") - 1 THEN
+      numericOnly$ = "." + numericOnly$
+    ELSE
+      WHILE MID$(numericOnly$, 2, 1) = "0"
+        numericOnly$ = MID$(numericOnly$, 2)
+        IF LEN(numericOnly$) = 1 THEN EXIT WHILE
+      WEND
+    END IF
+    value$ = LTRIM$(STR$(number#)) + "E+00"
+  END IF
+
+  IF length < LEN(value$) THEN result$ = result$ + "%"
+
+  IF length > LEN(value$) THEN
+    IF asteriskFill THEN
+      IF sign$ <> " " THEN
+        result$ = result$ + STRING$(length - LEN(value$) + 1, "*")
+      ELSE
+        result$ = result$ + STRING$(length - LEN(value$), "*")
+      END IF
+    ELSE
+      result$ = result$ + STRING$(length - LEN(value$), " ")
+    END IF
+  END IF
+  IF NOT trailingMinus AND sign$ <> " " THEN result$ = result$ + sign$
+  IF dollarSign THEN result$ = result$ + "$"
+  result$ = result$ + value$
+  IF trailingMinus THEN result$ = result$ + sign$
+
+  FUsing$ = result$
+
 END FUNCTION
 
 ' InCount will quickly report how many times one string occurs 
