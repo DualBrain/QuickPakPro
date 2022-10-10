@@ -1,95 +1,98 @@
-'********** APRINT.BAS - quick prints a "Mid" portion of an entire array
+' ********** APRINT.BAS - quick prints a "Mid" portion of an entire array
 
-'Copyright (c) 1987 Ethan Winer
+' Copyright (c) 1987 Ethan Winer
+' Modifications (c) 2022 Cory Smith
 
-    DEFINT A-Z
+DEFINT A-Z
 
-    DECLARE SUB APrint (BYVAL A, B, C, D, E, F)
-    DECLARE SUB Box (ULRow, ULCol, LRRow, LRCol, Style, Colr, Page)
-    DECLARE SUB QPrint (X$, Colr, Page)
+DECLARE SUB APrint (array$(), first, numEls, firstChar, numChars, colr, page)
+DECLARE SUB Box (ulRow, ulCol, lrRow, lrCol, style, colr, page)
+DECLARE SUB QPrint (txt$, colr, page)
 
-    Pages = 7   'use 3 or 7 to establish the vertical resolution of the demo
-    Wide = 80   'set to 40 or 80
+pages = 7   ' use 3 or 7 to establish the vertical resolution of the demo
+wide = 80   ' set to 40 or 80
 
-    Start = 1: MidFirst = 1     'start with first character in first element
+start = 1: midFirst = 1     ' start with first character in first element
 
-    'init screens to different colors to test the default color ability
-    'of APrint and Box - the Page parameters can also be hard-coded.
+' init screens to different colors to test the default color ability
+' of APrint and Box - the Page parameters can also be hard-coded.
 
-    IF Pages = 7 THEN   'if we're allowing 7 pages, then do 25 lines
-       ScrSize = 25
-       NumEls = 22
-    ELSE                'otherwise use the 43 line mode (EGA only)
-       ScrSize = 43
-       NumEls = 40
-    END IF
+IF pages = 7 THEN   ' if we're allowing 7 pages, then do 25 lines
+  scrSize = 25
+  numEls = 22
+ELSE                ' otherwise use the 43 line mode (EGA only)
+  scrSize = 43
+  numEls = 40
+END IF
 
-    IF Wide = 40 THEN   'if we're working in 40 columns, use 38 characters
-       NumChars = 38
-    ELSE                'otherwise use 80 characters
-       NumChars = 78
-    END IF
+IF wide = 40 THEN   ' if we're working in 40 columns, use 38 characters
+   numChars = 38
+ELSE                ' otherwise use 80 characters
+   numChars = 78
+END IF
 
-    WIDTH Wide, ScrSize
-    FOR X = Pages TO 0 STEP -1
-	SCREEN 0, 0, X, X
-	READ FG, BG
-	COLOR FG, BG
-	CLS
-	Box 1, 1, NumEls + 2, NumChars + 2, 3, FG + 1 + BG + 1 * 4, -1
-    NEXT
-    DATA 15,4,  1,0,  12,5,  2,8,  11,2,  9,0,  13,4,  14,1
+WIDTH wide, scrSize
+FOR x = pages TO 0 STEP -1
+  SCREEN 0, 0, x, x
+  READ fg, bg
+  COLOR fg, bg
+  CLS
+  Box 1, 1, numEls + 2, numChars + 2, 3, fg + 1 + fg + 1 * 4, -1
+NEXT
+DATA 15,4,  1,0,  12,5,  2,8,  11,2,  9,0,  13,4,  14,1
 
-    DIM Array$(2000)
-    OPEN "APrint.Bas" FOR INPUT AS #1
-    WHILE NOT EOF(1)
-	Count = Count + 1
-	LINE INPUT #1, Array$(Count)
-    WEND
-    CLOSE
+DIM array$(2000)
+OPEN "APRINT.BAS" FOR INPUT AS #1
+WHILE NOT EOF(1)
+  count = count + 1
+  LINE INPUT #1, array$(count)
+WEND
+CLOSE
 
 NewPage:
-    SCREEN , , Page, Page
-    P$ = "Page" + STR$(Page) + ": Use arrows, "
-    P$ = P$ + CHR$(34) + "P" + CHR$(34) + ", or Esc to exit"
-    LOCATE NumEls + 3, 1
-    QPrint P$, -1, -1
+  SCREEN , , page, page
+  p$ = "Page" + STR$(page) + ": Use arrows, "
+  p$ = P$ + CHR$(34) + "P" + CHR$(34) + ", or Esc to exit"
+  LOCATE numEls + 3, 1
+  QPrint p$, -1, -1
 
 Doit:
-    LOCATE 2, 2: Clr = 7
-    APrint VARPTR(Array$(Start)), NumEls, MidFirst, NumChars, -1, -1
+  LOCATE 2, 2: clr = 7
+  APrint array$(), start, numEls, midFirst, numChars, -1, -1
 
 GetK:
-    DO
-       X$ = INKEY$
-    LOOP UNTIL LEN(X$)
 
-    IF X$ = CHR$(27) THEN END                   'Escape
+  DO
+    x$ = INKEY$
+  LOOP UNTIL LEN(X$)
 
-    IF X$ = CHR$(0) + CHR$(80) THEN
-       IF Start + NumEls - 1 > Count GOTO GetK  'Down arrow
-       Start = Start + 1
-       GOTO Doit
-    ELSEIF X$ = CHR$(0) + CHR$(72) THEN         'Up arrow
-       IF Start < 2 GOTO GetK
-       Start = Start - 1
-       GOTO Doit
-    ELSEIF X$ = CHR$(0) + CHR$(75) THEN         'Left arrow
-       IF MidFirst < 2 GOTO GetK
-       MidFirst = MidFirst - 1
-       GOTO Doit
-    ELSEIF X$ = CHR$(0) + CHR$(77) THEN         'Right Arrow
-       MidFirst = MidFirst + 1
-       GOTO Doit
-    ELSEIF X$ = CHR$(0) + CHR$(71) THEN         'Home key
-       Start = 1
-       MidFirst = 1
-       GOTO Doit
-    ELSEIF UCASE$(X$) = "P" THEN                'new Page
-       Page = Page + 1
-       IF Page > Pages THEN Page = 0
-       GOTO NewPage
-    END IF
+  IF x$ = CHR$(27) THEN END                   ' Escape
 
-    GOTO GetK
+  IF x$ = CHR$(0) + CHR$(80) THEN
+    IF start + numEls - 1 > count GOTO GetK   ' Down arrow
+    start = start + 1
+    GOTO Doit
+  ELSEIF x$ = CHR$(0) + CHR$(72) THEN         ' Up arrow
+    IF start < 2 GOTO GetK
+    start = start - 1
+    GOTO Doit
+  ELSEIF x$ = CHR$(0) + CHR$(75) THEN         ' Left arrow
+    IF midFirst < 2 GOTO GetK
+    midFirst = midFirst - 1
+    GOTO Doit
+  ELSEIF x$ = CHR$(0) + CHR$(77) THEN         ' Right Arrow
+    midFirst = midFirst + 1
+    GOTO Doit
+  ELSEIF x$ = CHR$(0) + CHR$(71) THEN         ' Home key
+    start = 1
+    midFirst = 1
+    GOTO Doit
+  ELSEIF UCASE$(x$) = "P" THEN                ' new Page
+    page = page + 1
+    IF page > pages THEN page = 0
+    GOTO NewPage
+  END IF
 
+  GOTO GetK
+
+'$INCLUDE: 'QPPRO.BAS'

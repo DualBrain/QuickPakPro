@@ -1041,9 +1041,6 @@ FUNCTION AddUSI%(X%, Y%)
   ' See ADDUSI.ASM
 END FUNCTION
 
-SUB ASCIIChart(ULRow%, ULCol%, Height%)
-END SUB
-
 SUB BCopy(FromSeg%, FromAddr%, ToSeg%, ToAddr%, NumBytes%, Direction%)
 END SUB
 
@@ -1051,12 +1048,6 @@ SUB BCopyT(FromEl, ToEl, ElSize%, NumEls%)
 END SUB
 
 SUB BLPrint(LPTNumber%, X$, ErrorCount%)
-END SUB
-
-SUB Calc(ULRow%, ULCol%, FG%, BG%)
-END SUB
-
-SUB Calendar(Month%, Day%, Year%, ULRow%, ULCol%, Color1%, Color2%, Action%)
 END SUB
 
 ' Chime provides five different types of beep tones, and five short 
@@ -1830,6 +1821,23 @@ END SUB
 ' fixed-length) string array, and contain the display within a specified 
 ' area of the screen. 
 SUB APrint(array$(), first%, numEls%, firstChar%, numChars%, colr%, page%)
+  ' NOTE: page% is currently not implemented.
+  ' If page% is -1, use current page.
+  IF page% > -1 THEN SCREEN , , page%, page%
+  row% = CSRLIN
+  col% = POS(0)
+  FOR element% = first% to first% + numEls% - 1
+    value$ = MID$(array$(element%), firstChar%, numChars%)
+    QPrintRC value$ + SPACE$(numChars% - LEN(value$)), row%, col%, colr%
+    row% = row% + 1
+  NEXT
+END SUB
+
+' APrint0 will quickly print any portion of a conventional (not 
+' fixed-length) string array, and contain the display within a specified 
+' area of the screen. 
+SUB APrint0(array$(), first%, numEls%, firstChar%, numChars%, colr%)
+  CALL APrint(array$(), first%, numEls%, firstChar%, numChars%, colr%, 0)
 END SUB
 
 ' ArraySize will quickly calculate how many elements are needed in an
