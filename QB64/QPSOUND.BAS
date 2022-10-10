@@ -1,7 +1,7 @@
 ' ********** QPSOUND.BAS - demonstrates sounds without using PLAY or SOUND
 
 ' Copyright (c) 1989 Ethan Winer
-' Modifications (c) 2020 Cory Smith
+' Modifications (c) 2022 Cory Smith
 
 DEFINT A-Z
 

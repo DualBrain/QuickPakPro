@@ -1,16 +1,17 @@
-'********** MSGBOX.BAS
+' ********** MSGBOX.BAS
 
-'Copyright (c) 1988 Crescent Software
+' Copyright (c) 1988 Crescent Software
+' Modifications (c) 2022 Cory Smith
 
 DEFINT A-Z
 
-DECLARE SUB CSMsgBox (Message$, Wdth, Cnf AS ANY)
-DECLARE SUB MQPrint (X$, Colr)
-DECLARE SUB MPaintBox (ULRow, ULCol, LRRow, LRCol, Colr)
-DECLARE SUB MScrnSave (ULRow, ULCol, LRRow, LRCol, SEG Address)
-DECLARE SUB MScrnRest (ULRow, ULCol, LRRow, LRCol, SEG Address)
+DECLARE SUB CSMsgBox (message$, wdth, cnf AS ANY)
+DECLARE SUB MQPrint (x$, colr)
+DECLARE SUB MPaintBox (ulRow, ulCol, lrRow, lrCol, colr)
+DECLARE SUB MScrnSave (ulRow, ulCol, lrRow, lrCol, SEG address)
+DECLARE SUB MScrnRest (ulRow, ulCol, lrRow, lrCol, SEG address)
 
-'$INCLUDE: '\pro2\DEFCNF.BI'
+'$NOCLUDE: 'DEFCNF.BI'
 
 SUB CSMsgBox (Message$, Wdth, Cnf AS Config) STATIC
 
@@ -45,26 +46,26 @@ SUB CSMsgBox (Message$, Wdth, Cnf AS Config) STATIC
        BotRow = Row + LN + 1                    'Find the bottom row #
        IF BotRow > 24 THEN BotRow = 24          'No farther than line 24
 
-       ArraySize = 80 * (BotRow - Row + 2)      'Find the array size to use
-       REDIM ScrBuf(ArraySize)                  '  for the background screen
-       MScrnSave Row, 1, BotRow + 1, 80, ScrBuf(0)
+       ArrSize = 80 * (BotRow - Row + 2)      'Find the array size to use
+       REDIM ScrBuf(ArrSize)                  '  for the background screen
+       MScrnSave Row, 1, BotRow + 1, 80, ScrBuf()
 
        BoxWdth = Wdth + 4                       'Find the outer box width
        ColPos = 40 - (BoxWdth \ 2)              'Starting posit for centered
                                                 '  box
        LOCATE Row, ColPos                       'Print the top of box
-       CALL MQPrint("É" + STRING$(Wdth + 2, "Í") + "»", Cnf.MenBox)
-       Box$ = "º" + SPACE$(Wdth + 2) + "º"      'Make the box sides
+       CALL MQPrint(CHR$(201) + STRING$(Wdth + 2, CHR$(205)) + CHR$(187), Cnf.MenBox)
+       Bx$ = CHR$(186) + SPACE$(Wdth + 2) + CHR$(186)      'Make the box sides
 
        FOR N = 1 TO LN                          'Print message lines
            LOCATE N + Row, ColPos
-           CALL MQPrint(Box$, Cnf.MenBox)
+           CALL MQPrint(Bx$, Cnf.MenBox)
            LOCATE , ColPos + 2
            CALL MQPrint(Temp$(N), Cnf.ActivCh)
        NEXT
 
        LOCATE N + Row, ColPos                   'Print the bottom of box
-       CALL MQPrint("È" + STRING$(Wdth + 2, "Í") + "¼", Cnf.MenBox)
+       CALL MQPrint(CHR$(200) + STRING$(Wdth + 2, CHR$(205)) + CHR$(188), Cnf.MenBox)
 
        CALL MPaintBox(Row + 1, ColPos + BoxWdth, N + Row, ColPos + BoxWdth + 1, 8)
        CALL MPaintBox(N + Row + 1, ColPos + 2, N + Row + 1, ColPos + BoxWdth + 1, 8)
@@ -74,7 +75,7 @@ SUB CSMsgBox (Message$, Wdth, Cnf AS Config) STATIC
 
     ELSEIF Pass = 1 THEN                        'If we've been here before,
                                                 '  restore the screen
-       MScrnRest Row, 1, BotRow + 1, 80, SEG ScrBuf(0)
+       MScrnRest Row, 1, BotRow + 1, 80, ScrBuf()
        ERASE ScrBuf                             'Clean up memory
        Pass = 0                                 'Reset flag for next call
     END IF

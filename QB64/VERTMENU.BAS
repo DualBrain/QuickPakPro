@@ -25,7 +25,7 @@ DECLARE FUNCTION MBuffSize% ()
 DECLARE FUNCTION MinInt% (Val1, Val2)
 DECLARE FUNCTION PDQTimer& ()
 
-'$INCLUDE: 'DefCnf.BI'
+'$NOCLUDE: 'DefCnf.BI'
 
 '****************************************************************************
 '   File Name: VERTMENU.BAS
@@ -79,7 +79,7 @@ SUB VertMenu (Item$(), Choice, MaxLen, BoxBot, Ky$, Action, Cnf AS Config) STATI
     IF Action = 4 THEN Action = 1               'See if they forgot to reset
     IF Action < 2 THEN REDIM ScrBuf(1)          'Temp Dim the Screen buffer
     IF Action = 5 AND UBOUND(ScrBuf) > 1 THEN   'Restore the screen if action=5
-       MScrnRest Top - 1, LeftMargin, Bottom + 2, RightMargin + 2, ScrBuf(0)
+       MScrnRest Top - 1, LeftMargin, Bottom + 2, RightMargin + 2, ScrBuf()
        ERASE ScrBuf
        EXIT SUB
     END IF
@@ -101,7 +101,7 @@ SUB VertMenu (Item$(), Choice, MaxLen, BoxBot, Ky$, Action, Cnf AS Config) STATI
 
        '---- determine how many choices to display, and where to put the menu
        MaxNum = UBOUND(Item$)                   'find number of active items
-       MaxNum = FindLast%(VARPTR(Item$(MaxNum)), MaxNum)
+       MaxNum = FindLast%(Item$(), MaxNum)
 
        Top = CSRLIN + 1                         'put the menu at the current
        LeftMargin = POS(0)                      '  cursor location
@@ -119,43 +119,43 @@ SUB VertMenu (Item$(), Choice, MaxLen, BoxBot, Ky$, Action, Cnf AS Config) STATI
        '----- Save the underlying screen area
        Size = (WinSize + 3) * (RightMargin - LeftMargin + 3)
        REDIM ScrBuf(Size + 1)
-       MScrnSave Top - 1, LeftMargin, Bottom + 2, RightMargin + 2, ScrBuf(0)
+       MScrnSave Top - 1, LeftMargin, Bottom + 2, RightMargin + 2, ScrBuf()
 
        '----- Make sure the choice # is in range
-       Offset = 0
+       Offset1 = 0
        IF Choice = 0 OR Choice > MaxNum THEN
           Choice = 1
        END IF
 
-       IF Choice > Offset + WinSize THEN
-          Offset = Choice - WinSize
+       IF Choice > Offset1 + WinSize THEN
+          Offset1 = Choice - WinSize
        END IF
 
        '----- draw border and display items on the screen
        HideCursor
-       QPrintRC "É" + STRING$(MaxLen + 2, "Í") + "»", CSRLIN, LeftMargin, Cnf.MenBox
+       QPrintRC "ï¿½" + STRING$(MaxLen + 2, "ï¿½") + "ï¿½", CSRLIN, LeftMargin, Cnf.MenBox
        FOR X = Top TO Bottom                  'Draw sides, display items
            APos = X - Top + 1
 
-           IF Item$(APos + Offset) = "-" THEN
-              Item$(APos + Offset) = STRING$(MaxLen, "Ä")
+           IF Item$(APos + Offset1) = "-" THEN
+              Item$(APos + Offset1) = STRING$(MaxLen, "ï¿½")
            END IF
-           LSET Fill$ = Item$(APos + Offset)
+           LSET Fill$ = Item$(APos + Offset1)
                                                    'Left box side and choice
-           QPrintRC "º ", X, LeftMargin, Cnf.MenBox
+           QPrintRC "ï¿½ ", X, LeftMargin, Cnf.MenBox
            QPrintRC Fill$, X, LeftMargin + 2, Cnf.ActivCh
            IF X = Top AND More = -1 THEN           'Draw Up arrow box side
               QPrintRC CHR$(24), X, RightMargin, ScrlClr
            ELSEIF X = Bottom AND More = -1 THEN    'Draw Down arrow box side
               QPrintRC CHR$(25), X, RightMargin, ScrlClr
            ELSEIF More THEN                        'Draw Scroll bar
-              QPrintRC "²", X, RightMargin, ScrlClr
+              QPrintRC "ï¿½", X, RightMargin, ScrlClr
            ELSE                                    'Draw normal box side
-              QPrintRC "º", X, RightMargin, Cnf.MenBox
+              QPrintRC "ï¿½", X, RightMargin, Cnf.MenBox
            END IF
        NEXT
                                                    'Draw the bottom of box
-       QPrintRC "È" + STRING$(MaxLen + 2, "Í") + "¼", X, LeftMargin, Cnf.MenBox
+       QPrintRC "ï¿½" + STRING$(MaxLen + 2, "ï¿½") + "ï¿½", X, LeftMargin, Cnf.MenBox
 
        CALL MPaintBox(Top, RightMargin + 1, Bottom + 1, RightMargin + 2, 8)
        CALL MPaintBox(Bottom + 2, LeftMargin + 2, Bottom + 2, RightMargin + 2, 8)
@@ -259,8 +259,8 @@ SUB VertMenu (Item$(), Choice, MaxLen, BoxBot, Ky$, Action, Cnf AS Config) STATI
                        IF BarRow >= Bottom THEN BarRow = Bottom - 1
                        IF BarRow <= Top THEN BarRow = Top + 1
                        Choice = (BarRow - Top - 1&) * (MaxNum - 1) \ (WinSize - 3) + 1
-                       Offset = Choice - 1
-                       IF Offset + WinSize > MaxNum THEN Offset = MaxNum - WinSize
+                       Offset1 = Choice - 1
+                       IF Offset1 + WinSize > MaxNum THEN Offset1 = MaxNum - WinSize
                        GOSUB VertDisplay
                        GOSUB VertHiLite
                     END IF
@@ -270,10 +270,10 @@ SUB VertMenu (Item$(), Choice, MaxLen, BoxBot, Ky$, Action, Cnf AS Config) STATI
               ELSEIF Down AND MCol = RightMargin AND More THEN
                  IF PDQTimer& > LstScrl& + 1 THEN       'Delay between updates
                     IF MRow = Top THEN                  'If on top, do Up
-                       IF Choice > Offset + 1 THEN Choice = Offset + 2
+                       IF Choice > Offset1 + 1 THEN Choice = Offset1 + 2
                        Ky$ = CHR$(0) + CHR$(72)         '  Arrow proc.
                     ELSEIF MRow = Bottom THEN           'If on Bottom, do
-                       IF Choice < Offset + WinSize - 1 THEN Choice = Offset + WinSize - 1
+                       IF Choice < Offset1 + WinSize - 1 THEN Choice = Offset1 + WinSize - 1
                        Ky$ = CHR$(0) + CHR$(80)         '  Down Arrow Proc.
                     END IF
                     LstScrl& = PDQTimer&                'Update Delay
@@ -296,8 +296,8 @@ SUB VertMenu (Item$(), Choice, MaxLen, BoxBot, Ky$, Action, Cnf AS Config) STATI
               ELSEIF Down THEN
                  IF MRow <> LMRow OR MCol <> LMCol OR Presses THEN
                     IF MRow <= Bottom AND MRow >= Top THEN
-                       TChoice = MRow - Top + 1 + Offset 'Calc. Choice number
-                       IF LEFT$(Item$(TChoice), 1) <> "Ä" THEN
+                       TChoice = MRow - Top + 1 + Offset1 'Calc. Choice number
+                       IF LEFT$(Item$(TChoice), 1) <> "ï¿½" THEN
                           Choice = TChoice
                           FstPrsChoice = Choice
                           GOSUB VertHiLite              'Hi-Lite new choice
@@ -346,7 +346,7 @@ SUB VertMenu (Item$(), Choice, MaxLen, BoxBot, Ky$, Action, Cnf AS Config) STATI
                 IF Action THEN
                    Action = 4
                 ELSE
-                   MScrnRest Top - 1, LeftMargin, Bottom + 2, RightMargin + 2, ScrBuf(0)
+                   MScrnRest Top - 1, LeftMargin, Bottom + 2, RightMargin + 2, ScrBuf()
                    ERASE ScrBuf               'Clean up memory
                 END IF
                 LOCATE , , 1
@@ -373,12 +373,12 @@ SUB VertMenu (Item$(), Choice, MaxLen, BoxBot, Ky$, Action, Cnf AS Config) STATI
                    LOOP
                    IF Ky = A OR K2 = A THEN
                       Choice = N
-                      IF Choice > Offset + (Bottom - Top + 1) THEN
-                         Offset = Choice - (Bottom - Top + 1)
+                      IF Choice > Offset1 + (Bottom - Top + 1) THEN
+                         Offset1 = Choice - (Bottom - Top + 1)
                          GOSUB VertDisplay
                       END IF
-                      IF Choice <= Offset THEN
-                         Offset = Choice - 1
+                      IF Choice <= Offset1 THEN
+                         Offset1 = Choice - 1
                          GOSUB VertDisplay
                       END IF
                       EXIT DO
@@ -397,8 +397,8 @@ SUB VertMenu (Item$(), Choice, MaxLen, BoxBot, Ky$, Action, Cnf AS Config) STATI
                 IF Choice > 1 THEN
                    DO
                       Choice = Choice - 1
-                      IF Row - 1 < Top THEN Offset = Offset - 1
-                   LOOP WHILE LEFT$(Item$(Choice), 1) = "Ä"
+                      IF Row - 1 < Top THEN Offset1 = Offset1 - 1
+                   LOOP WHILE LEFT$(Item$(Choice), 1) = "ï¿½"
                    GOSUB VertDisplay
                 ELSEIF More = 0 THEN
                    Choice = MaxNum
@@ -408,39 +408,39 @@ SUB VertMenu (Item$(), Choice, MaxLen, BoxBot, Ky$, Action, Cnf AS Config) STATI
                 IF Choice < MaxNum THEN
                    DO
                       Choice = Choice + 1
-                      IF Row + 1 > Bottom THEN Offset = Offset + 1
-                   LOOP WHILE LEFT$(Item$(Choice), 1) = "Ä"
+                      IF Row + 1 > Bottom THEN Offset1 = Offset1 + 1
+                   LOOP WHILE LEFT$(Item$(Choice), 1) = "ï¿½"
                    GOSUB VertDisplay
                 ELSEIF More = 0 THEN
                    Choice = 1
                 END IF
 
              CASE 73
-                IF Offset > 0 THEN
-                   IF Offset - WinSize > 0 THEN
-                      Offset = Offset - WinSize
-                   ELSE Offset = 0
+                IF Offset1 > 0 THEN
+                   IF Offset1 - WinSize > 0 THEN
+                      Offset1 = Offset1 - WinSize
+                   ELSE Offset1 = 0
                    END IF
-                   Choice = (Row - Top + 1) + Offset
+                   Choice = (Row - Top + 1) + Offset1
                    GOSUB VertDisplay
                 END IF
 
              CASE 81
-                IF Offset + 2 * WinSize < MaxNum THEN
-                   Offset = Offset + WinSize
-                ELSE Offset = MaxNum - WinSize
+                IF Offset1 + 2 * WinSize < MaxNum THEN
+                   Offset1 = Offset1 + WinSize
+                ELSE Offset1 = MaxNum - WinSize
                 END IF
-                Choice = (Row - Top + 1) + Offset
+                Choice = (Row - Top + 1) + Offset1
                 GOSUB VertDisplay
 
              CASE 71
                 Choice = 1
-                Offset = 0
+                Offset1 = 0
                 GOSUB VertDisplay
 
              CASE 79
                 Choice = MaxNum
-                Offset = MaxNum - (Bottom - Top + 1)
+                Offset1 = MaxNum - (Bottom - Top + 1)
                 GOSUB VertDisplay
 
              CASE ELSE
@@ -457,7 +457,7 @@ SUB VertMenu (Item$(), Choice, MaxLen, BoxBot, Ky$, Action, Cnf AS Config) STATI
 
 
 VertHiLite:
-    Row = Top + (Choice - Offset) - 1
+    Row = Top + (Choice - Offset1) - 1
     IF LastRow > 0 AND Row <> LastRow THEN CALL MPaintBox(LastRow, LCol, LastRow, RCol, Cnf.ActivCh)
     CALL MPaintBox(Row, LCol, Row, RCol, Cnf.HiLite)   'set inverse color
     LastRow = Row
@@ -469,7 +469,7 @@ VertHiLite:
        IF BarPtr <> OPtr THEN
           IF OPtr THEN
              LOCATE OPtr, RightMargin  'Update the Scroll Bar position
-             CALL MQPrint("²", ScrlClr)
+             CALL MQPrint("ï¿½", ScrlClr)
           END IF
           LOCATE BarPtr, RightMargin
           CALL MQPrint(CHR$(8), Cnf.MenBox)
@@ -483,13 +483,13 @@ RETURN
 
 '----- Print the choices in the window
 VertDisplay:
-    IF Choice <= Offset THEN Offset = Choice - 1
-    IF Choice > Offset + WinSize THEN
-       Offset = Choice - WinSize
+    IF Choice <= Offset1 THEN Offset1 = Choice - 1
+    IF Choice > Offset1 + WinSize THEN
+       Offset1 = Choice - WinSize
     END IF
 
     LOCATE Top, LeftMargin + 2
-    APrint VARPTR(Item$(Offset + 1)), Bottom - Top + 1, 1, MaxLen, -1, -1
+    APrint Item$(), Offset1 + 1, Bottom - Top + 1, 1, MaxLen, -1, -1
 
 RETURN
 

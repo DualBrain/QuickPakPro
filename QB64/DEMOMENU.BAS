@@ -8,6 +8,7 @@
 
 DEFINT A-Z
 
+'$INCLUDE: 'CONST.BI'
 
 '----- BASIC subprograms
 '
@@ -49,7 +50,7 @@ REDIM Stat(9, 5)                        'holds the choice status flags
 REDIM Help$(9, 5)                       'holds Help strings
 REDIM ScrTxt$(50)                       'holds the screen text
 
-MMenu$(0, 0) = "ð"                      'this was the MS Help Icon
+MMenu$(0, 0) = "ï¿½"                      'this was the MS Help Icon
 
 '******* Define Main Menu
 RESTORE MenuStrngs                      'read the menu choices into the Array
@@ -193,12 +194,12 @@ DO
                CASE 8                   'Format Disk
                CASE 9                   'DOS Shell
                   REDIM ScrBuf(2000)
-                  CALL MScrnSave(1, 1, 25, 80, ScrBuf(0))
+                  CALL MScrnSave(1, 1, 25, 80, ScrBuf())
                   CLS
                   LOCATE 25, 1
                   CALL MQPrint("Type EXIT to return to demo.", 2)
                   SHELL
-                  CALL MScrnRest(1, 1, 25, 80, ScrBuf(0))
+                  CALL MScrnRest(1, 1, 25, 80, ScrBuf())
                   ERASE ScrBuf
                CASE ELSE
             END SELECT
@@ -220,10 +221,10 @@ DO
                   Psn = LEN(MMenu$(Choice, 2))  'get length of choice
                                                 'see if its marked
                   Mark$ = MID$(MMenu$(Choice, 2), Psn, 1)
-                  IF Mark$ = "û" THEN           'if it is, then unmark it
+                  IF Mark$ = "ï¿½" THEN           'if it is, then unmark it
                      Mark$ = " "
                   ELSE
-                     Mark$ = "û"                'otherwise mark it
+                     Mark$ = "ï¿½"                'otherwise mark it
                   END IF
                   MID$(MMenu$(Choice, 2), Psn) = Mark$
                CASE 6
@@ -354,7 +355,7 @@ SUB GetColor (Cnf AS Config) STATIC
     Clrs$(8) = "White"
 
     REDIM ScrBuf(2000)
-    MScrnSave 1, 1, 20, 80, ScrBuf(0)
+    MScrnSave 1, 1, 20, 80, ScrBuf()
 
     Bkgrnd = Cnf.NonMen \ 16
     Frgrnd = Cnf.NonMen MOD 16
@@ -405,7 +406,7 @@ SUB GetColor (Cnf AS Config) STATIC
        Cnf.NonMen = Frgrnd + ABS(Intens) * 8 + 16 * Bkgrnd
     END IF
             
-    MScrnRest 1, 1, 20, 80, SEG ScrBuf(0)
+    MScrnRest 1, 1, 20, 80, ScrBuf()
     ERASE Atrib$, Clrs$, ScrBuf
 
 END SUB
@@ -421,7 +422,7 @@ SUB GetFiles (FileSpec$, FilName$, Cnf AS Config) STATIC
         Fls$(N) = SPACE$(12)
     NEXT
     Fls$(0) = FileSpec$
-    ReadFile VARPTR(Fls$(0))            'get the file names
+    ReadFile Fls$()            'get the file names
 
     VertAction = 1
     Tim! = TIMER
@@ -439,3 +440,7 @@ SUB GetFiles (FileSpec$, FilName$, Cnf AS Config) STATIC
 
 END SUB
 
+'$INCLUDE: 'MSGBOX.BAS'
+'$INCLUDE: 'PULLDOWN.BAS'
+'$INCLUDE: 'VERTMENU.BAS'
+'$INCLUDE: 'QPPRO.BAS'

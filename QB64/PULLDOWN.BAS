@@ -24,12 +24,12 @@ DECLARE FUNCTION AltKey% ()
 DECLARE FUNCTION DOSVer% ()
 DECLARE FUNCTION QPLen% (text$)
 
-'$INCLUDE: 'DefCnf.Bi'
+'$NOINCLUDE: 'DefCnf.Bi'
 
-CONST BAR_LINE = 1               'Line number for the menu bar
-
-                                'Alt Key translation table
-CONST ALT_CHARS$ = "1234567890     QWERTYUIOP    ASDFGHJKL     ZXCVBNM"
+'$NOINCLUDE: 'CONST.BI'
+' CONST BAR_LINE = 1               'Line number for the menu bar
+'                                  'Alt Key translation table
+' CONST ALT_CHARS$ = "1234567890     QWERTYUIOP    ASDFGHJKL     ZXCVBNM"
 
 ' ******************** Display the Menu Bar *****************************
 ' Note: This is separate so the Main Program can display the Menu Bar
@@ -226,7 +226,7 @@ SUB PullDown (choice$(), stat(), menu, choice, ky$, action, cnf AS Config) STATI
              IF mRow - BAR_LINE - 1 <= lastChoice AND mRow - BAR_LINE - 1 > 0 AND mCol > startCol AND mCol < enBar THEN
                 IF choice THEN ky$ = CHR$(13)
              ELSEIF mRow = BAR_LINE THEN
-                IF wdth = 0 OR active = 0 THEN
+                IF wdth = 0 OR active1 = 0 THEN
                    ky$ = CHR$(13)
                 ELSE
                    choice = 1
@@ -264,7 +264,7 @@ SUB PullDown (choice$(), stat(), menu, choice, ky$, action, cnf AS Config) STATI
              IF action THEN action = 4
              EXIT SUB
 
-          ELSEIF wdth AND active AND ky$ <> "-" THEN
+          ELSEIF wdth AND active1 AND ky$ <> "-" THEN
              ky$ = UCASE$(k$)          'Make Key Uppercase
              pass = 0                   'See if User pressed a Choice Letter
              oldChoice = choice         'Save Current Choice setting
@@ -299,7 +299,7 @@ SUB PullDown (choice$(), stat(), menu, choice, ky$, action, cnf AS Config) STATI
                                         
           SELECT CASE ASCII(RIGHT$(ky$, 1))
              CASE 72                    'Check for Up Arrow Key
-                IF wdth AND active THEN
+                IF wdth AND active1 THEN
                    DO
                       choice = choice - 1
                       IF choice < 1 THEN choice = lastChoice
@@ -307,7 +307,7 @@ SUB PullDown (choice$(), stat(), menu, choice, ky$, action, cnf AS Config) STATI
                 END IF
 
              CASE 80                    'Check for Down Arrow Key
-                IF wdth AND active THEN
+                IF wdth AND active1 THEN
                    DO
                       choice = choice + 1
                       IF choice > lastChoice THEN choice = 1
@@ -315,7 +315,7 @@ SUB PullDown (choice$(), stat(), menu, choice, ky$, action, cnf AS Config) STATI
                 END IF
 
              CASE 71                    'Check for Home Key
-                IF wdth AND active THEN
+                IF wdth AND active1 THEN
                    choice = 1
                    DO WHILE choice$(choice, menu) = "-" OR stat(choice, menu)
                       choice = choice + 1
@@ -323,7 +323,7 @@ SUB PullDown (choice$(), stat(), menu, choice, ky$, action, cnf AS Config) STATI
                 END IF
 
              CASE 79                    'Check for End Key
-                IF wdth AND active THEN
+                IF wdth AND active1 THEN
                    choice = lastChoice
                    DO WHILE choice$(choice, menu) = "-" OR stat(choice, menu)
                       choice = choice - 1
@@ -365,7 +365,7 @@ SUB PullDown (choice$(), stat(), menu, choice, ky$, action, cnf AS Config) STATI
     EXIT SUB
 
 PullHilite:
-  IF wdth AND active THEN
+  IF wdth AND active1 THEN
     IF prevChoice > 0 THEN CALL MPaintBox(prevChoice + BAR_LINE + 1, startCol + 1, prevChoice + BAR_LINE + 1, enBar, cnf.ActivCh)
     IF choice > 0 THEN CALL MPaintBox(choice + BAR_LINE + 1, startCol + 1, choice + BAR_LINE + 1, enBar, cnf.HiLite)
   END IF
@@ -392,7 +392,7 @@ PullDisplay:                                 'Restore the screen
 
   wdth = 0                            'Find the Width and # of Choices of
   arrayEnd = UBOUND(choice$, 1)       '  the new menu
-  active = 0
+  active1 = 0
 
   IF choice AND (stat(choice, menu) OR choice$(choice, menu) = "-") THEN choice = 0
   FOR c = 1 TO arrayEnd
@@ -400,7 +400,7 @@ PullDisplay:                                 'Restore the screen
     IF chLen = 0 THEN EXIT FOR
     IF chLen > wdth THEN wdth = chLen
     IF stat(c, menu) = 0 AND choice$(c, menu) <> "-" THEN
-      active = -1
+      active1 = -1
       IF choice = 0 THEN
         choice = c
         prevChoice = c

@@ -794,9 +794,6 @@ END SUB
 SUB Spread(Wks$(), Format$(), ColumnWidths%(), Wide%, Rows%, Action%)
 END SUB
 
-SUB VertMenu(Item$(), Choice%, MaxLen%, BoxBot%, Ky$, Action%, Cnf)
-END SUB
-
 SUB YesNo(YN$, PromptParam$, ScanCode%, NormalColor%, EditColor%, Row%, Column%)
 END SUB
 
@@ -1417,7 +1414,7 @@ FUNCTION FUsing$ (number$, image$)
   ' returned string will be replaced with a percent sign ( % ) . 
 
   ' It is very important that you not include any blank spaces within the 
-  ' image string. For example 11 ##.## 11 is perfectly legal, while 
+  ' image string. For example "##.##" is perfectly legal, while 
   ' "## .##" will not work as expected. 
 
   ' The table below summarizes FUsing's capabilities: 
@@ -1511,11 +1508,18 @@ FUNCTION FUsing$ (number$, image$)
         END SELECT
       LOOP
     END IF
-  ELSE
-    PRINT "not a float"
   END IF
   IF hundreds THEN
-    ' the whole number value need to have comma(s) (,) inserted at every three whole numbers.
+    index% = INSTR(value$, ".")
+    IF index% = 0 THEN index% = LEN(value$) ELSE index% = index% - 1
+    DO
+      index% = index% - 3
+      IF index% < 1 THEN EXIT DO
+      IF MID$(value$, index%, 1) <> "," THEN
+        value$ = LEFT$(value$, index%) + "," + RIGHT$(value$, LEN(value$) - index%)
+        index% = index%
+      END IF
+    LOOP
   END IF
 
   IF exponential THEN
@@ -1808,9 +1812,6 @@ END SUB
 SUB Sequence(Work$)
 END SUB
 
-FUNCTION SpellNumber$(number$)
-END SUB
-
 SUB Translate(X$)
 END SUB
 
@@ -1824,6 +1825,12 @@ END SUB
 ' ****************************************
 ' Chapter 9 - Video Routines
 ' ****************************************
+
+' APrint will quickly print any portion of a conventional (not 
+' fixed-length) string array, and contain the display within a specified 
+' area of the screen. 
+SUB APrint(array$(), first%, numEls%, firstChar%, numChars%, colr%, page%)
+END SUB
 
 ' ArraySize will quickly calculate how many elements are needed in an
 ' integer array that is intended to hold a portion of the display screen.

@@ -144,12 +144,12 @@ DisplayScreen:                          ' display screen w/any existing values
   QPrint "QuickPak Input Routine Demo", 15, -1
   PRINT
   QPrint STRING$(80, CHR$(205)), 15, -1
-  LOCATE 5, 1: QPrint "Name", 15, -1
-  LOCATE , 6:  QPrint FnExt$(nam$, 32), colr, -1
-  LOCATE 7, 1: QPrint "Addr ", 15, -1
-  LOCATE , 6:  QPrint FnExt$(address$, 32), Colr, -1
-  LOCATE 9, 1: QPrint "City ", 15, -1
-  LOCATE , 6:  QPrint FnExt$(city$, 20), colr, -1
+  LOCATE 5, 1:  QPrint "Name", 15, -1
+  LOCATE , 6:   QPrint FnExt$(nam$, 32), colr, -1
+  LOCATE 7, 1:  QPrint "Addr ", 15, -1
+  LOCATE , 6:   QPrint FnExt$(address$, 32), Colr, -1
+  LOCATE 9, 1:  QPrint "City ", 15, -1
+  LOCATE , 6:   QPrint FnExt$(city$, 20), colr, -1
   LOCATE 9, 30: QPrint "State ", 15, -1
   LOCATE , 36:  QPrint FnExt$(state$, 2), colr, -1
   LOCATE 9, 40: QPrint "Zip ", 15, -1
@@ -158,10 +158,10 @@ DisplayScreen:                          ' display screen w/any existing values
   LOCATE , 7:   QPrint FnExt$(phone$, 14), colr, -1
   LOCATE 13, 1: QPrint "SS # ", 15, -1
   LOCATE , 6:   QPrint FnExt$(ss$, 9), colr, -1
-  LOCATE 13, 44: QPrint "Amt Due ", 15, -1
-  LOCATE , 52:   QPrint FUsing$(STR$(amtDue#), "########.##"), colr, -1
-  LOCATE 15, 44: QPrint "Date Paid ", 15, -1
-  LOCATE , 54:   QPrint dtPaid$, colr, -1 'QPrint FnSlash$(dtPaid$), colr, -1
+  LOCATE 13, 44:QPrint "Amt Due ", 15, -1
+  LOCATE , 52:  QPrint FUsing$(STR$(amtDue#), "########.##"), colr, -1
+  LOCATE 15, 44:QPrint "Date Paid ", 15, -1
+  LOCATE , 54:  QPrint FnSlash$(dtPaid$), colr, -1
   LOCATE 19, 1: QPrint "Memo ", 15, -1
   LOCATE , 6:   QPrint FnExt$(memo$, 74), colr, -1
   RETURN
