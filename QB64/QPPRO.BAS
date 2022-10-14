@@ -499,12 +499,23 @@ FUNCTION DCount%(dirSpec$)
     DIM fd AS Win32_Find_Data
     DIM hFind AS _UNSIGNED _OFFSET
     DIM junk AS LONG
+    DIM ffn AS STRING
+    DIM p AS INTEGER
     pattern = dirSpec$ + CHR$(0)
     hFind = FindFirstFile(_OFFSET(pattern), _OFFSET(fd))
     IF hFind <> INVALID_HANDLE_VALUE THEN
       DO
         IF (fd.dwfileattributes AND FILE_ATTRIBUTE_DIRECTORY) = FILE_ATTRIBUTE_DIRECTORY THEN
-          result% = result% + 1
+          ffn = fd.cfilename
+          p = INSTR(ffn, CHR$(0))
+          IF p > 0 THEN ffn = LEFT$(ffn, p - 1)
+          IF ffn = "." THEN
+          ELSEIF ffn = ".." THEN
+          ELSEIF ffn = "$RECYCLE.BIN" THEN
+          ELSEIF INSTR(ffn, "System Volume Information") > 0 THEN
+          ELSE
+            result% = result% + 1
+          END IF
         END IF
       LOOP UNTIL FindNextFile(hFind, _OFFSET(fd)) = 0
       junk = FindClose(hFind)
@@ -544,8 +555,14 @@ SUB ReadDir(array$())
           ffn = fd.cfilename
           p = INSTR(ffn, CHR$(0))
           IF p > 0 THEN ffn = LEFT$(ffn, p - 1)
-          array$(index) = ffn
-          index = index + 1
+          IF ffn = "." THEN
+          ELSEIF ffn = ".." THEN
+          ELSEIF ffn = "$RECYCLE.BIN" THEN
+          ELSEIF INSTR(ffn, "System Volume Information") > 0 THEN
+          ELSE
+            array$(index) = ffn
+            index = index + 1
+          END IF
         END IF
       LOOP UNTIL FindNextFile(hFind, _OFFSET(fd)) = 0
       junk = FindClose(hFind)

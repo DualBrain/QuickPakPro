@@ -33,7 +33,7 @@ START:
 
 CLS
 srch$ = "*.*"         'used for finding all directory names
-fullInfo = 1            'use zero to suppress full file info (and run faster)
+fullInfo = 0            'use zero to suppress full file info (and run faster)
 DIM iArray(8)           'holds each file's size, date, time, and attribute
 
 PRINT "This program searches an entire disk for a specified file."
@@ -44,11 +44,11 @@ LINE INPUT spec$
 IF spec$ = "" THEN spec$ = srch$
 
 IF INSTR(spec$, "\") THEN
-   PRINT
-   PRINT "Do not specify a directory.  This program searches ALL directories"
-   PRINT "Press a key: ";
-   CALL WaitKey
-   GOTO START
+  PRINT
+  PRINT "Do not specify a directory.  This program searches ALL directories"
+  PRINT "Press a key: ";
+  CALL WaitKey
+  GOTO START
 END IF
 
 CLS
@@ -56,8 +56,8 @@ LOCATE 25, 1: PRINT "Press any key to pause, or Escape to exit";
 LOCATE 1, 1
 
 IF MID$(spec$, 2, 1) = ":" THEN                 'a drive was specified
-   drive$ = LEFT$(spec$, 1)                     'isolate the drive letter
-   spec$ = MID$(spec$, 3)                       'and the file specification
+  drive$ = LEFT$(spec$, 1)                     'isolate the drive letter
+  spec$ = MID$(spec$, 3)                       'and the file specification
 END IF
 
 original$ = GetDir$(drive$)                     'save current directory
@@ -80,7 +80,7 @@ PRINT USING "##,###,### Total Disk Space "; CLNG(bytesPerSector) * CLNG(sectorsP
 SUB CleanUp STATIC
 
     SHARED drive, drive$, original$
-
+    'NOTE: The following to lines seem backward to me...
     CHDIR original$                             'back to original directory
     IF LEN(drive$) THEN SetDrive CHR$(drive)    'and drive
 
@@ -90,7 +90,7 @@ SUB Display (t)
 
     SHARED drive, drive$, spec$, srch$, totalCount, fullInfo, iArray()
 
-    IF t > 45 THEN                              '9 levels is enough, agreed?
+    IF t > 100 THEN                              '20 levels is enough, agreed?
        PRINT "Too many levels"
        EXIT SUB
     END IF
@@ -113,7 +113,7 @@ SUB Display (t)
     END IF
     PRINT ":"; curntDir$                        'print current directory
 
-    FOR X = 0 TO fCnt - 1                       'for each file
+    FOR X = 1 TO fCnt                        'for each file
         PRINT TAB(T); fArray$(X);               'tab in T spaces and print it
 
         IF fullInfo THEN                        'if they want the big picture
@@ -160,7 +160,7 @@ SUB Display (t)
           prefix$ = CurntDir$
        END IF
 
-       FOR x = 0 TO dCnt - 1                    'for each directory,
+       FOR x = 1 TO dCnt                     'for each directory,
            CHDIR prefix$ + "\" + dArray$(X)     '  change to it
            Display t + 5                        '  and do this routine again
        NEXT
