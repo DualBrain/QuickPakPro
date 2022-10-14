@@ -230,9 +230,6 @@ END SUB
 SUB ClipFile(FileName$, NewLength&)
 END SUB
 
-FUNCTION DCount%(DirSpec$)
-END FUNCTION
-
 SUB DiskInfo(Drive$, Byte%, Sectors%, FreeClusters&, TotalClusters&)
 END SUB
 
@@ -276,9 +273,6 @@ END SUB
 
 SUB FCopy(Source$, Dest$, Buffer$, ErrCode%)
 END SUB
-
-FUNCTION FCount%(FileSpec$)
-END FUNCTION
 
 SUB FCreate(FileName$)
   ff = FREEFILE
@@ -493,13 +487,152 @@ END SUB
 SUB QBSave(FileName$, Array%(), Element%, NumBytes%)
 END SUB
 
-SUB ReadDir(Array$())
+' DCount reports the number of directories that match a particular specification. 
+FUNCTION DCount%(dirSpec$)
+  ' dirSpec$ holds a DOS directory name specification, and Count 
+  ' receives the number of matching directories.
+
+  result% = 0
+
+  IF INSTR(_OS$, "[WINDOWS]") THEN
+    DIM pattern AS STRING
+    DIM fd AS Win32_Find_Data
+    DIM hFind AS _UNSIGNED _OFFSET
+    DIM junk AS LONG
+    pattern = dirSpec$ + CHR$(0)
+    hFind = FindFirstFile(_OFFSET(pattern), _OFFSET(fd))
+    IF hFind <> INVALID_HANDLE_VALUE THEN
+      DO
+        IF (fd.dwfileattributes AND FILE_ATTRIBUTE_DIRECTORY) = FILE_ATTRIBUTE_DIRECTORY THEN
+          result% = result% + 1
+        END IF
+      LOOP UNTIL FindNextFile(hFind, _OFFSET(fd)) = 0
+      junk = FindClose(hFind)
+    ELSE
+      ERROR 52 ' Bad file name or number
+    END IF
+  ELSE
+    ERROR 73 ' Advanced Feature / Feature Unavailable
+  END IF
+
+  DCount% = result%
+
+END FUNCTION
+
+' ReadDir obtains a list of directory names from disk, and loads them 
+' into a conventional (not fixed-length) string array in one operation. 
+SUB ReadDir(array$())
+  ' array$(0) holds the search specification to indicate which directory 
+  ' names are to be loaded, and subsequent array elements receive each 
+  ' directory name. 
+
+  IF INSTR(_OS$, "[WINDOWS]") THEN
+    
+    DIM pattern AS STRING
+    DIM fd AS Win32_Find_Data
+    DIM hFind AS _UNSIGNED _OFFSET
+    DIM junk AS LONG
+    DIM ffn AS STRING
+    DIM p AS INTEGER
+
+    pattern = array$(0) + CHR$(0)
+    hFind = FindFirstFile(_OFFSET(pattern), _OFFSET(fd))
+    IF hFind <> INVALID_HANDLE_VALUE THEN
+      index = 1
+      DO
+        IF (fd.dwfileattributes AND FILE_ATTRIBUTE_DIRECTORY) = FILE_ATTRIBUTE_DIRECTORY THEN
+          ffn = fd.cfilename
+          p = INSTR(ffn, CHR$(0))
+          IF p > 0 THEN ffn = LEFT$(ffn, p - 1)
+          array$(index) = ffn
+          index = index + 1
+        END IF
+      LOOP UNTIL FindNextFile(hFind, _OFFSET(fd)) = 0
+      junk = FindClose(hFind)
+    ELSE
+      ERROR 52 ' Bad file name or number
+    END IF
+  ELSE
+    ERROR 73 ' Advanced Feature / Feature Unavailable
+  END IF
+
+END SUB
+
+' FCount will report the number of file names that match a particular specification. 
+FUNCTION FCount%(fileSpec$)
+
+  ' fileSpec$ holds a DOS file name or specification, and Count 
+  ' receives the number of matching entries. 
+
+  result% = 0
+
+  IF INSTR(_OS$, "[WINDOWS]") THEN
+    DIM pattern AS STRING
+    DIM fd AS Win32_Find_Data
+    DIM hFind AS _UNSIGNED _OFFSET
+    DIM junk AS LONG
+    pattern = fileSpec$ + CHR$(0)
+    hFind = FindFirstFile(_OFFSET(pattern), _OFFSET(fd))
+    IF hFind <> INVALID_HANDLE_VALUE THEN
+      DO
+        IF (fd.dwfileattributes AND FILE_ATTRIBUTE_DIRECTORY) = FILE_ATTRIBUTE_DIRECTORY THEN
+        ELSE 
+          result% = result% + 1
+        END IF
+      LOOP UNTIL FindNextFile(hFind, _OFFSET(fd)) = 0
+      junk = FindClose(hFind)
+    ELSE
+      ERROR 52 ' Bad file name or number
+    END IF
+  ELSE
+    ERROR 73 ' Advanced Feature / Feature Unavailable
+  END IF
+
+  FCount% = result%
+
+END FUNCTION
+
+' ReadFile obtains a list of file names from disk, and loads them into 
+' a conventional (not fixed-length) string array in one operation. 
+SUB ReadFile(array$())
+
+  ' array$(0) holds the search specification to indicate which file names
+  ' are to be loaded, and subsequent array elements receive each name.
+
+  IF INSTR(_OS$, "[WINDOWS]") THEN
+    
+    DIM pattern AS STRING
+    DIM fd AS Win32_Find_Data
+    DIM hFind AS _UNSIGNED _OFFSET
+    DIM junk AS LONG
+    DIM ffn AS STRING
+    DIM p AS INTEGER
+
+    pattern = array$(0) + CHR$(0)
+    hFind = FindFirstFile(_OFFSET(pattern), _OFFSET(fd))
+    IF hFind <> INVALID_HANDLE_VALUE THEN
+      index = 1
+      DO
+        IF (fd.dwfileattributes AND FILE_ATTRIBUTE_DIRECTORY) = FILE_ATTRIBUTE_DIRECTORY THEN
+        ELSE 
+          ffn = fd.cfilename
+          p = INSTR(ffn, CHR$(0))
+          IF p > 0 THEN ffn = LEFT$(ffn, p - 1)
+          array$(index) = ffn
+          index = index + 1
+        END IF
+      LOOP UNTIL FindNextFile(hFind, _OFFSET(fd)) = 0
+      junk = FindClose(hFind)
+    ELSE
+      ERROR 52 ' Bad file name or number
+    END IF
+  ELSE
+    ERROR 73 ' Advanced Feature / Feature Unavailable
+  END IF
+
 END SUB
 
 SUB ReadDirT(Spec$, Array())
-END SUB
-
-SUB ReadFile(Array$())
 END SUB
 
 SUB ReadFileI(Array$())

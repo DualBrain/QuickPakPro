@@ -8,7 +8,7 @@
 
 DEFINT A-Z
 
-'$INCLUDE: 'CONST.BI'
+'$INCLUDE: 'QPPRO.BI'
 
 '----- BASIC subprograms
 '
