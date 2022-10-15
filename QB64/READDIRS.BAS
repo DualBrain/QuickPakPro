@@ -5,8 +5,6 @@
 ' Copyright (c) 1987 Ethan Winer
 ' Modifications (c) 2022 Cory Smith
 
-' NOTE: WORK IN PROGRESS - NOT WORKING... YET.
-
 DEFINT A-Z
 
 DECLARE SUB CleanUp ()
@@ -32,14 +30,14 @@ CLEAR , , 2000          'recursive subprogram Display needs extra stack space
 START:
 
 CLS
-srch$ = "*.*"         'used for finding all directory names
-fullInfo = 0            'use zero to suppress full file info (and run faster)
-DIM iArray(8)           'holds each file's size, date, time, and attribute
+srch$ = "*.*"           ' used for finding all directory names
+fullInfo = 0            ' use zero to suppress full file info (and run faster)
+DIM iArray(8)           ' holds each file's size, date, time, and attribute
 
 PRINT "This program searches an entire disk for a specified file."
 PRINT "You may also use the DOS wildcards to search for a group of files."
 PRINT
-PRINT TAB(5); "Enter File Spec (ie A:*.Bas), or press Enter for *.* ";
+PRINT TAB(5); "Enter file spec (ie C:*.bas), or press Enter for *.* ";
 LINE INPUT spec$
 IF spec$ = "" THEN spec$ = srch$
 
@@ -52,7 +50,7 @@ IF INSTR(spec$, "\") THEN
 END IF
 
 CLS
-LOCATE 25, 1: PRINT "Press any key to pause, or Escape to exit";
+LOCATE 25, 1: PRINT "Press any key to pause, or ESC to exit";
 LOCATE 1, 1
 
 IF MID$(spec$, 2, 1) = ":" THEN                 'a drive was specified
@@ -66,117 +64,119 @@ IF LEN(drive$) THEN SetDrive drive$             'drive was given, change to it
 CHDIR "\"                                       'start searching in the root
 
 totalCount = 0                                  'total number of files found
-tabLevel = 5                                    'amount to tab when printing
+tabLevel = 2                                    'amount to tab when printing
 Display tabLevel                                'display all matching files
 CleanUp                                         'restore original path & drive
 
 PRINT totalCount; "File(s) Found"
+'TODO: DiskInfo is currently not implemented.
 DiskInfo drive$, bytesPerSector, sectorsPerCluster, availableClusters, totalClusters
 PRINT
 
 PRINT USING "##,###,### Bytes Free "; CLNG(bytesPerSector) * CLNG(sectorsPerCluster) * CLNG(availableClusters)
 PRINT USING "##,###,### Total Disk Space "; CLNG(bytesPerSector) * CLNG(sectorsPerCluster) * CLNG(totalClusters)
 
+PRINT GetDir$(drive$)
+PRINT GetDrive%
+
 SUB CleanUp STATIC
-
-    SHARED drive, drive$, original$
-    'NOTE: The following to lines seem backward to me...
-    CHDIR original$                             'back to original directory
-    IF LEN(drive$) THEN SetDrive CHR$(drive)    'and drive
-
+  SHARED drive, drive$, original$
+  'COMMENT: The following to lines seem backward to me...
+  CHDIR original$                             'back to original directory
+  IF LEN(drive$) THEN SetDrive CHR$(drive)    'and drive
 END SUB
 
 SUB Display (t)
 
-    SHARED drive, drive$, spec$, srch$, totalCount, fullInfo, iArray()
+  SHARED drive, drive$, spec$, srch$, totalCount, fullInfo, iArray()
 
-    IF t > 100 THEN                              '20 levels is enough, agreed?
-       PRINT "Too many levels"
-       EXIT SUB
+  IF t > 40 THEN                               ' 20 levels is enough, agreed?
+    PRINT "Too many levels"
+    EXIT SUB
+  END IF
+
+  'curntDir$ = SPACE$(64)                      ' make room for directory name
+  curntDir$ = GetDir$("")                      ' get directory, current drive
+  curntDir$ = RTRIM$(curntDir$)                ' strip trailing blanks
+
+  fCnt = FCount(spec$)                         ' count matching files
+                                               '  0 means count normal files
+  totalCount = totalCount + fCnt               ' add to the accumulator
+  DIM fArray$(0 TO fCnt)                       ' dimension array accordingly
+  fArray$(0) = spec$
+  ReadFile farray$()                           ' read the names
+                                               '  0 means read normal files
+  IF LEN(drive$) THEN                          ' print the drive being used
+    PRINT UCASE$(drive$);                      '  if appropriate
+  ELSE                                         '  else print original drive
+    PRINT CHR$(drive);
+  END IF
+  PRINT ":"; curntDir$                         ' print current directory
+
+  FOR X = 1 TO fCnt                            ' for each file
+    PRINT TAB(T); fArray$(X);                  ' tab in T spaces and print it
+
+    IF fullInfo THEN                           ' if they want the big picture
+      'TODO: FileInfo is currently not implemented.
+      FileInfo fArray$(x), iArray(0)
+      ' calculate the file size from two integer words
+      lw& = IArray(6): IF lw& < 0 THEN lw& = lw& + 65536
+      hw& = IArray(7): IF hw& < 0 THEN hw& = hw& + 65536
+      PRINT USING "#########,"; lw& + 65536 * hw&;
+      PRINT SPC(2);
+
+      PRINT Padder$(iArray(1)); "/"; Padder$(iArray(2)); "/"; Padder$(iArray(0)); SPC(2);
+      PRINT Padder$(iArray(3)); ":"; Padder$(iArray(4)); ":"; Padder$(iArray(5)); SPC(2);
+      IF iArray(8) AND 1 THEN PRINT "Read-Only ";
+      IF iArray(8) AND 2 THEN PRINT "Hidden ";
+      IF iArray(8) AND 4 THEN PRINT "System ";
+      IF iArray(8) AND 16 THEN PRINT "Subdirectory "; ' this isn't needed
+      IF iArray(8) AND 32 THEN PRINT "Archive";
+    END IF
+    PRINT
+
+    x$ = INKEY$                                ' see if they pressed a key
+    IF x$ <> "" THEN                           ' pause on any keypress, or
+      IF x$ = CHR$(27) THEN                    ' abort upon Escape, but first
+        CleanUp                                ' put everything back to normal
+        END
+      ELSE
+        WHILE INKEY$ = "": WEND                ' wait for another key
+      END IF
+    END IF
+  NEXT
+
+  PRINT : PRINT                                ' add a couple of blank lines
+  dCnt = DCount(srch$)                         ' count dirs under this one
+       
+  IF dCnt THEN                                 ' if there are any, then
+
+    DIM dArray$(0 TO dCnt)                     ' dimension array for dir names
+    dArray$(0) = srch$
+    ReadDir dArray$()
+                                               ' get all dirs under this one
+    IF curntDir$ = "\" THEN                    ' if we're in the root, use a
+      prefix$ = ""                             ' blank, otherwise use the
+    ELSE                                       ' current directory
+      prefix$ = CurntDir$
     END IF
 
-    curntDir$ = SPACE$(64)                      'make room for directory name
-    curntDir$ = GetDir$("")                     'get directory, current drive
-    curntDir$ = RTRIM$(curntDir$)               'strip trailing blanks
-
-    fCnt = FCount(spec$)                        'count matching files
-                                                '  0 means count normal files
-    totalCount = totalCount + fCnt              'add to the accumulator
-    DIM fArray$(0 TO fCnt)            'dimension array accordingly
-    fArray$(0) = spec$
-    ReadFile farray$()  'read the names
-                                                '  0 means read normal files
-    IF LEN(drive$) THEN                         'print the drive being used
-       PRINT UCASE$(drive$);                    '  if appropriate
-    ELSE                                        '  else print original drive
-       PRINT CHR$(drive);
-    END IF
-    PRINT ":"; curntDir$                        'print current directory
-
-    FOR X = 1 TO fCnt                        'for each file
-        PRINT TAB(T); fArray$(X);               'tab in T spaces and print it
-
-        IF fullInfo THEN                        'if they want the big picture
-           FileInfo fArray$(x), iArray(0)
-           'calculate the file size from two integer words
-           lw& = IArray(6): IF lw& < 0 THEN lw& = lw& + 65536
-           hw& = IArray(7): IF hw& < 0 THEN hw& = hw& + 65536
-           PRINT USING "#########,"; lw& + 65536 * hw&;
-           PRINT SPC(2);
-
-           PRINT Padder$(iArray(1)); "/"; Padder$(iArray(2)); "/"; Padder$(iArray(0)); SPC(2);
-           PRINT Padder$(iArray(3)); ":"; Padder$(iArray(4)); ":"; Padder$(iArray(5)); SPC(2);
-           IF iArray(8) AND 1 THEN PRINT "Read-Only ";
-           IF iArray(8) AND 2 THEN PRINT "Hidden ";
-           IF iArray(8) AND 4 THEN PRINT "System ";
-           IF iArray(8) AND 16 THEN PRINT "Subdirectory "; 'this isn't needed
-           IF iArray(8) AND 32 THEN PRINT "Archive";
-        END IF
-        PRINT
-
-        x$ = INKEY$                             'see if they pressed a key
-        IF x$ <> "" THEN                        'pause on any keypress, or
-           IF x$ = CHR$(27) THEN                'abort upon Escape, but first
-              CleanUp                           'put everything back to normal
-              END
-           ELSE
-              WHILE INKEY$ = "": WEND           'wait for another key
-           END IF
-        END IF
+    FOR x = 1 TO dCnt                          ' for each directory,
+      CHDIR prefix$ + "\" + dArray$(x)         ' change to it
+      Display t + 5                            ' and do this routine again
     NEXT
 
-    PRINT : PRINT                               'add a couple of blank lines
-    dCnt = DCount(srch$)                      'count dirs under this one
-       
-    IF dCnt THEN                                'if there are any, then
-
-       DIM dArray$(0 TO dCnt)          'dimension array for dir names
-       dArray$(0) = srch$
-       ReadDir dArray$()
-                                                'get all dirs under this one
-       IF curntDir$ = "\" THEN                  'if we're in the root, use a
-          prefix$ = ""                          '  blank, otherwise use the
-       ELSE                                     '  current directory
-          prefix$ = CurntDir$
-       END IF
-
-       FOR x = 1 TO dCnt                     'for each directory,
-           CHDIR prefix$ + "\" + dArray$(X)     '  change to it
-           Display t + 5                        '  and do this routine again
-       NEXT
-
-    END IF
+  END IF
 
 END SUB
 
-FUNCTION Padder$ (x)       'strip leading space, pad w/leading zero if needed
-
-   IF LEN(STR$(x)) = 2 THEN
-      Padder$ = "0" + RIGHT$(STR$(x), 1)
-   ELSE
-      Padder$ = RIGHT$(STR$(x), 2)
-   END IF
-
+' strip leading space, pad w/leading zero if needed
+FUNCTION Padder$ (x)       
+  IF LEN(STR$(x)) = 2 THEN
+    Padder$ = "0" + RIGHT$(STR$(x), 1)
+  ELSE
+    Padder$ = RIGHT$(STR$(x), 2)
+  END IF
 END FUNCTION
 
 '$INCLUDE: 'QPPRO.BAS'

@@ -511,7 +511,7 @@ FUNCTION DCount%(dirSpec$)
           IF p > 0 THEN ffn = LEFT$(ffn, p - 1)
           IF ffn = "." THEN
           ELSEIF ffn = ".." THEN
-          ELSEIF ffn = "$RECYCLE.BIN" THEN
+          ELSEIF UCASE$(ffn) = "$RECYCLE.BIN" THEN
           ELSEIF INSTR(ffn, "System Volume Information") > 0 THEN
           ELSE
             result% = result% + 1
@@ -520,7 +520,13 @@ FUNCTION DCount%(dirSpec$)
       LOOP UNTIL FindNextFile(hFind, _OFFSET(fd)) = 0
       junk = FindClose(hFind)
     ELSE
-      ERROR 52 ' Bad file name or number
+      lastError& = GetLastError
+      IF lastError& = ERROR_ACCESS_DENIED THEN
+        ERROR 70 ' Permission denied
+      ELSE
+        PRINT lastError&; dirSpec$
+        ERROR 75 ' Path/File access error
+      END IF
     END IF
   ELSE
     ERROR 73 ' Advanced Feature / Feature Unavailable
@@ -557,7 +563,7 @@ SUB ReadDir(array$())
           IF p > 0 THEN ffn = LEFT$(ffn, p - 1)
           IF ffn = "." THEN
           ELSEIF ffn = ".." THEN
-          ELSEIF ffn = "$RECYCLE.BIN" THEN
+          ELSEIF UCASE$(ffn) = "$RECYCLE.BIN" THEN
           ELSEIF INSTR(ffn, "System Volume Information") > 0 THEN
           ELSE
             array$(index) = ffn
@@ -567,7 +573,13 @@ SUB ReadDir(array$())
       LOOP UNTIL FindNextFile(hFind, _OFFSET(fd)) = 0
       junk = FindClose(hFind)
     ELSE
-      ERROR 52 ' Bad file name or number
+      lastError& = GetLastError
+      IF lastError& = ERROR_ACCESS_DENIED THEN
+        ERROR 70 ' Permission denied
+      ELSE
+        PRINT lastError&; dirSpec$
+        ERROR 75 ' Path/File access error
+      END IF
     END IF
   ELSE
     ERROR 73 ' Advanced Feature / Feature Unavailable
@@ -599,7 +611,15 @@ FUNCTION FCount%(fileSpec$)
       LOOP UNTIL FindNextFile(hFind, _OFFSET(fd)) = 0
       junk = FindClose(hFind)
     ELSE
-      ERROR 52 ' Bad file name or number
+      lastError& = GetLastError
+      IF lastError& = ERROR_FILE_NOT_FOUND THEN
+        ' no files available, result remains 0
+      ELSEIF lastError& = ERROR_ACCESS_DENIED THEN
+        ERROR 70 ' Permission denied
+      ELSE
+        PRINT lastError&
+        ERROR 75 ' Path/File access error
+      END IF
     END IF
   ELSE
     ERROR 73 ' Advanced Feature / Feature Unavailable
@@ -641,7 +661,15 @@ SUB ReadFile(array$())
       LOOP UNTIL FindNextFile(hFind, _OFFSET(fd)) = 0
       junk = FindClose(hFind)
     ELSE
-      ERROR 52 ' Bad file name or number
+      lastError& = GetLastError
+      IF lastError& = ERROR_FILE_NOT_FOUND THEN
+        ' no files available, result remains 0
+      ELSEIF lastError& = ERROR_ACCESS_DENIED THEN
+        ERROR 70 ' Permission denied
+      ELSE
+        PRINT lastError&
+        ERROR 75 ' Path/File access error
+      END IF
     END IF
   ELSE
     ERROR 73 ' Advanced Feature / Feature Unavailable
@@ -682,7 +710,16 @@ END SUB
 SUB SetCmd(NewCommand$)
 END SUB
 
-SUB SetDrive(Drive$)
+' SetDrive allows changing the current default drive. 
+SUB SetDrive(drive$)
+  ' drive$ is either an upper or lower case letter of the drive to be 
+  ' made the current default. 
+  d$ = UCASE$(LEFT$(drive$, 1))
+  IF ASC(d$) >= 65 AND ASC(d$) <= 90 THEN
+    CHDIR d$ + ":"
+  ELSE
+    ERROR 5 ' Illegal Function Call
+  END IF
 END SUB
 
 SUB SetError(ErrNum%)

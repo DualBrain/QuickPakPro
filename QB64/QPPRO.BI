@@ -13,6 +13,11 @@ CONST FILE_ATTRIBUTE_NORMAL = &H80
 CONST FILE_ATTRIBUTE_COMPRESSED = &H800
 CONST FILE_ATTRIBUTE_ENCRYPTED = &H4000
 
+' https://learn.microsoft.com/en-us/windows/win32/debug/system-error-codes--0-499-
+CONST ERROR_FILE_NOT_FOUND = &H2
+CONST ERROR_PATH_NOT_FOUND = &H3
+CONST ERROR_ACCESS_DENIED = &H5
+
 TYPE FileTime
   dwlowdatetime AS _UNSIGNED LONG
   dwhighdatetime AS _UNSIGNED LONG
@@ -35,4 +40,5 @@ DECLARE DYNAMIC LIBRARY "kernel32"
   FUNCTION FindFirstFile~%& ALIAS FindFirstFileA (BYVAL lpfilename AS _OFFSET, BYVAL lpfindfiledata AS _OFFSET)
   FUNCTION FindNextFile& ALIAS FindNextFileA (BYVAL hfind AS _UNSIGNED _OFFSET, BYVAL lpfindfiledata AS _OFFSET)
   FUNCTION FindClose& (BYVAL hfind AS _UNSIGNED _OFFSET)
+  FUNCTION GetLastError& ()
 END DECLARE
