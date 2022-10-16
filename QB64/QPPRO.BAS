@@ -18,51 +18,67 @@ END TYPE
 
 SUB AddInt(Array%(), Start%, Value%, NumEls%)
   ' See ADDINT.ASM
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB DeleteStr(Array$(), Element%, NumEls%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB DeleteT(Array(), Element%, ElSize%, NumEls%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB DimBits(Array$, NumEls%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB Fill2(Array%(), Start%, Value%, NumEls%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB Fill4(Array!(), Start%, Value!, NumEls%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB Fill8(Array#(), Start%, Value#, NumEls%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB Find(Array$, Start%, NumEls%, SearchValue$)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB Find2(Array$, Start%, NumEls%, SearchValue$)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB FindB(Array$(), CurEl%, SearchValue$)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB FindB2(Array$(), CurEl%, SearchValue$)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB FindExact(Array$(), Start%, NumEls%, SearchValue$)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB FindT(Array$(), Start%, ElSize%, NumEls%, SearchValue$)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB FindT2(Array$(), Start%, ElSize%, NumEls%, SearchValue$)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB FindTB(Array$(), Start%, ElSize%, CurEl%, SearchValue$)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB FindTB2(Array$(), Start%, ElSize%, CurEl%, SearchValue$)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 ' FindLast scans a conventional (not fixed-length) string array 
@@ -79,144 +95,200 @@ FUNCTION FindLast% (Array$(), Size%)
 END FUNCTION
 
 FUNCTION GetBit%(Array$, Element%)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION IMaxD%(Array#(), Start%, NumEls%)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION IMaxI%(Array%(), Start%, NumEls%)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION IMaxL%(Array&(), Start%, NumEls%)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION IMaxS%(Array!(), Start%, NumEls%)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION IMaxC%(Array(), Start%, NumEls%)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION IMinD%(Array#(), Start%, NumEls%)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION IMinI%(Array%(), Start%, NumEls%)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION IMinL%(Array&(), Start%, NumEls%)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION IMinS%(Array!(), Start%, NumEls%)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION IMinC%(Array(), Start%, NumEls%)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 SUB InitInt(Array%(), Start%, Value%, NumEls%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB InsertStr(Array$(), Element%, Ins$, NumEls%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB InsertT(Array(), Element%, ElSize%, NumEls%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB ISortD(Array#(), Start%, Ndx%(), NumEls%, Dir%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB ISortI(Array%(), Start%, Ndx%(), NumEls%, Dir%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB ISortL(Array&(), Start%, Ndx%(), NumEls%, Dir%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB ISortS(Array!(), Start%, Ndx%(), NumEls%, Dir%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB ISortC(Array(), Start%, Ndx%(), NumEls%, Dir%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB ISortStr(Array$(), Start%, Ndx%(), NumEls%, Dir%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB ISortStr2(Array$(), Start%, Ndx%(), NumEls%, Dir%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB ISortStrT(Array$(), Start%, Ndx%(), NumEls%, Dir%, ElSize%, MemberOffset%, MemberSize%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB ISortStrT2(Array(), Start%, Ndx%(), NumEls%, Dir%, ElSize%, MemberOffset%, MemberSize%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB KeySort(Array(), Start%, ElSize%, NumEls%, Table%(,), NumKey%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 FUNCTION MaxD#(Array#(), Start%, NumEls%)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION MaxI&(Array%(), Start%, NumEls%)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION MaxL&(Array&(), Start%, NumEls%)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION MaxS!(Array!(), Start%, NumEls%)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION MaxC(Array(), Start%, NumEls%)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION MinD#(Array#(), Start%, NumEls%)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION MinI&(Array%(), Start%, NumEls%)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION MinL&(Array&(), Start%, NumEls%)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION MinS!(Array!(), Start%, NumEls%)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION MinC(Array(), Start%, NumEls%)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 SUB Search(Array(), Start%, NumEls%, Match, Found%, Direction%, MatchCode%, VarType%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB SearchT(Array(), Start%, NumEls%, Match, Found%, Dir%, Code%, StructSize%, MemberOf%, MemberSize%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB SearchT2(Array(), Start%, NumEls%, Match, Found%, Dir%, Code%, StructSize%, MemberOf%, MemberSize%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB SetBit(Array$, Element%, Bit%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB SortD(Array#(), Start%, NumEls%, Dir%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB SortI(Array%(), Start%, NumEls%, Dir%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB SortL(Array&(), Start%, NumEls%, Dir%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB SortS(Array!(), Start%, NumEls%, Dir%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB SortC(Array(), Start%, NumEls%, Dir%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
-SUB SortStr(Array$(), Start%, NumEls%, Dir%)
+' SortStr will sort (case-sensitive) all or just a portion of a conventional (not 
+' fixed-length) string array into either ascending or descending order. 
+SUB SortStr(array$(), start%, numEls%, dir%)
+  ' start% is the first element to be included in the sort, 
+  ' numEls% is the number of elements to consider, and dir% 
+  ' indicates the sort direction. If dir% is set to zero, then the sorting 
+  ' will be forward (ascending). Any other value will cause sorting to 
+  ' be performed backward (descending). 
+  ERROR 73 ' Feature Unavailable
 END SUB
 
-SUB SortStr2(Array$(), Start%, NumEls%, Dir%)
+' SortStr2 will sort (case-insensitive) all or just a portion of a conventional (not 
+' fixed-length) string array into either ascending or descending order. 
+SUB SortStr2(array$(), start%, numEls%, dir%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB SortStrT(Array$, Start%, NumEls%, Dir%, MemberOffset%, MemberSize%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB SortStrT2(Array$, Start%, NumEls%, Dir%, MemberOffset%, MemberSize%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 ' ****************************************
@@ -228,15 +300,19 @@ SUB CDir(NewDir$)
 END SUB
 
 SUB ClipFile(FileName$, NewLength&)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB DiskInfo(Drive$, Byte%, Sectors%, FreeClusters&, TotalClusters&)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 FUNCTION DiskRoom&(Drive$)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION DiskSize&(Drive$)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION DosError%
@@ -249,9 +325,11 @@ FUNCTION DOSVer%
 END FUNCTION
 
 FUNCTION ErrorMsg$(ErrorNumber%)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION ExeName$
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION Exist%(FileName$)
@@ -259,12 +337,15 @@ FUNCTION Exist%(FileName$)
 END FUNCTION
 
 FUNCTION FastLoadInt%(FileName$)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 SUB FastLoadStr(Array$())
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB FastSave(FileName$, Text$())
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB FClose(Handle%)
@@ -272,6 +353,7 @@ SUB FClose(Handle%)
 END SUB
 
 SUB FCopy(Source$, Dest$, Buffer$, ErrCode%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB FCreate(FileName$)
@@ -285,48 +367,63 @@ FUNCTION FEof%(Handle%)
 END FUNCTION
 
 SUB FFlush(Handle%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB FGet(Handle%, Destination$)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB FGetA(Handle%, Array(), Element%, NumBytes%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB FGetFH(FileName$, Array(), Start%, ElSize%, NumEls%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB FGetR(Handle%, Destination$, RecNumber&)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB FGetRT(Handle%, Destination, RecNumber&, RecSize%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB FGetRTA(Handle%, Destination, RecNumber&, RecSize%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB FGetT(Handle%, Destination, NumBytes%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 FUNCTION FileComp%(File1$, File2$, ErrCode%)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 SUB FileCopy(Source$, Dest$, Copied%, ErrCode%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB FileCrypt(FileName$, PassWord$)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB FileInfo(FileName$, TypeVar)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 FUNCTION FileSize&(FileName$)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 SUB FileSort(DataFile$, IndexFile$, First&, Last&, Table%(), RecLength%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 FUNCTION FLInput$(Handle%, Buffer$)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION FLoc&(Handle%)
@@ -338,48 +435,63 @@ FUNCTION FLof&(Handle%)
 END FUNCTION
 
 SUB FOpen(FileName$, Handle%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB FOpenS(FileName$, Handle%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB FOpenAll(FileName$, AccessMode%, ShareMode%, Handle%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 FUNCTION FormatDiskette%(DriveNumber%, Capacity%, BufArray%)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 SUB FPut(Handle%, Source$)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB FPutA(Handle%, Array(), Start%, NumBytes%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB FPutAH(Handle%, Array(), ElSize%, NumEls%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB FPutR(Handle%, Source$, RecNumber&)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB FPutRT(Handle%, Source, RecNumber&, RecSize%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB FPutRTA(Handle%, Source, RecNumber&, RecSize%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB FPutT(Handle%, Source, NumBytes%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB FSeek(Handle%, Location&)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB FStamp(FileName$, NewTime$, NewDate$)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 FUNCTION FullName$(PartName$)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION GetAttr%(FileName$)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 ' GetDir will return the current directory for either a specified drive 
@@ -404,6 +516,7 @@ FUNCTION GetDir$(drive$)
 END FUNCTION
 
 FUNCTION GetDisketteType%(DriveNumber%)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 ' GetDrive returns the current default disk drive. 
@@ -432,12 +545,15 @@ FUNCTION GetDrive%
 END FUNCTION
 
 FUNCTION GetVol$(Drive$)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION GoodDrive%(Drive$)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 SUB Handle2Name(Handle%, FilName)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB KillDir(DirName$)
@@ -449,15 +565,19 @@ SUB KillFile(FileName$)
 END SUB
 
 FUNCTION LastDrive%
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION LineCount%(FileName$, Buffer$)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION LoadExec%(Program$, CmdLine$)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 SUB LockFile(Handle%, Offset&, Length&)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB MakeDir(DirName$)
@@ -473,9 +593,11 @@ SUB NameFile(OldName$, NewName$)
 END SUB
 
 FUNCTION NetDrive%(Drive$)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 SUB PutVol(Drive$, Label$)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB QBLoad(FileName$, Array%(), Element%)
@@ -485,6 +607,7 @@ SUB QBLoad(FileName$, Array%(), Element%)
 END SUB
 
 SUB QBSave(FileName$, Array%(), Element%, NumBytes%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 ' DCount reports the number of directories that match a particular specification. 
@@ -678,36 +801,47 @@ SUB ReadFile(array$())
 END SUB
 
 SUB ReadDirT(Spec$, Array())
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB ReadFileI(Array$())
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB ReadFileT(Spec$, Array())
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB ReadFileX(Spec$, DirSize&, Array())
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB ReadSect(Drive$, Info$, Sector%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 FUNCTION ReadTest%(Drive$)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION Removable%(Drive$)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION ScanFile&(FileName$, Text$, Start&)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION SearchPath$(FileName$)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 SUB SetAttr(FileName$, Attribute%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB SetCmd(NewCommand$)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 ' SetDrive allows changing the current default drive. 
@@ -723,36 +857,47 @@ SUB SetDrive(drive$)
 END SUB
 
 SUB SetError(ErrNum%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB SetLevel(ErrValue%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 FUNCTION ShareThere%
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 SUB SplitName(WorkName$, Drive$, Path$, FileName$, Extension$)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 FUNCTION Unique$(Path$)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 SUB UnLockFile(Handle%, Offset&, Length&)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 FUNCTION Valid%(FileName$)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION WhichError%
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 SUB WriteSect(Drive$, Info$, Sector%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB WriteSect2(Drive$, Info$, Sector%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 FUNCTION WriteTest%(Drive$)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 ' ****************************************
@@ -760,156 +905,207 @@ END FUNCTION
 ' ****************************************
 
 FUNCTION Bit2Num%(Binary$)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION C2F!(CTemp!)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION Delimit%(Work$, Table$)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION Eval#(Number$)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION ExpandTab$(Original$, NumSpaces%)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION F2C!(FTemp!)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION LastFirst$(OldName$)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION LastLast$(OldName$)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION Num2Bin$(Number%)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION Num2Bin2(Number%)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION Pad$(Number!, Digits%)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 SUB Parse(Work$, Delim$, Array$())
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 FUNCTION ParseStr$(List$)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION QPHex$(Value, NumDigits%)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION Rand!(ValLower!, ValUpper!)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION ShrinkTab$(Original$, NumSpaces%)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION Signed%(US&)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION UnParseStr$(Code$)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION UnSigned&(S%)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION QPACOS#(X#)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION QPASIN#(X#)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION QPATAN2#(X#, Y#)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION QPLOG10#(X#)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION QPROUND$(Number#, Places%)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION QPFV#(pmt#, intr#, term%)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION QPFVN#(fv#, pmt#, intr#)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION QPFVP#(fv#, intr#, term%)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION QPFVD#(pmt#, intr#, term%)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION QPFVND#(fv#, pmt#, intr#)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION QPFVPD#(fv#, intr#, term#)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION QPPMT#(pv#, intr#, term%, bal#)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION QPPV#(pmt#, intr#, term%, bal#)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION QPPVN#(pmt#, intr#, pv#, bal#)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION QPPMTD#(pv#, intr#, term%, bal#)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION QPPVD#(pmt#, intr#, term%, bal#)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION QPPVND#(pmt#, intr#, pv#, bal#)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION QPCINT#(pv#, intr#, term%)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION QPCTERM#(pv#, fv#, intr#)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION QPIRR#(intr#, Array#())
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION QPNPV#(intr#, Array#())
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION QPRATE#(pv#, fv#, term%)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION QPDDB#(cost#, sal#, life%, per%, m!)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION QPSLN#(cost#, sal#, life%)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION QPSYD#(cost#, sal#, life%, per%)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION QPAVG#(Array#())
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION QPCOUNT%(Array#())
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION QPMAX#(Array#())
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION QPMIN#(Array#())
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION QPSUM#(Array#())
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION QPVAR#(Array#()) 
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION QPSTD#(Array#())
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 ' ****************************************
@@ -917,33 +1113,43 @@ END FUNCTION
 ' ****************************************
 
 SUB AMenu(Array$(), Start%, StartItem%, Count%, ScanCode%, NormColor%, HiLiteColor%, NumRows%, NumCols%, Gap%, ULRow%, ULCol%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB AMenuT(Array(), Start%, StartItem%, Length%, Count%, ScanCode%, NormColor%, HiLiteColor%, NumRows%, NumCols%, Gap%, ULRow%, ULCol%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB ASCIIPick(Char%, Color1%, Color2%, ExitCode%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB MASCIIPick(Char%, Color1%, Color2%, ExitCode%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB ColorPick(Colr%, BoxColor%, ExitCode%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB MColorPick(Colr%, BoxColor%, ExitCode%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB DirFile(Array$(), Count%, ScanCode%, MsgColor%, FileColor%, HiLiteColor%, BoxColor%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB Editor(Ed$, ActiveLength%, ScanCode%, NumOnly%, IsCapsOn%, NormalColor%, EditColor%, Row%, Column%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB Lts2Menu(Item$(), PromptParam$(), Choice%, Colr%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB LtsMenu(Item$(), Choice%, Colr%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 ' MAMenu is a full-featured multi-column menu routine, which 
@@ -952,36 +1158,47 @@ END SUB
 ' described elsewhere.
 'SUB MAMenu (Address%, Selection%, Start%, Count%, ExitCode%, FileColr%, HiLiteColr%, Rows%, Columns%, Spacing%, Row%, Column%)
 SUB MAMenu(Array$(), Selection%, Start%, Count%, ScanCode%, NormalColor%, Hilight%, NumRows%, NumCols%, Gap%, Row%, Column%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB MAMenuT(Array$(), Selection%, Start%, Length%, Count%, ScanCode%, NormalColor%, Hilight%, NumRows%, NumCols%, Gap%, Row%, Column%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB MaskIn(Mask$, Text$, Mski)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB MEditor(Ed$, ActiveLength%, ScanCode%, NumOnly%, IsCapsOn%, NormalColor%, EditColor%, Row%, Column%, CurrentColumn%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB MenuVert(Array$(), NumLines%, ScanCode%, Choice%, NormalColr%, HiLiteColor%, Row%, Column%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 FUNCTION MGetKey%(Row%, Col%)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 SUB MMenuVert(Array$(), Selection%, Start%, ScanCode%, NormalColr%, Hilight%, NumRows%, Row%, Column%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB PickList(Item$(), Picked%(), NPicked%, Cnf)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB QEdit(Array$(), Ky$, Action%, Ed)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB Spread(Wks$(), Format$(), ColumnWidths%(), Wide%, Rows%, Action%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB YesNo(YN$, PromptParam$, ScanCode%, NormalColor%, EditColor%, Row%, Column%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 ' ****************************************
@@ -1059,18 +1276,23 @@ SUB ButtonPress (button%, status%, count%, x%, y%)
 END SUB
 
 FUNCTION CapsLock
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 SUB CapsOff
+  ERROR 73 ' Feature Unavailable
 ENd SUB
 
 SUB CapsOn
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB ClearBuf
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 FUNCTION CtrlKey%
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 ' GetCursor reports the current location of the mouse cursor, and 
@@ -1107,6 +1329,7 @@ SUB GetCursor (x%, y%, button%) STATIC
 END SUB
 
 SUB GetCursorT(Col%, Row%, Button%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 ' GrafCursor greatly simplifies defining the shape of the mouse 
@@ -1131,60 +1354,78 @@ SUB InitMouse(there%)
 END SUB
 
 FUNCTION InStat%
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 SUB Keyboard(Row%, Column%, Color1%, Color2%, Mode%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 FUNCTION KeyDown%
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 SUB Motion(Value%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB Mouse(AX%, BX%, CX%, DX%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 ' MouseRange will return a range number that tells where the mouse 
 ' cursor is located, based on an array of screen coordinates. 
 SUB MouseRange(array() AS Area, numEls%, row%, col%, button%, rangeNum%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 FUNCTION MBuffSize%
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 SUB MGetState(Buffer$)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB MSetState(Buffer$)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 ' MouseTrap will establish the allowable range of movement for the mouse cursor. 
 SUB MouseTrap(ulRow%, ulCol%, lrRow%, lrCol%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 FUNCTION NumLock%
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 SUB NumOff
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB NumOn
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 FUNCTION PeekBuf%
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 SUB RptKey(Char%, Count%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 FUNCTION ScrlLock%
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 SUB SetCursor(X%, Y%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 FUNCTION ShiftKey%
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 SUB ShowCursor
@@ -1192,9 +1433,11 @@ SUB ShowCursor
 END SUB
 
 SUB StuffBuf(X$)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB TextCursor(FG%, BG%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 ' FUNCTION WaitKey%
@@ -1211,6 +1454,7 @@ SUB WaitKey
 END SUB
 
 FUNCTION WaitScan%
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 ' WaitUp halts a program's execution until no mouse buttons are being depressed. 
@@ -1226,15 +1470,19 @@ END SUB
 
 FUNCTION AddUSI%(X%, Y%)
   ' See ADDUSI.ASM
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 SUB BCopy(FromSeg%, FromAddr%, ToSeg%, ToAddr%, NumBytes%, Direction%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB BCopyT(FromEl, ToEl, ElSize%, NumEls%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB BLPrint(LPTNumber%, X$, ErrorCount%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 ' Chime provides five different types of beep tones, and five short 
@@ -1278,48 +1526,63 @@ SUB Chime(number%)
 END SUB
 
 SUB Clock(Row%, Column%, Colr%, Mode%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB Clock24(Row%, Column%, Colr%, Mode%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 FUNCTION Compare%(Seg1%, Adr1%, Seg2%, Adr2%, NumBytes%)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION CompareT%(Type1, Type2, NumBytes%)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION Date2Day%(D$)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION Date2Num%(D$)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION DayName$(Day%)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 SUB DirTree(Tree$(), FullPath$(), Levels%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 FUNCTION EDate2Num%(Dat$)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 SUB Empty(dummy%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 FUNCTION ENum2Date%(Days%)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION Evaluate#(Expression$)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 SUB Extended
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 FUNCTION Factorial#(Number%)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 SUB FileView(FileName$, Ky%, Action%, FVInfo, Buffer%())
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 FUNCTION FudgeFactor&
@@ -1328,12 +1591,15 @@ FUNCTION FudgeFactor&
 END FUNCTION
 
 FUNCTION GetCPU%
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION GetDS%
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 SUB GetEquip(Floppies%, Parallels%, Serials%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB LockUp
@@ -1341,6 +1607,7 @@ SUB LockUp
 END SUB
 
 FUNCTION MathChip%
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 ' MaxInt compares two integer variables, and returns the value of the 
@@ -1382,18 +1649,23 @@ FUNCTION MinLong& (Num1&, Num2&)
 END FUNCTION
 
 FUNCTION MonthName$(Month%)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 SUB MsgBox(Message$, Wide%, Cfn)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 FUNCTION Num2Date$(Day%)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION Num2Day%(D%)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION Num2Time$(Time&)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 ' Pause will pause a program's execution for a specified period of 
@@ -1439,18 +1711,23 @@ FUNCTION Peek1%(segment%, address%)
           ' &H40 Capslock Active
           ' &H20 Numlock Active
         CASE ELSE
+          ERROR 73 ' Feature Unavailable
       END SELECT
     CASE ELSE
+      ERROR 73 ' Feature Unavailable
   END SELECT
 END FUNCTION
 
 FUNCTION Peek2%(Segment%, Address%)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 SUB Poke1(Segment%, Address%, Byte%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB Poke2(Segment%, Address%, Word%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 FUNCTION Power(Y, N)
@@ -1462,18 +1739,23 @@ FUNCTION Power2(N)
 END FUNCTION
 
 FUNCTION PRNReady%(LPTNumber%)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 SUB PSwap
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB QPCli
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB QPSti
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB QPPlay(Tune$)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 ' QPSound is nearly identical to BASIC's SOUND statement, but provides
@@ -1490,69 +1772,91 @@ SUB QPSound(frequency%, duration%)
 END SUB
 
 FUNCTION QPSegAdr&(Any$)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION QPSSeg%(Any$)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION QPUSI%(LongInt&)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 SUB Reboot
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB ShiftIL(IntVar%, NumBits%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB ShiftIR(IntVar%, NumBits%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB ShiftLL(IntVar&, NumBits%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB ShiftLR(IntVar&, NumBits%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 FUNCTION Soundex$(Word$)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 SUB SysTime(T$)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 FUNCTION Time2Num&(T$)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION Times2%(Number%)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION TrapInt%(Value%, LoLimit%, HiLimit%)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 SUB ViewFile(FileName$, Wide%, High%, Colr%, HiBit%, Action%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB VLAdd(Value1#, Value2#, Sum#, ErrFlag%)
+  ERROR 73 ' Feature Unavailable
 ENd SUB
 
 SUB VLDiv(Dividend#, Divisor#, Quotient#, Remainder#, ErrFlag%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB VLMul(Value1#, Value2#, Product#, ErrFlag%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB VLPack(Number$, Value#, ErrFlag%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB VLSub(Value1#, Value2#, Difference#, ErrFlag%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB VLUnpack(Alias#, Number$, ErrFlag%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 FUNCTION WeekDay%(D$)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 SUB WordWrap(Message$, Wide%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 ' ****************************************
@@ -1568,18 +1872,23 @@ FUNCTION ASCII% (Char$)
 END SUB
 
 FUNCTION Blanks%(Work$)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION Compact$(Old$)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 SUB Encrypt(X$, PassWord$)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB Encrypt2(X$, PassWord$)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 FUNCTION Far2Str$(Segment%, Address%)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 ' FUsing accepts an incoming number and image string, and returns 
@@ -1741,6 +2050,7 @@ END FUNCTION
 ' any number of "?" wild cards. 
 FUNCTION InCount%(Source$, SearchValue$)
   ' TODO: Need to leverage QInstr%
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 ' InCount2 will quickly report how many times one string occurs 
@@ -1748,27 +2058,35 @@ END FUNCTION
 ' any number of "?" wild cards. 
 FUNCTION InCount2%(Source$, SearchValue$)
   ' TODO: Need to leverage QInstr%
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION InCountTbl%(Source$, Table$)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION InstrTbl%(Start%, Source$, Table$)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION InstrTbl2%(Start%, Source$, Table$)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION InstrTblB%(Start%, Source$, Table$)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION InstrTblB2%(Start%, Source$, Table$)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION LongestStr%(Array$())
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 SUB LowASCII(X$)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB Lower(value$)
@@ -1776,24 +2094,31 @@ SUB Lower(value$)
 END SUB
 
 SUB LowerTbl(Work$, Table$)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 FUNCTION MidChar%(Work$, Position%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB MidCharS(Work$, Postion%, Char%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 FUNCTION NotInstr%(Start%, Searched$, Table$)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION Null%(Work$)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION ParseString$(CurPos%, Work$, DelimitValue$)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 SUB ProperName(Work$)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 ' QInstr serves the same purpose as BASIC's INSTR function, 
@@ -1850,12 +2175,15 @@ FUNCTION QInstr2%(startPosition%, sourceValue$, searchValue$)
 END FUNCTION
 
 FUNCTION QInstrB%(StartPos%, Source$, SearchValue$)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION QInstrB2%(StartPos%, Source$, SearchValue$)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 SUB QInstrH(Segment%, Address%, SearchValue$, NumBytes&)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 FUNCTION QPLeft$(text$, numChars%)
@@ -1880,12 +2208,15 @@ FUNCTION QPLen%(text$)
 END FUNCTION
 
 FUNCTION QPSadd%(Work$)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION QPStrI$(IntVar%)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION QPStrL$(LongInt&)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION QPTrim$(inputValue$)
@@ -1925,9 +2256,11 @@ FUNCTION QPValI% (X$)
 END FUNCTION
 
 FUNCTION QPValL&(Work$)
+  ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 SUB RemCtrl(X$, Replace$)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 ' ReplaceChar replaces all occurrences of a specified character in a 
@@ -1985,12 +2318,15 @@ Again:
 END SUB
 
 SUB ReplaceTbl(Work$, Table$)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB Sequence(Work$)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB Translate(X$)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB Upper(value$)
@@ -1998,6 +2334,7 @@ SUB Upper(value$)
 END SUB
 
 SUB UpperTbl(Work$, Table$)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 ' ****************************************
