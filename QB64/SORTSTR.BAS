@@ -15,9 +15,9 @@ DECLARE FUNCTION FileSize& (fileName$)
 CLS
 
 LOCATE , , 1
-PRINT "File to load and sort: ";                'ask for a file to sort
+PRINT "File to load and sort: ";                ' ask for a file to sort
 LINE INPUT fileName$
-IF FileSize&(fileName$) > 32768 THEN '(FRE("") - 2000) THEN
+IF FileSize&(fileName$) > 32768 THEN            ' modified from (FRE("") - 2000) to 32768
   PRINT "Not enough memory to load this file"
   END
 END IF
@@ -48,10 +48,10 @@ ELSE
   c = 0
 END IF
 
-lines = LineCount%(fileName$, SPACE$(4096))     'count the number of lines
-DIM a$(lines)                                   'make an array to hold it
+lines = LineCount%(fileName$, SPACE$(4096))     ' count the number of lines
+DIM a$(lines)                                   ' make an array to hold it
 
-OPEN fileName$ FOR INPUT AS #1                  'read the file into an array
+OPEN fileName$ FOR INPUT AS #1                  ' read the file into an array
 lines = 0
 WHILE NOT EOF(1)
   lines = lines + 1
@@ -59,7 +59,7 @@ WHILE NOT EOF(1)
 WEND
 CLOSE
 
-start = 1                       'specify sorting the whole array
+start = 1                                       ' specify sorting the whole array
 size = lines
 PLAY "L32O3AF"
 
@@ -67,14 +67,14 @@ CLS
 
 PRINT "Press any key to begin sorting ";
 
-WHILE INKEY$ = "": WEND                 'pause for keypress
+WHILE INKEY$ = "": WEND                         ' pause for keypress
 PRINT "sorting..."
-x! = TIMER                              'so we can time the sort
+x! = TIMER                                      ' so we can time the sort
 
 IF c THEN
-  SortStr a$(), start, size, dir         'sort ascending
+  SortStr a$(), start, size, dir                ' sort ascending
 ELSE
-  SortStr2 a$(), start, size, dir        'sort descending
+  SortStr2 a$(), start, size, dir               ' sort descending
 END IF
 
 CLS
@@ -90,9 +90,9 @@ PRINT "Press any key to pause";
 LOCATE 3, 1
 
 FOR x = 1 TO size
-  PRINT LEFT$(a$(x), 79)          'in case the lines are very long
+  PRINT LEFT$(a$(x), 79)         ' in case the lines are very long
   IF INKEY$ <> "" THEN
-    WHILE INKEY$ = "": WEND      'pause on keypress
+    WHILE INKEY$ = "": WEND      ' pause on keypress
   END IF
 NEXT
 
