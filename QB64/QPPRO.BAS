@@ -268,19 +268,109 @@ END SUB
 
 ' SortStr will sort (case-sensitive) all or just a portion of a conventional (not 
 ' fixed-length) string array into either ascending or descending order. 
-SUB SortStr(array$(), start%, numEls%, dir%)
+SUB SortStr(array$(), startElement%, numOfElements%, dir%)
   ' start% is the first element to be included in the sort, 
   ' numEls% is the number of elements to consider, and dir% 
   ' indicates the sort direction. If dir% is set to zero, then the sorting 
   ' will be forward (ascending). Any other value will cause sorting to 
   ' be performed backward (descending). 
-  ERROR 73 ' Feature Unavailable
+
+  REDIM qStack(500)    ' create stack
+
+  s = 1                ' initialize work variables
+  f = startElement
+  max = startElement + numOfElements - 1
+  l = max
+
+L1:
+  temp$ = array$((l + f) \ 2)         ' seek midpoint
+  i = f
+  j = l
+
+L2:
+  IF dir% = 0 THEN
+    WHILE array$(i) < temp$: i = i + 1: WEND ' use > for descending
+    WHILE array$(j) > temp$: j = j - 1: WEND ' use < for descending
+  ELSE
+    WHILE array$(i) > temp$: i = i + 1: WEND
+    WHILE array$(j) < temp$: j = j - 1: WEND
+  END IF
+  IF i > j GOTO L3
+  IF i < j THEN 
+    'PRINT "swap"
+    SWAP array$(i), array$(j)
+  END IF
+  i = i + 1: j = j - 1
+  IF i <= j GOTO L2
+
+L3:
+  IF i < l THEN
+    'PRINT "push"
+    qStack(s) = i             ' Push I, L
+    qStack(s + 1) = l
+    s = s + 2
+  END IF
+
+  l = j
+  IF f < l GOTO L1
+  IF s = 1 GOTO L4
+  'PRINT "pop"
+  s = s - 2                   ' Pop L, F
+  f = qStack(s)
+  l = qStack(s + 1)
+  GOTO L1
+
+L4:
+  ERASE qStack                ' delete the temporary stack array
+
 END SUB
 
 ' SortStr2 will sort (case-insensitive) all or just a portion of a conventional (not 
 ' fixed-length) string array into either ascending or descending order. 
-SUB SortStr2(array$(), start%, numEls%, dir%)
-  ERROR 73 ' Feature Unavailable
+SUB SortStr2(array$(), startElement%, numOfElements%, dir%)
+
+  REDIM qStack(500)     ' create stack
+
+  s = 1                ' initialize work variables
+  f = startElement
+  l = startElement + numOfElements - 1
+
+L1:
+  temp$ = UCASE$(array$((l + f) \ 2))         ' seek midpoint
+  i = f
+  j = l
+
+L2:
+  IF dir% = 0 THEN
+    WHILE UCASE$(array$(i)) < temp$: i = i + 1: WEND    ' use > for descending
+    WHILE UCASE$(array$(j)) > temp$: j = j - 1: WEND    ' use < for descending
+  ELSE
+    WHILE UCASE$(array$(i)) > temp$: i = i + 1: WEND    ' use > for descending
+    WHILE UCASE$(array$(j)) < temp$: j = j - 1: WEND    ' use < for descending
+  END IF
+  IF i > j GOTO L3
+  IF i < j THEN SWAP array$(i), array$(j)
+  i = i + 1: j = j - 1
+  IF i <= j GOTO L2
+
+L3:
+  IF i < l THEN
+    qStack(s) = i             ' Push I, L
+    qStack(s + 1) = l
+    s = s + 2
+  END IF
+
+  l = j
+  IF f < l GOTO L1
+  IF s = 1 GOTO L4
+  s = s - 2                   ' Pop L, F
+  f = qStack(s)
+  l = qStack(s + 1)
+  GOTO L1
+
+L4:
+  ERASE qStack                ' delete the temporary stack array
+
 END SUB
 
 SUB SortStrT(Array$, Start%, NumEls%, Dir%, MemberOffset%, MemberSize%)
@@ -414,8 +504,44 @@ SUB FileInfo(FileName$, TypeVar)
   ERROR 73 ' Feature Unavailable
 END SUB
 
-FUNCTION FileSize&(FileName$)
-  ERROR 73 ' Feature Unavailable
+' FileSize will quickly return the length of a named file. 
+FUNCTION FileSize&(fileName$)
+
+  ' fileName$ is the name of the file, and size is assigned its length in 
+  ' bytes. If the file does not exist size is instead assigned a value of -1. 
+
+  result& = 0
+
+  IF NOT _FileExists(fileName$) THEN
+    result& = -1
+  ELSE
+
+    IF INSTR(_OS$, "[WINDOWS]") THEN
+      DIM pattern AS STRING
+      DIM fd AS Win32_Find_Data
+      DIM hFind AS _UNSIGNED _OFFSET
+      DIM junk AS LONG
+      pattern = fileName$ + CHR$(0)
+      hFind = FindFirstFile(_OFFSET(pattern), _OFFSET(fd))
+      IF hFind <> INVALID_HANDLE_VALUE THEN
+        result& = fd.nfilesizelow
+        junk = FindClose(hFind)
+      ELSE
+        lastError& = GetLastError
+        IF lastError& = ERROR_ACCESS_DENIED THEN
+          ERROR 70 ' Permission denied
+        ELSE
+          ERROR 75 ' Path/File access error
+        END IF
+      END IF
+    ELSE
+      ERROR 73 ' Advanced Feature / Feature Unavailable
+    END IF
+
+  END IF
+
+  FileSize& = result&
+
 END FUNCTION
 
 SUB FileSort(DataFile$, IndexFile$, First&, Last&, Table%(), RecLength%)
@@ -568,8 +694,48 @@ FUNCTION LastDrive%
   ERROR 73 ' Feature Unavailable
 END FUNCTION
 
-FUNCTION LineCount%(FileName$, Buffer$)
-  ERROR 73 ' Feature Unavailable
+' LineCount will quickly count all of the lines of text in a specified file.
+FUNCTION LineCount%(fileName$, buffer$)
+
+  ' The main purpose of LineCount is to report the number of lines in a 
+  ' text file, in preparation for dimensioning an array to hold them. 
+  ' When a program will be reading a text file into an array, knowing 
+  ' this ahead of time can be a big help. The only other possibilities 
+  ' would be to read through the entire file once just to count the lines, 
+  ' or guess at how large to dimension the array to. 
+
+  ' One important caveat you should be aware of when using 
+  ' LineCount is that it merely counts the number of CHR$(13) 
+  ' carriage returns in the file. Line feeds are not considered at all. 
+
+  ' fileName$ is the name of the file to examine, and may contain an 
+  ' optional drive letter or path name. buffer$ is a temporary work area 
+  ' needed by LineCount to hold the file, and count receives the 
+  ' number of lines of text. 
+
+  ' If there are more than 32767 lines in the file (very unlikely if you 
+  ' think about it), LineCount will return a negative number. Simply 
+  ' add 65536 to that number to get the actual count. 
+
+  ' If the file doesn't exist or some other error occurs, LineCount will 
+  ' instead receive -1. 
+
+  result% = 0
+
+  IF _FileExists(fileName$) THEN
+    ff = FREEFILE
+    OPEN fileName$ FOR INPUT AS #ff
+    DO UNTIL EOF(1)
+      LINE INPUT #ff, buffer$
+      result% = result% + 1
+    LOOP
+    CLOSE #ff
+  ELSE
+    result% = -1
+  END IF
+
+  LineCount% = result%
+
 END FUNCTION
 
 FUNCTION LoadExec%(Program$, CmdLine$)
@@ -647,7 +813,6 @@ FUNCTION DCount%(dirSpec$)
       IF lastError& = ERROR_ACCESS_DENIED THEN
         ERROR 70 ' Permission denied
       ELSE
-        PRINT lastError&; dirSpec$
         ERROR 75 ' Path/File access error
       END IF
     END IF
@@ -700,7 +865,6 @@ SUB ReadDir(array$())
       IF lastError& = ERROR_ACCESS_DENIED THEN
         ERROR 70 ' Permission denied
       ELSE
-        PRINT lastError&; dirSpec$
         ERROR 75 ' Path/File access error
       END IF
     END IF
@@ -2822,3 +2986,8 @@ FUNCTION BitShift% (value%, cmd$, bits%)
     BitShift% = value% \ mult%
   END IF
 END FUNCTION
+
+' FUNCTION FRE%(value$)
+'   RETURN 32768
+' END FUNCTION
+

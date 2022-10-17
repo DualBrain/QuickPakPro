@@ -17,7 +17,7 @@ CLS
 LOCATE , , 1
 PRINT "File to load and sort: ";                'ask for a file to sort
 LINE INPUT fileName$
-IF FileSize&(fileName$) > (FRE("") - 2000) THEN
+IF FileSize&(fileName$) > 32768 THEN '(FRE("") - 2000) THEN
   PRINT "Not enough memory to load this file"
   END
 END IF
@@ -28,8 +28,8 @@ PRINT "Ascending or Descending? (A/D) ";
 
 DO
   s$ = UCASE$(INKEY$)
-LOOP UNTIL x$ = "A" OR x$ = "D"
-IF x$ = "A" THEN
+LOOP UNTIL s$ = "A" OR s$ = "D"
+IF s$ = "A" THEN
    dir = 0
 ELSE
    dir = 1
@@ -40,9 +40,9 @@ CLS
 PRINT "Case Sensitive or Insensitive? (S/I) ";
 
 DO
-  x$ = UCASE$(INKEY$)
-LOOP UNTIL x$ = "S" OR x$ = "I"
-IF x$ = "S" THEN
+  c$ = UCASE$(INKEY$)
+LOOP UNTIL c$ = "S" OR c$ = "I"
+IF c$ = "S" THEN
   c = 1
 ELSE
   c = 0
@@ -68,12 +68,13 @@ CLS
 PRINT "Press any key to begin sorting ";
 
 WHILE INKEY$ = "": WEND                 'pause for keypress
+PRINT "sorting..."
 x! = TIMER                              'so we can time the sort
 
 IF c THEN
-  SortStr a$, start, size, dir         'sort ascending
+  SortStr a$(), start, size, dir         'sort ascending
 ELSE
-  SortStr2 a$, start, size, dir        'sort descending
+  SortStr2 a$(), start, size, dir        'sort descending
 END IF
 
 CLS

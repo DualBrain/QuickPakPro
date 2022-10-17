@@ -28,8 +28,8 @@ FOR x = 1 TO numFiles                   'fill each element with 12 spaces
 NEXT
 array$(0) = spec$                       'put the search spec into Array$(0)
 
-ReadFile array$(0)              'read the names into Array$()
-SortStr array$(1), numFiles, 0  'sort the array, 0 means "ascending"
+ReadFile array$()              'read the names into Array$()
+SortStr array$(), 1, numFiles, 0  'sort the array, 0 means "ascending"
 
 FOR x = 1 TO numFiles
   PRINT array$(x)
