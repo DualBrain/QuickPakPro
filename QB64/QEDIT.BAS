@@ -3,10 +3,9 @@
 'Copyright (c) 1988-1990 Crescent Software
 'by Don Malin
 
-
 DEFINT A-Z
 
-'$INCLUDE: 'QEDITYPE.BI'
+''$INCLUDE: 'QEDITYPE.BI'
 
 TYPE BlkCoords                                  'Type for Block coordinates
     B AS INTEGER                                'Block coordinates
@@ -14,7 +13,6 @@ TYPE BlkCoords                                  'Type for Block coordinates
     P AS INTEGER                                'Paint coordinates
     PP AS INTEGER                               'Previous paint coordinates
 END TYPE
-
 
 '----- assembler calls
 DECLARE SUB APrint0 (BYVAL X, NumEls, StartChar, NumChars, Colr)
@@ -69,18 +67,18 @@ CONST SkipTbl$ = " ^*()[]-=+,.<>/\"             'Word delimiters
 
 
 '----- Returns the number of columns to advance at the end of a line
-DEF FnSpaces2Pad% (Text$)
-    STATIC Temp
-    SELECT CASE ASCII%(RIGHT$(Text$, 1))
-       CASE 46, 33, 63          '".", "!", "?"
-          Temp = 2
-       CASE 32, -1              'Space
-          Temp = 0
-       CASE ELSE
-          Temp = 1
-    END SELECT
-    FnSpaces2Pad% = Temp
-END DEF
+' DEF FnSpaces2Pad% (Text$)
+'     STATIC Temp
+'     SELECT CASE ASCII%(RIGHT$(Text$, 1))
+'        CASE 46, 33, 63          '".", "!", "?"
+'           Temp = 2
+'        CASE 32, -1              'Space
+'           Temp = 0
+'        CASE ELSE
+'           Temp = 1
+'     END SELECT
+'     FnSpaces2Pad% = Temp
+' END DEF
 
 '****************************************************************************
 '  Title: QEdit - Full featured text editing sub-program
@@ -145,9 +143,9 @@ SUB QEdit (Array$(), X$, Action%, Ed AS EditInfo) STATIC
            MID$(Ruler(0), N + 1) = MID$(STR$(N MOD 100), 2, 1)
            FOR X = 1 TO 9
                IF X = 5 THEN
-                  MID$(Ruler(0), N + X + 1) = "Å"
+                  MID$(Ruler(0), N + X + 1) = CHR$(197)
                ELSE
-                  MID$(Ruler(0), N + X + 1) = "Â"
+                  MID$(Ruler(0), N + X + 1) = CHR$(194)
                END IF
            NEXT
        NEXT
@@ -186,7 +184,7 @@ SUB QEdit (Array$(), X$, Action%, Ed AS EditInfo) STATIC
       
        '----- Dim array to hold the underlying screen and save it.
        REDIM ScrBuf(1 TO (ScrRows * 80) + 2)
-       CALL MScrnSave(1, 1, ScrRows, 80, ScrBuf(1))
+       CALL MScrnSave(1, 1, ScrRows, 80, ScrBuf())
       
        IF Ed.LC <= 0 THEN Ed.LC = 1             'Set window column to 1
        IF Ed.CurCol <= 0 THEN Ed.CurCol = 1     'establish cursor column at 1
@@ -208,10 +206,10 @@ SUB QEdit (Array$(), X$, Action%, Ed AS EditInfo) STATIC
 
        '----- Find the last element being used in the text array
        ArrayEnd = UBOUND(Array$)
-       Ed.LCount = FindLast%(VARPTR(Array$(ArrayEnd)), ArrayEnd)
+       Ed.LCount = FindLast%(Array$(), ArrayEnd)
 
 
-       IF Ed.Wrap THEN     'If word wrap is on, use "" paragraph marker
+       IF Ed.Wrap THEN     'If word wrap is on, use "Â¶" paragraph marker
           Par$ = CHR$(20)  '(you could use CHR$(255) for invisible marker)
           Ed.Wrap = MaxInt%(MinInt%(Ed.Wrap, 255), 10)
        ELSE                'Otherwise,
@@ -469,7 +467,7 @@ SUB QEdit (Array$(), X$, Action%, Ed AS EditInfo) STATIC
            END SELECT
 
            
-           X& = FRE("")
+           X& = 32768 'FRE("")
            IF X& < 1280 THEN
               BEEP
               Ed.MErr = 1                       'Set error flag
@@ -484,25 +482,26 @@ SUB QEdit (Array$(), X$, Action%, Ed AS EditInfo) STATIC
               '----- HELP key pressed
               CASE 59
                                                 'Make array for underlying Scr
-                 REDIM HelpScr(ArraySize%(2, 80 - 57 - 1, 12, 80))
+                 sz = ArraySize%(2, 80 - 57 - 1, 12, 80)
+                 REDIM HelpScr(sz)
                                                 'Save underlying screen
-                 CALL MScrnSave(2, 80 - 57 - 1, 12, 80, HelpScr(1))
+                 CALL MScrnSave(2, 80 - 57 - 1, 12, 80, HelpScr())
 
-                 REDIM Help(35) AS STRING * 57
+                 REDIM Hlp$(35) 'AS STRING * 57
                                                 'Load array with Help text
-                 CALL LoadHelp(VARSEG(Help(1)), VARPTR(Help(1)))
+                 CALL LoadHelp(Hlp$())
 
                  LOCATE 2, 80 - 57 - 1, 0       'Locate the cursor
                                                
                  CALL HideCursor                'Print the help screen
-                 CALL APrintT0(VARSEG(Help(1)), VARPTR(Help(1)), 57, 10, 1, 57, 112)
+                 CALL APrint0(Hlp$(), 1, 10, 1, 57, 112)
                  CALL ShowCursor
                                                 'Paint Shadows
                  CALL MPaintBox(3, 79, 11, 80, 8)
                  CALL MPaintBox(12, 80 - 57 + 1, 12, 80, 8)
                  LOCATE 10, 78
                  IF NOT MouseThere AND NOT BlocksThere THEN
-                    CALL MQPrint("º", 79)
+                    CALL MQPrint("ï¿½", 79)
                  ELSE
                     CALL MQPrint(CHR$(18), 240)
                  END IF
@@ -562,15 +561,15 @@ SUB QEdit (Array$(), X$, Action%, Ed AS EditInfo) STATIC
                     IF Temp THEN
                        Temp$ = INKEY$           'Now extract key from buffer
                        CALL HideCursor          'Display new page of help
-                       CALL APrintT0(VARSEG(Help(I)), VARPTR(Help(I)), 57, 8, 1, 56, 112)
+                       CALL APrint0(Hlp$(), I, 8, 1, 56, 112)
                        CALL ShowCursor
                     END IF
                                                 'Bail out if mouse button pressed
                     CALL ButtonPress(1, 0, Ed.Presses, X, Y)
                  LOOP UNTIL Ed.Presses
                                                 'Restore the screen
-                 CALL MScrnRest(2, 80 - 57 - 1, 12, 80, HelpScr(1))
-                 ERASE HelpScr, Help            'Clean up memory
+                 CALL MScrnRest(2, 80 - 57 - 1, 12, 80, HelpScr())
+                 ERASE HelpScr, Hlp$            'Clean up memory
                                            
 
               '----- Cursor UP
@@ -862,7 +861,7 @@ SUB QEdit (Array$(), X$, Action%, Ed AS EditInfo) STATIC
         IF RePrint OR (Ed.WasMarked AND MarkBlock = 0) THEN
            LOCATE Ed.TSRow, Ed.LSCol, 0         'APrint the screen
            CALL HideCursor                      'Turn Mouse cursor off
-           CALL APrint0(VARPTR(Array$(Ed.TL)), Ed.Rows, Ed.LC, Ed.Wide, Ed.AColor)
+           CALL APrint0(Array$(), Ed.TL, Ed.Rows, Ed.LC, Ed.Wide, Ed.AColor)
            CALL ShowCursor                      'Turn mouse cursor back on
            RePrint = 0                          'Turn Flag off
            IF MarkBlock = 0 THEN Ed.WasMarked = 0  'Turn hiliting off
@@ -1513,7 +1512,8 @@ SUB QEdit (Array$(), X$, Action%, Ed AS EditInfo) STATIC
                      BBytes& = BBytes& + QPLen%(MID$(Array$(N), Bl(1).B, NumCols))
                  NEXT
                  '----- See if we have enough far memory
-                 IF ((CLNG(NumRows) * NumCols)) + 50000 > FRE(-1) OR CLNG(NumRows) * NumCols > 65536 THEN
+                 free = 32768 'FRE(-1)
+                 IF ((CLNG(NumRows) * NumCols)) + 50000 > free OR CLNG(NumRows) * NumCols > 65536 THEN
                     Ed.MErr = 1                 'Set error flag
                     Ed.UlCRow = 0               'Erase block marking flags
                     MarkBlock = 0
@@ -1521,7 +1521,7 @@ SUB QEdit (Array$(), X$, Action%, Ed AS EditInfo) STATIC
                  ELSE                           '  happens
                                                 'Save the block to far memory
                     REDIM ClipBd((CLNG(NumRows) * NumCols) \ 2 + 1)
-                    CALL MidStrSave(VARPTR(Array$(Ed.UlCRow)), NumRows, Ed.UlCCol, NumCols, ClipBd(0))
+                    CALL MidStrSave(Array$(), Ed.UlCRow, NumRows, Ed.UlCCol, NumCols, ClipBd())
                  END IF
               ELSE                              'Sentence block
                                                 'Save top and bottom lines
@@ -1537,8 +1537,8 @@ SUB QEdit (Array$(), X$, Action%, Ed AS EditInfo) STATIC
                         BBytes& = BBytes& + QPLen%(Array$(N))
                     NEXT
                     '----- See if we have enough far memory
-                    Temp& = StringSize&(VARPTR(Array$(Ed.UlCRow + 1)), NumRows)
-                    IF Temp& + 40000 > FRE(-1) THEN
+                    Temp& = StringSize&(Array$(), Ed.UlCRow + 1, NumRows)
+                    IF Temp& + 40000 > 32768 THEN 'FRE(-1) THEN
                        BEEP
                        Ed.MErr = 1              'Set error flag
                        Ed.UlCRow = 0            'Erase block marking flags
@@ -1547,7 +1547,7 @@ SUB QEdit (Array$(), X$, Action%, Ed AS EditInfo) STATIC
                     ELSE                        '  happens
                                                 'Save the block to far memory
                        REDIM ClipBd(Temp& \ 2 + (Temp& MOD 2))
-                       CALL StringSave(VARPTR(Array$(Ed.UlCRow + 1)), ClipBd(0), NumRows)
+                       CALL StringSave(Array$(), Ed.UlCRow + 1, ClipBd(), 0, NumRows)
                     END IF
                  ELSE
                     REDIM ClipBd(0)
@@ -1581,7 +1581,7 @@ SUB QEdit (Array$(), X$, Action%, Ed AS EditInfo) STATIC
                         GOSUB DeleteLine
                     NEXT
                  END IF
-                 Ed.LCount = FindLast%(VARPTR(Array$(ArrayEnd)), ArrayEnd)
+                 Ed.LCount = FindLast%(Array$(), ArrayEnd)
                  Ed.CurLine = Ed.UlCRow         'Re-establish current cursor
                  Ed.CurCol = Ed.UlCCol          '  and window coordinates.
                  Ed.TL = MinInt%(SaveT, Ed.CurLine)
@@ -1606,7 +1606,7 @@ SUB QEdit (Array$(), X$, Action%, Ed AS EditInfo) STATIC
         '----- Shift Insert (Insert Clipboard contents)
         ELSEIF Ed.InsBlock OR (ShiftKey% AND (X$ = "0" OR X$ = Zero$ + CHR$(82))) THEN
            Ed.InsBlock = 0
-           X& = FRE("")                         'If a block has been marked
+           X& = 32768 'FRE("")                         'If a block has been marked
                                                 '  and there is enough string
                                                 '  memory
            IF Ed.UlCRow AND BBytes& < X& - 1280 THEN
@@ -1631,9 +1631,9 @@ SUB QEdit (Array$(), X$, Action%, Ed AS EditInfo) STATIC
                               END IF
                            END IF
                        
-                           CALL MidStrRest(Temp$, N, ClipBd(0))
+                           CALL MidStrRest(Temp$, N, ClipBd())
 
-                           IF FRE("") < 1280& THEN
+                           IF 0 THEN 'FRE("") < 1280& THEN
                               BEEP
                               Ed.MErr = 1       'Set error flag
                               EXIT FOR
@@ -1653,11 +1653,11 @@ SUB QEdit (Array$(), X$, Action%, Ed AS EditInfo) STATIC
                         END IF
                     NEXT
                                                 'Update number of lines
-                    Ed.LCount = FindLast%(VARPTR(Array$(ArrayEnd)), ArrayEnd)
+                    Ed.LCount = FindLast%(Array$(), ArrayEnd)
 
                  ELSE                           'Restore one line of text
                     IF Ed.CurCol > QPLen%(Array$(Ed.CurLine)) THEN Array$(Ed.CurLine) = Array$(Ed.CurLine) + SPACE$(Ed.CurCol - QPLen%(Array$(Ed.CurLine)) - 1)
-                    CALL MidStrRest(Temp$, 1, ClipBd(0))
+                    CALL MidStrRest(Temp$, 1, ClipBd())
                     Array$(Ed.CurLine) = LEFT$(Array$(Ed.CurLine), Ed.CurCol - 1) + Temp$ + MID$(Array$(Ed.CurLine), Ed.CurCol)
                     Array$(Ed.CurLine) = RTRIM$(Array$(Ed.CurLine))
                                                 'Wrap words down
@@ -1684,7 +1684,7 @@ SUB QEdit (Array$(), X$, Action%, Ed AS EditInfo) STATIC
                                                 'Make string to hold a line
                            Temp$ = SPACE$(StrLength%(ClipBd(0), ClipBytes&, N))
                                                 'Get the next string
-                           Get1Str Temp$, ClipBd(0), N
+                           Get1Str Temp$, ClipBd(), 0, N
                         ELSE
                            Temp$ = ClipBd1$
                         END IF
@@ -1706,7 +1706,7 @@ SUB QEdit (Array$(), X$, Action%, Ed AS EditInfo) STATIC
                     NEXT                        'Insert last line
                     Array$(Temp) = RTRIM$(Array$(Temp) + ClipBd2$ + RightSide$)
                                                 'Update last line number
-                    Ed.LCount = FindLast%(VARPTR(Array$(ArrayEnd)), ArrayEnd)
+                    Ed.LCount = FindLast%(Array$(), ArrayEnd)
                     Temp$ = ""                  'Erase the restore buffer
 
                     WrapLine = Ed.CurLine
@@ -1730,7 +1730,7 @@ SUB QEdit (Array$(), X$, Action%, Ed AS EditInfo) STATIC
                            ELSE                 'For the body of the block,
                                                 '  get lines from far mem.
                               Temp$ = SPACE$(StrLength%(ClipBd(0), ClipBytes&, N - 1))
-                              CALL Get1Str(Temp$, ClipBd(0), N - 1)
+                              CALL Get1Str(Temp$, ClipBd(), 0, N - 1)
                            END IF
                            Temp$ = RTRIM$(Temp$)
                            GOSUB InsertLine
@@ -1738,7 +1738,7 @@ SUB QEdit (Array$(), X$, Action%, Ed AS EditInfo) STATIC
                     NEXT
                     Temp$ = ""                  'Erase the restore buffer
                                                 'Update last line number
-                    Ed.LCount = FindLast%(VARPTR(Array$(ArrayEnd)), ArrayEnd)
+                    Ed.LCount = FindLast%(Array$(), ArrayEnd)
 
                  END IF
               END IF
@@ -1894,7 +1894,7 @@ CursorLeft:
        CALL HideCursor
        CALL ScrollR(Ed.TSRow, Ed.LSCol, Ed.TSRow + Ed.Rows - 1, Ed.LSCol + Ed.Wide - 1, Temp, -1)
        LOCATE Ed.TSRow, Ed.LSCol
-       CALL APrint0(VARPTR(Array$(Ed.TL)), Ed.Rows, Ed.LC, Temp, -1)
+       CALL APrint0(Array$(), Ed.TL, Ed.Rows, Ed.LC, Temp, -1)
        CALL ShowCursor
     END IF
 RETURN
@@ -1911,7 +1911,7 @@ CursorRight:
        CALL HideCursor
        CALL ScrollL(Ed.TSRow, Ed.LSCol, Ed.TSRow + Ed.Rows - 1, Ed.LSCol + Ed.Wide - 1, Temp, -1)
        LOCATE Ed.TSRow, Ed.LSCol + Ed.Wide - Temp
-       CALL APrint0(VARPTR(Array$(Ed.TL)), Ed.Rows, Ed.LC + Ed.Wide - Temp, Temp, -1)
+       CALL APrint0(Array$(), Ed.TL, Ed.Rows, Ed.LC + Ed.Wide - Temp, Temp, -1)
        CALL ShowCursor
     END IF
 RETURN
@@ -2098,7 +2098,7 @@ RETURN
 InsertLine:
     IF Temp <= Ed.LCount THEN
        Ed.LCount = MinInt%(Ed.LCount + 1, ArrayEnd)
-       CALL InsertStr(VARPTR(Array$(Temp)), Temp$, Ed.LCount - Temp)
+       CALL InsertStr(Array$(), Temp, Temp$, Ed.LCount - Temp)
     ELSE
        Ed.LCount = Temp
        Array$(Temp) = Temp$
@@ -2111,7 +2111,7 @@ RETURN
 DeleteLine:
     IF Temp <= Ed.LCount THEN
        IF Temp < Ed.LCount THEN
-          CALL DeleteStr(VARPTR(Array$(Temp)), Ed.LCount - Temp)
+          CALL DeleteStr(Array$(), Temp, Ed.LCount - Temp)
        END IF
        Array$(Ed.LCount) = ""
        Ed.LCount = Ed.LCount - 1                'Update last line number
@@ -2130,22 +2130,22 @@ InitWindow:
    
     'Did the Lower Right corner move Up?
     IF WC(2, 0) < WC(2, 1) THEN                 'Restore slice
-       CALL MPRestore(WC(2, 0) + 1, WC(1, 1), WC(2, 1), WC(3, 1), 80, ScrBuf((WC(2, 0) * 80) + WC(1, 1)))
+       CALL MPRestore(WC(2, 0) + 1, WC(1, 1), WC(2, 1), WC(3, 1), 80, ScrBuf(), (WC(2, 0) * 80) + WC(1, 1))
     END IF
 
     'Did the Lower Right corner move Left?
     IF WC(3, 0) < WC(3, 1) THEN                 'Restore slice
-       CALL MPRestore(WC(0, 1), WC(3, 0) + 1, WC(2, 1), WC(3, 1), 80, ScrBuf((WC(0, 1) - 1) * 80 + WC(3, 0) + 1))
+       CALL MPRestore(WC(0, 1), WC(3, 0) + 1, WC(2, 1), WC(3, 1), 80, ScrBuf(), (WC(0, 1) - 1) * 80 + WC(3, 0) + 1)
     END IF
 
     'Did the Upper Left corner move Down?
     IF WC(0, 0) > WC(0, 1) THEN                 'Restore slice
-       CALL MPRestore(WC(0, 1), WC(1, 1), WC(0, 0) - 1, WC(3, 1), 80, ScrBuf((WC(0, 1) - 1) * 80 + WC(1, 1)))
+       CALL MPRestore(WC(0, 1), WC(1, 1), WC(0, 0) - 1, WC(3, 1), 80, ScrBuf(), (WC(0, 1) - 1) * 80 + WC(1, 1))
     END IF
     
     'Did the Upper Left corner move Right?
     IF WC(1, 0) > WC(1, 1) THEN                 'Restore slice
-       CALL MPRestore(WC(0, 1), WC(1, 1), WC(2, 1), WC(1, 0) - 1, 80, ScrBuf((WC(0, 1) - 1) * 80 + WC(1, 1)))
+       CALL MPRestore(WC(0, 1), WC(1, 1), WC(2, 1), WC(1, 0) - 1, 80, ScrBuf(), (WC(0, 1) - 1) * 80 + WC(1, 1))
     END IF
                        
     WC(0, 1) = WC(0, 0)
@@ -2166,7 +2166,7 @@ InitWindow:
        '----- Print the middle lines
        X = Ed.TL
        FOR N = Ed.TSRow TO Ed.TSRow + Ed.Rows - 1
-           CALL QPrintRC("³", N, Ed.LSCol - 1, HiClr)
+           CALL QPrintRC(CHR$(179), N, Ed.LSCol - 1, HiClr)
            IF X <= ArrayEnd THEN
               LSET LineBuf$ = MID$(Array$(X), Ed.LC)
            ELSE
@@ -2174,17 +2174,17 @@ InitWindow:
            END IF
            X = X + 1
            CALL QPrintRC(LineBuf$, N, Ed.LSCol, Ed.AColor)
-           CALL QPrintRC("°", N, WC(3, 0), 112)
+           CALL QPrintRC(CHR$(176), N, WC(3, 0), 112)
        NEXT
 
        '----- Print the up and down arrows
        CALL QPrintRC(CHR$(24), Ed.TSRow, WC(3, 0), 112)
        CALL QPrintRC(CHR$(25), N - 1, WC(3, 0), 112)
        '----- Print the status spaces on bottom of window
-       CALL QPrintRC("À", Ed.TSRow + Ed.Rows, Ed.LSCol - 1, HiClr)
+       CALL QPrintRC(CHR$(192), Ed.TSRow + Ed.Rows, Ed.LSCol - 1, HiClr)
        CALL QPrintRC(":", Ed.TSRow + Ed.Rows, Ed.LSCol + 4, 48)
        '----- Print the horizontal scroll bar
-       CALL QPrintRC(CHR$(27) + STRING$(Ed.Wide - 10, "°") + CHR$(26), Ed.TSRow + Ed.Rows, Ed.LSCol + 8, 112)
+       CALL QPrintRC(CHR$(27) + STRING$(Ed.Wide - 10, CHR$(176)) + CHR$(26), Ed.TSRow + Ed.Rows, Ed.LSCol + 8, 112)
        CALL QPrintRC(CHR$(4), Ed.TSRow + Ed.Rows, WC(3, 0), HiClr)
 
        CALL ShowCursor                          'Turn the mouse cursor back on
@@ -2206,7 +2206,7 @@ RETURN
 
 '----- Restore the screen and free up memory
 CleanUp:
-    CALL MScrnRest(1, 1, ScrRows, 80, ScrBuf(1))'Restore the screen
+    CALL MScrnRest(1, 1, ScrRows, 80, ScrBuf())'Restore the screen
     ERASE ScrBuf, Ruler                         'Clean up memory
     LineBuf$ = ""
     LOCATE , , , BScan - 1, BScan
@@ -2215,3 +2215,19 @@ RETURN
 
 END SUB          'That's all folks.  And you thought editing was easy?
 
+FUNCTION FnSpaces2Pad% (Text$)
+    STATIC Temp
+    SELECT CASE ASCII%(RIGHT$(Text$, 1))
+       CASE 46, 33, 63          '".", "!", "?"
+          Temp = 2
+       CASE 32, -1              'Space
+          Temp = 0
+       CASE ELSE
+          Temp = 1
+    END SELECT
+    FnSpaces2Pad% = Temp
+END FUNCTION
+
+SUB LoadHelp (Hlp$())
+  'TODO:
+END SUB

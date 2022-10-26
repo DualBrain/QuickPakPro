@@ -21,8 +21,13 @@ SUB AddInt(Array%(), Start%, Value%, NumEls%)
   ERROR 73 ' Feature Unavailable
 END SUB
 
-SUB DeleteStr(Array$(), Element%, NumEls%)
-  ERROR 73 ' Feature Unavailable
+' DeleteStr removes an element from a normal (not fixed-length) 
+' string array.
+SUB DeleteStr(array$(), element%, numEls%)
+  FOR x = element% TO element + numEls% 
+    SWAP array$(x), array$(x + 1) 
+  NEXT 
+  ' array$(element + numEls%) = ""               ' clear the last element.
 END SUB
 
 SUB DeleteT(Array(), Element%, ElSize%, NumEls%)
@@ -83,15 +88,14 @@ END SUB
 
 ' FindLast scans a conventional (not fixed-length) string array 
 ' backwards looking for the last non-blank element. 
-FUNCTION FindLast% (Array$(), Size%)
-  NumEls% = Size% 'UBOUND(Array$)
-  FOR el = NumEls% TO LBOUND(Array$)
-    IF Array$(el) <> "" THEN
+FUNCTION FindLast% (array$(), numEls%)
+  FOR el = numEls% TO LBOUND(Array$)
+    IF array$(el) <> "" THEN
       FindLast% = el
       EXIT FUNCTION
     END IF
   NEXT
-  FineLast% = NumEls%
+  FineLast% = numEls%
 END FUNCTION
 
 FUNCTION GetBit%(Array$, Element%)
@@ -142,8 +146,13 @@ SUB InitInt(Array%(), Start%, Value%, NumEls%)
   ERROR 73 ' Feature Unavailable
 END SUB
 
-SUB InsertStr(Array$(), Element%, Ins$, NumEls%)
-  ERROR 73 ' Feature Unavailable
+' InsertStr will insert an element at any point into a conventional (not 
+' fixed-length) string array. 
+SUB InsertStr(array$(), element%, ins$, numEls%)
+  FOR x = (element% + numEls%) TO (element% + 1) STEP -1 
+    SWAP array$(x), Array$(x - 1) 
+  NEXT 
+  SWAP array$(start), ins$ 
 END SUB
 
 SUB InsertT(Array(), Element%, ElSize%, NumEls%)
@@ -1353,10 +1362,6 @@ SUB PickList(Item$(), Picked%(), NPicked%, Cnf)
   ERROR 73 ' Feature Unavailable
 END SUB
 
-SUB QEdit(Array$(), Ky$, Action%, Ed)
-  ERROR 73 ' Feature Unavailable
-END SUB
-
 SUB Spread(Wks$(), Format$(), ColumnWidths%(), Wide%, Rows%, Action%)
   ERROR 73 ' Feature Unavailable
 END SUB
@@ -1451,8 +1456,11 @@ SUB CapsOn
   ERROR 73 ' Feature Unavailable
 END SUB
 
+' ClearBuf will quickly clear the keyboard of any key strokes that are 
+' currently pending. 
 SUB ClearBuf
-  ERROR 73 ' Feature Unavailable
+  'WHILE INKEY$ <> "": WEND 
+  _KEYCLEAR
 END SUB
 
 FUNCTION CtrlKey%
@@ -1502,6 +1510,8 @@ SUB GrafCursor(x%, y%, cursor$)
   ' x% and y% define the cursor "hot spot", and cursor$ is either a 
   ' conventional or fixed-length string that contains the new cursor shape. 
 
+  ' https://learn.microsoft.com/en-us/windows/win32/menurc/using-cursors
+
   ' NOT IMPLEMENTED
 
 END SUB
@@ -1525,8 +1535,65 @@ SUB Keyboard(Row%, Column%, Color1%, Color2%, Mode%)
   ERROR 73 ' Feature Unavailable
 END SUB
 
+' KeyDown reports if any keys are currently being pressed. 
 FUNCTION KeyDown%
-  ERROR 73 ' Feature Unavailable
+
+  ' Set to -1 (True) if a key is currently being pressed, or 
+  ' 0 if no keys are pressed. 
+
+  bksp% = _KEYDOWN(8)
+  tb% = _KEYDOWN(9)
+  entr% = _KEYDOWN(13)
+  esc% = _KEYDOWN(27) ' ESC
+
+  f1% = _KEYDOWN(15104) ' F1
+  f2% = _KEYDOWN(15360) ' F2
+  f3% = _KEYDOWN(15616) ' F3
+  f4% = _KEYDOWN(15872) ' F4
+  f5% = _KEYDOWN(16128) ' F5
+  f6% = _KEYDOWN(16384) ' F6
+  f7% = _KEYDOWN(16640) ' F7
+  f8% = _KEYDOWN(16896) ' F8
+  f9% = _KEYDOWN(17152) ' F9
+  f10% = _KEYDOWN(17408) ' F10
+  f11% = _KEYDOWN(34048) ' F11
+  f12% = _KEYDOWN(34304) ' F12
+  ins% = _KEYDOWN(20992) ' INS
+  hm% = _KEYDOWN(18176) ' HOME
+  pgup% = _KEYDOWN(18688) ' PGUP
+  del% = _KEYDOWN(21248) ' DEL
+  ed% = _KEYDOWN(20224) ' END
+  pgdn% = _KEYDOWN(20736) ' PGDN
+  up% = _KEYDOWN(18432) ' UP
+  dn% = _KEYDOWN(20480) ' DN
+  lt% = _KEYDOWN(19200) ' LEFT
+  rt% = _KEYDOWN(19712) ' RIGHT
+  num% = _KEYDOWN(100300) ' Num Lock
+  caps% = _KEYDOWN(100301) ' Caps Lock
+  rshift% = _KEYDOWN(100303) ' Right Shift
+  lshift% = _KEYDOWN(100304) ' Left Shift
+  rctrl% = _KEYDOWN(100305) ' Right Control
+  lctrl% = _KEYDOWN(100306) ' Left Control
+  ralt% = _KEYDOWN(100307) ' Right Alt
+  lalt% = _KEYDOWN(100308) ' Left Alt
+
+  atoz% = 0
+  FOR i% = 32 TO 126
+    IF _KEYDOWN(i%) THEN atoz% = 1: EXIT FOR
+  NEXT
+
+  accum& = bksp% + tb% + entr% + esc%
+  accum& = accum& + f1% + f2% + f3% + f4% + f5% + f6% + f7% + f8% + f9% + f10% + f11% + f12%
+  accum& = accum& + hm% + pgup% + del% + ed% + pgdn% + up% + dn% + lt% + rt%
+  accum& = accum& + num% + caps% + rshift% + lshift% + rctrl% + lctrl% + ralt% + lalt%
+  accum& = accum& + atoz%
+
+  IF accum& THEN
+    KeyDown% = -1
+  ELSE
+    KeyDown% = 0
+  END IF
+
 END FUNCTION
 
 SUB Motion(Value%)
@@ -1557,6 +1624,9 @@ END SUB
 
 ' MouseTrap will establish the allowable range of movement for the mouse cursor. 
 SUB MouseTrap(ulRow%, ulCol%, lrRow%, lrCol%)
+  ' https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-clipcursor
+  ' https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getclipcursor
+  ' https://learn.microsoft.com/en-us/windows/win32/menurc/using-cursors
   ERROR 73 ' Feature Unavailable
 END SUB
 
@@ -1572,8 +1642,14 @@ SUB NumOn
   ERROR 73 ' Feature Unavailable
 END SUB
 
+' PeekBuf provides a handy way to determine what key if any is the 
+' next one pending in the keyboard buffer, without actually removing 
+' it as INKEY$ does. 
 FUNCTION PeekBuf%
-  ERROR 73 ' Feature Unavailable
+  ' Char receives the ASCII value of the pending key if it is a normal 
+  ' key, 0 if no keys are pending at all, or a negative value representing 
+  ' an extended key's scan code. 
+  PeekBuf% = INP(&H60)
 END FUNCTION
 
 SUB RptKey(Char%, Count%)
@@ -1585,11 +1661,14 @@ FUNCTION ScrlLock%
 END FUNCTION
 
 SUB SetCursor(X%, Y%)
+  ' https://learn.microsoft.com/en-us/windows/win32/menurc/using-cursors
   ERROR 73 ' Feature Unavailable
 END SUB
 
 FUNCTION ShiftKey%
-  ERROR 73 ' Feature Unavailable
+  KEY_LSHIFT& = 100304
+  KEY_RSHIFT& = 100303
+  ShiftKey% = _KEYDOWN(KEY_LSHIFT&) OR _KEYDOWN(KEY_RSHIFT&)
 END FUNCTION
 
 SUB ShowCursor
@@ -1600,8 +1679,11 @@ SUB StuffBuf(X$)
   ERROR 73 ' Feature Unavailable
 END SUB
 
+' TextCursor provides an easy way to initialize the mouse cursor in 
+' text mode, and define its color. 
 SUB TextCursor(FG%, BG%)
-  ERROR 73 ' Feature Unavailable
+  ' NOTE: I'm not sure that this is required (or is even possible)
+  '       within the context of QB64 - for now, just stub.
 END SUB
 
 ' FUNCTION WaitKey%
@@ -1792,6 +1874,30 @@ FUNCTION MaxLong& (Num1&, Num2&)
     MaxLong& = Num2& 
   END IF 
 END FUNCTION
+
+' MidStrRest is a specialized version of the string manager
+' routines StringRest, which are designed to save a MID$ 
+' portion of a string array. 
+SUB MidStrRest (buffer$, strNumber, storage%())
+  ERROR 73 ' Feature Unavailable
+END SUB
+
+SUB MidStrSave (array$(), element%, numEls%, FirstChar%, numChars%, storage%())
+  ERROR 73 ' Feature Unavailable
+END SUB
+
+SUB StringSave (array$(), stringElement%, array%(), integerElement%, numStrings%)
+  ERROR 73 ' Feature Unavailable
+END SUB
+
+SUB Get1Str(work$, array%(), element%, stringNumber%)
+  ERROR 73 ' Feature Unavailable
+END SUB
+
+FUNCTION StringSize&(array$(), start%, numStringEls%)
+  ERROR 73 ' Feature Unavailable
+END FUNCTION
+
 
 ' MinInt compares two integer variables, and returns the value of the 
 ' smaller one. MinLong is similar, but is intended for use with long 
@@ -2528,6 +2634,20 @@ SUB APrint0(array$(), first%, numEls%, firstChar%, numChars%, colr%)
   CALL APrint(array$(), first%, numEls%, firstChar%, numChars%, colr%, 0)
 END SUB
 
+' APrintT will quickly print any portion of a fixed-length string array 
+' or the string component of a TYPE array, and contain the display 
+' within a specified area of the screen. 
+SUB APrintT(array$(), first%, elSize%, numEls%, firstChar%, numChars%, colr%, page%)
+  CALL APrint(array$(), first%, numEls%, firstChar%, numChars%, colr%, page%)
+END SUB
+
+' APrintT0 will quickly print any portion of a fixed-length string 
+' array or the string component of a TYPE array, and contain the 
+' display within a specified area of the screen. 
+SUB APrintT0(array$(), first%, elSize%, numEls%, firstChar%, numChars%, colr%)
+  ERROR 73 ' Feature Unavailable
+END SUB
+
 ' ArraySize will quickly calculate how many elements are needed in an
 ' integer array that is intended to hold a portion of the display screen.
 FUNCTION ArraySize%(ulRow%, ulCol%, lrRow%, lrCol%)
@@ -2688,6 +2808,10 @@ END FUNCTION
 SUB MPaintBox (ulRow%, ulCol%, lrRow%, lrCol%, colr%)
   ' Paint a portion of the screen; leaving text intact (only change color).
   CALL PaintBox0 (ulRow%, ulCol%, lrRow%, lrCol%, colr%)
+END SUB
+
+SUB MPRestore(ulRow%, ulCol%, lrRow%, lrCol%, originalWidth%, array%(), start%)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 ' MQPrint is similar to QPrint, except it always turns off the mouse cursor

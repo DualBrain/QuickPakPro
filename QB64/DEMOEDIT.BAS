@@ -1,19 +1,22 @@
-'********** DEMOEDIT.BAS
+' ********** DEMOEDIT.BAS
 
-'Copyright (c) 1988 Don Malin
-'Copyright (c) 1988 Crescent Software
+' Copyright (c) 1988 Don Malin
+' Copyright (c) 1988 Crescent Software
+' Modifications (c) 2022 Cory Smith
 
+'$INCLUDE: 'QPPRO.BI'
 
 DEFINT A-Z
-DECLARE SUB ClearEOL (Colr%)    'for the demo only
+
+DECLARE SUB ClearEOL (colr%)    'for the demo only
 DECLARE FUNCTION Monitor% ()    'determines monitor type
 
 '----- this file contains a TYPE variable for several of QEdit's parameters
 '$INCLUDE: 'QEDITYPE.BI'
-DIM Ed AS EditInfo              'create the editor's data structure
 
+DIM ed AS EditInfo              'create the editor's data structure
 
-DECLARE SUB QEdit (Array$(), Ky$, Action, Ed AS EditInfo)
+DECLARE SUB QEdit (array$(), ky$, action, ed AS EditInfo)
 
 'Note: The Action" parameter can be used to operate the editor in a
 '      polled mode.  The "Action" values and corresponding meanings are
@@ -276,3 +279,5 @@ DATA "VertMenu, a value of zero means to enter the editor and wait"
 DATA "there until Escape is pressed.  Likewise, setting Action to 5"
 DATA "clears the window and restores the original screen contents."
 
+'$INCLUDE: 'QEDIT.BAS'
+'$INCLUDE: 'QPPRO.BAS'
