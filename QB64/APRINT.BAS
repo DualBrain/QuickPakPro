@@ -5,6 +5,10 @@
 
 DEFINT A-Z
 
+'$INCLUDE: 'QPPRO.BI'
+
+_FULLSCREEN _SQUAREPIXELS
+
 DECLARE SUB APrint (array$(), first, numEls, firstChar, numChars, colr, page)
 DECLARE SUB Box (ulRow, ulCol, lrRow, lrCol, style, colr, page)
 DECLARE SUB QPrint (txt$, colr, page)

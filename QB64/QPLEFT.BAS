@@ -1,9 +1,13 @@
 ' ********* QPLEFT.BAS - demonstrates QPLeft$, QPRight$, and QPMid$
 
 ' Copyright (c) 1988 Ethan Winer
-' Modifications (c) Cory Smith
+' Modifications (c) 2020 Cory Smith
 
 DEFINT A-Z
+
+'$INCLUDE: 'QPPRO.BI'
+
+_FULLSCREEN _SQUAREPIXELS
 
 DECLARE FUNCTION QPMid$ (text$, midArg%, numChars%)
 DECLARE FUNCTION QPLeft$ (text$, leftArg%)

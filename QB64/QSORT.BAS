@@ -11,6 +11,8 @@
 
 DEFINT A-Z
 
+_FULLSCREEN _SQUAREPIXELS
+
 DECLARE SUB QSort (array!(), startEl, numEls)
 
 CLS

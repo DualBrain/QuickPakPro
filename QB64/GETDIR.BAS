@@ -3,9 +3,11 @@
 ' Copyright (c) 1988 Ethan Winer
 ' Modified (c) 2022 Cory Smith
 
-_FULLSCREEN
-
 DEFINT A-Z
+
+'$INCLUDE: 'QPPRO.BI'
+
+_FULLSCREEN _SQUAREPIXELS
 
 DECLARE FUNCTION GetDir$ (drive$)
 DECLARE FUNCTION GetDrive%

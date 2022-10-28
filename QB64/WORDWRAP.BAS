@@ -5,6 +5,8 @@
 
 DEFINT A-Z
 
+_FULLSCREEN _SQUAREPIXELS
+
 DECLARE SUB WordWrap (x$, wide)
 
 CLS

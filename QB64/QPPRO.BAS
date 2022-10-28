@@ -1029,8 +1029,13 @@ SUB SetDrive(drive$)
   END IF
 END SUB
 
-SUB SetError(ErrNum%)
-  ERROR 73 ' Feature Unavailable
+' SetError allows a BASIC program to set or clear the DOSError and 
+' WhichError functions. 
+SUB SetError(errNum%)
+  'TODO: Need to figure out how to handle setting of an error
+  ' so that, somehow, SYSTEM and/or END can be called
+  ' before exiting the application so that the error set
+  ' can be exposed to the caller (externally - os level).
 END SUB
 
 SUB SetLevel(ErrValue%)
@@ -1057,8 +1062,28 @@ FUNCTION Valid%(FileName$)
   ERROR 73 ' Feature Unavailable
 END FUNCTION
 
+' WhichError reports which error if any occurred during the last call 
+' to a QuickPak: Professional DOS routine.
 FUNCTION WhichError%
-  ERROR 73 ' Feature Unavailable
+  
+  ' WhichError% returns O if there was no error, or an error code if 
+  ' there was. 
+
+  ' All of the QuickPak Professional routines assign a value to the 
+  ' DOSError and WhichError functions to indicate their success or 
+  ' failure. Rather than requiring you to set up a separate error 
+  ' handling procedure and use ON ERROR, you can simply query 
+  ' these functions after performing any QuickPak Professional DOS 
+  ' operation. WhichError is discussed in the section entitled 
+  ' "Eliminating ON ERROR". 
+  
+  ' The table on the following page shows all of the possible DOS 
+  ' errors and the corresponding numbers that WhichError returns. 
+  
+  ' Also see the complimentary function DOSError
+
+  WhichError% = 0 'TODO: Need to implement. 
+
 END FUNCTION
 
 SUB WriteSect(Drive$, Info$, Sector%)
@@ -1350,8 +1375,26 @@ SUB MenuVert(Array$(), NumLines%, ScanCode%, Choice%, NormalColr%, HiLiteColor%,
   ERROR 73 ' Feature Unavailable
 END SUB
 
+' MGetKey first clears the keyboard buffer of any pending keys, and 
+' then waits until either a key or mouse button has been pressed. This 
+' is a "mouse-aware" version of the QuickPak Professional WaitKey 
+' routine. 
 FUNCTION MGetKey%(Row%, Col%)
-  ERROR 73 ' Feature Unavailable
+  ' Scan Code% is returned holding the key or mouse button that was 
+  ' pressed, and Row% and Column% indicate the location of the 
+  ' mouse cursor at the time the mouse button was pressed. 
+  DO
+    'TODO: Need to handle mouse click...
+    a$ = INKEY$
+    IF a$ <> "" THEN
+      IF LEN(a$) = 1 THEN
+        MGetKey% = ASC(a$)
+      ELSE
+        MGetKey% = -ASC(RIGHT$(a$, 1))
+      END IF
+      EXIT DO
+    END IF
+  LOOP
 END FUNCTION
 
 SUB MMenuVert(Array$(), Selection%, Start%, ScanCode%, NormalColr%, Hilight%, NumRows%, Row%, Column%)

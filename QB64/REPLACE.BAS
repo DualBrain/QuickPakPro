@@ -8,6 +8,10 @@
 
 DEFINT A-Z
 
+'$INCLUDE: 'QPPRO.BI'
+
+_FULLSCREEN _SQUAREPIXELS
+
 DECLARE SUB ReplaceString2 (text$, old$, new$)
 DECLARE SUB ReplaceChar (text$, old$, new$)
 DECLARE SUB ReplaceChar2 (text$, old$, new$)
