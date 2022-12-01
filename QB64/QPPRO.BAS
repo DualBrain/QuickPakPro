@@ -200,19 +200,35 @@ SUB KeySort(Array(), Start%, ElSize%, NumEls%, Table%(,), NumKey%)
 END SUB
 
 FUNCTION MaxD#(Array#(), Start%, NumEls%)
-  ERROR 73 ' Feature Unavailable
+  max# = Array#(Start%)
+  FOR x% = Start% + 1 TO NumEls%
+    IF Array#(x%) > max# THEN max# = Array#(x%)
+  NEXT
+  MaxD# = max#
 END FUNCTION
 
-FUNCTION MaxI&(Array%(), Start%, NumEls%)
-  ERROR 73 ' Feature Unavailable
+FUNCTION MaxI%(Array%(), Start%, NumEls%)
+  max% = Array%(Start%)
+  FOR x% = Start% + 1 TO NumEls%
+    IF Array%(x%) > max% THEN max% = Array%(x%)
+  NEXT
+  MaxI% = max%
 END FUNCTION
 
 FUNCTION MaxL&(Array&(), Start%, NumEls%)
-  ERROR 73 ' Feature Unavailable
+  max& = Array&(Start%)
+  FOR x% = Start% + 1 TO NumEls%
+    IF Array&(x%) > max& THEN max& = Array&(x%)
+  NEXT
+  MaxL& = max&
 END FUNCTION
 
 FUNCTION MaxS!(Array!(), Start%, NumEls%)
-  ERROR 73 ' Feature Unavailable
+  max! = Array!(Start%)
+  FOR x% = Start% + 1 TO NumEls%
+    IF Array!(x%) > max! THEN max! = Array!(x%)
+  NEXT
+  MaxS! = max!
 END FUNCTION
 
 FUNCTION MaxC(Array(), Start%, NumEls%)
@@ -220,19 +236,35 @@ FUNCTION MaxC(Array(), Start%, NumEls%)
 END FUNCTION
 
 FUNCTION MinD#(Array#(), Start%, NumEls%)
-  ERROR 73 ' Feature Unavailable
+  min# = Array#(Start%)
+  FOR x% = Start% + 1 TO NumEls%
+    IF Array#(x%) < min# THEN min# = Array#(x%)
+  NEXT
+  MinD# = min#
 END FUNCTION
 
-FUNCTION MinI&(Array%(), Start%, NumEls%)
-  ERROR 73 ' Feature Unavailable
+FUNCTION MinI%(Array%(), Start%, NumEls%)
+  min% = Array%(Start%)
+  FOR x% = Start% + 1 TO NumEls%
+    IF Array%(x%) < min% THEN min% = Array%(x%)
+  NEXT
+  MinI% = min%
 END FUNCTION
 
 FUNCTION MinL&(Array&(), Start%, NumEls%)
-  ERROR 73 ' Feature Unavailable
+  min& = Array&(Start%)
+  FOR x% = Start% + 1 TO NumEls%
+    IF Array&(x%) < min& THEN min& = Array&(x%)
+  NEXT
+  MinL& = min&
 END FUNCTION
 
 FUNCTION MinS!(Array!(), Start%, NumEls%)
-  ERROR 73 ' Feature Unavailable
+  min! = Array!(Start%)
+  FOR x% = Start% + 1 TO NumEls%
+    IF Array!(x%) < min! THEN min! = Array!(x%)
+  NEXT
+  MinS! = min!
 END FUNCTION
 
 FUNCTION MinC(Array(), Start%, NumEls%)
@@ -1175,134 +1207,6 @@ FUNCTION UnParseStr$(Code$)
 END FUNCTION
 
 FUNCTION UnSigned&(S%)
-  ERROR 73 ' Feature Unavailable
-END FUNCTION
-
-FUNCTION QPACOS#(X#)
-  ERROR 73 ' Feature Unavailable
-END FUNCTION
-
-FUNCTION QPASIN#(X#)
-  ERROR 73 ' Feature Unavailable
-END FUNCTION
-
-FUNCTION QPATAN2#(X#, Y#)
-  ERROR 73 ' Feature Unavailable
-END FUNCTION
-
-FUNCTION QPLOG10#(X#)
-  ERROR 73 ' Feature Unavailable
-END FUNCTION
-
-FUNCTION QPROUND$(Number#, Places%)
-  ERROR 73 ' Feature Unavailable
-END FUNCTION
-
-FUNCTION QPFV#(pmt#, intr#, term%)
-  ERROR 73 ' Feature Unavailable
-END FUNCTION
-
-FUNCTION QPFVN#(fv#, pmt#, intr#)
-  ERROR 73 ' Feature Unavailable
-END FUNCTION
-
-FUNCTION QPFVP#(fv#, intr#, term%)
-  ERROR 73 ' Feature Unavailable
-END FUNCTION
-
-FUNCTION QPFVD#(pmt#, intr#, term%)
-  ERROR 73 ' Feature Unavailable
-END FUNCTION
-
-FUNCTION QPFVND#(fv#, pmt#, intr#)
-  ERROR 73 ' Feature Unavailable
-END FUNCTION
-
-FUNCTION QPFVPD#(fv#, intr#, term#)
-  ERROR 73 ' Feature Unavailable
-END FUNCTION
-
-FUNCTION QPPMT#(pv#, intr#, term%, bal#)
-  ERROR 73 ' Feature Unavailable
-END FUNCTION
-
-FUNCTION QPPV#(pmt#, intr#, term%, bal#)
-  ERROR 73 ' Feature Unavailable
-END FUNCTION
-
-FUNCTION QPPVN#(pmt#, intr#, pv#, bal#)
-  ERROR 73 ' Feature Unavailable
-END FUNCTION
-
-FUNCTION QPPMTD#(pv#, intr#, term%, bal#)
-  ERROR 73 ' Feature Unavailable
-END FUNCTION
-
-FUNCTION QPPVD#(pmt#, intr#, term%, bal#)
-  ERROR 73 ' Feature Unavailable
-END FUNCTION
-
-FUNCTION QPPVND#(pmt#, intr#, pv#, bal#)
-  ERROR 73 ' Feature Unavailable
-END FUNCTION
-
-FUNCTION QPCINT#(pv#, intr#, term%)
-  ERROR 73 ' Feature Unavailable
-END FUNCTION
-
-FUNCTION QPCTERM#(pv#, fv#, intr#)
-  ERROR 73 ' Feature Unavailable
-END FUNCTION
-
-FUNCTION QPIRR#(intr#, Array#())
-  ERROR 73 ' Feature Unavailable
-END FUNCTION
-
-FUNCTION QPNPV#(intr#, Array#())
-  ERROR 73 ' Feature Unavailable
-END FUNCTION
-
-FUNCTION QPRATE#(pv#, fv#, term%)
-  ERROR 73 ' Feature Unavailable
-END FUNCTION
-
-FUNCTION QPDDB#(cost#, sal#, life%, per%, m!)
-  ERROR 73 ' Feature Unavailable
-END FUNCTION
-
-FUNCTION QPSLN#(cost#, sal#, life%)
-  ERROR 73 ' Feature Unavailable
-END FUNCTION
-
-FUNCTION QPSYD#(cost#, sal#, life%, per%)
-  ERROR 73 ' Feature Unavailable
-END FUNCTION
-
-FUNCTION QPAVG#(Array#())
-  ERROR 73 ' Feature Unavailable
-END FUNCTION
-
-FUNCTION QPCOUNT%(Array#())
-  ERROR 73 ' Feature Unavailable
-END FUNCTION
-
-FUNCTION QPMAX#(Array#())
-  ERROR 73 ' Feature Unavailable
-END FUNCTION
-
-FUNCTION QPMIN#(Array#())
-  ERROR 73 ' Feature Unavailable
-END FUNCTION
-
-FUNCTION QPSUM#(Array#())
-  ERROR 73 ' Feature Unavailable
-END FUNCTION
-
-FUNCTION QPVAR#(Array#()) 
-  ERROR 73 ' Feature Unavailable
-END FUNCTION
-
-FUNCTION QPSTD#(Array#())
   ERROR 73 ' Feature Unavailable
 END FUNCTION
 

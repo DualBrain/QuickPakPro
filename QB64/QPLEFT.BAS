@@ -1,7 +1,7 @@
 ' ********* QPLEFT.BAS - demonstrates QPLeft$, QPRight$, and QPMid$
 
 ' Copyright (c) 1988 Ethan Winer
-' Modifications (c) 2020 Cory Smith
+' Modifications (c) 2022 Cory Smith
 
 DEFINT A-Z
 
