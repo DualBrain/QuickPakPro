@@ -1134,35 +1134,7 @@ END FUNCTION
 ' Chapter 4 - Functions
 ' ****************************************
 
-FUNCTION Bit2Num%(Binary$)
-  ERROR 73 ' Feature Unavailable
-END FUNCTION
-
-FUNCTION C2F!(CTemp!)
-  ERROR 73 ' Feature Unavailable
-END FUNCTION
-
-FUNCTION Delimit%(Work$, Table$)
-  ERROR 73 ' Feature Unavailable
-END FUNCTION
-
-FUNCTION Eval#(Number$)
-  ERROR 73 ' Feature Unavailable
-END FUNCTION
-
-FUNCTION ExpandTab$(Original$, NumSpaces%)
-  ERROR 73 ' Feature Unavailable
-END FUNCTION
-
-FUNCTION F2C!(FTemp!)
-  ERROR 73 ' Feature Unavailable
-END FUNCTION
-
-FUNCTION LastFirst$(OldName$)
-  ERROR 73 ' Feature Unavailable
-END FUNCTION
-
-FUNCTION LastLast$(OldName$)
+FUNCTION Bin2Num%(Binary$)
   ERROR 73 ' Feature Unavailable
 END FUNCTION
 
@@ -1170,43 +1142,11 @@ FUNCTION Num2Bin$(Number%)
   ERROR 73 ' Feature Unavailable
 END FUNCTION
 
-FUNCTION Num2Bin2(Number%)
-  ERROR 73 ' Feature Unavailable
-END FUNCTION
-
-FUNCTION Pad$(Number!, Digits%)
-  ERROR 73 ' Feature Unavailable
-END FUNCTION
-
-SUB Parse(Work$, Delim$, Array$())
-  ERROR 73 ' Feature Unavailable
-END SUB
-
-FUNCTION ParseStr$(List$)
+FUNCTION Num2Bin2$(Number%)
   ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 FUNCTION QPHex$(Value, NumDigits%)
-  ERROR 73 ' Feature Unavailable
-END FUNCTION
-
-FUNCTION Rand!(ValLower!, ValUpper!)
-  ERROR 73 ' Feature Unavailable
-END FUNCTION
-
-FUNCTION ShrinkTab$(Original$, NumSpaces%)
-  ERROR 73 ' Feature Unavailable
-END FUNCTION
-
-FUNCTION Signed%(US&)
-  ERROR 73 ' Feature Unavailable
-END FUNCTION
-
-FUNCTION UnParseStr$(Code$)
-  ERROR 73 ' Feature Unavailable
-END FUNCTION
-
-FUNCTION UnSigned&(S%)
   ERROR 73 ' Feature Unavailable
 END FUNCTION
 
@@ -2266,16 +2206,36 @@ END FUNCTION
 ' within another, and the case-sensitive search string may contain 
 ' any number of "?" wild cards. 
 FUNCTION InCount%(Source$, SearchValue$)
-  ' TODO: Need to leverage QInstr%
-  ERROR 73 ' Feature Unavailable
+  result% = 0
+  pos1% = 1
+  DO
+    p% = QInstr%(pos1%, Source$, SearchValue$)
+    IF p% > 0 THEN
+      result% = result% + 1
+      pos1% = p% + LEN(SearchValue$)
+    ELSE
+      EXIT DO
+    END IF
+  LOOP
+  InCount% = result%
 END FUNCTION
 
 ' InCount2 will quickly report how many times one string occurs 
 ' within another, and the case-insensitive search string may contain 
 ' any number of "?" wild cards. 
 FUNCTION InCount2%(Source$, SearchValue$)
-  ' TODO: Need to leverage QInstr%
-  ERROR 73 ' Feature Unavailable
+  result% = 0
+  pos1% = 1
+  DO
+    p% = QInstr2%(pos1%, Source$, SearchValue$)
+    IF p% > 0 THEN
+      result% = result% + 1
+      pos1% = p% + LEN(SearchValue$)
+    ELSE
+      EXIT DO
+    END IF
+  LOOP
+  InCount2% = result%
 END FUNCTION
 
 FUNCTION InCountTbl%(Source$, Table$)
