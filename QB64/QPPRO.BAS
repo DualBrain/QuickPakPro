@@ -1134,16 +1134,63 @@ END FUNCTION
 ' Chapter 4 - Functions
 ' ****************************************
 
-FUNCTION Bin2Num%(Binary$)
-  ERROR 73 ' Feature Unavailable
+FUNCTION Bin2Num%(binary$)
+  b$ = RIGHT$("0000000000000000" + binary$, 16)
+  result& = VAL(MID$(b$, 16, 1))
+  FOR x% = LEN(b$) - 1 TO 2 STEP - 1
+    v% = VAL(MID$(b$, x%, 1))
+    IF v% > 0 THEN
+      v% = 16 - x%
+      result& = result& + (2 ^ v%)
+    END IF
+  NEXT
+  'IF INSTR(b$, "0") = 0 THEN
+  '  result& = -1
+  'ELSE
+  IF MID$(b$, 1, 1) = "1" THEN
+    result& = -(32768 - result&) 
+  END IF
+  Bin2Num% = CINT(result&)
 END FUNCTION
 
-FUNCTION Num2Bin$(Number%)
-  ERROR 73 ' Feature Unavailable
+' Num2Bin will convert a number into an equivalent binary string with 
+' a fixed length of 16 digits. 
+FUNCTION Num2Bin$(number%)
+  n& = number%
+  IF n& < O THEN n& = n& + 65536 
+  IF n& = 0 THEN
+    Num2Bin$ = "0000000000000000"
+  ELSEIF n& > 0 THEN
+    result$ = ""
+    i# = 2 ^ CLNG(LOG(n&) / LOG(2) + 0.1)
+    DO WHILE i# >= 1
+      c& = FIX(n& / i#)
+      result$ = result$ + LTRIM$(STR$(c&))
+      n& = n& - i# * c&
+      i# = i# / 2
+    LOOP
+    Num2Bin$ = RIGHT$("0000000000000000" + result$, 16)
+  END IF
 END FUNCTION
 
-FUNCTION Num2Bin2$(Number%)
-  ERROR 73 ' Feature Unavailable
+' Num2Bin2 will convert a number into an equivalent binary string with 
+' only as many digits as required to represent the number. 
+FUNCTION Num2Bin2$(number%)
+  n& = number%
+  IF n& < O THEN n& = n& + 65536 
+  IF n& = 0 THEN
+    Num2Bin2$ = "0"
+  ELSEIF n& > 0 THEN
+    result$ = ""
+    i# = 2 ^ CLNG(LOG(n&) / LOG(2) + 0.1)
+    DO WHILE i# >= 1
+      c& = FIX(n& / i#)
+      result$ = result$ + LTRIM$(STR$(c&))
+      n& = n& - i# * c&
+      i# = i# / 2
+    LOOP
+    Num2Bin2$ = result$
+  END IF
 END FUNCTION
 
 FUNCTION QPHex$(Value, NumDigits%)
