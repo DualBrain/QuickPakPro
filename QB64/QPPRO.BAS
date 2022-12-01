@@ -34,10 +34,6 @@ SUB DeleteT(Array(), Element%, ElSize%, NumEls%)
   ERROR 73 ' Feature Unavailable
 END SUB
 
-SUB DimBits(Array$, NumEls%)
-  ERROR 73 ' Feature Unavailable
-END SUB
-
 SUB Fill2(Array%(), Start%, Value%, NumEls%)
   ERROR 73 ' Feature Unavailable
 END SUB
@@ -95,12 +91,34 @@ FUNCTION FindLast% (array$(), numEls%)
       EXIT FUNCTION
     END IF
   NEXT
-  FineLast% = numEls%
+  FindLast% = numEls%
 END FUNCTION
 
-FUNCTION GetBit%(Array$, Element%)
-  ERROR 73 ' Feature Unavailable
+FUNCTION GetBit%(array$, element%)
+  ' NOTE: Not sure if this matches the original QPPro implementation.
+  entry% = (element% \ 8) + 1
+  bit% = element% MOD 8
+  byt% = ASC(MID$(array$, entry%, 1))
+  test% = 2 ^ bit%
+  IF (byt% AND test%) = test% THEN
+    GetBit% = -1
+  ELSE 
+    GetBit% = 0
+  END IF
 END FUNCTION
+
+SUB SetBit(array$, element%, value%)
+  ' NOTE: Not sure if this matches the original QPPro implementation.
+  entry% = (element% \ 8) + 1
+  bit% = element% MOD 8
+  byt% = ASC(MID$(array$, entry%, 1))
+  IF value% THEN
+    byt% = byt% XOR (2 ^ bit%)
+  ELSE 
+    byt% = byt% AND NOT (2 ^ bit%)
+  END IF
+  MID$(array$, entry%, 1) = CHR$(byt%)
+END SUB
 
 FUNCTION IMaxD%(Array#(), Start%, NumEls%)
   ERROR 73 ' Feature Unavailable
@@ -280,10 +298,6 @@ SUB SearchT(Array(), Start%, NumEls%, Match, Found%, Dir%, Code%, StructSize%, M
 END SUB
 
 SUB SearchT2(Array(), Start%, NumEls%, Match, Found%, Dir%, Code%, StructSize%, MemberOf%, MemberSize%)
-  ERROR 73 ' Feature Unavailable
-END SUB
-
-SUB SetBit(Array$, Element%, Bit%)
   ERROR 73 ' Feature Unavailable
 END SUB
 

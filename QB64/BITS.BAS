@@ -1,11 +1,15 @@
-'********** BITS.BAS - allows creating and manipulating "bit" arrays
+' ********** BITS.BAS - allows creating and manipulating "bit" arrays
 
-'Copyright (c) 1988 Ethan Winer
-
+' Copyright (c) 1988 Ethan Winer
+' Modifications (c) 2022 Cory Smith
 
 DEFINT A-Z
 
-DECLARE SUB DimBits (Array$, ArraySize)         'dims a bit array
+'$INCLUDE: 'QPPRO.BI'
+
+_FULLSCREEN _SQUAREPIXELS
+
+DECLARE SUB DimBits (Array$, Size)         'dims a bit array
 DECLARE SUB SetBit (Array$, BitNumber, Bit)     'assigns to the bit array
 DECLARE FUNCTION GetBit% (Array$, BitNumber)    'returns elements from array
 
@@ -29,7 +33,8 @@ FOR X = 0 TO NumEls             'examine all of the elements to prove it works
   END IF
 NEXT
 
-SUB DimBits (Array$, ArraySize)
-  Array$ = STRING$(ArraySize \ 8 + 1, 0)        'each character holds 8 bits
+SUB DimBits (Array$, Size%)
+  Array$ = STRING$(Size% \ 8 + 1, 0)        'each character holds 8 bits
 END SUB
 
+'$INCLUDE: 'QPPRO.BAS'

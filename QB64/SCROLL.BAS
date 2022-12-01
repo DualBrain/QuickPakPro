@@ -5,6 +5,10 @@
 
 DEFINT A-Z
 
+'$INCLUDE: 'QPPRO.BI'
+
+_FULLSCREEN _SQUAREPIXELS
+
 DECLARE SUB ScrollU (ulRow, ulCol, lrRow, lrCol, lines, page)
 DECLARE SUB ScrollD (ulRow, ulCol, lrRow, lrCol, lines, page)
 DECLARE SUB ScrollL (ulRow, ulCol, lrRow, lrCol, lines, page)

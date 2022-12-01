@@ -5,6 +5,10 @@
 
 DEFINT A-Z
 
+'$INCLUDE: 'QPPRO.BI'
+
+_FULLSCREEN _SQUAREPIXELS
+
 DECLARE FUNCTION ArraySize% (ulRow, ulCol, lrRow, lrCol)
 DECLARE SUB Pause (ticks)
 DECLARE SUB ScrnSave (ulRow, ulCol, lrRow, lrCol, SEG addr, page)
