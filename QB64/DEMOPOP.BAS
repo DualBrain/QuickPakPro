@@ -12,7 +12,7 @@ _FULLSCREEN _SQUAREPIXELS
 DECLARE SUB ASCIIChart (row, column, lines)
 DECLARE SUB Calc (ulRow, ulCol, fg, bg)
 DECLARE SUB Calendar (mnth, dy, yr, ulRow, ulCol, colr1, colr2, action)
-'DECLARE SUB CSMsgBox (message$, wdth, cnf AS ANY)
+DECLARE SUB CSMsgBox (message$, wdth, cnf AS ANY)
 DECLARE FUNCTION Monitor% ()
 
 '$INCLUDE: 'DefCnf.BI'          ' defines the TYPE variable for MsgBox
@@ -81,13 +81,13 @@ DATA "but don't want to bother having to deal with how it will be formatted."
 
 wdth = 54                'a box 54 characters wide will be centered on screen
 LOCATE 3                 'the top of the box goes on line 3
-'CALL CSMsgBox(message$, wdth, cnf)
+CALL CSMsgBox(message$, wdth, cnf)
 CALL WaitKey
-'CALL CSMsgBox("", 0, cnf) 'the parameters used the second time don't matter
+CALL CSMsgBox("", 0, cnf) 'the parameters used the second time don't matter
                           ' as long as the message string is null
 
 '$INCLUDE: 'ASCCHART.BAS'
 '$INCLUDE: 'CALC.BAS'
 '$INCLUDE: 'CALENDAR.BAS'
-'$NOCLUDE: 'MSGBOX.BAS'
+'$INCLUDE: 'MSGBOX.BAS'
 '$INCLUDE: 'QPPRO.BAS'
