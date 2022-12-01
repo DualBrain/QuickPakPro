@@ -3,9 +3,11 @@
 ' Copyright (c) 1989 Ethan Winer
 ' Modifications (c) 2022 Cory Smith
 
+DEFINT A-Z
+
 '$INCLUDE: 'QPPRO.BI'
 
-DEFINT A-Z
+_FULLSCREEN _SQUAREPIXELS
 
 DECLARE SUB ReadFile (array$())
 DECLARE SUB SortStr (array$(), start, numEls, direction)

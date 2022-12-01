@@ -6,6 +6,10 @@
 
 DEFINT A-Z
 
+'$INCLUDE: 'QPPRO.BI'
+
+_FULLSCREEN _SQUAREPIXELS
+
 ' ----- Look up tables for number words
 
 CONST SPELLNUM_NUMS$ = "123456789"

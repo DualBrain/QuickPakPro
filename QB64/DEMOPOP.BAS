@@ -5,9 +5,13 @@
 
 DEFINT A-Z
 
+'$INCLUDE: 'QPPRO.BI'
+
+_FULLSCREEN _SQUAREPIXELS
+
 DECLARE SUB ASCIIChart (row, column, lines)
 DECLARE SUB Calc (ulRow, ulCol, fg, bg)
-'DECLARE SUB Calendar (mnth, dy, yr, ulRow, ulCol, colr1, colr2, action)
+DECLARE SUB Calendar (mnth, dy, yr, ulRow, ulCol, colr1, colr2, action)
 'DECLARE SUB CSMsgBox (message$, wdth, cnf AS ANY)
 DECLARE FUNCTION Monitor% ()
 
@@ -54,11 +58,11 @@ yr = VAL(RIGHT$(DATE$, 4))
 dy = VAL(MID$(DATE$, 4, 2))
 
 action = 1                      'display the calendar
-'CALL Calendar(mnth, dy, yr, ulRow, ulCol, colr1, colr2, action)
+CALL Calendar(mnth, dy, yr, ulRow, ulCol, colr1, colr2, action)
 CALL WaitKey
 
 action = 0                      'remove the calendar
-'CALL Calendar(mnth, dy, yr, ulRow, ulCol, colr1, colr2, action)
+CALL Calendar(mnth, dy, yr, ulRow, ulCol, colr1, colr2, action)
 
 '----- MsgBox - word wraps a message
 
@@ -84,6 +88,6 @@ CALL WaitKey
 
 '$INCLUDE: 'ASCCHART.BAS'
 '$INCLUDE: 'CALC.BAS'
-'$NOCLUDE: 'CALENDAR.BAS'
+'$INCLUDE: 'CALENDAR.BAS'
 '$NOCLUDE: 'MSGBOX.BAS'
 '$INCLUDE: 'QPPRO.BAS'

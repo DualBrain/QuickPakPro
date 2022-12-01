@@ -6,6 +6,10 @@
 
 DEFINT A-Z
 
+'$INCLUDE: 'QPPRO.BI'
+
+_FULLSCREEN _SQUAREPIXELS
+
 DECLARE SUB BarPrint (choice$(), barColor)
 DECLARE FUNCTION Monitor% ()
 DECLARE SUB PullDown (choice$(), stat(), menu, choice, ky$, action, cnf AS ANY)
@@ -17,7 +21,7 @@ DECLARE SUB HideCursor ()
 ' screen colors.  The second $Include determines the type of monitor you
 ' are using and assigns appropriate colors.
 
-'$NOCLUDE: 'DefCnf.BI'
+'$INCLUDE: 'DefCnf.BI'
 '$INCLUDE: 'SetCnf.BI'
 
 CLS

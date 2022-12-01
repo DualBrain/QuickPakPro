@@ -5,6 +5,10 @@
 
 DEFINT A-Z
 
+'$INCLUDE: 'QPPRO.BI'
+
+_FULLSCREEN _SQUAREPIXELS
+
 DECLARE SUB Chime (number)
 DECLARE SUB Pause (ticks)
 DECLARE SUB QPSound (frequency, duration)

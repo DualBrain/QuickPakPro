@@ -3,10 +3,12 @@
 ' Copyright (c) 1988 Ethan Winer
 ' Modified (c) 2022 Cory Smith
 
+DEFINT A-Z  ' use integers throughout - faster and requires less variable space
+
+'$INCLUDE: 'QPPRO.BI'
+
 _FULLSCREEN _SQUAREPIXELS
 
-DEFINT A-Z  ' use integers throughout - faster and requires less variable space
-  
 'BASIC subprograms demonstrated
 DECLARE SUB CapNum ()
 DECLARE SUB DateIn (dt$, exitCode, colr)

@@ -5,6 +5,10 @@
 
 DEFINT A-Z
 
+'$INCLUDE: 'QPPRO.BI'
+
+_FULLSCREEN _SQUAREPIXELS
+
 DECLARE SUB PaintBox (ulRow, ulCol, lrRow, lrCol, colr, page)
 
 ' Removed and replaced with the OneColor function.

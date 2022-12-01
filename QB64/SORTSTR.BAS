@@ -3,9 +3,11 @@
 ' Copyright (c) 1987 Ethan Winer
 ' Modifications (c) 2022 Cory Smith
 
+DEFINT A-Z
+
 '$INCLUDE: 'QPPRO.BI'
 
-DEFINT A-Z
+_FULLSCREEN _SQUAREPIXELS
 
 DECLARE SUB SortStr (address$(), start, size, direction)
 DECLARE SUB SortStr2 (address$(), start, size, direction)

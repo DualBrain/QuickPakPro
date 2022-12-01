@@ -1578,16 +1578,20 @@ SUB MouseTrap(ulRow%, ulCol%, lrRow%, lrCol%)
   ERROR 73 ' Feature Unavailable
 END SUB
 
+' NumLock will quickly tell if the NumLock key is currently depressed. 
 FUNCTION NumLock%
-  ERROR 73 ' Feature Unavailable
+  ' Active receives -1 if the NumLock key is currently down, or O if it is not. 
+  NumLock% = _NUMLOCK
 END FUNCTION
 
+' NumOff turns off the NumLock key status. 
 SUB NumOff
-  ERROR 73 ' Feature Unavailable
+  _NUMLOCK OFF
 END SUB
 
+' NumOn turns on the NumLock key status. 
 SUB NumOn
-  ERROR 73 ' Feature Unavailable
+  _NUMLOCK ON
 END SUB
 
 ' PeekBuf provides a handy way to determine what key if any is the 
@@ -2916,6 +2920,28 @@ SUB QPrintRC (txt$, r%, c%, clr%)
   IF ofg% <> -1 AND obg% <> -1 THEN
     COLOR ofg%, obg%
   END IF
+END SUB
+
+' ReadScrn will quickly read characters from the display screen, and 
+' store them in a specified string variable. 
+SUB ReadScrn (row%, column%, x$, page%)
+  ' row% and column% tell ReadScrn where on the screen the 
+  ' characters are located, x$ receives the screen contents, and page% 
+  ' indicates which video page to read. If Page% is set to -1, then 
+  ' ReadScrn will read from the currently active screen page. 
+  ' The number of characters to be read is specified by the length of X$.
+  FOR c% = column% TO column% + LEN(x$) - 1
+    MID$(x$, c% - column% + 1, 1) = CHR$(SCREEN(row%, c%))
+  NEXT
+END SUB
+
+' ReadScrn0 will quickly read characters from the display screen, 
+' and store them in a specified string variable. 
+SUB ReadScrn0 (row%, column%, x$)
+  ' Row% and Column% tell ReadScrn0 where on the screen the 
+  ' characters are located, and X$ receives the screen contents. 
+  ' The number of characters to read is specified by the length of X$. 
+  CALL ReadScrn (row%, column%, x$, 0)
 END SUB
 
 ' ScrnRest will restore a screen that had previously been saved with 

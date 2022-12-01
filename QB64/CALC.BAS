@@ -1,15 +1,14 @@
-'********** CALC.BAS - pop-up calculator from BASIC
+' ********** CALC.BAS - pop-up calculator from BASIC
 
-'Copyright (c) 1988 Don Resnick
-'Copyright (c) 1988 Crescent Software
-
+' Copyright (c) 1988 Don Resnick
+' Copyright (c) 1988 Crescent Software
+' Modifications (c) 2022 Cory Smith
 
 DEFINT A-Z
 
 '----- BASIC subprograms
 DECLARE SUB TextEntry (Colr, ExitCode, Number$, Row, Col)
 DECLARE SUB Calc (ULRow, ULCol, FG, BG)
-
 
 '----- assembler routines
 DECLARE SUB Box (TopRow, LeftCol, BotmRow, RightCol, Style, Colr, Page)
@@ -20,7 +19,6 @@ DECLARE SUB ReadScrn0 (Row, Col, X$)
 DECLARE SUB ScrnSave0 (TopRow, LeftCol, BotmRow, RightCol, SEG Address)
 DECLARE SUB ScrnRest0 (TopRow, LeftCol, BotmRow, RightCol, SEG Address)
 DECLARE SUB ScrollU (TopRow, LeftCol, BotmRow, RightCol, Lines, Page)
-
 
 '----- assembler functions
 
@@ -37,17 +35,17 @@ SUB Calc (TopRow, LeftCol, CF, CB) STATIC
    
     'CalcWndo() holds the saved screen under the calculator
     DIM CalcWndo(((BotmRow - TopRow + 1) * (RightCol - LeftCol + 1)) * 2)
-    CALL ScrnSave0(TopRow, LeftCol, BotmRow, RightCol, CalcWndo(0))
+    CALL ScrnSave0(TopRow, LeftCol, BotmRow, RightCol, CalcWndo())
    
     CALL ClearScr(TopRow, LeftCol, BotmRow, RightCol, Colr, -1) 'clear window
     CALL Box(TopRow, LeftCol, BotmRow, RightCol, 2, Colr, -1)   'make a box
    
-    Title$ = "µ Calculator ∆"                   'change this if you'd like
+    Title$ = CHR$(198) + " Calculator " + CHR$(181)                   'change this if you'd like
     LOCATE TopRow, ((RightCol - LeftCol + 1) / 2 - LEN(Title$) / 2) + LeftCol
     CALL QPrint0(Title$, Colr)
 
     LOCATE BotmRow, LeftCol + 2
-    CALL QPrint0("µ F7 for Printer ∆", Colr)
+    CALL QPrint0(CHR$(198) + " F7 for Printer " + CHR$(181), Colr)
     F7 = 0                                      'F7 flags if also LPRINTing
 
 Init:
@@ -69,18 +67,18 @@ Begin:
             X$ = INKEY$
             PrinterStatus = PRNReady%(1)
             LOCATE BotmRow, LeftCol + 2, 0
-            CALL QPrint0("µ Turn printer on ∆", Colr)
+            CALL QPrint0(CHR$(198) + " Turn printer on " + CHR$(181), Colr)
             IF X$ <> "" THEN EXIT DO            'any key to exit loop
           LOOP WHILE PrinterStatus = 0          'keep checking printer
           IF X$ = "" THEN
             F7 = 1                              'turn printer flag on
             LOCATE BotmRow, LeftCol + 2
-            CALL QPrint0("ÕÕÕÕÕµ Print ∆ÕÕÕÕÕ", Colr)
+            CALL QPrint0(STRING$(5, 205) + CHR$(198) + " Print " + CHR$(181) + STRING$(5, 205), Colr)
           END IF
         ELSE
           F7 = 0                                'turn printer flag off
           LOCATE BotmRow, LeftCol + 2
-          CALL QPrint0("µ F7 for Printer ∆", Colr)
+          CALL QPrint0(CHR$(198) + " F7 for Printer " + CHR$(181), Colr)
         END IF
         GOTO Begin
 
@@ -159,7 +157,7 @@ DisplayResult:
        IF NOT ZeroFlag THEN
          PRINT USING "###########.##"; Result#; 'print result, then paint
        ELSE
-         CALL QPrint0("             Ï", Colr)   'display infinity
+         CALL QPrint0("             " + CHR$(236), Colr)   'display infinity
        END IF
        CALL PaintBox(Row + 1, LeftCol + 2, Row + 1, LeftCol + 19, Colr, -1)
     END IF
@@ -173,7 +171,7 @@ DisplayResult:
        IF NOT ZeroFlag THEN
          LPRINT USING "###########.## *"; Result#
        ELSE
-         LPRINT "             Ï"
+         LPRINT "             " + CHR$(236)
        END IF
     END IF
 RETURN
@@ -198,7 +196,7 @@ RETURN
 
 StopCalc:                                       'end the calculation
     LOCATE BotmRow, LeftCol + 1, 0              'can either start another
-    CALL QPrint0("µ(A)nother / (Q)uit∆", Colr)  'or quit out of calculator
+    CALL QPrint0(CHR$(198) + "(A)nother / (Q)uit" + CHR$(181), Colr)  'or quit out of calculator
 
     Y$ = UCASE$(INKEY$)
     WHILE Y$ = ""
@@ -208,7 +206,7 @@ StopCalc:                                       'end the calculation
        ELSEIF Y$ = "A" THEN
          CALL ClearScr(TopRow + 1, LeftCol + 1, BotmRow - 1, RightCol - 1, Colr, -1)
          LOCATE BotmRow, LeftCol + 1
-         CALL QPrint0("Õµ F7 for Printer ∆Õ", Colr)
+         CALL QPrint0(CHR$(205) + CHR$(198) + " F7 for Printer " + CHR$(181) + CHR$(205), Colr)
          GOTO Init
        ELSE
          Y$ = ""
@@ -216,7 +214,7 @@ StopCalc:                                       'end the calculation
     WEND
 
 QuitCalc:
-    CALL ScrnRest0(TopRow, LeftCol, BotmRow, RightCol, CalcWndo(0))
+    CALL ScrnRest0(TopRow, LeftCol, BotmRow, RightCol, CalcWndo())
     ERASE CalcWndo
     LOCATE OldRow, OldCol               'restore original cursor position
 
@@ -345,4 +343,3 @@ EndText:
     END IF
 
 END SUB
-

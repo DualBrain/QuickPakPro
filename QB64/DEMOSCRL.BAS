@@ -6,6 +6,10 @@
 
 DEFINT A-Z
 
+'$INCLUDE: 'QPPRO.BI'
+
+_FULLSCREEN _SQUAREPIXELS
+
 DECLARE SUB ScrollIn (eit$, start, wide, maxLen, filter, ky, edClr, clr)
 DECLARE SUB QPrint0 (txt$, clr)
 DECLARE SUB InitMouse (there)

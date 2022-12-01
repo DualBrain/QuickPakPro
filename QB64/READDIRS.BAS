@@ -7,6 +7,10 @@
 
 DEFINT A-Z
 
+'$INCLUDE: 'QPPRO.BI'
+
+_FULLSCREEN _SQUAREPIXELS
+
 DECLARE SUB CleanUp ()
 DECLARE SUB Display (T)
 DECLARE FUNCTION DCount (dSpec$)
@@ -19,10 +23,6 @@ DECLARE FUNCTION Padder$ (x)
 DECLARE SUB ReadDir (array$())
 DECLARE SUB ReadFile (array$())
 DECLARE SUB SetDrive (drive$)
-
-'$INCLUDE: 'QPPRO.BI'
-
-_FULLSCREEN _SQUAREPIXELS
 
 'We SHOULD be using "SEG Element$" instead of "BYVAL Segment, BYVAL Address",
 'in ReadFileT, but a "design decision" in QB 4 prevents this from working.
