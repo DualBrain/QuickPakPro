@@ -5,6 +5,10 @@
 
 DEFINT A-Z
 
+'$INCLUDE: 'QPPRO.BI'
+
+_FULLSCREEN _SQUAREPIXELS
+
 DECLARE SUB ClearScr (ulRow, ulCol, lrRow, lrCol, colr, page)
 
 'WIDTH 80, 43               'for testing

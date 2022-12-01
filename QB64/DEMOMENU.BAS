@@ -10,6 +10,8 @@ DEFINT A-Z
 
 '$INCLUDE: 'QPPRO.BI'
 
+_FULLSCREEN _SQUAREPIXELS
+
 '----- BASIC subprograms
 '
 DECLARE SUB BarPrint (Choice$(), BarClr)

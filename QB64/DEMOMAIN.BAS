@@ -5,6 +5,10 @@
 
 DEFINT A-Z
 
+'$INCLUDE: 'QPPRO.BI'
+
+_FULLSCREEN _SQUAREPIXELS
+
 DECLARE SUB MainMenu (item$(), choice, colr)
 
 CLS
