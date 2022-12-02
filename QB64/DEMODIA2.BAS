@@ -56,7 +56,7 @@ OrigDrv$ = Drive$                      'Save a copy so we can restore it later
 OrigPath$ = Path$                      'Ditto
 
 FPath$ = Drive$ + ":" + Path$          'Build the file spec
-Count = FCount%(FileName$)                'See how many files match the spec
+Count = FCount%(FileName$)             'See how many files match the spec
 IF Count = 0 THEN Count = 1            'Make sure to dim at least 1 element
 REDIM Menu$(Count)
 FOR i = 1 TO Count                     'Set each element to 12 spaces long

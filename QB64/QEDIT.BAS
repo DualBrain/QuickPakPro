@@ -1,7 +1,7 @@
-'********** QEDIT.BAS - this version is for QuickBASIC 4.0
+' ********** QEDIT.BAS - this version is for QuickBASIC 4.0
 
-'Copyright (c) 1988-1990 Crescent Software
-'by Don Malin
+' Copyright (c) 1988-1990 Crescent Software
+' by Don Malin
 
 DEFINT A-Z
 

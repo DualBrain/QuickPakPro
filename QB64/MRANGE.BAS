@@ -39,16 +39,16 @@ LOCATE 25, 2
 PRINT "Press button 1 in a colored box to see the action, press button 2 to end.";
 
 FOR x = 1 TO 8                          ' get some data into it
-  READ mCoord(x).ULRow                  ' upper corners
-  READ mCoord(x).ULCol
-  READ mCoord(x).LRRow                  ' lower corners
-  READ mCoord(x).LRCol
-  READ mCoord(x).NumWindow              ' area number
+  READ mCoord(x).Y1                     ' upper corners
+  READ mCoord(x).X1
+  READ mCoord(x).Y2                     ' lower corners
+  READ mCoord(x).X2
+  READ mCoord(x).RN                     ' area number
   ' === if there's a color display use PaintBox to color the boxes
-  IF FG THEN CALL MPaintbox(mCoord(x).ULRow, mCoord(x).ULCol, mCoord(x).LRRow, mCoord(x).LRCol, 16 * x)
-  CALL Box0(mCoord(x).ULRow, mCoord(x).ULCol, mCoord(x).LRRow, mCoord(x).LRCol, 1, -1)
-  LOCATE mCoord(x).ULRow, mCoord(x).ULCol, 0
-  PRINT mCoord(x).NumWindow;            ' print the box number
+  IF FG THEN CALL MPaintbox(mCoord(x).Y1, mCoord(x).X1, mCoord(x).Y2, mCoord(x).X2, 16 * x)
+  CALL Box0(mCoord(x).Y1, mCoord(x).X1, mCoord(x).Y2, mCoord(x).X2, 1, -1)
+  LOCATE mCoord(x).Y1, mCoord(x).X1, 0
+  PRINT mCoord(x).RN;                   ' print the box number
   CALL Pause(3)                         ' pause for effect. . .
 NEXT x
    
@@ -64,7 +64,7 @@ WEND
 ' === if we got a valid range number then do some theatrics                          
 IF range THEN
   CALL HideCursor                       ' hide cursor for this print
-  CALL Box0(mCoord(range).ULRow, mCoord(range).ULCol, mCoord(range).LRRow, mCoord(range).LRCol, 1, 15 OR 128)
+  CALL Box0(mCoord(range).Y1, mCoord(range).X1, mCoord(range).Y2, mCoord(range).X2, 1, 15 OR 128)
   LOCATE 24, 45
   PRINT "You Picked box number"; range;
   CALL ShowCursor                       ' restore cursor
@@ -74,7 +74,7 @@ CALL HideCursor
 END
 
 ' =============================== Range Data areas ===========================
-'    ULR  ULC  LRR  LRC  RNum
+'     Y1   X1   Y2   X2  RN
 DATA  1,   1,  10,  10,  1
 DATA  4,   3,  17,  27,  2
 DATA  5,  40,  18,  72,  3

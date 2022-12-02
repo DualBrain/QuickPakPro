@@ -1243,7 +1243,7 @@ SUB DirFile(Array$(), Count%, ScanCode%, MsgColor%, FileColor%, HiLiteColor%, Bo
   ERROR 73 ' Feature Unavailable
 END SUB
 
-SUB Editor(Ed$, ActiveLength%, ScanCode%, NumOnly%, IsCapsOn%, NormalColor%, EditColor%, Row%, Column%)
+SUB Editor(ed$, activeLength%, scanCode%, numOnly%, isCapsOn%, normalColor%, editColor%, row%, column%)
   ERROR 73 ' Feature Unavailable
 END SUB
 
@@ -1272,7 +1272,7 @@ SUB MaskIn(Mask$, Text$, Mski)
   ERROR 73 ' Feature Unavailable
 END SUB
 
-SUB MEditor(Ed$, ActiveLength%, ScanCode%, NumOnly%, IsCapsOn%, NormalColor%, EditColor%, Row%, Column%, CurrentColumn%)
+SUB MEditor(ed$, activeLength%, scanCode%, numOnly%, isCapsOn%, normalColor%, editColor%, row%, column%, currentColumn%)
   ERROR 73 ' Feature Unavailable
 END SUB
 
@@ -1573,12 +1573,12 @@ SUB MouseRange(array() AS Area, start%, numEls%, row%, col%, button%, rangeNum%)
   CALL GetCursorT(row%, col%, button%)
   IF button% > 0 THEN
     FOR entry% = numEls% TO start% STEP - 1
-      IF row% >= array(entry%).ULRow AND row% <= array(entry%).LRRow THEN
-        IF col% >= array(entry%).ULCol AND col% <= array(entry%).LRCol THEN
-          IF array(entry%).NumWindow = -1 THEN
+      IF row% >= array(entry%).Y1 AND row% <= array(entry%).Y2 THEN
+        IF col% >= array(entry%).X1 AND col% <= array(entry%).X2 THEN
+          IF array(entry%).RN = -1 THEN
             rangeNum% = entry%
           ELSE
-            rangeNum% = array(entry%).NumWindow
+            rangeNum% = array(entry%).RN
           END IF
           EXIT FOR
         END IF
@@ -1592,12 +1592,12 @@ SUB MouseRange1(array() AS Area, start%, numEls%, row%, col%, button%, rangeNum%
   row% = -1: col% = -1 
   CALL GetCursorT(row%, col%, button%)
   FOR entry% = numEls% TO start% STEP - 1
-    IF row% >= array(entry%).ULRow AND row% <= array(entry%).LRRow THEN
-      IF col% >= array(entry%).ULCol AND col% <= array(entry%).LRCol THEN
-        IF array(entry%).NumWindow = -1 THEN
+    IF row% >= array(entry%).Y1 AND row% <= array(entry%).Y2 THEN
+      IF col% >= array(entry%).X1 AND col% <= array(entry%).X2 THEN
+        IF array(entry%).RN = -1 THEN
           rangeNum% = entry%
         ELSE
-          rangeNum% = array(entry%).NumWindow
+          rangeNum% = array(entry%).RN
         END IF
         EXIT FOR
       END IF
@@ -1614,12 +1614,12 @@ SUB MouseRangeG(array() AS Area, start%, numEls%, x%, y%, button%, rangeNum%)
   CALL GetCursor(x%, y%, button%)
   IF button% > 0 THEN
     FOR entry% = numEls% TO start% STEP - 1
-      IF y% >= array(entry%).ULRow AND y% <= array(entry%).LRRow THEN
-        IF x% >= array(entry%).ULCol AND x% <= array(entry%).LRCol THEN
-          IF array(entry%).NumWindow = -1 THEN
+      IF y% >= array(entry%).Y1 AND y% <= array(entry%).Y2 THEN
+        IF x% >= array(entry%).X1 AND x% <= array(entry%).X2 THEN
+          IF array(entry%).RN = -1 THEN
             rangeNum% = entry%
           ELSE
-            rangeNum% = array(entry%).NumWindow
+            rangeNum% = array(entry%).RN
           END IF
           EXIT FOR
         END IF
@@ -1633,12 +1633,12 @@ SUB MouseRangeG1(array() AS Area, start%, numEls%, x%, y%, button%, rangeNum%)
   x% = -1: y% = -1 
   CALL GetCursor(x%, y%, button%)
   FOR entry% = numEls% TO start% STEP - 1
-    IF y% >= array(entry%).ULRow AND y% <= array(entry%).LRRow THEN
-      IF x% >= array(entry%).ULCol AND x% <= array(entry%).LRCol THEN
-        IF array(entry%).NumWindow = -1 THEN
+    IF y% >= array(entry%).Y1 AND y% <= array(entry%).Y2 THEN
+      IF x% >= array(entry%).X1 AND x% <= array(entry%).X2 THEN
+        IF array(entry%).RN = -1 THEN
           rangeNum% = entry%
         ELSE
-          rangeNum% = array(entry%).NumWindow
+          rangeNum% = array(entry%).RN
         END IF
         EXIT FOR
       END IF
@@ -1716,6 +1716,7 @@ SUB ShowCursor
 END SUB
 
 SUB StuffBuf(X$)
+  ' User32 (Windows) SendInput https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-sendinput API
   ERROR 73 ' Feature Unavailable
 END SUB
 

@@ -8,6 +8,8 @@ DEFINT A-Z
 
 '$INCLUDE: 'QPPRO.BI'
 
+_FULLSCREEN _SQUAREPIXELS
+
 DECLARE SUB ClearEOL (colr%)    'for the demo only
 DECLARE FUNCTION Monitor% ()    'determines monitor type
 

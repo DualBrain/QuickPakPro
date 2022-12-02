@@ -255,13 +255,13 @@ REDIM MouseBox(NumChoices) AS Area
 
 FOR i = 1 TO NumButtons                    'Make button string
   Button$ = Button$ + STRING$(AvgSpc, CHR$(32)) + Text$(i)
-  MouseBox(i).ULRow = LRRow - 1            'Define mouse windows for buttons
-  MouseBox(i).LRRow = MouseBox(i).ULRow
-  MouseBox(i).ULCol = ULCol + LEN(Button$) - (LEN(Text$(i)) - 1 + OS)
-  MouseBox(i).LRCol = MouseBox(i).ULCol + (LEN(Text$(i)) - 1)
-  MouseBox(i).NumWindow = i
-  Dial(i).Row = MouseBox(i).ULRow        'Define row
-  Dial(i).Col = MouseBox(i).ULCol + 2    'Define column
+  MouseBox(i).Y1 = LRRow - 1            'Define mouse windows for buttons
+  MouseBox(i).Y2 = MouseBox(i).Y1
+  MouseBox(i).X1 = ULCol + LEN(Button$) - (LEN(Text$(i)) - 1 + OS)
+  MouseBox(i).X2 = MouseBox(i).X1 + (LEN(Text$(i)) - 1)
+  MouseBox(i).RN = i
+  Dial(i).Row = MouseBox(i).Y1        'Define row
+  Dial(i).Col = MouseBox(i).X1 + 2    'Define column
   WindowNum = WindowNum + 1
 NEXT
 
@@ -320,13 +320,13 @@ FOR i = (NumButtons + 1) TO UpperBound
     CASE 2, 3         'Check box
       LOCATE ULRow + RowPtr, ULCol + 3
       CALL QPrint0(Text$(i), BClr)
-      MouseBox(WindowNum).ULRow = ULRow + RowPtr    'Define mouse window
-      MouseBox(WindowNum).LRRow = MouseBox(WindowNum).ULRow
-      MouseBox(WindowNum).ULCol = ULCol + 4
-      MouseBox(WindowNum).LRCol = MouseBox(WindowNum).ULCol + LEN(Text$(i)) - 2
-      MouseBox(WindowNum).NumWindow = i
-      Dial(i).Row = MouseBox(WindowNum).ULRow         'Define row
-      Dial(i).Col = MouseBox(WindowNum).ULCol         'Define column
+      MouseBox(WindowNum).Y1 = ULRow + RowPtr    'Define mouse window
+      MouseBox(WindowNum).Y2 = MouseBox(WindowNum).Y1
+      MouseBox(WindowNum).X1 = ULCol + 4
+      MouseBox(WindowNum).X2 = MouseBox(WindowNum).X1 + LEN(Text$(i)) - 2
+      MouseBox(WindowNum).RN = i
+      Dial(i).Row = MouseBox(WindowNum).Y1         'Define row
+      Dial(i).Col = MouseBox(WindowNum).X1         'Define column
       WindowNum = WindowNum + 1
       RowPtr = RowPtr + 1
 
@@ -335,13 +335,13 @@ FOR i = (NumButtons + 1) TO UpperBound
       LOCATE ULRow + RowPtr, HMid - MW - 1 - (Dial(i).TextLen \ 2)
       CALL QPrint0(Text$(i), BClr)
       CALL Box0(ULRow + RowPtr + 1, HMid - MW - 1 - (Dial(i).TextLen \ 2), ULRow + RowPtr + 3, HMid - MW - (Dial(i).TextLen \ 2) + Dial(i).TextLen, 1, BClr)
-      MouseBox(WindowNum).ULRow = ULRow + 2 + RowPtr
-      MouseBox(WindowNum).LRRow = MouseBox(WindowNum).ULRow
-      MouseBox(WindowNum).ULCol = HMid - (Dial(i).TextLen \ 2) - ((MenuWidth + MOS) \ 2)
-      MouseBox(WindowNum).LRCol = MouseBox(WindowNum).ULCol + Dial(i).TextLen - 1
-      MouseBox(WindowNum).NumWindow = i
-      Dial(i).Row = MouseBox(WindowNum).ULRow
-      Dial(i).Col = MouseBox(WindowNum).ULCol
+      MouseBox(WindowNum).Y1 = ULRow + 2 + RowPtr
+      MouseBox(WindowNum).Y2 = MouseBox(WindowNum).Y1
+      MouseBox(WindowNum).X1 = HMid - (Dial(i).TextLen \ 2) - ((MenuWidth + MOS) \ 2)
+      MouseBox(WindowNum).X2 = MouseBox(WindowNum).X1 + Dial(i).TextLen - 1
+      MouseBox(WindowNum).RN = i
+      Dial(i).Row = MouseBox(WindowNum).Y1
+      Dial(i).Col = MouseBox(WindowNum).X1
       WindowNum = WindowNum + 1
       RowPtr = RowPtr + 4
    
@@ -351,11 +351,11 @@ FOR i = (NumButtons + 1) TO UpperBound
       LOCATE Dial(i).Row - 2, Dial(i).Col - 1
       CALL QPrint0(Text$(i), BClr)
       CALL Box0(Dial(i).Row - 1, Dial(i).Col - 1, LRRow - 3, Dial(i).Col + MenuWidth, 1, BClr)
-      MouseBox(WindowNum).ULRow = Dial(i).Row
-      MouseBox(WindowNum).LRRow = Dial(i).Row + BHite - 9
-      MouseBox(WindowNum).ULCol = Dial(i).Col
-      MouseBox(WindowNum).LRCol = Dial(i).Col + MenuWidth - 1'MouseBox(WindowNum).ULCol + Dial(i).TextLen - 1
-      MouseBox(WindowNum).NumWindow = i
+      MouseBox(WindowNum).Y1 = Dial(i).Row
+      MouseBox(WindowNum).Y2 = Dial(i).Row + BHite - 9
+      MouseBox(WindowNum).X1 = Dial(i).Col
+      MouseBox(WindowNum).X2 = Dial(i).Col + MenuWidth - 1'MouseBox(WindowNum).ULCol + Dial(i).TextLen - 1
+      MouseBox(WindowNum).RN = i
       WindowNum = WindowNum + 1
 
     CASE ELSE
@@ -454,7 +454,7 @@ DO
       IF El <= NumButtons THEN         'If we've clicked on a button
         Choice = El                    ' choice = button selected
         ButtonDown = -1                'Remember that mouse button was pressed
-        CALL PaintBox0(LRRow - 1, MouseBox(Choice).ULCol + 1, LRRow - 1, MouseBox(Choice).LRCol - 1, 15)
+        CALL PaintBox0(LRRow - 1, MouseBox(Choice).X1 + 1, LRRow - 1, MouseBox(Choice).X2 - 1, 15)
       END IF
       MFlag = -1                       'Set Mouse flag
       Choice = RangeNum
@@ -463,7 +463,7 @@ DO
                   'If we've clicked on a button, wait 'till mouse button is up
   IF RangeNum <= NumButtons AND MButton = 0 AND ButtonDown THEN
      ButtonDown = 0
-     CALL PaintBox0(LRRow - 1, MouseBox(Choice).ULCol + 1, LRRow - 1, MouseBox(Choice).LRCol - 1, BClr)
+     CALL PaintBox0(LRRow - 1, MouseBox(Choice).X1 + 1, LRRow - 1, MouseBox(Choice).X2 - 1, BClr)
      GOTO Done                         'Exit Dialog box
   END IF
 
@@ -748,8 +748,8 @@ LOOP
 '-----Various GOSUBs
 
 HiLite:                        'Hilites the currently active button
-  CALL PaintBox0(LRRow - 1, MouseBox(Choice).ULCol, LRRow - 1, MouseBox(Choice).ULCol, HiLite)
-  CALL PaintBox0(LRRow - 1, MouseBox(Choice).LRCol, LRRow - 1, MouseBox(Choice).LRCol, HiLite)
+  CALL PaintBox0(LRRow - 1, MouseBox(Choice).X1, LRRow - 1, MouseBox(Choice).X1, HiLite)
+  CALL PaintBox0(LRRow - 1, MouseBox(Choice).X2, LRRow - 1, MouseBox(Choice).X2, HiLite)
 RETURN
 
 Done:
