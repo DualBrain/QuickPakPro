@@ -1448,8 +1448,16 @@ SUB GetCursor (x%, y%, button%) STATIC
   END IF
 END SUB
 
-SUB GetCursorT(Col%, Row%, Button%)
-  ERROR 73 ' Feature Unavailable
+' GetCursorT reports the current location of the mouse cursor, and 
+' which mouse buttons are currently depressed.
+SUB GetCursorT(row%, col%, button%)
+  ' col% and row% return holding the current mouse coordinates, and 
+  ' button% is bit-coded to indicate which buttons are currently being pressed. 
+  CALL GetCursor(x%, y%, button%)
+  IF _PIXELSIZE = 0 THEN
+    col% = (x% \ 8) + 1
+    row% = (y% \ 8) + 1
+  END IF
 END SUB
 
 ' GrafCursor greatly simplifies defining the shape of the mouse 
@@ -1554,8 +1562,88 @@ END SUB
 
 ' MouseRange will return a range number that tells where the mouse 
 ' cursor is located, based on an array of screen coordinates. 
-SUB MouseRange(array() AS Area, Start%, numEls%, row%, col%, button%, rangeNum%)
-  ERROR 73 ' Feature Unavailable
+SUB MouseRange(array() AS Area, start%, numEls%, row%, col%, button%, rangeNum%)
+  ' array() / start% is the first element in a special TYPE array, and 
+  ' numEls% is the number of elements in that array. row% and 
+  ' col% return the current location of the mouse cursor, button% 
+  ' indicates which mouse button is currently depressed, and 
+  ' rangeNum% holds the range within which the cursor is located.
+  rangeNum% = 0 ' no current window
+  row% = -1: col% = -1 
+  CALL GetCursorT(row%, col%, button%)
+  IF button% > 0 THEN
+    FOR entry% = numEls% TO start% STEP - 1
+      IF row% >= array(entry%).Ulr AND row% <= array(entry%).Lrr THEN
+        IF col% >= array(entry%).Ulc AND col% <= array(entry%).Lrc THEN
+          IF array(entry%).RNum = -1 THEN
+            rangeNum% = entry%
+          ELSE
+            rangeNum% = array(entry%).RNum
+          END IF
+          EXIT FOR
+        END IF
+      END IF
+    NEXT
+  END IF
+END SUB
+
+SUB MouseRange1(array() AS Area, start%, numEls%, row%, col%, button%, rangeNum%)
+  rangeNum% = 0 ' no current window
+  row% = -1: col% = -1 
+  CALL GetCursorT(row%, col%, button%)
+  FOR entry% = numEls% TO start% STEP - 1
+    IF row% >= array(entry%).Ulr AND row% <= array(entry%).Lrr THEN
+      IF col% >= array(entry%).Ulc AND col% <= array(entry%).Lrc THEN
+        IF array(entry%).RNum = -1 THEN
+          rangeNum% = entry%
+        ELSE
+          rangeNum% = array(entry%).RNum
+        END IF
+        EXIT FOR
+      END IF
+    END IF
+  NEXT
+END SUB
+
+' MouseRangeG works in the same way as MouseRange, 
+' but all parameters are given and returned as pixels 
+' instead of rows and columns. 
+SUB MouseRangeG(array() AS Area, start%, numEls%, x%, y%, button%, rangeNum%)
+  rangeNum% = 0 ' no current window
+  x% = -1: y% = -1 
+  CALL GetCursor(x%, y%, button%)
+  IF button% > 0 THEN
+    FOR entry% = numEls% TO start% STEP - 1
+      IF y% >= array(entry%).Ulr AND y% <= array(entry%).Lrr THEN
+        IF x% >= array(entry%).Ulc AND x% <= array(entry%).Lrc THEN
+          IF array(entry%).RNum = -1 THEN
+            rangeNum% = entry%
+          ELSE
+            rangeNum% = array(entry%).RNum
+          END IF
+          EXIT FOR
+        END IF
+      END IF
+    NEXT
+  END IF
+END SUB
+
+SUB MouseRangeG1(array() AS Area, start%, numEls%, x%, y%, button%, rangeNum%)
+  rangeNum% = 0 ' no current window
+  x% = -1: y% = -1 
+  CALL GetCursor(x%, y%, button%)
+  FOR entry% = numEls% TO start% STEP - 1
+    IF y% >= array(entry%).Ulr AND y% <= array(entry%).Lrr THEN
+      IF x% >= array(entry%).Ulc AND x% <= array(entry%).Lrc THEN
+        IF array(entry%).RNum = -1 THEN
+          rangeNum% = entry%
+        ELSE
+          rangeNum% = array(entry%).RNum
+        END IF
+        EXIT FOR
+      END IF
+    END IF
+  NEXT
 END SUB
 
 FUNCTION MBuffSize%

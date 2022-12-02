@@ -1,4 +1,4 @@
-'******* DEMODI2.BAS - demonstrates file selection with DIALOG.BAS         6/91
+'******* DEMODIA2.BAS - demonstrates file selection with DIALOG.BAS         6/91
 
 ' Copyright (c) 1991 Crescent Software
 ' Written by Phil Cramer

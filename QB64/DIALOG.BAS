@@ -5,6 +5,8 @@
 
 DEFINT A-Z
 
+'$NOCLUDE: 'QPPRO.BI'
+
 '----BASIC Subs
 DECLARE FUNCTION LongestStr1% (Text$(), NumButtons, ItemNum)
 
@@ -271,7 +273,8 @@ FOR i = 1 TO NumButtons                    'Make button string
   WindowNum = WindowNum + 1
 NEXT
 
-REDIM Scrn(ArraySize(ULRow, ULCol, LRRow + 1, LRCol + 2))
+sz = ArraySize(ULRow, ULCol, LRRow + 1, LRCol + 2)
+REDIM Scrn(sz) ' The above line used to be "inline", but compile was failing - thus moved above.
 CALL MScrnSave(ULRow, ULCol, LRRow + 1, LRCol + 2, Scrn())
                      
                        'Draw the basic dialog box
@@ -820,3 +823,4 @@ Skip:
 
 END FUNCTION
 
+'$NOCLUDE: 'QPPRO.BAS'
