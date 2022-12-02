@@ -1573,12 +1573,12 @@ SUB MouseRange(array() AS Area, start%, numEls%, row%, col%, button%, rangeNum%)
   CALL GetCursorT(row%, col%, button%)
   IF button% > 0 THEN
     FOR entry% = numEls% TO start% STEP - 1
-      IF row% >= array(entry%).Ulr AND row% <= array(entry%).Lrr THEN
-        IF col% >= array(entry%).Ulc AND col% <= array(entry%).Lrc THEN
-          IF array(entry%).RNum = -1 THEN
+      IF row% >= array(entry%).ULRow AND row% <= array(entry%).LRRow THEN
+        IF col% >= array(entry%).ULCol AND col% <= array(entry%).LRCol THEN
+          IF array(entry%).NumWindow = -1 THEN
             rangeNum% = entry%
           ELSE
-            rangeNum% = array(entry%).RNum
+            rangeNum% = array(entry%).NumWindow
           END IF
           EXIT FOR
         END IF
@@ -1592,12 +1592,12 @@ SUB MouseRange1(array() AS Area, start%, numEls%, row%, col%, button%, rangeNum%
   row% = -1: col% = -1 
   CALL GetCursorT(row%, col%, button%)
   FOR entry% = numEls% TO start% STEP - 1
-    IF row% >= array(entry%).Ulr AND row% <= array(entry%).Lrr THEN
-      IF col% >= array(entry%).Ulc AND col% <= array(entry%).Lrc THEN
-        IF array(entry%).RNum = -1 THEN
+    IF row% >= array(entry%).ULRow AND row% <= array(entry%).LRRow THEN
+      IF col% >= array(entry%).ULCol AND col% <= array(entry%).LRCol THEN
+        IF array(entry%).NumWindow = -1 THEN
           rangeNum% = entry%
         ELSE
-          rangeNum% = array(entry%).RNum
+          rangeNum% = array(entry%).NumWindow
         END IF
         EXIT FOR
       END IF
@@ -1614,12 +1614,12 @@ SUB MouseRangeG(array() AS Area, start%, numEls%, x%, y%, button%, rangeNum%)
   CALL GetCursor(x%, y%, button%)
   IF button% > 0 THEN
     FOR entry% = numEls% TO start% STEP - 1
-      IF y% >= array(entry%).Ulr AND y% <= array(entry%).Lrr THEN
-        IF x% >= array(entry%).Ulc AND x% <= array(entry%).Lrc THEN
-          IF array(entry%).RNum = -1 THEN
+      IF y% >= array(entry%).ULRow AND y% <= array(entry%).LRRow THEN
+        IF x% >= array(entry%).ULCol AND x% <= array(entry%).LRCol THEN
+          IF array(entry%).NumWindow = -1 THEN
             rangeNum% = entry%
           ELSE
-            rangeNum% = array(entry%).RNum
+            rangeNum% = array(entry%).NumWindow
           END IF
           EXIT FOR
         END IF
@@ -1633,12 +1633,12 @@ SUB MouseRangeG1(array() AS Area, start%, numEls%, x%, y%, button%, rangeNum%)
   x% = -1: y% = -1 
   CALL GetCursor(x%, y%, button%)
   FOR entry% = numEls% TO start% STEP - 1
-    IF y% >= array(entry%).Ulr AND y% <= array(entry%).Lrr THEN
-      IF x% >= array(entry%).Ulc AND x% <= array(entry%).Lrc THEN
-        IF array(entry%).RNum = -1 THEN
+    IF y% >= array(entry%).ULRow AND y% <= array(entry%).LRRow THEN
+      IF x% >= array(entry%).ULCol AND x% <= array(entry%).LRCol THEN
+        IF array(entry%).NumWindow = -1 THEN
           rangeNum% = entry%
         ELSE
-          rangeNum% = array(entry%).RNum
+          rangeNum% = array(entry%).NumWindow
         END IF
         EXIT FOR
       END IF

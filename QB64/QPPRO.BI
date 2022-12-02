@@ -42,3 +42,11 @@ DECLARE DYNAMIC LIBRARY "kernel32"
   FUNCTION FindClose& (BYVAL hfind AS _UNSIGNED _OFFSET)
   FUNCTION GetLastError& ()
 END DECLARE
+
+TYPE Area                    'Type definition for MouseRange
+  ULRow AS INTEGER
+  ULCol AS INTEGER
+  LRRow AS INTEGER
+  LRCol AS INTEGER
+  NumWindow AS INTEGER
+END TYPE

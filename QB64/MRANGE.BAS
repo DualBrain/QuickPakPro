@@ -8,7 +8,7 @@ DEFINT A-Z
 
 '$INCLUDE: 'QPPRO.BI'
 
-'_FULLSCREEN _SQUAREPIXELS
+_FULLSCREEN _SQUAREPIXELS
 
 DECLARE FUNCTION Peek1% (segment, offset)   ' to check monitor type
 
@@ -31,13 +31,6 @@ END IF
 CALL TextCursor(FG, BG)                 ' set up our text cursor
 COLOR 0, 7                              ' color for status box
 
-TYPE Area                               ' mouse range area structure
-  Ulr AS INTEGER                        ' this could be done with
-  Ulc AS INTEGER                        ' a normal integer array, but
-  Lrr AS INTEGER                        ' this is much easier to follow
-  Lrc AS INTEGER
-  RNum AS INTEGER                       ' range number (see the manual)
-END TYPE
 REDIM mCoord(1 TO 8) AS Area
 
 LOCATE 1, 20                               ' print the status box
@@ -46,16 +39,16 @@ LOCATE 25, 2
 PRINT "Press button 1 in a colored box to see the action, press button 2 to end.";
 
 FOR x = 1 TO 8                          ' get some data into it
-  READ mCoord(x).Ulr                    ' upper corners
-  READ mCoord(x).Ulc
-  READ mCoord(x).Lrr                    ' lower corners
-  READ mCoord(x).Lrc
-  READ mCoord(x).RNum                   ' area number
+  READ mCoord(x).ULRow                  ' upper corners
+  READ mCoord(x).ULCol
+  READ mCoord(x).LRRow                  ' lower corners
+  READ mCoord(x).LRCol
+  READ mCoord(x).NumWindow              ' area number
   ' === if there's a color display use PaintBox to color the boxes
-  IF FG THEN CALL MPaintbox(mCoord(x).Ulr, mCoord(x).Ulc, mCoord(x).Lrr, mCoord(x).Lrc, 16 * x)
-  CALL Box0(mCoord(x).Ulr, mCoord(x).Ulc, mCoord(x).Lrr, mCoord(x).Lrc, 1, -1)
-  LOCATE mCoord(x).Ulr, mCoord(x).Ulc, 0
-  PRINT mCoord(x).RNum;                 ' print the box number
+  IF FG THEN CALL MPaintbox(mCoord(x).ULRow, mCoord(x).ULCol, mCoord(x).LRRow, mCoord(x).LRCol, 16 * x)
+  CALL Box0(mCoord(x).ULRow, mCoord(x).ULCol, mCoord(x).LRRow, mCoord(x).LRCol, 1, -1)
+  LOCATE mCoord(x).ULRow, mCoord(x).ULCol, 0
+  PRINT mCoord(x).NumWindow;            ' print the box number
   CALL Pause(3)                         ' pause for effect. . .
 NEXT x
    
@@ -71,9 +64,9 @@ WEND
 ' === if we got a valid range number then do some theatrics                          
 IF range THEN
   CALL HideCursor                       ' hide cursor for this print
-  CALL Box0(mCoord(range).Ulr, mCoord(range).Ulc, mCoord(range).Lrr, mCoord(range).Lrc, 1, 15 OR 128)
+  CALL Box0(mCoord(range).ULRow, mCoord(range).ULCol, mCoord(range).LRRow, mCoord(range).LRCol, 1, 15 OR 128)
   LOCATE 24, 45
-  PRINT "You Picked box number"; Range;
+  PRINT "You Picked box number"; range;
   CALL ShowCursor                       ' restore cursor
 END IF
 COLOR 7, 0

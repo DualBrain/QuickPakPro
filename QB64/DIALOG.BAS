@@ -41,14 +41,6 @@ TYPE DLog
   Col AS INTEGER             'Starting column
 END TYPE
 
-TYPE Area                    'Type definition for MouseRange
-  ULRow AS INTEGER
-  ULCol AS INTEGER
-  LRRow AS INTEGER
-  LRCol AS INTEGER
-  NumWindow AS INTEGER
-END TYPE
-
 CONST Check$ = "X"           'Character for Check boxes
 CONST Cancel$ = "CANCEL"
 
