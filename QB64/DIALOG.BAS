@@ -56,7 +56,7 @@ CONST HMid = 41              'Center of screen for 80 column mode
 
 SUB Dialog (Choice1, Text$(), Response$(), Menu$(), ScrnRow, Style, BClr, Action) STATIC
                         '^
-                        'ÀÄÄÄ Insert a "1" for TextCopy [change to Text1$()]
+                        'ï¿½ï¿½ï¿½ï¿½ Insert a "1" for TextCopy [change to Text1$()]
 
 '****************************************************************************
 '* Note: Dialog internally modifies the Text$() array. Depending on how you
@@ -75,7 +75,7 @@ SUB Dialog (Choice1, Text$(), Response$(), Menu$(), ScrnRow, Style, BClr, Action
 '  Col AS INTEGER             'Starting column
 'END TYPE
 
-CALL InstallKeyDown           'Install routine to check for keys held down
+'CALL InstallKeyDown           'Install routine to check for keys held down
 
 Choice = Choice1
 IF Action = 5 AND Choice = -1 THEN GOTO Escape
@@ -272,7 +272,7 @@ FOR i = 1 TO NumButtons                    'Make button string
 NEXT
 
 REDIM Scrn(ArraySize(ULRow, ULCol, LRRow + 1, LRCol + 2))
-CALL MScrnSave(ULRow, ULCol, LRRow + 1, LRCol + 2, SEG Scrn(0))
+CALL MScrnSave(ULRow, ULCol, LRRow + 1, LRCol + 2, Scrn())
                      
                        'Draw the basic dialog box
 
@@ -289,19 +289,19 @@ LOCATE ULRow, HMid - (TLen \ 2)
 CALL QPrint0(Text$(0), BClr)    'Print the box title if there is one
 
 SELECT CASE Style               'Determine appropriate line types for divider
-  CASE 1                      'Ã
+  CASE 1                      'ï¿½
     L = 195
     R = 180
     Char = 196
-  CASE 2                      'Ì
+  CASE 2                      'ï¿½
     L = 204
     R = 185
     Char = 205
-  CASE 3                      'Æ
+  CASE 3                      'ï¿½
     L = 198
     R = 181
     Char = 205
-  CASE 4                      'Ç
+  CASE 4                      'ï¿½
     L = 199
     R = 182
     Char = 196
@@ -404,7 +404,7 @@ FOR i = NumButtons TO UpperBound
         IF Selection > UBOUND(Menu$, 1) THEN Selection = 1
         IF StartItem > UBOUND(Menu$, 1) THEN StartItem = 1
       END IF
-      CALL MAMenu(BYVAL VARPTR(Menu$(1)), Selection, StartItem, UBOUND(Menu$, 1), MenuScanCode, BClr, HClr, BHite - 8, MenuCols, 2, Dial(ItemNum).Row, Dial(ItemNum).Col)
+      CALL MAMenu(Menu$(), 1, Selection, StartItem, UBOUND(Menu$, 1), MenuScanCode, BClr, HClr, BHite - 8, MenuCols, 2, Dial(ItemNum).Row, Dial(ItemNum).Col)
       MCount = UBOUND(Menu$, 1)
       Response$(i) = ""                        'Clear last choice
     CASE ELSE
@@ -449,7 +449,7 @@ DO
     IF LEN(Ky$) THEN MFlag = 0
   
     'MButton = 0   EW: no longer needed
-    CALL MouseRange(SEG MouseBox(1), NumChoices, MRow, MCol, MButton, RangeNum)
+    CALL MouseRange(MouseBox(), 1, NumChoices, MRow, MCol, MButton, RangeNum)
     IF MButton > 0 AND RangeNum THEN   'If mouse down and its in a valid range
       IF RangeNum <> El THEN           'If we havent already turned off hilite,
         HiLite = BClr                  ' turn off old HiLite
@@ -463,7 +463,7 @@ DO
       END IF
       MFlag = -1                       'Set Mouse flag
       Choice = RangeNum
-      Ky$ = "š"                        'Dummy key to exit INKEY$ loop
+      Ky$ = "ï¿½"                        'Dummy key to exit INKEY$ loop
     END IF
                   'If we've clicked on a button, wait 'till mouse button is up
   IF RangeNum <= NumButtons AND MButton = 0 AND ButtonDown THEN
@@ -637,7 +637,7 @@ TextIn:
     MERow = Dial(El).Row
     MECol = Dial(El).Col
     CALL MEditor(Response$(El), EdLen, ScanCode, Dial(El).NumFlag, 0, BClr, BClr, MERow, MECol, CurCol)
-    CALL MouseRange(SEG MouseBox(1), NumChoices, MRow, MCol, MButton, RangeNum)
+    CALL MouseRange(MouseBox(), 1, NumChoices, MRow, MCol, MButton, RangeNum)
   
     IF ScanCode = 13 THEN          'ENTER
       GOTO Done
@@ -688,8 +688,8 @@ Menu:
     MCol = Dial(ItemNum).Col
    
     LOCATE , , 0  'EW: 12-24-95 turn off cursor for AMenu scrolling menus
-    CALL MAMenu(BYVAL VARPTR(Menu$(1)), Selection, StartItem, MCount, MenuScanCode, BClr, 15, BHite - 8, MenuCols, 2, MRow, MCol)
-    CALL MouseRange(SEG MouseBox(1), NumChoices, MRow, MCol, MButton, RangeNum)
+    CALL MAMenu(Menu$(), 1, Selection, StartItem, MCount, MenuScanCode, BClr, 15, BHite - 8, MenuCols, 2, MRow, MCol)
+    CALL MouseRange(MouseBox(), 1, NumChoices, MRow, MCol, MButton, RangeNum)
     Response$(El) = Menu$(Selection)
     LOCATE , , 1   'EW: 12-24-95
 
@@ -773,7 +773,7 @@ Done:
   LOOP WHILE KeyDown
     
     CALL HideCursor
-    CALL MScrnRest(ULRow, ULCol, LRRow + 1, LRCol + 2, SEG Scrn(0))
+    CALL MScrnRest(ULRow, ULCol, LRRow + 1, LRCol + 2, Scrn())
     ERASE TResponse$ ',Text$    'Un-rem for TextCopy
     Action = 0
   ELSE
@@ -797,7 +797,7 @@ Escape:
   LOOP WHILE KeyDown
 
     CALL HideCursor
-    CALL MScrnRest(ULRow, ULCol, LRRow + 1, LRCol + 2, SEG Scrn(0))
+    CALL MScrnRest(ULRow, ULCol, LRRow + 1, LRCol + 2, Scrn())
     ERASE TResponse$', Text$    'Un-REM for TextCopy
     Action = 0
   ELSE

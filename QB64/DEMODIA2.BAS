@@ -1,10 +1,13 @@
-'******* DEMODI2.BAS - demonstates file selection with DIALOG.BAS         6/91
+'******* DEMODI2.BAS - demonstrates file selection with DIALOG.BAS         6/91
 
-'Copyright (c) 1991 Crescent Software
-'Written by Phil Cramer
-
+' Copyright (c) 1991 Crescent Software
+' Written by Phil Cramer
+' Modifications (c) 2022 Cory Smith
 
 DEFINT A-Z
+
+'$INCLUDE: 'QPPRO.BI'
+
 DECLARE SUB Dialog (Choice, Text$(), Response$(), Menu$(), ScrnRow, Style, Clr, Action)
 
 '****************************** IMPORTANT! **********************************
@@ -58,9 +61,8 @@ FOR i = 1 TO Count                     'Set each element to 12 spaces long
   Menu$(i) = SPACE$(12)
 NEXT
 Menu$(0) = FileName$                   'Place spec in element 0
-CALL ReadFile(BYVAL VARPTR(Menu$(0)))  'Load the Menu$() with files
-CALL SortStr(BYVAL VARPTR(Menu$(1)), Count, 0)
-
+CALL ReadFile(Menu$())  'Load the Menu$() with files
+CALL SortStr(Menu$(), 1, Count, 0)
 
 REDIM Text$(11)                        'Set up the Dialog box
 REDIM Response$(11)
@@ -179,9 +181,9 @@ DO
             Menu$(i) = SPACE$(12)
           NEXT
           Menu$(0) = TFileName$
-          CALL ReadFile(BYVAL VARPTR(Menu$(0)))
-          CALL SortStr(BYVAL VARPTR(Menu$(0)), Count, 0)
-          IF Count > 1 THEN CALL SortStr(BYVAL VARPTR(Menu$(1)), Count, 0)
+          CALL ReadFile(Menu$())
+          CALL SortStr(Menu$(), 0, Count, 0)
+          IF Count > 1 THEN CALL SortStr(Menu$(), 1, Count, 0)
           Action = 2
         ELSE
           LSET Response$(4) = FileName$
@@ -235,9 +237,11 @@ ELSE                                     'If the file spec is invalid
   CALL Dialog(Choice, Text$(), Response$(), Menu$(), ScrnRow, Style, Clr, Action)
 END IF
 
-CALL DeinstallKeyDown                    'Remove KeyDown routine
-CALL SetDrive(OrigDrv$)                  'Restore original drive
-CALL CDir(OrigPath$)                     'Restore original path
+'CALL DeinstallKeyDown                    ' Remove KeyDown routine
+CALL SetDrive(OrigDrv$)                  ' Restore original drive
+CALL CDir(OrigPath$)                     ' Restore original path
 
-END                                      'Fini
+END                                      ' Fini
 
+'$INCLUDE: 'DIALOG.BAS'
+'$INCLUDE: 'QPPRO.BAS'

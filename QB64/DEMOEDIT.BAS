@@ -4,9 +4,9 @@
 ' Copyright (c) 1988 Crescent Software
 ' Modifications (c) 2022 Cory Smith
 
-'$INCLUDE: 'QPPRO.BI'
-
 DEFINT A-Z
+
+'$INCLUDE: 'QPPRO.BI'
 
 DECLARE SUB ClearEOL (colr%)    'for the demo only
 DECLARE FUNCTION Monitor% ()    'determines monitor type

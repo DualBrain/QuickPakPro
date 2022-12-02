@@ -4,13 +4,13 @@
 
 ' Copyright (c) 2022 Cory Smith
 
-TYPE Area                    ' Type definition for MouseRange
-  ULRow AS INTEGER
-  ULCol AS INTEGER
-  LRRow AS INTEGER
-  LRCol AS INTEGER
-  NumWindow AS INTEGER
-END TYPE
+' TYPE Area                    ' Type definition for MouseRange
+'   ULRow AS INTEGER
+'   ULCol AS INTEGER
+'   LRRow AS INTEGER
+'   LRCol AS INTEGER
+'   NumWindow AS INTEGER
+' END TYPE
 
 ' ****************************************
 ' Chapter 2 - Array Routines 
@@ -1260,11 +1260,11 @@ END SUB
 ' a mouse-aware version of the original AMenu routine, which is 
 ' described elsewhere.
 'SUB MAMenu (Address%, Selection%, Start%, Count%, ExitCode%, FileColr%, HiLiteColr%, Rows%, Columns%, Spacing%, Row%, Column%)
-SUB MAMenu(Array$(), Selection%, Start%, Count%, ScanCode%, NormalColor%, Hilight%, NumRows%, NumCols%, Gap%, Row%, Column%)
+SUB MAMenu(Array$(), First%, Selection%, Start%, Count%, ScanCode%, NormalColor%, Hilight%, NumRows%, NumCols%, Gap%, Row%, Column%)
   ERROR 73 ' Feature Unavailable
 END SUB
 
-SUB MAMenuT(Array$(), Selection%, Start%, Length%, Count%, ScanCode%, NormalColor%, Hilight%, NumRows%, NumCols%, Gap%, Row%, Column%)
+SUB MAMenuT(Array$(), First%, Selection%, Start%, Length%, Count%, ScanCode%, NormalColor%, Hilight%, NumRows%, NumCols%, Gap%, Row%, Column%)
   ERROR 73 ' Feature Unavailable
 END SUB
 
@@ -1554,7 +1554,7 @@ END SUB
 
 ' MouseRange will return a range number that tells where the mouse 
 ' cursor is located, based on an array of screen coordinates. 
-SUB MouseRange(array() AS Area, numEls%, row%, col%, button%, rangeNum%)
+SUB MouseRange(array() AS Area, Start%, numEls%, row%, col%, button%, rangeNum%)
   ERROR 73 ' Feature Unavailable
 END SUB
 
