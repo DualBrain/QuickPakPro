@@ -1279,12 +1279,77 @@ SUB AMenuT(Array(), Start%, StartItem%, Length%, Count%, ScanCode%, NormColor%, 
   ERROR 73 ' Feature Unavailable
 END SUB
 
-SUB ASCIIPick(Char%, Color1%, Color2%, ExitCode%)
-  ERROR 73 ' Feature Unavailable
+SUB ASCIIPick(char%, color1%, color2%, exitCode%)
+
+  prevChar% = char%
+
+  ulRow% = CSRLIN
+  ulCol% = POS(0)
+  lrRow% = ulRow% + 17
+  lrCol% = ulCol% + 34
+  CALL Box0(ulRow%, ulCol%, lrRow%, lrCol%, 2, color1%)
+  CALL QPrintRC(CHR$(181) + " ASCII Code: Dec  ___  Hex  __ " + CHR$(198), ulRow% + 17, ulCol% + 1, color1%)
+
+  DO
+
+    prevControlChr% = _CONTROLCHR ' <----------- QB64 definately get's this wrong...
+    IF NOT prevControlChr% THEN _CONTROLCHR OFF
+    FOR r% = 1 TO 16
+      FOR c% = 1 TO 16
+        ch% = ((r% - 1) * 16) + (c% - 1)
+        ch$ = CHR$(ch%)
+        IF char% = ch% THEN clr% = color2% ELSE clr% = color1%
+        CALL QPrintRC(ch$, ulRow% + r%, ulCol% + (c% * 2), clr%)
+      NEXT
+    NEXT
+    IF NOT prevControlChr% THEN _CONTROLCHR ON
+
+    IF exitCode% = -1 THEN EXIT SUB
+
+    DO
+
+      scanCode% = MGetKey(row%, col%) ' scanCode% might be returned to caller.
+    
+      SELECT CASE scanCode%
+        CASE -72 ' Up
+          char% = char% - 16: EXIT DO
+        CASE -80 ' Down
+          char% = char% + 16: EXIT DO
+        CASE -75 ' Left
+          char% = char% - 1: EXIT DO
+        CASE -77 ' Right
+          char% = char% + 1: EXIT DO
+        CASE -71 ' Home ' Diagonal UL
+          char% = char% - 17: EXIT DO
+        CASE -79 ' End  ' Diagonal DL
+          char% = char% + 15: EXIT DO
+        CASE -73 ' PgUp ' Diagonal UR
+          char% = char% - 15: EXIT DO
+        CASE -81 ' PgDn ' Diagonal DR
+          char% = char% + 17: EXIT DO
+        CASE 8, 9, 32 TO 126
+          char% = scanCode%: EXIT DO
+        CASE 13 ' Enter
+          exitCode% = 0: EXIT SUB
+        CASE 1000 ' Mouse click
+          r% = row% - (ulRow% + 1): c% = (col% - ulCol%) \ 2
+          char% = ((r% * 16) + c%) - 1
+          exitCode% = 2: EXIT SUB
+        CASE 27
+          char% = prevChar%: exitCode% = 2: EXIT SUB
+        CASE ELSE                         ' any other key,
+      END SELECT
+    LOOP
+
+    IF char% < 0 THEN char% = char% + 256
+    IF char% > 255 THEN char% = char% - 256
+
+  LOOP
+
 END SUB
 
-SUB MASCIIPick(Char%, Color1%, Color2%, ExitCode%)
-  ERROR 73 ' Feature Unavailable
+SUB MASCIIPick(Char%, color1%, color2%, exitCode%)
+  CALL ASCIIPick(char, color1%, color2%, exitCode%)
 END SUB
 
 SUB ColorPick(Colr%, BoxColor%, ExitCode%)
