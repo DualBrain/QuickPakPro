@@ -8,7 +8,7 @@ DEFINT A-Z
 
 '$INCLUDE: 'QPPRO.BI'
 
-'_FULLSCREEN _SQUAREPIXELS
+_FULLSCREEN _SQUAREPIXELS
 
 DECLARE SUB Dialog (Choice, Text$(), Response$(), Menu$(), ScrnRow, Style, Clr, Action)
 
@@ -46,204 +46,204 @@ DECLARE SUB SetDrive (Drive$)
 COLOR 1, 0
 CLS
 
-CALL InitMouse(There)                  'Initialize the mouse driver
-LOCATE 1, 1: PRINT STRING$(2000, 176); 'Draw an attractive background
-FileName$ = "*.*"                      'Start with all files in default dir
-Drive$ = CHR$(GetDrive)                'Save the current drive
-Path$ = GetDir$(Drive$)                'Save the current path
+CALL InitMouse(there)                     ' Initialize the mouse driver
+LOCATE 1, 1: PRINT STRING$(2000, 176);    ' Draw an attractive background
+fileName$ = "*.*"                         ' Start with all files in default dir
+drive$ = CHR$(GetDrive)                   ' Save the current drive
+path$ = GetDir$(drive$)                   ' Save the current path
 
-OrigDrv$ = Drive$                      'Save a copy so we can restore it later
-OrigPath$ = Path$                      'Ditto
+origDrv$ = drive$                         ' Save a copy so we can restore it later
+origPath$ = path$                         ' Ditto
 
-FPath$ = Drive$ + ":" + Path$          'Build the file spec
-Count = FCount%(FileName$)             'See how many files match the spec
-IF Count = 0 THEN Count = 1            'Make sure to dim at least 1 element
-REDIM Menu$(Count)
-FOR i = 1 TO Count                     'Set each element to 12 spaces long
-  Menu$(i) = SPACE$(12)
+fPath$ = drive$ + ":" + path$             ' Build the file spec
+count = FCount%(fileName$)                ' See how many files match the spec
+IF count = 0 THEN count = 1               ' Make sure to dim at least 1 element
+REDIM menu$(count)
+FOR i = 1 TO count                        ' Set each element to 12 spaces long
+  menu$(i) = SPACE$(12)
 NEXT
-Menu$(0) = FileName$                   'Place spec in element 0
-CALL ReadFile(Menu$())  'Load the Menu$() with files
-CALL SortStr(Menu$(), 1, Count, 0)
+menu$(0) = fileName$                      ' Place spec in element 0
+CALL ReadFile(menu$())                    ' Load the Menu$() with files
+CALL SortStr(menu$(), 1, count, 0)
 
-REDIM Text$(11)                        'Set up the Dialog box
-REDIM Response$(11)
-Text$(0) = " Load File "               'Dialog box Title
-Text$(1) = "< OK >"                    'Command button
-Text$(2) = "< Cancel >"                'Ditto
-Text$(3) = " "                         'Blank line
-Text$(4) = "{30} File Name"            'Text entry field, 30 characters long
-Text$(5) = "|208| Files"               'Menu field, 2 columns, 8 rows
-Text$(6) = SPACE$(30)                  'Plain text field, 30 characters long
-LSET Text$(6) = FPath$                 'Place the current path in Text$(6)
-Text$(7) = " "                         'Blank line
-Text$(8) = " Load file as:            "'Left justify Plain text
-Text$(9) = "( ) Module"                'Option button
-Text$(10) = "( ) Include"              'Ditto
-Text$(11) = "( ) Document"             'Ditto
+REDIM text$(11)                           ' Set up the Dialog box
+REDIM response$(11)
+text$(0) = " Load File "                  ' Dialog box Title
+text$(1) = "< OK >"                       ' Command button
+text$(2) = "< Cancel >"                   ' Ditto
+text$(3) = " "                            ' Blank line
+text$(4) = "{30} File Name"               ' Text entry field, 30 characters long
+text$(5) = "|208| Files"                  ' Menu field, 2 columns, 8 rows
+text$(6) = SPACE$(30)                     ' Plain text field, 30 characters long
+LSET text$(6) = fPath$                    ' Place the current path in Text$(6)
+Text$(7) = " "                            ' Blank line
+Text$(8) = " Load file as:            "   ' Left justify Plain text
+Text$(9) = "( ) Module"                   ' Option button
+Text$(10) = "( ) Include"                 ' Ditto
+Text$(11) = "( ) Document"                ' Ditto
 
-Response$(4) = FileName$               'Place current file name Response$(4)
-Response$(9) = CHR$(7)                 'Must assign a "dot" to an option field
+response$(4) = fileName$                  ' Place current file name Response$(4)
+response$(9) = "*" 'CHR$(7)                    ' Must assign a "dot" to an option field
 
-Style = 1                              'Single line border
-Clr = 112                              'Black text, white background
-Action = 1                             'Start Dialog in Polled Mode
+style = 1                                 ' Single line border
+clr = 112                                 ' Black text, white background
+action = 1                                ' Start Dialog in Polled Mode
 
 DO
-  CALL Dialog(Choice, Text$(), Response$(), Menu$(), ScrnRow, Style, Clr, Action)
+  CALL Dialog(choice, text$(), response$(), menu$(), scrnRow, style, clr, action)
 
-  TSpec$ = QPTrim$(Response$(4))      'Trim off any blanks before we test
-                                      'If they have selected a new menu choice
-  IF LEN(Response$(5)) AND Response$(5) <> LastMenu$ THEN
-    LSET Response$(4) = Response$(5)  'Place the Menu choice in the File name
-    LastMenu$ = Response$(5)          ' field and remember which one
-    IF Action <> 4 THEN Action = 2    'Re-display unless they want to exit
+  tSpec$ = QPTrim$(response$(4))          ' Trim off any blanks before we test
+                                          ' If they have selected a new menu choice
+  IF LEN(response$(5)) AND response$(5) <> lastMenu$ THEN
+    LSET response$(4) = response$(5)      ' Place the Menu choice in the File name
+    lastMenu$ = response$(5)              '   field and remember which one
+    IF action <> 4 THEN action = 2        ' Re-display unless they want to exit
   END IF
 
-  IF Action = 4 AND Choice <> -1 THEN     'Enter or < OK >
-                                          'Look for wild cards in the spec
-    IF INSTR(TSpec$, "?") OR INSTR(TSpec$, "*") OR LEFT$(TSpec$, 2) = ".." THEN
+  IF action = 4 AND choice <> -1 THEN     ' Enter or < OK >
+                                          ' Look for wild cards in the spec
+    IF INSTR(tSpec$, "?") OR INSTR(tSpec$, "*") OR LEFT$(tSpec$, 2) = ".." THEN
 
-      DriveThere = 0                      'Reset flags
-      PathInfo = 0
-      PathFound = 0
-      Start = 1                           'Default starting point for PathInfo
+      driveThere = 0                      ' Reset flags
+      pathInfo = 0
+      pathFound = 0
+      start = 1                           ' Default starting point for PathInfo
 
-      IF TSpec$ = ".." THEN
-        TPath$ = TSpec$                   'Make the path$ ".."
-        TFileName$ = FileName$            'Use the last filename
-        PathInfo = -1                     'Set flags
-        PathFound = -1
+      IF tSpec$ = ".." THEN
+        tPath$ = tSpec$                   ' Make the path$ ".."
+        tileName$ = fileName$             ' Use the last filename
+        pathInfo = -1                     ' Set flags
+        pathFound = -1
       END IF
 
-      '---- Look for drive info
-      IF MID$(TSpec$, 2, 1) = ":" THEN         'See if a drive is in the path
-        DriveThere = -1
-        IF GoodDrive%(LEFT$(TSpec$, 1)) THEN    'If its a valid drive,
-          TDrive$ = UCASE$(LEFT$(TSpec$, 1))   ' assign Drive$
-          Start = 3                            'Search for path starting at 3
-        ELSE                                   'Bad drive, restore previous
-          LSET Text$(6) = Drive$ + ":" + Path$ 'path and file name
-          LSET Response$(4) = FileName$
-          Action = 2                           'Action 2 forces re-display
-          GOTO BadSpec                         'Hopeless, bail out
+      ' ---- Look for drive info
+      IF MID$(tSpec$, 2, 1) = ":" THEN    ' See if a drive is in the path
+        driveThere = -1
+        IF GoodDrive%(LEFT$(tSpec$, 1)) THEN ' If its a valid drive,
+          tDrive$ = UCASE$(LEFT$(tSpec$, 1)) '   assign Drive$
+          Start = 3                       ' Search for path starting at 3
+        ELSE                              ' Bad drive, restore previous
+          LSET text$(6) = drive$ + ":" + path$ ' path and file name
+          LSET response$(4) = fileName$
+          action = 2                      ' Action 2 forces re-display
+          GOTO BadSpec                    ' Hopeless, bail out
         END IF
       END IF
 
-      IF NOT DriveThere THEN                   'If Spec$ does not include
-        TDrive$ = Drive$                       ' a drive, use last drive
+      IF NOT driveThere THEN              ' If Spec$ does not include
+        tDrive$ = drive$                  '   a drive, use last drive
       END IF
 
-      '---- Look for path info
-      IF NOT PathFound THEN
-        IF INSTR(TSpec$, "\") THEN               'Contains path information
-          PathInfo = -1
-          FOR i = LEN(TSpec$) TO 1 STEP -1       'Find where it ends
-            IF MID$(TSpec$, i, 1) = "\" THEN     ' and determine path$
-              TPath$ = UCASE$(MID$(TSpec$, Start, i - Start))
-              IF TPath$ = "" THEN TPath$ = "\"
-              TFileName$ = UCASE$(RIGHT$(TSpec$, LEN(TSpec$) - i))
+      ' ---- Look for path info
+      IF NOT pathFound THEN
+        IF INSTR(tSpec$, "\") THEN        ' Contains path information
+          pathInfo = -1
+          FOR i = LEN(tSpec$) TO 1 STEP -1 ' Find where it ends
+            IF MID$(tSpec$, i, 1) = "\" THEN ' and determine path$
+              tPath$ = UCASE$(MID$(tSpec$, start, i - start))
+              IF tPath$ = "" THEN tPath$ = "\"
+              tFileName$ = UCASE$(RIGHT$(tSpec$, LEN(tSpec$) - i))
               EXIT FOR
             END IF
           NEXT
-        ELSE                                     'Must just be a file name
-          TFileName$ = UCASE$(RIGHT$(TSpec$, LEN(TSpec$) - Start + 1))
+        ELSE                              ' Must just be a file name
+          tFileName$ = UCASE$(RIGHT$(tSpec$, LEN(tSpec$) - start + 1))
         END IF
       END IF
-      IF NOT PathInfo THEN TPath$ = Path$        'If no path specified then
-                                                 ' use last path
-      '---- See if they have made a selection from the menu
-      IF Response$(5) <> "" THEN                 'If a menu item is active
-        LSET Response$(4) = Response$(5)         ' change the file spec
-        TFileName$ = QPTrim$(Response$(5))
-        IF Path$ = "\" THEN Path$ = ""
-        Temp$ = Drive$ + ":" + Path$ + "\" + TFileName$
-        Response$(4) = Temp$
-        EXIT DO                                  'and bail out
+      IF NOT pathInfo THEN tPath$ = path$ ' If no path specified then
+                                          '   use last path
+      ' ---- See if they have made a selection from the menu
+      IF response$(5) <> "" THEN          ' If a menu item is active
+        LSET response$(4) = response$(5)  '   change the file spec
+        tFileName$ = QPTrim$(response$(5))
+        IF path$ = "\" THEN path$ = ""
+        temp$ = drive$ + ":" + path$ + "\" + tFileName$
+        response$(4) = temp$
+        EXIT DO                           ' and bail out
       END IF
 
-      CALL SetDrive(TDrive$)
-      CALL CDir(TPath$)
-      IF DOSError% THEN                          'Must be a bad path
-        LSET Response$(4) = FileName$
-        Action = 2
+      CALL SetDrive(tDrive$)
+      CALL CDir(tPath$)
+      IF DOSError% THEN                   ' Must be a bad path
+        LSET response$(4) = fileName$
+        action = 2
         BEEP
         GOTO BadSpec
       ELSE
-        IF Exist%(TFileName$) THEN
-          Drive$ = TDrive$
-          Path$ = GetDir$(Drive$)                'Save the current path
-          FileName$ = TFileName$
-          LSET Response$(4) = FileName$
-          LSET Text$(6) = Drive$ + ":" + Path$
-          Count = FCount%(TFileName$)            'Load the Menu$()
-          IF Count = 0 THEN Count = 1            ' with files from
-          REDIM Menu$(Count)                     ' the new file spec
-          FOR i = 1 TO Count
-            Menu$(i) = SPACE$(12)
+        IF Exist%(tFileName$) THEN
+          drive$ = tDrive$
+          path$ = GetDir$(drive$)         ' Save the current path
+          fileName$ = tFileName$
+          LSET response$(4) = fileName$
+          LSET text$(6) = drive$ + ":" + path$
+          count = FCount%(tFileName$)     ' Load the Menu$()
+          IF count = 0 THEN count = 1     '   with files from
+          REDIM menu$(count)              '   the new file spec
+          FOR i = 1 TO count
+            menu$(i) = SPACE$(12)
           NEXT
-          Menu$(0) = TFileName$
-          CALL ReadFile(Menu$())
-          CALL SortStr(Menu$(), 0, Count, 0)
-          IF Count > 1 THEN CALL SortStr(Menu$(), 1, Count, 0)
-          Action = 2
+          menu$(0) = tFileName$
+          CALL ReadFile(menu$())
+          CALL SortStr(menu$(), 0, count, 0)
+          IF count > 1 THEN CALL SortStr(menu$(), 1, count, 0)
+          action = 2
         ELSE
-          LSET Response$(4) = FileName$
-          Action = 2
+          LSET response$(4) = fileName$
+          action = 2
         END IF
       END IF
     ELSE
 
-      '---- No wildcards, must be complete file spec
-      IF INSTR(TSpec$, ":") = 0 THEN             'if there is no drive info,
-        TPath$ = Drive$ + ":"                    ' use the last drive
+      ' ---- No wildcards, must be complete file spec
+      IF INSTR(tSpec$, ":") = 0 THEN      ' if there is no drive info,
+        tPath$ = drive$ + ":"             ' use the last drive
       END IF
-      IF INSTR(TSpec$, "\") = 0 THEN             'If there is no path info,
-        IF Path$ = "\" THEN Path$ = ""
-        TPath$ = TPath$ + Path$ + "\"            ' use the last path
+      IF INSTR(tSpec$, "\") = 0 THEN      ' If there is no path info,
+        IF path$ = "\" THEN path$ = ""
+        tPath$ = tPath$ + path$ + "\"     ' use the last path
       END IF
-      Response$(4) = TPath$ + QPTrim$(Response$(4)) 'Assign complete path
-      EXIT DO                                       'and bail out
+      response$(4) = tPath$ + QPTrim$(response$(4)) ' Assign complete path
+      EXIT DO                                       ' and bail out
     END IF
   END IF
 
-  Response$(5) = ""
+  response$(5) = ""
 
 BadSpec:
-LOOP UNTIL Choice = -1
+LOOP UNTIL choice = -1
 
-Action = 5                               'Action 5 clears the Dialog box
-CALL Dialog(Choice, Text$(), Response$(), Menu$(), ScrnRow, Style, Clr, Action)
+action = 5                                ' Action 5 clears the Dialog box
+CALL Dialog(choice, text$(), response$(), menu$(), scrnRow, style, clr, action)
 
 COLOR 15
-LOCATE 1, 1: PRINT "You picked: "; Response$(4);
+LOCATE 1, 1: PRINT "You picked: "; response$(4);
 
-IF Exist%(QPTrim$(Response$(4))) AND Choice <> -1 THEN 'If it's a valid path
-  'Code to load the file goes here
+IF Exist%(QPTrim$(response$(4))) AND choice <> -1 THEN ' If it's a valid path
+  ' Code to load the file goes here
   'SELECT CASE VAL(Response$(8))
-  '  CASE 1                              'Load as Module
-  '  CASE 2                              'Load as Include
-  '  CASE 3                              'Load as Document
+  '  CASE 1                                ' Load as Module
+  '  CASE 2                                ' Load as Include
+  '  CASE 3                                ' Load as Document
   'END SELECT
-ELSE                                     'If the file spec is invalid
-  REDIM Text$(5)                         ' give them a message
-  REDIM Response$(0)
-  REDIM Menu$(0)
-  Text$(1) = "< OK >"
-  Text$(2) = "< Help >"
-  Text$(3) = " "
-  Text$(4) = "   File not found   "
-  Text$(5) = " "
-  Choice = 1
-  Action = 0
-  CALL Dialog(Choice, Text$(), Response$(), Menu$(), ScrnRow, Style, Clr, Action)
+ELSE                                      ' If the file spec is invalid
+  REDIM text$(5)                          '   give them a message
+  REDIM response$(0)
+  REDIM menu$(0)
+  text$(1) = "< OK >"
+  text$(2) = "< Help >"
+  text$(3) = " "
+  text$(4) = "   File not found   "
+  text$(5) = " "
+  choice = 1
+  action = 0
+  CALL Dialog(choice, text$(), response$(), menu$(), scrnRow, style, clr, action)
 END IF
 
 'CALL DeinstallKeyDown                    ' Remove KeyDown routine
-CALL SetDrive(OrigDrv$)                  ' Restore original drive
-CALL CDir(OrigPath$)                     ' Restore original path
+CALL SetDrive(origDrv$)                   ' Restore original drive
+CALL CDir(origPath$)                      ' Restore original path
 
-END                                      ' Fini
+END                                       ' Fini
 
 '$INCLUDE: 'DIALOG.BAS'
 '$INCLUDE: 'QPPRO.BAS'

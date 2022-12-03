@@ -1,12 +1,17 @@
-'**** MouseCM.Bas - demonstrates Chris May's mouse routines      (8/1/1989)
+' **** MOUSECM.BAS - demonstrates Chris May's mouse routines (8/1/1989)
 
-'Copyright (c) 1989 Chris May
-'QuickBasic must be started with the /ah option for this demo
+' Copyright (c) 1989 Chris May
+' QuickBasic must be started with the /ah option for this demo
+' Modifications (c) 2022 Cory Smith
 
 DEFINT A-Z
 
+'$INCLUDE: 'QPPRO.BI'
+
+_FULLSCREEN _SQUAREPIXELS
+
 TYPE FLen
-   S AS STRING * 13
+  S AS STRING * 13
 END TYPE
 
 DECLARE SUB MAMenuT (SEG ArrayElement AS FLen, Selection, Start, ElSize, Count, ScanCode, FileColr, HiLiteColr, Rows, Columns, Spacing, Row, Column)
@@ -16,145 +21,149 @@ DECLARE SUB MMenuVert (BYVAL Address, Selection, Start, ScanCode, ElemClr, HiLit
 DECLARE FUNCTION MGetKey% (Row, Col)
 DECLARE FUNCTION WaitKey% ()
 
-CALL InitMouse(There)
+CALL InitMouse(there)
 CLS
 IF NOT There THEN PRINT "Mouse not present but will continue anyway"
 
-'--------------------------------------- MEDITOR
+' --------------------------------------- MEDITOR
 PRINT "MEDITOR DEMO"
-Edit$ = "Try editing this string         "
-Num.Only = 0
-Caps.On = 0
-NormColor = 7
-EditColor = 23
-Row = 10
-Col = 15
-CurCol = 10
+edit$ = "Try editing this string         "
+num.Only = 0
+caps.On = 0
+normColor = 7
+editColor = 23
+row = 10
+col = 15
+curCol = 10
 CALL ShowCursor
-MEditor Edit$, ALen, ScanCode, Num.Only, Caps.On, NormColor, EditColor, Row, Col, CurCol
+MEditor edit$, aLen, scanCode, num.Only, caps.On, normColor, editColor, row, col, curCol
 CALL HideCursor
 LOCATE 1, 1
-PRINT "ScanCode = "; ScanCode, "Edit$ = "; Edit$
-PRINT "Row = "; Row, , "Col = "; Col
-PRINT "Cursor column = "; CurCol, "String length = "; ALen
+PRINT "ScanCode = "; scanCode, "Edit$ = "; edit$
+PRINT "Row = "; row, , "Col = "; col
+PRINT "Cursor column = "; curCol, "String length = "; aLen
 LOCATE 25, 1: PRINT "Press any key to continue";
 CALL ShowCursor
-Press = MGetKey(R, C)
+press = MGetKey(r, c)
 CALL HideCursor
 
-
-'--------------------------------------- MGETKEY
+' --------------------------------------- MGETKEY
 CLS
 PRINT "This is a demo of MGETKEY - Press any mouse button or keyboard key"
 CALL ShowCursor
-ScanCode = MGetKey(Row, Col)
+scanCode = MGetKey(row, col)
 CALL HideCursor
-IF ScanCode = 1000 THEN PRINT "Left mouse button was pressed"
-IF ScanCode = 1001 THEN PRINT "Right mouse button was pressed"
-IF ScanCode = 1002 THEN PRINT "Middle mouse button was pressed"
-PRINT "ScanCode = "; ScanCode
-PRINT "Row = "; Row, "Col = "; Col
+IF scanCode = 1000 THEN PRINT "Left mouse button was pressed"
+IF scanCode = 1001 THEN PRINT "Right mouse button was pressed"
+IF scanCode = 1002 THEN PRINT "Middle mouse button was pressed"
+PRINT "ScanCode = "; scanCode
+PRINT "Row = "; row, "Col = "; col
 LOCATE 25, 1: PRINT "Press any key to continue";
 CALL ShowCursor
-Press = MGetKey(R, C)
+press = MGetKey(r, c)
 CALL HideCursor
-    
 
-'--------------------------------------- MAMENU
+' --------------------------------------- MAMENU
 CLS
-N = 450                      'number of elements in array
-Start = 1                    'element at which to start
+n = 450                                  ' number of elements in array
+start = 1                                ' element at which to start
 
-REDIM A$(N)
+REDIM a$(n)
 
-FOR I = 1 TO N
-   A$(I) = "Element" + STR$(I)
-   A$(I) = A$(I) + SPACE$(13 - LEN(A$(I)))
-  NEXT I
+FOR i = 1 TO n
+  a$(i) = "Element" + STR$(i)
+  a$(i) = a$(i) + SPACE$(13 - LEN(a$(i)))
+NEXT i
 
-Length = LEN(A$(1))
+length = LEN(a$(1))
 
 PRINT "MAMENU DEMO :-  Select a file using the mouse ....."
 
-Row = 5                      'Upper left row of display
-Col = 5                      'Upper left column of display
-Selection = 146
-Start = 125
+row = 5                                   ' Upper left row of display
+col = 5                                   ' Upper left column of display
+selection = 146
+start = 125
 
 CALL ShowCursor
-MAmenu VARPTR(A$(1)), Selection, Start, N, ScanCode, 112, 23, 20, 5, 2, Row, Col
+MAmenu a$(), 1, selection, start, n, scanCode, 112, 23, 20, 5, 2, row, col
 CALL HideCursor
-'                                                     ^    ^   ^  ^  ^
-'                                                     ³    ³   ³  ³  ³
-'                     File Color ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ    ³   ³  ³  ³
-'                     HiLite Color ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ   ³  ³  ³
-'                     Number of Rows in table ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ  ³  ³
-'                     Number of Columns in table ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ  ³
-'                     Number of spaces between columns ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+'                                               ^    ^   ^  ^  ^
+'                                               |    |   |  |  |
+'               File Color ---------------------     |   |  |  |
+'               HiLite Color ------------------------    |  |  |
+'               Number of Rows in table -----------------   |  |
+'               Number of Columns in table -----------------   |
+'               Number of spaces between columns --------------
 
-PRINT "Selection = "; Selection, "ScanCode = "; ScanCode
-PRINT "Row = "; Row, , "Col = "; Col
+PRINT "Selection = "; selection, "ScanCode = "; scanCode
+PRINT "Row = "; row, , "Col = "; col
 LOCATE 25, 1: PRINT "Press any key to continue";
 CALL ShowCursor
-Press = MGetKey(R, C)
+press = MGetKey(r, c)
 CALL HideCursor
-    
 
-'--------------------------------------- MAMENUT
+' --------------------------------------- MAMENUT
 CLS
-N = 6666                    'number of elements in array
-Start = 1                   'first element in table
-Selection = 1               'element on which to put cursor
+n = 6666                                 ' number of elements in array
+start = 1                                ' first element in table
+selection = 1                            ' element on which to put cursor
 
-REDIM B(N) AS FLen
+REDIM b(n) AS FLen
 
 PRINT "Assembling a fixed length string array with 6,666 elements, each of"
 PRINT "which is 13 bytes long. That's a total of 86,658 bytes!  Please wait..."
 
-FOR I = 1 TO N
-   B(I).S = "Element" + STR$(I)
-  NEXT I
+FOR i = 1 TO n
+  b(i).S = "Element" + STR$(i)
+NEXT i
 
 CLS
-Row = 5
-Col = 5
+row = 5
+col = 5
 PRINT "MAMENUT DEMO :-  Select a file using the mouse ....."
 WHILE INKEY$ <> "": WEND
 CALL ShowCursor
-MAMenuT B(1), Selection, Start, 13, N, ScanCode, 112, 23, 20, 5, 2, Row, Col
+DIM ttt$(LBOUND(b) TO UBOUND(b))
+FOR index% = LBOUND(b) TO UBOUND(b)
+   ttt$(index%) = b(index%).S
+NEXT
+count% = n
+'MAMenuT B(), 1, Selection, Start, 13, N, ScanCode, 112, 23, 20, 5, 2, Row, Col
+MAMenu ttt$(), 1, selection, start, 13, scanCode, 112, 23, 20, 5, 2, row, col
 CALL HideCursor
-'                                                 ^    ^   ^  ^  ^
-'                                                 ³    ³   ³  ³  ³
-' File Color ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ    ³   ³  ³  ³
-' HiLite Color ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ   ³  ³  ³
-' Number of Rows in table ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ  ³  ³
-' Number of Columns in table ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ  ³
-' Number of spaces between columns ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+'                                                   ^   ^   ^  ^  ^
+'                                                   |   |   |  |  |
+' File Color ---------------------------------------    |   |  |  |
+' HiLite Color -----------------------------------------    |  |  |
+' Number of Rows in table ----------------------------------   |  |
+' Number of Columns in table ----------------------------------   |
+' Number of spaces between columns -------------------------------
 
-PRINT "Selection = "; Selection, "ScanCode = "; ScanCode
-PRINT "Row = "; Row, , "Col = "; Col
+PRINT "Selection = "; selection, "ScanCode = "; scanCode
+PRINT "Row = "; row, , "Col = "; col
 
 LOCATE 25, 1: PRINT "Press any key to continue";
-Press = WaitKey
+'press = WaitKey
+press = MGetKey(r, c)
 
-
-'--------------------------------------- MMENUV
+' --------------------------------------- MMENUV
 CLS
 PRINT "This demonstrates a vertical menuing program"
 
-Row = 7
-Col = 13
-NumRow = 15
-ScanCode = 50
-Selection = 1
-Start = 1
-NormClr = 112
-HiLite = 23
+row = 7
+col = 13
+numRow = 15
+scanCode = 50
+selection = 1
+start = 1
+normClr = 112
+hiLite = 23
 CALL ShowCursor
-MMenuVert VARPTR(A$(1)), Selection, Start, ScanCode, NormClr, HiLite, NumRow, Row, Col
+MMenuVert a$(), 1, selection, start, scanCode, normClr, hiLite, numRow, row, col
 CALL HideCursor
 LOCATE 2, 1
-PRINT "ScanCode = "; ScanCode
-PRINT "Selection = "; Selection, "Start = "; Start
-PRINT "Row = "; Row, , "Col = "; Col
+PRINT "ScanCode = "; scanCode
+PRINT "Selection = "; selection, "Start = "; start
+PRINT "Row = "; row, , "Col = "; col
 
+'$INCLUDE: 'QPPRO.BAS'

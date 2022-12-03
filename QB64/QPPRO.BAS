@@ -997,6 +997,8 @@ SUB ReadFile(array$())
           ffn = fd.cfilename
           p = INSTR(ffn, CHR$(0))
           IF p > 0 THEN ffn = LEFT$(ffn, p - 1)
+          'TODO: Adjusting to 12 characters for legacy purposes.
+          IF LEN(ffn) < 12 THEN ffn = LEFT$(ffn + SPACE$(12), 12)
           array$(index) = ffn
           index = index + 1
         END IF
@@ -1322,8 +1324,8 @@ END SUB
 ' version of the original AMenu routine, which is described elsewhere.
 SUB MAMenu(array$(), first%, selection%, start%, count%, scanCode%, normColor%, hiLiteColor%, numRows%, numCols%, gap%, row%, column%)
   w% = LEN(array$(start%))                ' width of each column.
-  ulRow% = row%
-  ulCol% = column%
+  ulRow% = row%                           ' store menu location because row and column
+  ulCol% = column%                        ' are replaced with mouse coords on return
   IF scanCode% <> 3 THEN
     DO
       IF selection% > start% + ((numRows% * numCols%) - 1) THEN
@@ -1351,10 +1353,10 @@ SUB MAMenu(array$(), first%, selection%, start%, count%, scanCode%, normColor%, 
         QPrintRC text$, ulRow% + rr%, ulCol% + (cc% * (w% + gap%)), clr% ' render text.
       NEXT
     NEXT
-    IF scanCode% = 9999 THEN EXIT SUB 'TODO: For testing...
+    IF scanCode% = 9999 THEN EXIT SUB     'TODO: For testing...
     WHILE INKEY$ <> "": WEND              ' not sure needed.
     DO
-      scanCode% = MGetKey(row%, columns%)     ' scanCode% might be returned to caller.
+      scanCode% = MGetKey(row%, column%) ' scanCode% might be returned to caller.
       SELECT CASE scanCode%
         CASE -72 ' Up
           IF selection% > 1 THEN          ' if current more than min,
@@ -1399,20 +1401,28 @@ SUB MEditor(ed$, activeLength%, scanCode%, numOnly%, isCapsOn%, normalColor%, ed
   ERROR 73 ' Feature Unavailable
 END SUB
 
-SUB MenuVert(Array$(), NumLines%, ScanCode%, Choice%, NormalColr%, HiLiteColor%, Row%, Column%)
+SUB MenuVert(Array$(), First%, NumLines%, ScanCode%, Choice%, NormalColr%, HiLiteColor%, Row%, Column%)
   ERROR 73 ' Feature Unavailable
 END SUB
 
 ' MGetKey first clears the keyboard buffer of any pending keys, and 
 ' then waits until either a key or mouse button has been pressed. This 
-' is a "mouse-aware" version of the QuickPak Professional WaitKey 
-' routine. 
-FUNCTION MGetKey%(Row%, Col%)
-  ' Scan Code% is returned holding the key or mouse button that was 
-  ' pressed, and Row% and Column% indicate the location of the 
+' is a "mouse-aware" version of the QuickPak Professional WaitKey routine. 
+FUNCTION MGetKey%(row%, col%)
+  ' scanCode% is returned holding the key or mouse button that was 
+  ' pressed, and row% and col% indicate the location of the 
   ' mouse cursor at the time the mouse button was pressed. 
+  WHILE INKEY$ <> "": WEND
+  DO: CALL GetCursor(x%, y%, button%): LOOP UNTIL button% = 0
   DO
-    'TODO: Need to handle mouse click...
+    CALL GetCursor(x%, y%, button%)
+    IF _PIXELSIZE = 0 THEN
+      col% = (x% \ 8) + 1
+      row% = (y% \ 8) + 1
+    END IF
+    IF (button% AND 1) = 1 THEN MGetKey% = 1000: EXIT DO
+    IF (button% AND 2) = 2 THEN MGetKey% = 1001: EXIT DO
+    IF (button% AND 4) = 4 THEN MGetKey% = 1002: EXIT DO
     a$ = INKEY$
     IF a$ <> "" THEN
       IF LEN(a$) = 1 THEN
@@ -1425,7 +1435,7 @@ FUNCTION MGetKey%(Row%, Col%)
   LOOP
 END FUNCTION
 
-SUB MMenuVert(Array$(), Selection%, Start%, ScanCode%, NormalColr%, Hilight%, NumRows%, Row%, Column%)
+SUB MMenuVert(Array$(), First%, Selection%, Start%, ScanCode%, NormalColr%, Hilight%, NumRows%, Row%, Column%)
   ERROR 73 ' Feature Unavailable
 END SUB
 
@@ -1488,11 +1498,9 @@ SUB ButtonPress (button%, status%, count%, x%, y%)
     '   IF button% = 2 THEN count2% = count2% + 1
     '   IF button% = 3 THEN count3% = count3% + 1
     ' WEND
-    IF _MOUSEBUTTON(button%) THEN
-      IF button% = 1 THEN count1% = count1% + 1
-      IF button% = 2 THEN count2% = count2% + 1
-      IF button% = 3 THEN count3% = count3% + 1
-    END IF
+    IF _MOUSEBUTTON(1) THEN count1% = count1% + 1
+    IF _MOUSEBUTTON(2) THEN count2% = count2% + 1
+    IF _MOUSEBUTTON(3) THEN count3% = count3% + 1
     IF _PIXELSIZE = 0 THEN
       col% = _MOUSEX
       row% = _MOUSEY
@@ -1858,9 +1866,24 @@ END SUB
 
 ' WaitKey first clears the keyboard buffer of any keys that may be 
 ' pending, and then waits until a key is pressed. 
-SUB WaitKey
+' SUB WaitKey
+'   WHILE INKEY$ <> "": WEND ' Clear any pending key strokes.
+'   WHILE INKEY$ = "": WEND ' Wait for a key.
+' END SUB
+
+FUNCTION WaitKey%
   WHILE INKEY$ <> "": WEND ' Clear any pending key strokes.
-  WHILE INKEY$ = "": WEND ' Wait for a key.
+  DO ' Wait for a key.
+    a$ = INKEY$
+    IF a$ <> "" THEN
+      IF LEN(a$) = 1 THEN
+        WaitKey% = ASC(a$)
+      ELSE
+        WaitKey% = -ASC(RIGHT$(a$, 1))
+      END IF
+      EXIT DO
+    END IF
+  LOOP
 END SUB
 
 FUNCTION WaitScan%

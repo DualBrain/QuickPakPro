@@ -84,7 +84,7 @@ SUB Dialog (choice1, text$(), response$(), menu$(), scrnRow, style, bClr, action
   menuCols = 1                            ' Default number of menu columns
   mCount = UBOUND(menu$, 1)
   startItem = 1                           ' Place item one at top of menu
-  dot$ = CHR$(7)                          ' Ascii character for option buttons
+  dot$ = "*" 'CHR$(7)                          ' Ascii character for option buttons
 
   ' ----Hilite color will be Bright White unless foreground color is Bright White
   fFg = 15
@@ -189,9 +189,9 @@ SUB Dialog (choice1, text$(), response$(), menu$(), scrnRow, style, bClr, action
         END SELECT
         ' Trim the passed string if its longer than edit length
         IF LEN(response$(i)) > dial(i).TextLen THEN response$(i) = LEFT$(response$(i), dial(i).TextLen)
-        ' Left justify Response$ in edit field for later
+        ' Left justify response$ in edit field for later
         response$(i) = response$(i) + SPACE$(dial(i).TextLen - LEN(response$(i)))
-        IF dial(i).TextLen + 4 > bWidth THEN bWidth = Dial(i).TextLen + 4
+        IF dial(i).TextLen + 4 > bWidth THEN bWidth = dial(i).TextLen + 4
       CASE ELSE                           ' Plain string
         dial(i).DType = 0                 ' Type identifier
         bHite = bHite + 1
@@ -201,8 +201,8 @@ SUB Dialog (choice1, text$(), response$(), menu$(), scrnRow, style, bClr, action
 
   IF menuHite > bHite THEN bHite = menuHite
   IF bHite < 9 AND itemNum THEN bHite = 9 ' Minimum Height for Menu is 2
-  lS = LongestStr1(text$(), numButtons, itemNum) ' Compare longest string from
-  IF lS + 6 > bWidth THEN bWidth = lS + 6 ' text array with Title + 6
+  ls = LongestStr1(text$(), numButtons, itemNum) ' Compare longest string from
+  IF ls + 6 > bWidth THEN bWidth = ls + 6 ' text array with Title + 6
   FOR i = 1 TO numButtons
     tLen = tLen + LEN(text$(i)) + 2       ' Buttons will always have at
   NEXT                                    '   least 2 spaces between them
@@ -218,7 +218,7 @@ SUB Dialog (choice1, text$(), response$(), menu$(), scrnRow, style, bClr, action
     ulRow = vMid - (bHite \ 2)
   END IF
 
-  ulCol = hMid - (bWidth \ 2)
+  ulCol = HMid - (bWidth \ 2)
   lrRow = bHite + ulRow - 1
   lrCol = bWidth + ulCol - 1
 
@@ -244,8 +244,8 @@ SUB Dialog (choice1, text$(), response$(), menu$(), scrnRow, style, bClr, action
   NEXT
 
   sz = ArraySize(ulRow, ulCol, lrRow + 1, lrCol + 2)
-  REDIM Scrn(sz) ' The above line used to be "inline", but compile was failing - thus moved above.
-  CALL MScrnSave(ulRow, ulCol, lrRow + 1, lrCol + 2, Scrn())
+  REDIM scrn(sz) ' The above line used to be "inline", but compile was failing - thus moved above.
+  CALL MScrnSave(ulRow, ulCol, lrRow + 1, lrCol + 2, scrn())
                       
   ' Draw the basic dialog box
 
@@ -258,7 +258,7 @@ SUB Dialog (choice1, text$(), response$(), menu$(), scrnRow, style, bClr, action
   style = style MOD 10
   CALL Box0(ulRow, ulCol, lrRow, lrCol, style, bClr)  ' Draw the box
   tLen = LEN(text$(0))
-  LOCATE ulRow, hMid - (tLen \ 2)
+  LOCATE ulRow, HMid - (tLen \ 2)
   CALL QPrint0(text$(0), bClr)           ' Print the box title if there is one
 
   SELECT CASE style                      ' Determine appropriate line types for divider
@@ -273,6 +273,7 @@ SUB Dialog (choice1, text$(), response$(), menu$(), scrnRow, style, bClr, action
   LOCATE lrRow - 2, ulCol
   CALL QPrint0(divider$, bClr)
 
+  ' Draw "butttons" (along the bottom of the Dialog box)
   IF oS THEN button$ = RIGHT$(button$, (LEN(button$) - 1))
   LOCATE lrRow - 1, ulCol + 1
   CALL QPrint0(button$, bClr)
@@ -280,9 +281,9 @@ SUB Dialog (choice1, text$(), response$(), menu$(), scrnRow, style, bClr, action
   rowPtr = 1
   FOR i = (numButtons + 1) TO upperBound
     SELECT CASE dial(i).DType                'Display based on type
-      CASE 0            'Plain text
+      CASE 0            ' Plain text
         rowPtr = rowPtr + 1
-      CASE 2, 3         'Check box
+      CASE 2, 3         ' Check box
         LOCATE ulRow + rowPtr, ulCol + 3
         CALL QPrint0(text$(i), bClr)
         mouseBox(windowNum).Y1 = ulRow + rowPtr    'Define mouse window
@@ -294,25 +295,25 @@ SUB Dialog (choice1, text$(), response$(), menu$(), scrnRow, style, bClr, action
         dial(i).Col = mouseBox(windowNum).X1         'Define column
         windowNum = windowNum + 1
         rowPtr = rowPtr + 1
-      CASE 4            'Text in
+      CASE 4            ' Text in
         mW = (menuWidth + mOS) \ 2
-        LOCATE ulRow + rowPtr, hMid - mW - 1 - (dial(i).TextLen \ 2)
+        LOCATE ulRow + rowPtr, HMid - mW - 1 - (dial(i).TextLen \ 2)
         CALL QPrint0(text$(i), bClr)
-        CALL Box0(ulRow + rowPtr + 1, hMid - mW - 1 - (dial(i).TextLen \ 2), ulRow + rowPtr + 3, hMid - mW - (dial(i).TextLen \ 2) + dial(i).TextLen, 1, bClr)
+        CALL Box0(ulRow + rowPtr + 1, HMid - mW - 1 - (dial(i).TextLen \ 2), ulRow + rowPtr + 3, HMid - mW - (dial(i).TextLen \ 2) + dial(i).TextLen, 1, bClr)
         mouseBox(windowNum).Y1 = ulRow + 2 + rowPtr
         mouseBox(windowNum).Y2 = mouseBox(windowNum).Y1
-        mouseBox(windowNum).X1 = hMid - (dial(i).TextLen \ 2) - ((menuWidth + mOS) \ 2)
+        mouseBox(windowNum).X1 = HMid - (dial(i).TextLen \ 2) - ((menuWidth + mOS) \ 2)
         mouseBox(windowNum).X2 = mouseBox(windowNum).X1 + dial(i).TextLen - 1
         mouseBox(windowNum).RN = i
         dial(i).Row = mouseBox(windowNum).Y1
         dial(i).Col = mouseBox(windowNum).X1
         windowNum = windowNum + 1
         rowPtr = rowPtr + 4
-      CASE 5            'Menu
+      CASE 5            ' Menu
         dial(i).Row = ulRow + 4
         dial(i).Col = lrCol - menuWidth - 1
         LOCATE dial(i).Row - 2, dial(i).Col - 1
-        CALL QPrint0(text$(i), BClr)
+        CALL QPrint0(text$(i), bClr)
         CALL Box0(dial(i).Row - 1, dial(i).Col - 1, lrRow - 3, dial(i).Col + menuWidth, 1, bClr)
         mouseBox(windowNum).Y1 = dial(i).Row
         mouseBox(windowNum).Y2 = dial(i).Row + bHite - 9
@@ -331,7 +332,7 @@ DispResponse:
   FOR i = numButtons TO upperBound
     SELECT CASE dial(i).DType             ' Display Response$()
       CASE 0                              ' Plain text
-        LOCATE ulRow + rowPtr, hMid - (LEN(text$(i)) \ 2) - ((menuWidth + mOS) \ 2)
+        LOCATE ulRow + rowPtr, HMid - (LEN(text$(i)) \ 2) - ((menuWidth + mOS) \ 2)
         CALL QPrint0(text$(i), bClr)
         rowPtr = rowPtr + 1
       CASE 2, 3                           ' Check box
@@ -342,7 +343,7 @@ DispResponse:
         END IF
         rowPtr = rowPtr + 1
       CASE 4                              ' Text in
-        LOCATE ulRow + 2 + rowPtr, hMid - (dial(i).TextLen \ 2) - ((menuWidth + mOS) \ 2)
+        LOCATE ulRow + 2 + rowPtr, HMid - (dial(i).TextLen \ 2) - ((menuWidth + mOS) \ 2)
         CALL QPrint0(response$(i), bClr)
         rowPtr = rowPtr + 4
       CASE 5                              ' Menu
