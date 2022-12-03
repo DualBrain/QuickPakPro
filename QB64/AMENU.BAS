@@ -1,58 +1,61 @@
-'**** AMENU.BAS - demonstrates AMenu                        (4/1/1989)
+' **** AMENU.BAS - demonstrates AMenu (4/1/1989)
 
-'Copyright (c) 1989 Chris May
+' Copyright (c) 1989 Chris May
+' Modifications (c) 2022 Cory Smith
 
 DEFINT A-Z
 
-DECLARE SUB AMenu (BYVAL Address, Start, Count, ScanCode, FileColr, HiLiteColr, Rows, Columns, Spacing, Row, Column)
-       
-N = 450                     'number of elements in array
-Start = 31                  'element at which to start
+'$INCLUDE: 'QPPRO.BI'
 
-REDIM A$(N)
+DECLARE SUB AMenu (array$(), start, startItem, count, scanCode, fileColr, hiLiteColr, rows, columns, spacing, row, column)
+       
+n = 450                     ' number of elements in array
+startItem = 31              ' element at which to start
+
+REDIM a$(n)
 
 CLS
 
-FOR I = 1 TO N
-   A$(I) = "Element" + STR$(I)
-   A$(I) = A$(I) + SPACE$(13 - LEN(A$(I)))
-  NEXT I
+FOR i = 1 TO n
+  a$(i) = "Element" + STR$(i)
+  a$(i) = a$(i) + SPACE$(13 - LEN(a$(i)))
+NEXT i
 
 PRINT "You are welcome to scan all 450 elements ....."
-Count = N
-AMenu VARPTR(A$(1)), Start, Count, ScanCode, 112, 23, 20, 5, 2, 5, 5
-'                                             ^    ^   ^  ^  ^  ^  ^
-'                                             ³    ³   ³  ³  ³  ³  ³
-'  File Color ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ    ³   ³  ³  ³  ³  ³
-'  HiLite Color ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ   ³  ³  ³  ³  ³
-'  Number of Rows in table ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ  ³  ³  ³  ³
-'  Number of Columns in table ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ  ³  ³  ³
-'  Number of spaces between columns ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ  ³  ³
-'  Upper left row of display        ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ  ³
-'  Upper left column of display     ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-
+count = n
+CALL AMenu (a$(), 1, startItem, count, scanCode, 112, 23, 20, 5, 2, 5, 5)
+'                                                 ^    ^   ^  ^  ^  ^  ^
+'                                                 |    |   |  |  |  |  |
+'  File Color ------------------------------------     |   |  |  |  |  |
+'  HiLite Color ---------------------------------------    |  |  |  |  |
+'  Number of Rows in table --------------------------------   |  |  |  |
+'  Number of Columns in table --------------------------------   |  |  |
+'  Number of spaces between columns -----------------------------   |  |
+'  Upper left row of display        --------------------------------   |
+'  Upper left column of display     -----------------------------------
 
 LOCATE 1, 1
-IF ScanCode > 0 THEN PRINT "Control Key #"; ScanCode; "was pressed";
-IF ScanCode < 0 THEN PRINT "Keyboard Scan Code #"; -ScanCode; "was pressed";
+IF scanCode > 0 THEN PRINT "Control Key #"; scanCode; "was pressed";
+IF scanCode < 0 THEN PRINT "Keyboard Scan Code #"; -scanCode; "was pressed";
 PRINT SPACE$(50)
 PRINT "This demonstrates re-entry into the program    "
-PRINT "We will change  "; A$(Count); " to  ";
-A$(Count) = "Done" + STR$(Count)
-A$(Count) = A$(Count) + SPACE$(13 - LEN(A$(Count)))
-PRINT A$(Count)
+PRINT "We will change  "; a$(count); " to  ";
+a$(count) = "Done" + STR$(count)
+a$(count) = a$(count) + SPACE$(13 - LEN(a$(count)))
+PRINT a$(count)
 LOCATE 25, 1: PRINT "Press any key to continue";
 WHILE INKEY$ = "": WEND
-ScanCode = 3
-Count = N
-AMenu VARPTR(A$(1)), Start, Count, ScanCode, 112, 23, 20, 5, 2, 5, 5
+scanCode = 3
+count = N
+CALL AMenu (a$(), 1, startItem, count, scanCode, 112, 23, 20, 5, 2, 5, 5)
 
 CLS
 PRINT "Now we will demonstrate starting from any point within the array"
 PRINT "Lets say   Element 345"
 LOCATE 25, 1: PRINT "Press any key to continue";
 WHILE INKEY$ = "": WEND
-Start = 345
-Count = N
-AMenu VARPTR(A$(1)), Start, Count, ScanCode, 112, 23, 20, 5, 2, 5, 5
+startItem = 345
+count = n
+CALL AMenu (a$(), 1, startItem, count, scanCode, 112, 23, 20, 5, 2, 5, 5)
 
+'$INCLUDE: 'QPPRO.BAS'
