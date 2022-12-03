@@ -1215,12 +1215,12 @@ END FUNCTION
 ' Chapter 5 - Menu/Input Routines
 ' ****************************************
 
-SUB AMenu(array$(), start%, item%, count%, scanCode%, normColor%, hiLiteColor%, numRows%, numCols%, gap%, ulRow%, ulCol%)
-  w% = LEN(array$(start%))                ' width of each column.
+SUB AMenu(array$(), first%, item%, count%, scanCode%, normColor%, hiLiteColor%, numRows%, numCols%, gap%, ulRow%, ulCol%)
+  w% = LEN(array$(first%))                ' width of each column.
   IF scanCode% <> 3 THEN
     DO
-      IF item% > start% + ((numRows% * numCols%) - 1) THEN
-        start% = start% + (numRows% * numCols%)
+      IF item% > first% + ((numRows% * numCols%) - 1) THEN
+        first% = first% + (numRows% * numCols%)
       ELSE
         EXIT DO
       END IF
@@ -1228,24 +1228,23 @@ SUB AMenu(array$(), start%, item%, count%, scanCode%, normColor%, hiLiteColor%, 
   END IF
   DO
     DO
-      IF item% < start% THEN                ' current item before the display range?
-        start% = start% - numRows%          ' scroll display to the left.
-      ELSEIF item% > start% + ((numRows% * numCols%) - 1) THEN ' current item beyond the display range?
-        start% = start% + numRows%          ' scroll display to the right.
+      IF item% < first% THEN                ' current item before the display range?
+        first% = first% - numRows%          ' scroll display to the left.
+      ELSEIF item% > first% + ((numRows% * numCols%) - 1) THEN ' current item beyond the display range?
+        first% = first% + numRows%          ' scroll display to the right.
       ELSE
         EXIT DO
       END IF
     LOOP
-    'IF scanCode% <> 3 THEN                ' if 3, skip rendering (see docs).
-      FOR rr% = 0 TO numRows% - 1         ' for each display row,
-        FOR cc% = 0 TO numCols% - 1       ' for each display column,
-          index% = start% + rr% + (cc% * numRows%) ' determine element index,
-          IF index% = item% THEN clr% = hiLiteColor% ELSE clr% = normColor% ' determine color,
-          IF index% <= UBOUND(array$) THEN text$ = array$(index%) ELSE text$ = SPACE$(w%) ' determine text (can be blank),
-          QPrintRC text$, ulRow% + rr%, ulCol% + (cc% * (w% + gap%)), clr% ' render text.
-        NEXT
+    FOR rr% = 0 TO numRows% - 1         ' for each display row,
+      FOR cc% = 0 TO numCols% - 1       ' for each display column,
+        index% = first% + rr% + (cc% * numRows%) ' determine element index,
+        IF index% = item% THEN clr% = hiLiteColor% ELSE clr% = normColor% ' determine color,
+        IF index% <= UBOUND(array$) THEN text$ = array$(index%) ELSE text$ = SPACE$(w%) ' determine text (can be blank),
+        QPrintRC text$, ulRow% + rr%, ulCol% + (cc% * (w% + gap%)), clr% ' render text.
       NEXT
-    'END IF
+    NEXT
+    IF scanCode% = 9999 THEN EXIT SUB 'TODO: For testing...
     WHILE inkey$ <> "": WEND              ' not sure needed.
     DO
       scanCode% = MGetKey(row%, col%)     ' scanCode% might be returned to caller.
@@ -1276,7 +1275,7 @@ SUB AMenu(array$(), start%, item%, count%, scanCode%, normColor%, hiLiteColor%, 
           EXIT DO
         CASE ELSE                         ' any other key,
           count% = item%                  ' set count% on exit to be the currently highlighted item,
-          EXIT FUNCTION                   ' return to caller.
+          EXIT SUB                        ' return to caller.
       END SELECT
     LOOP
   LOOP
@@ -1318,13 +1317,74 @@ SUB LtsMenu(Item$(), Choice%, Colr%)
   ERROR 73 ' Feature Unavailable
 END SUB
 
-' MAMenu is a full-featured multi-column menu routine, which 
-' allows selecting items either with the keyboard or a mouse. This is 
-' a mouse-aware version of the original AMenu routine, which is 
-' described elsewhere.
-'SUB MAMenu (Address%, Selection%, Start%, Count%, ExitCode%, FileColr%, HiLiteColr%, Rows%, Columns%, Spacing%, Row%, Column%)
-SUB MAMenu(Array$(), First%, Selection%, Start%, Count%, ScanCode%, NormalColor%, Hilight%, NumRows%, NumCols%, Gap%, Row%, Column%)
-  ERROR 73 ' Feature Unavailable
+' MAMenu is a full-featured multi-column menu routine, which allows
+' selecting items either with the keyboard or a mouse. This is a mouse-aware
+' version of the original AMenu routine, which is described elsewhere.
+SUB MAMenu(array$(), first%, selection%, start%, count%, scanCode%, normColor%, hiLiteColor%, numRows%, numCols%, gap%, row%, column%)
+  w% = LEN(array$(start%))                ' width of each column.
+  ulRow% = row%
+  ulCol% = column%
+  IF scanCode% <> 3 THEN
+    DO
+      IF selection% > start% + ((numRows% * numCols%) - 1) THEN
+        start% = start% + (numRows% * numCols%)
+      ELSE
+        EXIT DO
+      END IF
+    LOOP
+  END IF
+  DO
+    DO
+      IF selection% < start% THEN         ' current item before the display range?
+        start% = start% - numRows%        ' scroll display to the left.
+      ELSEIF selection% > start% + ((numRows% * numCols%) - 1) THEN ' current item beyond the display range?
+        start% = start% + numRows%        ' scroll display to the right.
+      ELSE
+        EXIT DO
+      END IF
+    LOOP
+    FOR rr% = 0 TO numRows% - 1           ' for each display row,
+      FOR cc% = 0 TO numCols% - 1         ' for each display column,
+        index% = start% + rr% + (cc% * numRows%) ' determine element index,
+        IF index% = selection% THEN clr% = hiLiteColor% ELSE clr% = normColor% ' determine color,
+        IF index% <= UBOUND(array$) THEN text$ = array$(index%) ELSE text$ = SPACE$(w%) ' determine text (can be blank),
+        QPrintRC text$, ulRow% + rr%, ulCol% + (cc% * (w% + gap%)), clr% ' render text.
+      NEXT
+    NEXT
+    IF scanCode% = 9999 THEN EXIT SUB 'TODO: For testing...
+    WHILE INKEY$ <> "": WEND              ' not sure needed.
+    DO
+      scanCode% = MGetKey(row%, columns%)     ' scanCode% might be returned to caller.
+      SELECT CASE scanCode%
+        CASE -72 ' Up
+          IF selection% > 1 THEN          ' if current more than min,
+            selection% = selection% - 1   ' decrement.
+          END IF
+          EXIT DO
+        CASE -80 ' Down
+          IF selection% < UBOUND(array$) THEN  ' if current less than max,
+            selection% = selection% + 1        ' increment.
+          END IF
+          EXIT DO
+        CASE -75 ' Left
+          IF selection% - numRows% > 0 THEN    ' more columns to the left?
+            selection% = selection% - numRows% ' shift columns right.
+          ELSEIF selection% > 1 THEN           ' if not shifted (above),
+            selection% = 1                     ' set current item to first.
+          END IF
+          EXIT DO
+        CASE -77 ' Right
+          IF selection% + numRows% <= UBOUND(array$) THEN ' more columns to the right?
+            selection% = selection% + numRows%            ' shift columns left.
+          ELSEIF selection% < UBOUND(array$) THEN         ' if not shifted (above),
+            selection% = UBOUND(array$)                   ' set current item to last.
+          END IF
+          EXIT DO
+        CASE ELSE                         ' any other key,
+          EXIT SUB                        ' return to caller.
+      END SELECT
+    LOOP
+  LOOP
 END SUB
 
 SUB MAMenuT(Array$(), First%, Selection%, Start%, Length%, Count%, ScanCode%, NormalColor%, Hilight%, NumRows%, NumCols%, Gap%, Row%, Column%)
@@ -1780,7 +1840,7 @@ END SUB
 
 SUB StuffBuf(X$)
   ' User32 (Windows) SendInput https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-sendinput API
-  ERROR 73 ' Feature Unavailable
+  'ERROR 73 ' Feature Unavailable
 END SUB
 
 ' TextCursor provides an easy way to initialize the mouse cursor in 

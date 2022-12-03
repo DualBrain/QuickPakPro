@@ -8,7 +8,7 @@ DEFINT A-Z
 
 '$INCLUDE: 'QPPRO.BI'
 
-_FULLSCREEN _SQUAREPIXELS
+'_FULLSCREEN _SQUAREPIXELS
 
 DECLARE SUB Dialog (Choice, Text$(), Response$(), Menu$(), ScrnRow, Style, Clr, Action)
 
