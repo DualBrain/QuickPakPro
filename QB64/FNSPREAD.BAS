@@ -10,7 +10,9 @@
 
 DEFINT A-Z
 
-'$INCLUDE: 'QPPRO.BI'
+'$INCLUDE: 'PRO.BI'
+
+'_FULLSCREEN _SQUAREPIXELS
 
 '----- Assembler function helpers
 
@@ -590,4 +592,4 @@ FUNCTION QPVAR# (Array#()) STATIC
 
 END FUNCTION
 
-'$INCLUDE: 'QPPRO.BAS'
+'$INCLUDE: 'PRO.BAS'

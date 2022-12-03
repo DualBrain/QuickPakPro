@@ -4,9 +4,9 @@
 
 DEFINT A-Z
 
-'$INCLUDE: 'QPPRO.BI'
+'$INCLUDE: 'PRO.BI'
 
-_FULLSCREEN _SQUAREPIXELS
+'_FULLSCREEN _SQUAREPIXELS
 
 DECLARE SUB InitMouse (There)
 DECLARE SUB MouseRangeG (SEG Element AS ANY, NumEls, Row, Column, Button, Range)
@@ -76,4 +76,4 @@ DO
   IF button > 1 THEN END
 LOOP
 
-'$INCLUDE: 'QPPRO.BAS'
+'$INCLUDE: 'PRO.BAS'

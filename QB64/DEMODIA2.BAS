@@ -6,9 +6,9 @@
 
 DEFINT A-Z
 
-'$INCLUDE: 'QPPRO.BI'
+'$INCLUDE: 'PRO.BI'
 
-_FULLSCREEN _SQUAREPIXELS
+'_FULLSCREEN _SQUAREPIXELS
 
 DECLARE SUB Dialog (Choice, Text$(), Response$(), Menu$(), ScrnRow, Style, Clr, Action)
 
@@ -246,4 +246,4 @@ CALL CDir(origPath$)                      ' Restore original path
 END                                       ' Fini
 
 '$INCLUDE: 'DIALOG.BAS'
-'$INCLUDE: 'QPPRO.BAS'
+'$INCLUDE: 'PRO.BAS'

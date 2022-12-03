@@ -5,9 +5,9 @@
 
 DEFINT A-Z
 
-'$INCLUDE: 'QPPRO.BI'
+'$INCLUDE: 'PRO.BI'
 
-_FULLSCREEN _SQUAREPIXELS
+'_FULLSCREEN _SQUAREPIXELS
 
 DECLARE FUNCTION QPMid$ (text$, midArg%, numChars%)
 DECLARE FUNCTION QPLeft$ (text$, leftArg%)
@@ -24,4 +24,4 @@ PRINT "{"; QPRight$(text$, arg); "}"
 PRINT "{"; QPMid$(text$, arg, -1); "}"     'a negative value means take all of
                                            'the characters through the end
 
-'$INCLUDE: 'QPPRO.BAS'
+'$INCLUDE: 'PRO.BAS'

@@ -6,9 +6,9 @@
 
 DEFINT A-Z
 
-'$INCLUDE: 'QPPRO.BI'
+'$INCLUDE: 'PRO.BI'
 
-_FULLSCREEN _SQUAREPIXELS
+'_FULLSCREEN _SQUAREPIXELS
 
 DECLARE SUB ScrollIn (eit$, start, wide, maxLen, filter, ky, edClr, clr)
 DECLARE SUB QPrint0 (txt$, clr)
@@ -90,4 +90,4 @@ CALL ScrollIn(edit$, start, wide, maxLen, filter, ky, edClr, clr)
 CALL HideCursor
 
 '$INCLUDE: 'SCROLLIN.BAS'
-'$INCLUDE: 'QPPRO.BAS'
+'$INCLUDE: 'PRO.BAS'

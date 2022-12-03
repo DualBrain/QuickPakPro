@@ -8,6 +8,10 @@
 
 DEFINT A-Z
 
+'$INCLUDE: 'PRO.BI'
+
+'_FULLSCREEN _SQUAREPIXELS
+
 DECLARE SUB Bin2Hex (binary$, hexNum)
 DECLARE FUNCTION Monitor%
 DECLARE FUNCTION Peek1% (segment, address)
@@ -176,4 +180,4 @@ SUB WaitButton STATIC
   WEND
 END SUB
 
-'$INCLUDE: 'QPPRO.BAS'
+'$INCLUDE: 'PRO.BAS'

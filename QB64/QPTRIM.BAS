@@ -5,9 +5,9 @@
 
 DEFINT A-Z
 
-'$INCLUDE: 'QPPRO.BI'
+'$INCLUDE: 'PRO.BI'
 
-_FULLSCREEN _SQUAREPIXELS
+'_FULLSCREEN _SQUAREPIXELS
 
 DECLARE FUNCTION QPLTrim$ (x$)
 DECLARE FUNCTION QPRTrim$ (x$)
@@ -23,4 +23,4 @@ PRINT "QPLTrim  ===> {"; QPLTrim$(x$); "}"
 PRINT "QPRTrim  ===> {"; QPRTrim$(x$); "}"
 PRINT "QPTrim   ===> {"; QPTrim$(x$); "}"
 
-'$INCLUDE: 'QPPRO.BAS'
+'$INCLUDE: 'PRO.BAS'

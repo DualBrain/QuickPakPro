@@ -5,9 +5,9 @@
 
 DEFINT A-Z
 
-'$INCLUDE: 'QPPRO.BI'
+'$INCLUDE: 'PRO.BI'
 
-_FULLSCREEN _SQUAREPIXELS
+'_FULLSCREEN _SQUAREPIXELS
 
 DECLARE SUB BPrint (X$)
 
@@ -25,4 +25,4 @@ CALL BPrint("This is a number:" + STR$(Value!) + CHR$(13) + CHR$(10))
 LOCATE 20, 20
 CALL BPrint("This shows that BPrint honors the current cursor location")
 
-'$INCLUDE: 'QPPRO.BAS'
+'$INCLUDE: 'PRO.BAS'

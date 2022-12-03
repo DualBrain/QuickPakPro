@@ -5,9 +5,9 @@
 
 DEFINT A-Z
 
-'$INCLUDE: 'QPPRO.BI'
+'$INCLUDE: 'PRO.BI'
 
-_FULLSCREEN _SQUAREPIXELS
+'_FULLSCREEN _SQUAREPIXELS
 
 DECLARE SUB APrint (array$(), first, numEls, firstChar, numChars, colr, page)
 DECLARE SUB Box (ulRow, ulCol, lrRow, lrCol, style, colr, page)
@@ -99,4 +99,4 @@ GetK:
 
   GOTO GetK
 
-'$INCLUDE: 'QPPRO.BAS'
+'$INCLUDE: 'PRO.BAS'

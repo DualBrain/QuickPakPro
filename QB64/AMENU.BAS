@@ -5,7 +5,9 @@
 
 DEFINT A-Z
 
-'$INCLUDE: 'QPPRO.BI'
+'$INCLUDE: 'PRO.BI'
+
+'_FULLSCREEN _SQUAREPIXELS
 
 DECLARE SUB AMenu (array$(), start, startItem, count, scanCode, fileColr, hiLiteColr, rows, columns, spacing, row, column)
        
@@ -58,4 +60,4 @@ startItem = 345
 count = n
 CALL AMenu (a$(), 1, startItem, count, scanCode, 112, 23, 20, 5, 2, 5, 5)
 
-'$INCLUDE: 'QPPRO.BAS'
+'$INCLUDE: 'PRO.BAS'

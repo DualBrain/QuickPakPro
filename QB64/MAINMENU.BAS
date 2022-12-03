@@ -114,5 +114,3 @@ Display:
   RETURN
 
 END SUB
-
-'$INCLUDE: 'QPPRO.BAS'

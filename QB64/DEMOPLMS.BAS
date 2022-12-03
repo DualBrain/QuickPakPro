@@ -6,6 +6,10 @@
 
 DEFINT A-Z
 
+'$INCLUDE: 'PRO.BI'
+
+'_FULLSCREEN _SQUAREPIXELS
+
 DECLARE FUNCTION Monitor% ()
 DECLARE FUNCTION PullMenKey% (ky$, menu$(), stat())
 
@@ -227,4 +231,4 @@ HideCursor                              ' Turn the mouse cursor off
 END
 
 '$INCLUDE: 'PULLDNMS.BAS'
-'$INCLUDE: 'QPPRO.BAS'
+'$INCLUDE: 'PRO.BAS'

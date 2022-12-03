@@ -5,9 +5,9 @@
 
 DEFINT A-Z
 
-'$INCLUDE: 'QPPRO.BI'
+'$INCLUDE: 'PRO.BI'
 
-_FULLSCREEN _SQUAREPIXELS
+'_FULLSCREEN _SQUAREPIXELS
 
 DECLARE SUB PaintBox (ulRow, ulCol, lrRow, lrCol, colr, page)
 
@@ -34,4 +34,4 @@ WHILE INKEY$ = "": WEND
 
 PaintBox ulRow, ulCol, lrRow, lrCol, colr, page
 
-'$INCLUDE: 'QPPRO.BAS'
+'$INCLUDE: 'PRO.BAS'

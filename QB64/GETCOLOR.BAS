@@ -5,9 +5,9 @@
 
 DEFINT A-Z
 
-'$INCLUDE: 'QPPRO.BI'
+'$INCLUDE: 'PRO.BI'
 
-_FULLSCREEN _SQUAREPIXELS
+'_FULLSCREEN _SQUAREPIXELS
 
 DECLARE SUB GetColor (fg, bg)           ' gets BASIC's current colors
 DECLARE SUB SplitColor (xColor, fg, bg) ' .ASM - splits a color into FG and BG
@@ -56,4 +56,4 @@ SUB GetColor (fg%, bg%) STATIC
 
 END SUB
 
-'$INCLUDE: 'QPPRO.BAS'
+'$INCLUDE: 'PRO.BAS'

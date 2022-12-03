@@ -4,13 +4,14 @@
 ' and DEMOVERT.BAS.
 '
 ' by Don Malin   (C) Crescent Software 1988-1989
+' Modifications (c) 2022 Cory Smith
 '****************************************************************************
 
 DEFINT A-Z
 
-'$INCLUDE: 'QPPRO.BI'
+'$INCLUDE: 'PRO.BI'
 
-_FULLSCREEN _SQUAREPIXELS
+'_FULLSCREEN _SQUAREPIXELS
 
 '----- BASIC subprograms
 '
@@ -445,4 +446,4 @@ END SUB
 '$INCLUDE: 'MSGBOX.BAS'
 '$INCLUDE: 'PULLDOWN.BAS'
 '$INCLUDE: 'VERTMENU.BAS'
-'$INCLUDE: 'QPPRO.BAS'
+'$INCLUDE: 'PRO.BAS'

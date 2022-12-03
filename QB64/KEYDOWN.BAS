@@ -2,9 +2,11 @@
 
 ' Modifications (c) 2022 Cory Smith
 
-'$INCLUDE: 'QPPRO.BI'
-
 DEFINT A-Z
+
+'$INCLUDE: 'PRO.BI'
+
+'_FULLSCREEN _SQUAREPIXELS
 
 ' NOTE: Keydown does not work with QuickBASIC 4.0 or earlier.
 ' NOTE: Modern computers have a "repeat" mechanism, which simulates 
@@ -29,4 +31,4 @@ LOOP UNTIL INKEY$ = CHR$(27)
 'CALL DeinstallKeyDown           ' Deinstalling is needed only within QBX (PDS)
                                  ' You can ignore this step with QuickBASIC 4.5
 
-'$INCLUDE: 'QPPRO.BAS'
+'$INCLUDE: 'PRO.BAS'

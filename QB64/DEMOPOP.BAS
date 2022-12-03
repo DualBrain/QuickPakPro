@@ -5,9 +5,9 @@
 
 DEFINT A-Z
 
-'$INCLUDE: 'QPPRO.BI'
+'$INCLUDE: 'PRO.BI'
 
-_FULLSCREEN _SQUAREPIXELS
+'_FULLSCREEN _SQUAREPIXELS
 
 DECLARE SUB ASCIIChart (row, column, lines)
 DECLARE SUB Calc (ulRow, ulCol, fg, bg)
@@ -90,4 +90,4 @@ CALL CSMsgBox("", 0, cnf) 'the parameters used the second time don't matter
 '$INCLUDE: 'CALC.BAS'
 '$INCLUDE: 'CALENDAR.BAS'
 '$INCLUDE: 'MSGBOX.BAS'
-'$INCLUDE: 'QPPRO.BAS'
+'$INCLUDE: 'PRO.BAS'

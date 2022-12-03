@@ -9,7 +9,7 @@
 
 DEFINT A-Z
 
-'$INCLUDE: 'QPPRO.BI'
+'$INCLUDE: 'PRO.BI'
 
 '_FULLSCREEN _SQUAREPIXELS
 
@@ -63,4 +63,4 @@ FUNCTION FnPad$(X$) ' for centering
   FnPad$ = SPACE$((7 - LEN(X$)) / 2) + X$
 END FUNCTION
 
-'$INCLUDE: 'QPPRO.BAS'
+'$INCLUDE: 'PRO.BAS'

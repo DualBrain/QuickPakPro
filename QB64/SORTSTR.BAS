@@ -5,9 +5,9 @@
 
 DEFINT A-Z
 
-'$INCLUDE: 'QPPRO.BI'
+'$INCLUDE: 'PRO.BI'
 
-_FULLSCREEN _SQUAREPIXELS
+'_FULLSCREEN _SQUAREPIXELS
 
 DECLARE SUB SortStr (address$(), start, size, direction)
 DECLARE SUB SortStr2 (address$(), start, size, direction)
@@ -98,4 +98,4 @@ FOR x = 1 TO size
   END IF
 NEXT
 
-'$INCLUDE: 'QPPRO.BAS'
+'$INCLUDE: 'PRO.BAS'

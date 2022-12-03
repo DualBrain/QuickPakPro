@@ -5,9 +5,9 @@
 
 DEFINT A-Z  ' use integers throughout - faster and requires less variable space
 
-'$INCLUDE: 'QPPRO.BI'
+'$INCLUDE: 'PRO.BI'
 
-_FULLSCREEN _SQUAREPIXELS
+'_FULLSCREEN _SQUAREPIXELS
 
 'BASIC subprograms demonstrated
 DECLARE SUB CapNum ()
@@ -183,4 +183,4 @@ END FUNCTION
 '$INCLUDE: 'DATEIN.BAS'
 '$INCLUDE: 'CAPNUM.BAS'
 '$INCLUDE: 'YESNOB.BAS'
-'$INCLUDE: 'QPPRO.BAS'
+'$INCLUDE: 'PRO.BAS'

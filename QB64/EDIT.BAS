@@ -4,14 +4,14 @@
 
 DEFINT A-Z
 
-'$INCLUDE: 'QPPRO.BI'
+'$INCLUDE: 'PRO.BI'
+
+'_FULLSCREEN _SQUAREPIXELS
 
 _TITLE "EDIT.EXE"
 
 CONST FALSE = 0
 CONST TRUE = NOT FALSE
-
-'_FULLSCREEN _SQUAREPIXELS
 
 CLS
 
@@ -179,7 +179,7 @@ HideCursor                              ' Turn the mouse cursor off
 SYSTEM 'END
 
 '$INCLUDE: 'PULLDNMS.BAS'
-'$INCLUDE: 'QPPRO.BAS'
+'$INCLUDE: 'PRO.BAS'
 
 SUB UpdateStatus(text$, r, c) STATIC
   IF text$ <> value$ OR text$ = "*" THEN

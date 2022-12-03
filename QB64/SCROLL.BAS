@@ -5,9 +5,9 @@
 
 DEFINT A-Z
 
-'$INCLUDE: 'QPPRO.BI'
+'$INCLUDE: 'PRO.BI'
 
-_FULLSCREEN _SQUAREPIXELS
+'_FULLSCREEN _SQUAREPIXELS
 
 DECLARE SUB ScrollU (ulRow, ulCol, lrRow, lrCol, lines, page)
 DECLARE SUB ScrollD (ulRow, ulCol, lrRow, lrCol, lines, page)
@@ -78,4 +78,4 @@ ELSE
   ScrollR ulRow, ulCol, lrRow, lrCol, lines, page
 END IF
 
-'$INCLUDE: 'QPPRO.BAS'
+'$INCLUDE: 'PRO.BAS'

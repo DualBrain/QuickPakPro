@@ -6,9 +6,9 @@
 
 DEFINT A-Z
 
-'$INCLUDE: 'QPPRO.BI'
+'$INCLUDE: 'PRO.BI'
 
-_FULLSCREEN _SQUAREPIXELS
+'_FULLSCREEN _SQUAREPIXELS
 
 DECLARE FUNCTION Peek1% (segment, offset)   ' to check monitor type
 
@@ -84,4 +84,4 @@ DATA 13,  50,  20,  60,  6
 DATA  7,  15,   9,  50,  7
 DATA 10,  55,  15,  63,  8
 
-'$INCLUDE: 'QPPRO.BAS'
+'$INCLUDE: 'PRO.BAS'

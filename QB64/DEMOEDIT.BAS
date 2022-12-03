@@ -6,9 +6,9 @@
 
 DEFINT A-Z
 
-'$INCLUDE: 'QPPRO.BI'
+'$INCLUDE: 'PRO.BI'
 
-_FULLSCREEN _SQUAREPIXELS
+'_FULLSCREEN _SQUAREPIXELS
 
 DECLARE SUB ClearEOL (colr%)    'for the demo only
 DECLARE FUNCTION Monitor% ()    'determines monitor type
@@ -282,4 +282,4 @@ DATA "there until Escape is pressed.  Likewise, setting Action to 5"
 DATA "clears the window and restores the original screen contents."
 
 '$INCLUDE: 'QEDIT.BAS'
-'$INCLUDE: 'QPPRO.BAS'
+'$INCLUDE: 'PRO.BAS'

@@ -6,9 +6,9 @@
 
 DEFINT A-Z
 
-'$INCLUDE: 'QPPRO.BI'
+'$INCLUDE: 'PRO.BI'
 
-_FULLSCREEN _SQUAREPIXELS
+'_FULLSCREEN _SQUAREPIXELS
 
 ' ----- Look up tables for number words
 
@@ -110,4 +110,4 @@ FUNCTION SpellNumber$ (strNum$) STATIC
 
 END FUNCTION
 
-'$INCLUDE: 'QPPRO.BAS'
+'$INCLUDE: 'PRO.BAS'

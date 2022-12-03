@@ -1,16 +1,8 @@
-' *********** QPPRO.BAS - added value functionality for QB64
-'                         inspired by QuickPak Professional 
-'                         for QB45/PDS71/VBDOS10
+' *********** PRO.BAS - added value functionality for QB64
+'                       inspired by QuickPak Professional 
+'                       for QB45/PDS71/VBDOS10
 
 ' Copyright (c) 2022 Cory Smith
-
-' TYPE Area                    ' Type definition for MouseRange
-'   ULRow AS INTEGER
-'   ULCol AS INTEGER
-'   LRRow AS INTEGER
-'   LRCol AS INTEGER
-'   NumWindow AS INTEGER
-' END TYPE
 
 ' ****************************************
 ' Chapter 2 - Array Routines 

@@ -6,9 +6,9 @@
 
 DEFINT A-Z
 
-'$INCLUDE: 'QPPRO.BI'
+'$INCLUDE: 'PRO.BI'
 
-_FULLSCREEN _SQUAREPIXELS
+'_FULLSCREEN _SQUAREPIXELS
 
 DECLARE SUB BarPrint (choice$(), barColor)
 DECLARE FUNCTION Monitor% ()
@@ -81,4 +81,4 @@ PRINT "Selection"; choice; "was made from Menu"; menu;
 IF ky$ = CHR$(27) THEN PRINT "- Escape was pressed";
 
 '$INCLUDE: 'PULLDOWN.BAS'
-'$INCLUDE: 'QPPRO.BAS'
+'$INCLUDE: 'PRO.BAS'

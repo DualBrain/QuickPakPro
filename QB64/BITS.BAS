@@ -5,9 +5,9 @@
 
 DEFINT A-Z
 
-'$INCLUDE: 'QPPRO.BI'
+'$INCLUDE: 'PRO.BI'
 
-_FULLSCREEN _SQUAREPIXELS
+'_FULLSCREEN _SQUAREPIXELS
 
 DECLARE SUB DimBits (Array$, Size)         'dims a bit array
 DECLARE SUB SetBit (Array$, BitNumber, Bit)     'assigns to the bit array
@@ -37,4 +37,4 @@ SUB DimBits (Array$, Size%)
   Array$ = STRING$(Size% \ 8 + 1, 0)        'each character holds 8 bits
 END SUB
 
-'$INCLUDE: 'QPPRO.BAS'
+'$INCLUDE: 'PRO.BAS'

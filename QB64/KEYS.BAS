@@ -2,9 +2,11 @@
 
 ' Copyright (c) 2022 Cory Smith
 
-'$INCLUDE: 'QPPRO.BI'
-
 DEFINT A-Z
+
+'$INCLUDE: 'PRO.BI'
+
+'_FULLSCREEN _SQUAREPIXELS
 
 CLS
 
@@ -31,4 +33,4 @@ DO
   ' END IF
 LOOP
 
-'$INCLUDE: 'QPPRO.BAS'
+'$INCLUDE: 'PRO.BAS'

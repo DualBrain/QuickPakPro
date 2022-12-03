@@ -6,9 +6,9 @@
 
 DEFINT A-Z
 
-'$INCLUDE: 'QPPRO.BI'
+'$INCLUDE: 'PRO.BI'
 
-_FULLSCREEN _SQUAREPIXELS
+'_FULLSCREEN _SQUAREPIXELS
 
 TYPE FLen
   S AS STRING * 13
@@ -166,4 +166,4 @@ PRINT "ScanCode = "; scanCode
 PRINT "Selection = "; selection, "Start = "; start
 PRINT "Row = "; row, , "Col = "; col
 
-'$INCLUDE: 'QPPRO.BAS'
+'$INCLUDE: 'PRO.BAS'

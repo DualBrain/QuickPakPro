@@ -8,9 +8,9 @@
 
 DEFINT A-Z
 
-'$INCLUDE: 'QPPRO.BI'
+'$INCLUDE: 'PRO.BI'
 
-_FULLSCREEN _SQUAREPIXELS
+'_FULLSCREEN _SQUAREPIXELS
 
 DECLARE SUB ReplaceString2 (text$, old$, new$)
 DECLARE SUB ReplaceChar (text$, old$, new$)
@@ -38,7 +38,7 @@ PRINT Work$
 ReplaceChar2 Work$, "a", "e"
 PRINT Work$
 
-' Moved ReplaceString ReplaceString2 into QPPRO.BAS.
+' Moved ReplaceString ReplaceString2 into PRO.BAS.
 '
 ' SUB ReplaceString (sourceValue$, oldValue$, newValue$) STATIC
 '   oldLen = LEN(oldValue$)
@@ -66,4 +66,4 @@ PRINT Work$
 '   END IF
 ' END SUB
 
-'$INCLUDE: 'QPPRO.BAS'
+'$INCLUDE: 'PRO.BAS'

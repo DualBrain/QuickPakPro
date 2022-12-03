@@ -5,9 +5,9 @@
 
 DEFINT A-Z
 
-'$INCLUDE: 'QPPRO.BI'
+'$INCLUDE: 'PRO.BI'
 
-_FULLSCREEN _SQUAREPIXELS
+'_FULLSCREEN _SQUAREPIXELS
 
 DECLARE FUNCTION ArraySize% (ulRow, ulCol, lrRow, lrCol)
 DECLARE SUB Pause (ticks)
@@ -53,4 +53,4 @@ ScrnRest 1, 60, 6, 80, array(), page
 ScrnRest 19, 1, 24, 21, array(), page
 ScrnRest 19, 60, 24, 80, array(), page
 
-'$INCLUDE: 'QPPRO.BAS'
+'$INCLUDE: 'PRO.BAS'

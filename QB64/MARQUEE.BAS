@@ -7,6 +7,10 @@
 
 DEFINT A-Z
 
+'$INCLUDE: 'PRO.BI'
+
+'_FULLSCREEN _SQUAREPIXELS
+
 DECLARE SUB Marquee (message$, row, colr)
 DECLARE SUB Pause (ticks)
 DECLARE SUB QPrint (txt$, colr, page)
@@ -45,4 +49,4 @@ SUB Marquee (x$, row%, colr%) STATIC
 
 END SUB
 
-'$INCLUDE: 'QPPRO.BAS'
+'$INCLUDE: 'PRO.BAS'

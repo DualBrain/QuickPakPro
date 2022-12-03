@@ -5,9 +5,9 @@
 
 DEFINT A-Z
 
-'$INCLUDE: 'QPPRO.BI'
+'$INCLUDE: 'PRO.BI'
 
-_FULLSCREEN _SQUAREPIXELS
+'_FULLSCREEN _SQUAREPIXELS
 
 DECLARE SUB ReadFile (array$())
 DECLARE SUB SortStr (array$(), start, numEls, direction)
@@ -37,4 +37,4 @@ FOR x = 1 TO numFiles
   PRINT array$(x)
 NEXT
 
-'$INCLUDE: 'QPPRO.BAS'
+'$INCLUDE: 'PRO.BAS'
