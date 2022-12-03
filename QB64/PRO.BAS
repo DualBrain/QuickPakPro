@@ -2836,15 +2836,19 @@ END SUB
 ' APrintT will quickly print any portion of a fixed-length string array 
 ' or the string component of a TYPE array, and contain the display 
 ' within a specified area of the screen. 
-SUB APrintT(array$(), first%, elSize%, numEls%, firstChar%, numChars%, colr%, page%)
-  CALL APrint(array$(), first%, numEls%, firstChar%, numChars%, colr%, page%)
+SUB APrintT(array() AS FLen, first%, elSize%, numEls%, firstChar%, numChars%, colr%, page%)
+  DIM s$(LBOUND(array) TO UBOUND(array))
+  FOR x% = LBOUND(array) TO UBOUND(array)
+    s$(x%) = array(x%).S
+  NEXT
+  CALL APrint(s$(), first%, numEls%, firstChar%, numChars%, colr%, page%)
 END SUB
 
 ' APrintT0 will quickly print any portion of a fixed-length string 
 ' array or the string component of a TYPE array, and contain the 
 ' display within a specified area of the screen. 
-SUB APrintT0(array$(), first%, elSize%, numEls%, firstChar%, numChars%, colr%)
-  ERROR 73 ' Feature Unavailable
+SUB APrintT0(array() AS FLen, first%, elSize%, numEls%, firstChar%, numChars%, colr%)
+  CALL APrintT0(array(), first%, elSize%, numEls%, firstChar%, numChars%, colr%)
 END SUB
 
 ' ArraySize will quickly calculate how many elements are needed in an

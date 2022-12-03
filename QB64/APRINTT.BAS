@@ -1,52 +1,67 @@
 '********** APRINTT.BAS - APrint demo for fixed-length strings
 
-'Copyright (c) 1988 Ethan Winer
+' Copyright (c) 1988 Ethan Winer
+' Modifications (c) 2022 Cory Smith
 
-
-'IMPORTANT NOTE:  To run this program you MUST start QB like this:
+' IMPORTANT NOTE:  To run this program you MUST start QB like this:
 '
 '    QB APrintT /AH /L Pro   - the /AH is needed because of the Huge array
 '
-'NOTE: This demo is implemented to prove that APrintT correctly handles
-'      elements that cross a segment boundary.
-
+' NOTE: This demo is implemented to prove that APrintT correctly handles
+'       elements that cross a segment boundary.
 
 DEFINT A-Z
 
-'Defining a fixed length string as a TYPE greatly simplifies the call to
-'APrintT below.  The alternative method using a fixed-length string array
-'is shown in REMarks for comparison.
+'$INCLUDE: 'PRO.BI'
 
-TYPE FLen
-   S AS STRING * 30
-END TYPE
+'_FULLSCREEN _SQUAREPIXELS
 
-DECLARE SUB APrintT (SEG ArrayElement AS FLen, ElSize, NumEls, MidStart, NumChars, Colr, Page)
-'DECLARE SUB APrintT (BYVAL Segment, BYVAL Address, ElSize, NumEls, MidStart, NumChars, Colr, Page)
+' Defining a fixed length string as a TYPE greatly simplifies the call to
+' APrintT below.  The alternative method using a fixed-length string array
+' is shown in REMarks for comparison.
 
-DEF FnSigned& (X)                       'for testing only
-  IF X < 0 THEN
-     FnSigned& = X + 65536
-  ELSE
-     FnSigned& = X
-  END IF
-END DEF
+' TYPE FLen
+'   S AS STRING * 30
+' END TYPE
 
-REDIM Array(3100) AS FLen
-'REDIM Array(3100) AS STRING * 30
+DECLARE SUB APrintT (SEG arrayElement AS FLen, elSize, numEls, midStart, numChars, colr, page)
+'DECLARE SUB APrintT (BYVAL segment, BYVAL address, elSize, numEls, midStart, numChars, colr, page)
+
+' Converted the following FN to a FUNCTION (see below).
+' DEF FnSigned& (x)                       ' for testing only
+'   IF x < 0 THEN
+'     FnSigned& = x + 65536
+'   ELSE
+'     FnSigned& = x
+'   END IF
+' END DEF
+
+REDIM array(3100) AS FLen
+'REDIM array(3100) AS STRING * 30
 
 CLS
-OPEN "KeySort.Bas" FOR INPUT AS #1
-FOR X = 2100 TO 2200
-  LINE INPUT #1, Array(X).S
- 'LINE INPUT #1, Array$(X)
-  IF X >= 2175 AND X < 2195 THEN
-    PRINT FnSigned&(VARPTR(Array(X).S)); TAB(10); Array(X).S
-   'PRINT FnSigned&(VARPTR(Array$(X))); TAB(10); Array$(X)
+OPEN "KEYSORT.BAS" FOR INPUT AS #1
+FOR x = 2100 TO 2200
+  LINE INPUT #1, array(x).S
+  'LINE INPUT #1, array$(x)
+  IF x >= 2175 AND x < 2195 THEN
+    'vv% = VARPTR(array(X).S) 'BUG: <------ fails in QB64.
+    vv% = x
+    PRINT FnSigned&(vv%); TAB(10); array(X).S
+    'PRINT FnSigned&(VARPTR(array$(X))); TAB(10); array$(X)
   END IF
 NEXT
 
 LOCATE 1, 45
-CALL APrintT(Array(2175), 30, 20, 1, 30, 7, -1)
-'CALL APrintT (VARSEG(Array$(2175)), VARPTR(Array$(2175)), 30, 20, 1, 30, 7, -1)
+CALL APrintT(array(), 2175, 30, 20, 1, 30, 7, -1)
+'CALL APrintT (VARSEG(array$(2175)), VARPTR(array$(2175)), 30, 20, 1, 30, 7, -1)
 
+FUNCTION FnSigned& (value%)                       ' for testing only
+  IF value% < 0 THEN
+    FnSigned& = value% + 65536
+  ELSE
+    FnSigned& = value%
+  END IF
+END FUNCTION
+
+'$INCLUDE: 'PRO.BAS'

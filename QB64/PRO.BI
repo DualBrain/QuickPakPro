@@ -1,7 +1,23 @@
-CONST BAR_LINE = 1               ' Line number for the menu bar
+CONST BAR_LINE = 1                        ' Line number for the menu bar
 
-                                 ' Alt Key translation table
+                                          ' Alt Key translation table
 CONST ALT_CHARS$ = "1234567890     QWERTYUIOP    ASDFGHJKL     ZXCVBNM"
+
+TYPE Area                                 ' Type definition for MouseRange
+  Y1 AS INTEGER
+  X1 AS INTEGER
+  Y2 AS INTEGER
+  X2 AS INTEGER
+  RN AS INTEGER
+END TYPE
+
+TYPE FLen                                 ' "Hard-coded" TYPE for xxxxT methods.
+  S AS STRING * 30
+END TYPE
+
+' ********************************************************
+' * Win32
+' ********************************************************
 
 CONST MAX_PATH = 260
 CONST INVALID_HANDLE_VALUE = -1
@@ -42,11 +58,3 @@ DECLARE DYNAMIC LIBRARY "kernel32"
   FUNCTION FindClose& (BYVAL hfind AS _UNSIGNED _OFFSET)
   FUNCTION GetLastError& ()
 END DECLARE
-
-TYPE Area                    'Type definition for MouseRange
-  Y1 AS INTEGER
-  X1 AS INTEGER
-  Y2 AS INTEGER
-  X2 AS INTEGER
-  RN AS INTEGER
-END TYPE
