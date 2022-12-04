@@ -1247,6 +1247,7 @@ END FUNCTION
 ' ****************************************
 
 SUB AMenu(array$(), first%, item%, count%, scanCode%, normColor%, hiLiteColor%, numRows%, numCols%, gap%, ulRow%, ulCol%)
+  'TODO: Fix "tagging" functionality - see DEMOCM.BAS for example of functionality.
   w% = LEN(array$(first%))                ' width of each column.
   IF scanCode% <> 3 THEN
     DO
@@ -1462,8 +1463,32 @@ SUB MColorPick(Colr%, BoxColor%, ExitCode%)
   ERROR 73 ' Feature Unavailable
 END SUB
 
-SUB DirFile(Array$(), Count%, ScanCode%, MsgColor%, FileColor%, HiLiteColor%, BoxColor%)
-  ERROR 73 ' Feature Unavailable
+SUB DirFile(array$(), first%, count%, scanCode%, msgColor%, fileColor%, hiLiteColor%, boxColor%)
+
+  'TODO: Take functionality in AMenu and embed it within this method.
+  'TODO: Once embeded AMenu functionality done, need to update the currently selected filename "label".
+
+  startItem = first%
+
+  CALL QPrintRC (STR$(count%) +  " file(s) found", 8, 6, msgColor%)
+
+  ulRow% = 10
+  ulCol% = 6
+  lrRow% = 18
+  lrCol% = 77
+  CALL MPaintBox (ulRow%, ulCol%, lrRow%, lrCol%, fileColor%)
+  CALL Box0 (ulRow%, ulCol%, lrRow%, lrCol%, 1, boxColor%)
+
+  CALL QPrintRC ("Filename : " + "*UNKNOWN*", 20, 7, msgColor%)
+  CALL QPrintRC ("Use cursor keys to select file then press <ENTER>", 24, 4, msgColor%)
+
+  ulRow% = ulRow% + 1
+  ulCol% = ulCol% + 2
+  gap% = 2
+  rows% = 7
+  cols% = 5
+  CALL AMenu (array$(), first%, startItem%, count%, scanCode%, fileColor%, hiLiteColor%, rows%, cols%, gap%, ulRow%, ulCol%)
+
 END SUB
 
 SUB Editor(ed$, activeLength%, scanCode%, numOnly%, isCapsOn%, normalColor%, editColor%, row%, column%) STATIC
@@ -1500,6 +1525,7 @@ SUB Editor(ed$, activeLength%, scanCode%, numOnly%, isCapsOn%, normalColor%, edi
           EXIT DO
         CASE 13, 27 ' Enter, Esc
           QPrintRC ed$, ulRow%, ulCol%, normalColor%
+          activeLength% = LEN(RTRIM$(ed$))
           LOCATE , , 0
           EXIT SUB
         CASE ELSE
@@ -1599,6 +1625,7 @@ SUB MEditor(ed$, activeLength%, scanCode%, numOnly%, isCapsOn%, normalColor%, ed
 END SUB
 
 SUB MenuVert(Array$(), First%, NumLines%, ScanCode%, Choice%, NormalColr%, HiLiteColor%, Row%, Column%)
+  'TODO: Pretty much looks like a single column version of AMenu.
   ERROR 73 ' Feature Unavailable
 END SUB
 
@@ -3282,6 +3309,23 @@ END SUB
 ' disturbing the text that is already present. 
 SUB PaintBox0 (ulRow%, ulCol%, lrRow%, lrCol%, colr%)
   CALL PaintBox (ulRow%, ulCol%, lrRow%, lrCol%, colr%, 0)
+END SUB
+
+SUB PUsing (number$, image$, color1%, color2%, page%, row%, column%)
+  ' number$ is any number whether integer, single, or double precision, 
+  ' and image$ indicates how the result is to be formatted. Image$ may 
+  ' contain both leading and trailing text as shown below.
+  ' color1% and color2% indicate the colors for the text and numeric 
+  ' portions of image$ respectively. Either color may be set to -1 to 
+  ' maintain the current screen colors.   
+  ' page% tells PUsing what screen page to print to, which may 
+  ' optionally be given as -1 to use the current page. 
+  ' row% and column% specify where the printing is to be located on 
+  ' the screen. 
+  CALL QPrintRC (FUsing$(number$, image$), row%, column%, color2%)
+  'TODO: page% is currently not honored.
+  'TODO: color1% needs to be implemented.
+  'TODO: "raw text" (non formatted) is currently not printed (ignored by FUsing$)
 END SUB
 
 SUB QPrint (text$, colr%, page%)
