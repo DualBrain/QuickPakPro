@@ -1288,9 +1288,12 @@ SUB ASCIIPick(char%, color1%, color2%, exitCode%)
   lrRow% = ulRow% + 17
   lrCol% = ulCol% + 34
   CALL Box0(ulRow%, ulCol%, lrRow%, lrCol%, 2, color1%)
-  CALL QPrintRC(CHR$(181) + " ASCII Code: Dec  ___  Hex  __ " + CHR$(198), ulRow% + 17, ulCol% + 1, color1%)
 
   DO
+
+    d$ = RIGHT$("00" + LTRIM$(STR$(char%)), 2)
+    h$ = RIGHT$("0" + HEX$(char%), 2)
+    CALL QPrintRC(CHR$(181) + " ASCII Code: Dec  " + d$ + "  Hex  " + h$ + " " + CHR$(198), ulRow% + 17, ulCol% + 1, color1%)
 
     prevControlChr% = _CONTROLCHR ' <----------- QB64 definately get's this wrong...
     IF NOT prevControlChr% THEN _CONTROLCHR OFF
