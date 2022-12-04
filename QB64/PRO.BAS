@@ -1295,8 +1295,8 @@ SUB ASCIIPick(char%, color1%, color2%, exitCode%)
     h$ = RIGHT$("0" + HEX$(char%), 2)
     CALL QPrintRC(CHR$(181) + " ASCII Code: Dec  " + d$ + "  Hex  " + h$ + " " + CHR$(198), ulRow% + 17, ulCol% + 1, color1%)
 
-    prevControlChr% = _CONTROLCHR ' <----------- QB64 definately get's this wrong...
-    IF NOT prevControlChr% THEN _CONTROLCHR OFF
+    'prevControlChr% = _CONTROLCHR ' <----------- QB64 definately get's this wrong...
+    'IF NOT prevControlChr% THEN _CONTROLCHR OFF
     FOR r% = 1 TO 16
       FOR c% = 1 TO 16
         ch% = ((r% - 1) * 16) + (c% - 1)
@@ -1305,7 +1305,7 @@ SUB ASCIIPick(char%, color1%, color2%, exitCode%)
         CALL QPrintRC(ch$, ulRow% + r%, ulCol% + (c% * 2), clr%)
       NEXT
     NEXT
-    IF NOT prevControlChr% THEN _CONTROLCHR ON
+    'IF NOT prevControlChr% THEN _CONTROLCHR ON
 
     IF exitCode% = -1 THEN EXIT SUB
 
@@ -3011,7 +3011,10 @@ END SUB
 ' BPrint will print either a conventional or fixed-length string at the 
 ' current cursor position through DOS. 
 SUB BPrint(X$)
+  prevControlChr% = _CONTROLCHR ' <----------- QB64 definately get's this wrong...
+  IF NOT prevControlChr% THEN _CONTROLCHR OFF
   PRINT X$;
+  IF NOT prevControlChr% THEN _CONTROLCHR ON
 END SUB
 
 ' ClearEOL (Clear to End of Line) erases the current screen line 
@@ -3098,7 +3101,10 @@ SUB MQPrint (txt$, colr%)
   END IF
   pr% = CSRLIN
   pc% = POS(0)
+  prevControlChr% = _CONTROLCHR ' <----------- QB64 definately get's this wrong...
+  IF NOT prevControlChr% THEN _CONTROLCHR OFF
   PRINT txt$;
+  IF NOT prevControlChr% THEN _CONTROLCHR ON
   LOCATE pr%, pc%
   IF ofg% <> -1 AND obg% <> -1 THEN
     COLOR ofg%, obg%
@@ -3152,7 +3158,10 @@ SUB QPrint (text$, colr%, page%)
   END IF
   pr% = CSRLIN
   pc% = POS(0)
+  prevControlChr% = _CONTROLCHR ' <----------- QB64 definately get's this wrong...
+  IF NOT prevControlChr% THEN _CONTROLCHR OFF
   PRINT text$;
+  IF NOT prevControlChr% THEN _CONTROLCHR ON
   LOCATE pr%, pc%
   IF ofg% <> -1 AND obg% <> -1 THEN
     COLOR ofg%, obg%
@@ -3170,7 +3179,10 @@ SUB QPrint0 (text$, colr%)
   END IF
   pr% = CSRLIN
   pc% = POS(0)
+  prevControlChr% = _CONTROLCHR ' <----------- QB64 definately get's this wrong...
+  IF NOT prevControlChr% THEN _CONTROLCHR OFF
   PRINT text$;
+  IF NOT prevControlChr% THEN _CONTROLCHR ON
   LOCATE pr%, pc%
   IF ofg% <> -1 AND obg% <> -1 THEN
     COLOR ofg%, obg%
@@ -3195,7 +3207,10 @@ SUB QPrintAny (txt$, clr%, monCode%, row%, column%)
   pr% = CSRLIN
   pc% = POS(0)
   LOCATE row%, column%
+  prevControlChr% = _CONTROLCHR ' <----------- QB64 definately get's this wrong...
+  IF NOT prevControlChr% THEN _CONTROLCHR OFF
   PRINT txt$;
+  IF NOT prevControlChr% THEN _CONTROLCHR ON
   LOCATE pr%, pc%
   IF ofg% <> -1 AND obg% <> -1 THEN
     COLOR ofg%, obg%
@@ -3214,7 +3229,10 @@ SUB QPrintRC (txt$, r%, c%, clr%)
   pr% = CSRLIN
   pc% = POS(0)
   LOCATE r%, c%
+  prevControlChr% = _CONTROLCHR ' <----------- QB64 definately get's this wrong...
+  IF NOT prevControlChr% THEN _CONTROLCHR OFF
   PRINT txt$;
+  IF NOT prevControlChr% THEN _CONTROLCHR ON
   LOCATE pr%, pc%
   IF ofg% <> -1 AND obg% <> -1 THEN
     COLOR ofg%, obg%

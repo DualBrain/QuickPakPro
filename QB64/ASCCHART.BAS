@@ -25,24 +25,24 @@ SUB ASCIIChart (row, column, lines)
     array$(x) = SPACE$(10)
     MID$(array$(x), 1 - (x < 10) - (x < 100)) = STR$(x)
     MID$(array$(x), 6 - (x < 16)) = HEX$(x)
-    ' HACK: QB64, need to filter the following as they
-    '       cause wierd things to happen when printed 
-    '       to the screen.
-    SELECT CASE x
-      CASE 7 ' BELL
-      CASE 8 ' BACKSPACE
-      CASE 9 ' HTAB
-      CASE 10 ' LF
-      CASE 11 ' VTAB
-      CASE 12 ' FORM FEED
-      CASE 13 ' CR
-      CASE 28 ' Not sure why???
-      CASE 29 ' Not sure why???
-      CASE 30 ' Not sure why???
-      CASE 31 ' Not sure why???
-      CASE ELSE
+    '' HACK: QB64, need to filter the following as they
+    ''       cause wierd things to happen when printed 
+    ''       to the screen.
+    'SELECT CASE x
+    '  CASE 7 ' BELL
+    '  CASE 8 ' BACKSPACE
+    '  CASE 9 ' HTAB
+    '  CASE 10 ' LF
+    '  CASE 11 ' VTAB
+    '  CASE 12 ' FORM FEED
+    '  CASE 13 ' CR
+    '  CASE 28 ' Not sure why???
+    '  CASE 29 ' Not sure why???
+    '  CASE 30 ' Not sure why???
+    '  CASE 31 ' Not sure why???
+    '  CASE ELSE
         MID$(array$(x), 9) = CHR$(x)
-    END SELECT
+    'END SELECT
   NEXT
  
   cursV = CSRLIN: cursH = POS(0)        ' save cursor position
