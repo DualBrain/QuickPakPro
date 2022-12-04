@@ -1021,8 +1021,45 @@ SUB ReadFileI(Array$())
   ERROR 73 ' Feature Unavailable
 END SUB
 
-SUB ReadFileT(Spec$, Array())
-  ERROR 73 ' Feature Unavailable
+SUB ReadFileT(spec$, array() AS STRING * 12, first%)
+  IF INSTR(_OS$, "[WINDOWS]") THEN
+    
+    DIM pattern AS STRING
+    DIM fd AS Win32_Find_Data
+    DIM hFind AS _UNSIGNED _OFFSET
+    DIM junk AS LONG
+    DIM ffn AS STRING
+    DIM p AS INTEGER
+
+    pattern = spec$ 'array$(0) + CHR$(0)
+    hFind = FindFirstFile(_OFFSET(pattern), _OFFSET(fd))
+    IF hFind <> INVALID_HANDLE_VALUE THEN
+      index = first% ' 1
+      DO
+        IF (fd.dwfileattributes AND FILE_ATTRIBUTE_DIRECTORY) = FILE_ATTRIBUTE_DIRECTORY THEN
+        ELSE 
+          ffn = fd.cfilename
+          p = INSTR(ffn, CHR$(0))
+          IF p > 0 THEN ffn = LEFT$(ffn, p - 1)
+          LSET array$(index) = ffn
+          index = index + 1
+        END IF
+      LOOP UNTIL FindNextFile(hFind, _OFFSET(fd)) = 0
+      junk = FindClose(hFind)
+    ELSE
+      lastError& = GetLastError
+      IF lastError& = ERROR_FILE_NOT_FOUND THEN
+        ' no files available, result remains 0
+      ELSEIF lastError& = ERROR_ACCESS_DENIED THEN
+        ERROR 70 ' Permission denied
+      ELSE
+        PRINT lastError&
+        ERROR 75 ' Path/File access error
+      END IF
+    END IF
+  ELSE
+    ERROR 73 ' Advanced Feature / Feature Unavailable
+  END IF
 END SUB
 
 SUB ReadFileX(Spec$, DirSize&, Array())
@@ -1275,8 +1312,70 @@ SUB AMenu(array$(), first%, item%, count%, scanCode%, normColor%, hiLiteColor%, 
   LOOP
 END SUB
 
-SUB AMenuT(Array(), Start%, StartItem%, Length%, Count%, ScanCode%, NormColor%, HiLiteColor%, NumRows%, NumCols%, Gap%, ULRow%, ULCol%)
-  ERROR 73 ' Feature Unavailable
+SUB AMenuT(array() AS STRING * 12, first%, item%, length%, count%, scanCode%, normColor%, hiLiteColor%, numRows%, numCols%, gap%, ulRow%, ulCol%)
+  w% = length% 'LEN(array$(first%))                ' width of each column.
+  IF scanCode% <> 3 THEN
+    DO
+      IF item% > first% + ((numRows% * numCols%) - 1) THEN
+        first% = first% + (numRows% * numCols%)
+      ELSE
+        EXIT DO
+      END IF
+    LOOP
+  END IF
+  DO
+    DO
+      IF item% < first% THEN                ' current item before the display range?
+        first% = first% - numRows%          ' scroll display to the left.
+      ELSEIF item% > first% + ((numRows% * numCols%) - 1) THEN ' current item beyond the display range?
+        first% = first% + numRows%          ' scroll display to the right.
+      ELSE
+        EXIT DO
+      END IF
+    LOOP
+    FOR rr% = 0 TO numRows% - 1         ' for each display row,
+      FOR cc% = 0 TO numCols% - 1       ' for each display column,
+        index% = first% + rr% + (cc% * numRows%) ' determine element index,
+        IF index% = item% THEN clr% = hiLiteColor% ELSE clr% = normColor% ' determine color,
+        IF index% <= UBOUND(array$) THEN text$ = array$(index%) ELSE text$ = SPACE$(w%) ' determine text (can be blank),
+        QPrintRC text$, ulRow% + rr%, ulCol% + (cc% * (w% + gap%)), clr% ' render text.
+      NEXT
+    NEXT
+    IF scanCode% = 9999 THEN EXIT SUB 'TODO: For testing...
+    WHILE inkey$ <> "": WEND              ' not sure needed.
+    DO
+      scanCode% = MGetKey(row%, col%)     ' scanCode% might be returned to caller.
+      SELECT CASE scanCode%
+        CASE -72 ' Up
+          IF item% > 1 THEN               ' if current more than min,
+            item% = item% - 1             ' decrement.
+          END IF
+          EXIT DO
+        CASE -80 ' Down
+          IF item% < UBOUND(array$) THEN  ' if current less than max,
+            item% = item% + 1             ' increment.
+          END IF
+          EXIT DO
+        CASE -75 ' Left
+          IF item% - numRows% > 0 THEN    ' more columns to the left?
+            item% = item% - numRows%      ' shift columns right.
+          ELSEIF item% > 1 THEN           ' if not shifted (above),
+            item% = 1                     ' set current item to first.
+          END IF
+          EXIT DO
+        CASE -77 ' Right
+          IF item% + numRows% <= UBOUND(array$) THEN ' more columns to the right?
+            item% = item% + numRows%                 ' shift columns left.
+          ELSEIF item% < UBOUND(array$) THEN         ' if not shifted (above),
+            item% = UBOUND(array$)                   ' set current item to last.
+          END IF
+          EXIT DO
+        CASE ELSE                         ' any other key,
+          count% = item%                  ' set count% on exit to be the currently highlighted item,
+          EXIT SUB                        ' return to caller.
+      END SELECT
+    LOOP
+  LOOP
 END SUB
 
 SUB ASCIIPick(char%, color1%, color2%, exitCode%)
@@ -1367,8 +1466,46 @@ SUB DirFile(Array$(), Count%, ScanCode%, MsgColor%, FileColor%, HiLiteColor%, Bo
   ERROR 73 ' Feature Unavailable
 END SUB
 
-SUB Editor(ed$, activeLength%, scanCode%, numOnly%, isCapsOn%, normalColor%, editColor%, row%, column%)
-  ERROR 73 ' Feature Unavailable
+SUB Editor(ed$, activeLength%, scanCode%, numOnly%, isCapsOn%, normalColor%, editColor%, row%, column%) STATIC
+  'TODO: How is activeLength% utilized?
+  'TODO: Handle numOnly%
+  'TODO: Handle isCapsOn%
+  'TODO: Handle Alt+C - clear "field".
+  'TODO: Handle Alt+R - restore "field".
+  IF scanCode% = 1 THEN
+    'p% = *what is was at last exit*
+  ELSEIF scanCode% = 2 THEN
+    p% = column%
+  ELSE
+    p% = 1
+    ulRow% = row%
+    ulCol% = column%
+    originalEd$ = ed$
+  END IF
+  DO
+    LOCATE ulRow%, ulCol% + p% - 1, 1
+    QPrintRC ed$, ulRow%, ulCol%, editColor%
+    WHILE INKEY$ <> "": WEND              ' not sure needed.
+    DO
+      scanCode% = MGetKey(row%, column%) ' scanCode% might be returned to caller.
+      SELECT CASE scanCode%
+        ' Home, End
+        CASE -75 ' Left
+          p% = p% - 1
+          IF p% < 1 THEN p% = 1
+          EXIT DO
+        CASE -77 ' Right
+          p% = p% + 1
+          IF p% > LEN(ed$) THEN p% = LEN(ed$)
+          EXIT DO
+        CASE 13, 27 ' Enter, Esc
+          QPrintRC ed$, ulRow%, ulCol%, normalColor%
+          LOCATE , , 0
+          EXIT SUB
+        CASE ELSE
+      END SELECT
+    LOOP
+  LOOP
 END SUB
 
 SUB Lts2Menu(Item$(), PromptParam$(), Choice%, Colr%)
@@ -2749,11 +2886,11 @@ FUNCTION QPSadd%(Work$)
 END FUNCTION
 
 FUNCTION QPStrI$(IntVar%)
-  ERROR 73 ' Feature Unavailable
+  QPStrI$ = LTRIM$(STR$(IntVar%))
 END FUNCTION
 
 FUNCTION QPStrL$(LongInt&)
-  ERROR 73 ' Feature Unavailable
+  QPStrL$ = LTRIM$(STR$(LongInt&))
 END FUNCTION
 
 FUNCTION QPTrim$(inputValue$)
@@ -3269,7 +3406,7 @@ SUB ScrnRest (ulRow%, ulCol%, lrRow%, lrCol%, element%(), page%)
   cols% = (lrCol% - ulCol%) + 1
   FOR r% = 0 TO rows% - 1
     FOR c% = 0 TO cols% - 1
-      index% = (r% * cols%) + c%
+      index% = 1 + ((r% * cols%) + c%)
       clr% = element%(index%) AND &H00FF ' split color
       ch% = ((element%(index%) AND &HFF00) \ 256) AND &H00FF ' split character
       QPrintRC CHR$(ch%), ulRow% + r%, ulCol% + c%, clr%
@@ -3291,7 +3428,7 @@ SUB ScrnSave (ulRow%, ulCol%, lrRow%, lrCol%, element%(), page%)
   cols% = (lrCol% - ulCol%) + 1
   FOR r% = 0 TO rows% - 1
     FOR c% = 0 TO cols% - 1
-      index% = (r% * cols%) + c%
+      index% = 1 + ((r% * cols%) + c%)
       ch% = SCREEN(ulRow% + r%, ulCol% + c%, 0)
       clr% = SCREEN(ulRow% + r%, ulCol% + c%, 1)
       element%(index%) = (ch% * 256) + clr% ' combine

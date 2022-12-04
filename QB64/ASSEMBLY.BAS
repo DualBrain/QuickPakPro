@@ -1,9 +1,16 @@
-'********** Assembly.Bas - basis for the Assembly.Asm example program
+' ********** ASSEMBLY.BAS - basis for the Assembly.Asm example program
 
-'Copyright (c) 1989 Ethan Winer
-
+' Copyright (c) 1989 Ethan Winer
+' Modifications (c) 2022 Cory Smith
 
 DEFINT A-Z
+
+_TITLE "ASSEMBLY"
+
+'$INCLUDE: 'PRO.BI'
+
+_FULLSCREEN _SQUAREPIXELS
+
 DECLARE SUB AMenuT (BYVAL Segment, BYVAL Address, Start, StrLength, Count, ScanCode, ElementColor, HiLiteColor, Rows, Columns, Spacing, Row, Column)
 DECLARE SUB Box0 (ULRow, ULCol, LRRow, LRCol, Char, Colr)
 DECLARE SUB ClearScr0 (ULRow, ULCol, LRRow, LRCol, Colr)
@@ -20,65 +27,66 @@ DECLARE FUNCTION Peek1% (Segment, Address)
 DECLARE FUNCTION QPStrI$ (Value%)
 DECLARE FUNCTION QPTrim$ (Work$)
 
-DIM ScrnArray(1 TO 2000)                'holds the underlying screen
-DIM FileNames(300) AS STRING * 12       'holds the file names read
+DIM scrnArray(1 TO 2000)                'holds the underlying screen
+DIM fileNames(300) AS STRING * 12       'holds the file names read
 
-Spec$ = "*.*" + SPACE$(30)              'default values for Editor
-ALen = 0
-SCode = 0
-Num = 0
-Cap = 0
-NormClr = 112
-EditClr = 112
-Row = 5
-Col = 30
+spec$ = "*.*" + SPACE$(30)              'default values for Editor
+aLen = 0
+sCode = 0
+num = 0
+cap = 0
+normClr = 112
+editClr = 112
+row = 5
+col = 30
 
-ScrnColor = 7                                   'assume monchrome
-IF Peek1%(0, &H463) <> &HB4 THEN ScrnColor = 23 'nope, it's color
+scrnColor = 7                                   'assume monchrome
+IF Peek1%(0, &H463) <> &HB4 THEN scrnColor = 23 'nope, it's color
 
-ULRow = 1
-ULCol = 1
-LRRow = 25
-LRCol = 80
+ulRow = 1
+ulCol = 1
+lrRow = 25
+lrCol = 80
 
-ScrnSave0 ULRow, ULCol, LRRow, LRCol, ScrnArray(1)  'save underlying screen
-ClearScr0 ULRow, ULCol, LRRow, LRCol, ScrnColor     'okay clear it now
+ScrnSave0 ulRow, ulCol, lrRow, lrCol, scrnArray()  'save underlying screen
+ClearScr0 ulRow, ulCol, lrRow, lrCol, scrnColor     'okay clear it now
 
 LOCATE 5, 1
-QPrint0 "Enter a file specification: ", ScrnColor   'ask for a file spec
-Editor Spec$, ALen, SCode, Num, Cap, NormClr, EditClr, Row, Col
+QPrint0 "Enter a file specification: ", scrnColor   'ask for a file spec
+Editor spec$, aLen, sCode, num, cap, normClr, editClr, row, col
 
-Count = FCount%(QPTrim$(Spec$))         'trim the spec, count matching files
-IF Count > 300 THEN                     'too many to read into FileNames()
-   PRINT "Too many files, must be three hundred or less - press a key"
-   GOTO BadEnd
-ELSEIF Count = 0 THEN                   'none, so don't bother to continue
-   PRINT "No matching files - press a key"
-   GOTO BadEnd
+count = FCount%(QPTrim$(spec$))         'trim the spec, count matching files
+IF count > 300 THEN                     'too many to read into FileNames()
+  PRINT "Too many files, must be three hundred or less - press a key"
+  GOTO BadEnd
+ELSEIF count = 0 THEN                   'none, so don't bother to continue
+  PRINT "No matching files - press a key"
+  GOTO BadEnd
 END IF
 
-ReadFileT QPTrim$(Spec$), VARSEG(FileNames(1)), VARPTR(FileNames(1)) 'read 'em
-Box0 9, 6, 20, 72, 2, ScrnColor         'draw a nice box
+ReadFileT QPTrim$(spec$), fileNames(), 1 'read 'em
+Box0 9, 6, 20, 72, 2, scrnColor         'draw a nice box
 
-Start = 1                               'assign the parameters for AMenuT
-Length = 12
-HColor = 15
-Rows = 10
-Cols = 4
-Gap = 5
-Row = 10
-Col = 8
-AMenuT VARSEG(FileNames(1)), VARPTR(FileNames(1)), Start, Length, Count, SCode, NormClr, HColor, Rows, Cols, Gap, Row, Col
+start = 1                               'assign the parameters for AMenuT
+length = 12
+hColor = 15
+rows = 10
+cols = 4
+gap = 5
+row = 10
+col = 8
+AMenuT fileNames(), first, start, length, count, sCode, normClr, hColor, rows, cols, gap, row, col
 
 LOCATE 22, 1                                    'locate and print the number
-QPrint0 "You picked choice number ", ScrnColor  '  of matching file names
+QPrint0 "You picked choice number ", scrnColor  '  of matching file names
 LOCATE 22, 26
-QPrint0 QPStrI$(Count), ScrnColor
+QPrint0 QPStrI$(count), scrnColor
 LOCATE 22, 30
-QPrint0 FileNames(Count), ScrnColor             'print the name they picked
+QPrint0 FileNames(count), scrnColor             'print the name they picked
 
 BadEnd:
-   WaitKey
-   ScrnRest0 ULRow, ULCol, LRRow, LRCol, ScrnArray(1)   'restore the screen
-   END
+  k = WaitKey
+  ScrnRest0 ulRow, ulCol, lrRow, lrCol, scrnArray()   'restore the screen
+  END
 
+'$INCLUDE: 'PRO.BAS'
