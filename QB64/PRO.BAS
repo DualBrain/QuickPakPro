@@ -3223,11 +3223,13 @@ END SUB
 
 ' BPrint will print either a conventional or fixed-length string at the 
 ' current cursor position through DOS. 
-SUB BPrint(X$)
+SUB BPrint(text$)
   prevControlChr% = _CONTROLCHR ' <----------- QB64 definately get's this wrong...
-  IF NOT prevControlChr% THEN _CONTROLCHR OFF
-  PRINT X$;
-  IF NOT prevControlChr% THEN _CONTROLCHR ON
+  IF prevControlChr% THEN _CONTROLCHR ON
+  temp$ = text$
+  CALL ReplaceChar(temp$, CHR$(13), "")
+  PRINT temp$;
+  IF prevControlChr% THEN _CONTROLCHR OFF
 END SUB
 
 ' ClearEOL (Clear to End of Line) erases the current screen line 

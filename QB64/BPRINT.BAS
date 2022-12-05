@@ -9,19 +9,19 @@ DEFINT A-Z
 
 '_FULLSCREEN _SQUAREPIXELS
 
-DECLARE SUB BPrint (X$)
+DECLARE SUB BPrint (x$)
 
-DIM FixLen AS STRING * 30
+DIM fixLen AS STRING * 30
 
-FixLen$ = "This string has a fixed length..."   ' dots show how assigning to a
+fixLen$ = "This string has a fixed length..."   ' dots show how assigning to a
                                                 ' fixed length string truncates
-Normal$ = "This is a normal BASIC string"
-Value! = 143.801
+normal$ = "This is a normal BASIC string"
+value! = 143.801
 
 CLS
-CALL BPrint(FixLen$ + CHR$(13) + CHR$(10))
-CALL BPrint(Normal$ + CHR$(13) + CHR$(10))
-CALL BPrint("This is a number:" + STR$(Value!) + CHR$(13) + CHR$(10))
+CALL BPrint(fixLen$ + CHR$(13) + CHR$(10))
+CALL BPrint(normal$ + CHR$(13) + CHR$(10))
+CALL BPrint("This is a number:" + STR$(value!) + CHR$(13) + CHR$(10))
 LOCATE 20, 20
 CALL BPrint("This shows that BPrint honors the current cursor location")
 
