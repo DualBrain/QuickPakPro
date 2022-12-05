@@ -7,6 +7,5 @@
 			"**/*.json-bak": true
 		},
 		"files.defaultLanguage": "QB64",
-		"editor.multiCursorModifier": "ctrlCmd",
-		"editor.tabSize": 2
+		"editor.multiCursorModifier": "ctrlCmd"
 	}

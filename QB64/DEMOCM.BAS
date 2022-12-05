@@ -67,7 +67,7 @@ NEXT
 CALL ReadFile(array$())         ' get the file names
 
 ' --- show how to select file names using the DirFile menu routine
-
+  
 messageColor = 9                ' DirFile's message color
 fileColor = 112                 ' color for showing the files
 hiLite = 23                     ' the highlighted file's color
@@ -96,7 +96,7 @@ PRINT "Press any key to see AMenu at work"
 WHILE INKEY$ = "": WEND
 
 count = n       ' reset Count to the number of files read earlier
-		          ' (DirFile returns the selected item number in Count)
+		            ' (DirFile returns the selected item number in Count)
 CLS             ' start this demo with a clean slate
 PRINT "Number of rows and columns in table is limited only by screen size"
 CALL AMenu(array$(), 1, 1, count, scanCode, 112, 23, 10, 3, 2, 7, 15)
@@ -143,7 +143,7 @@ DO                                      ' loop until they press Escape
   SELECT CASE scanCode                  ' see what key they pressed
     CASE 13, 32                         ' Enter or Space, toggle the item
 	   IF LEFT$(array$(count), 1) = " " THEN  ' it's not marked, mark it
-	     MID$(array$(count), 1, 1) = "�" ' <---- use any marker you want
+	     MID$(array$(count), 1, 1) = CHR$(251) ' <---- use any marker you want
 	   ELSE
 	     MID$(array$(count), 1, 1) = " " ' unmark the item
 	   END IF
