@@ -1548,11 +1548,6 @@ SUB Editor(ed$, activeLength%, scanCode%, numOnly%, isCapsOn%, normalColor%, edi
           p% = p% - 1: EXIT DO
         CASE -77 ' Right
           p% = p% + 1: EXIT DO
-        CASE 13, 27 ' Enter, Esc
-          QPrintRC ed$, ulRow%, ulCol%, normalColor%
-          activeLength% = LEN(RTRIM$(ed$))
-          LOCATE , , 0
-          EXIT SUB
         CASE 32 TO 126
           ch$ = CHR$(scanCode%)
           IF numOnly% THEN
@@ -1567,19 +1562,24 @@ SUB Editor(ed$, activeLength%, scanCode%, numOnly%, isCapsOn%, normalColor%, edi
           IF ch$ <> "" THEN
             IF insert% THEN ' insert
               ed$ = LEFT$(LEFT$(ed$, p% - 1) + ch$ + MID$(ed$, p%), LEN(originalEd$))
-              p% = p% + 1
             ELSE ' overwrite
               MID$(ed$, p%, 1) = ch$
             END IF
+            p% = p% + 1
             EXIT DO
           END IF
+        'CASE 13, 27 ' Enter, Esc
         CASE ELSE
-          QPrintRC STR$(scanCode%) + "   ", 1, 1, 7
+          'QPrintRC STR$(scanCode%) + "   ", 1, 1, 7
+          QPrintRC ed$, ulRow%, ulCol%, normalColor%
+          activeLength% = LEN(RTRIM$(ed$))
+          LOCATE , , 0
+          EXIT SUB
       END SELECT
     LOOP
     IF p% < 1 THEN p% = 1     
     IF p% > LEN(ed$) THEN p% = LEN(ed$)
-    QPrintRC STR$(p%) + "   ", 2, 1, 7
+    'QPrintRC STR$(p%) + "   ", 2, 1, 7
   LOOP
 END SUB
 

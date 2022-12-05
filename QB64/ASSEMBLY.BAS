@@ -1,4 +1,4 @@
-' ********** ASSEMBLY.BAS - basis for the Assembly.Asm example program
+' ********** ASSEMBLY.BAS - basis for the ASSEMBLY.ASM example program
 
 ' Copyright (c) 1989 Ethan Winer
 ' Modifications (c) 2022 Cory Smith
@@ -9,7 +9,7 @@ _TITLE "ASSEMBLY"
 
 '$INCLUDE: 'PRO.BI'
 
-_FULLSCREEN _SQUAREPIXELS
+'_FULLSCREEN _SQUAREPIXELS
 
 DECLARE SUB AMenuT (BYVAL Segment, BYVAL Address, Start, StrLength, Count, ScanCode, ElementColor, HiLiteColor, Rows, Columns, Spacing, Row, Column)
 DECLARE SUB Box0 (ULRow, ULCol, LRRow, LRCol, Char, Colr)
