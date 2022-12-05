@@ -47,7 +47,7 @@ normColor = 7           ' restore the field to color 7 when done
 
 fSpec$ = "D:*.*"                                ' initial string for editing
 fSpec$ = fSpec$ + SPACE$(max - LEN(fSpec$))     ' pad with spaces to the
-						                              ' desired length
+						                                    ' desired length
 LOCATE 25, 1, 0
 PRINT "Now enter a file spec: "; '
 CALL Editor(fSpec$, length, scanCode, numOnly, isCapsOn, normColor, editColor, 25, 24)

@@ -1492,11 +1492,8 @@ SUB DirFile(array$(), first%, count%, scanCode%, msgColor%, fileColor%, hiLiteCo
 END SUB
 
 SUB Editor(ed$, activeLength%, scanCode%, numOnly%, isCapsOn%, normalColor%, editColor%, row%, column%) STATIC
-  'TODO: How is activeLength% utilized?
   'TODO: Handle numOnly%
   'TODO: Handle isCapsOn%
-  'TODO: Handle Alt+C - clear "field".
-  'TODO: Handle Alt+R - restore "field".
   IF scanCode% = 1 THEN
     'p% = *what is was at last exit*
   ELSEIF scanCode% = 2 THEN
@@ -1507,30 +1504,82 @@ SUB Editor(ed$, activeLength%, scanCode%, numOnly%, isCapsOn%, normalColor%, edi
     ulCol% = column%
     originalEd$ = ed$
   END IF
+  insert% = 0
+  LOCATE , , 1, 7, 7 ' single line cursor, on.
   DO
-    LOCATE ulRow%, ulCol% + p% - 1, 1
+    LOCATE ulRow%, ulCol% + p% - 1
     QPrintRC ed$, ulRow%, ulCol%, editColor%
     WHILE INKEY$ <> "": WEND              ' not sure needed.
     DO
       scanCode% = MGetKey(row%, column%) ' scanCode% might be returned to caller.
       SELECT CASE scanCode%
-        ' Home, End
+        CASE -83 ' Del
+          ed$ = LEFT$(ed$, p% - 1) + MID$(ed$, p% + 1) + " "
+          EXIT DO
+        CASE -82 ' Ins
+          insert% = NOT insert%
+          IF insert% THEN
+            'LOCATE , , 1, 5, 7 ' quarter height cursor, on.
+            LOCATE , , 1, 3, 7 ' half height cursor, on.
+          ELSE
+            LOCATE , , 1, 7, 7 ' single line cursor, on.
+          END IF
+        CASE 8 ' Backspace
+          IF p% = 1 THEN ' If pressed at beginning of the line, exit.
+            QPrintRC ed$, ulRow%, ulCol%, normalColor%
+            activeLength% = LEN(RTRIM$(ed$))
+            LOCATE , , 0
+            EXIT SUB
+          END IF
+          p% = p% -1: ed$ = LEFT$(ed$, p% - 1) + MID$(ed$, p% + 1) + " ": EXIT DO
+        CASE -46 ' ALT+C
+          p% = 1: ed$ = SPACE$(LEN(ed$)): EXIT DO
+        CASE -19 ' ALT+R
+          ed$ = originalEd$
+          ' IF LEN(RTRIM$(ed$)) > 0 THEN p% = LEN(RTRIM$(ed$)) + 1 ELSE p% = 1
+          ' Removed the above line as it appears the original does not reset the cursor position.
+          EXIT DO
+        CASE -71 ' Home
+          p% = 1: EXIT DO
+        CASE -79 ' End
+          IF LEN(RTRIM$(ed$)) > 0 THEN p% = LEN(RTRIM$(ed$)) + 1
+          EXIT DO
         CASE -75 ' Left
-          p% = p% - 1
-          IF p% < 1 THEN p% = 1
-          EXIT DO
+          p% = p% - 1: EXIT DO
         CASE -77 ' Right
-          p% = p% + 1
-          IF p% > LEN(ed$) THEN p% = LEN(ed$)
-          EXIT DO
+          p% = p% + 1: EXIT DO
         CASE 13, 27 ' Enter, Esc
           QPrintRC ed$, ulRow%, ulCol%, normalColor%
           activeLength% = LEN(RTRIM$(ed$))
           LOCATE , , 0
           EXIT SUB
+        CASE 32 TO 126
+          ch$ = CHR$(scanCode%)
+          IF numOnly% THEN
+            SELECT CASE scanCode%
+              CASE 45
+              CASE 46
+              CASE 48 TO 57
+              CASE ELSE
+                ch$ = ""
+            END SELECT
+          END IF
+          IF ch$ <> "" THEN
+            IF insert% THEN ' insert
+              ed$ = LEFT$(LEFT$(ed$, p% - 1) + ch$ + MID$(ed$, p%), LEN(originalEd$))
+              p% = p% + 1
+            ELSE ' overwrite
+              MID$(ed$, p%, 1) = ch$
+            END IF
+            EXIT DO
+          END IF
         CASE ELSE
+          QPrintRC STR$(scanCode%) + "   ", 1, 1, 7
       END SELECT
     LOOP
+    IF p% < 1 THEN p% = 1     
+    IF p% > LEN(ed$) THEN p% = LEN(ed$)
+    QPrintRC STR$(p%) + "   ", 2, 1, 7
   LOOP
 END SUB
 
