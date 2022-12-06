@@ -2319,12 +2319,39 @@ FUNCTION CompareT%(Type1, Type2, NumBytes%)
   ERROR 73 ' Feature Unavailable
 END FUNCTION
 
-FUNCTION Date2Day%(D$)
-  ERROR 73 ' Feature Unavailable
-END FUNCTION
+' Date2Num converts a date in string form to an equivalent integer variable. 
+FUNCTION Date2Num% (dat$) STATIC
 
-FUNCTION Date2Num%(D$)
-  ERROR 73 ' Feature Unavailable
+  REDIM dyMth%(13)            ' DyMth() holds number of days into the year
+  RESTORE                     '   for a given month
+  FOR c% = 1 TO 13
+    READ dyMth%(C%)
+  NEXT
+  DATA 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365
+  
+  year% = VAL(MID$(dat$, 7))                  ' Read year
+  IF year% >= 1900 THEN year% = year% - 1900
+
+  month% = VAL(LEFT$(dat$, 2))                ' Extract Month #
+  day% = VAL(MID$(dat$, 4, 2))                ' Extract Day #
+
+  days% = (year% - 80!) * 365
+  IF year% >= 80 THEN
+    adDays% = (year% - 77) \ 4
+  ELSE
+    adDays% = (year% - 80) \ 4
+  END IF
+
+  days% = days% + adDays%                    ' Add a day for each Leap Year
+  'LeapYr below is 0 when true!
+  leapYr% = year% MOD 4                      ' Find Leap year flag
+  IF year% = 0 THEN leapYr% = 1    'EW 12-13-95: 1900 <> leap year, 2000 is
+  days% = days% + dyMth%(month%) + day%      ' Add # of days into year
+
+  ' If leap year, add 1 day
+  IF leapYr% = 0 AND month% > 2 THEN days% = days% + 1
+  Date2Num% = days%
+
 END FUNCTION
 
 FUNCTION DayName$(Day%)
@@ -2458,12 +2485,65 @@ SUB MsgBox(Message$, Wide%, Cfn)
   ERROR 73 ' Feature Unavailable
 END SUB
 
-FUNCTION Num2Date$(Day%)
-  ERROR 73 ' Feature Unavailable
+FUNCTION Num2Date$ (days) STATIC
+
+   REDIM DyMth(13)            'DyMth holds the number of days into the year
+   RESTORE
+   FOR C = 1 TO 13            'for a given month
+     READ DyMth(C)
+   NEXT
+   DATA 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365
+
+   IF Days > 0 THEN SD = 1 ELSE SD = -1
+   Year = ((Days - SD - ((Days + 1401) \ 1461)) \ 365) 'Find year number
+
+   IF Days > 0 THEN
+     Year = 80 + Year
+     SY = 77
+   ELSE
+     Year = 79 + Year
+     SY = 80
+   END IF
+                      'Find days into year
+   DaysInYr = ABS((((Year - 80!) * 365) + ((Year - SY) \ 4)) - Days)
+
+   'LeapYr below is 0 when true!
+   LeapYr = Year MOD 4                        'See if its a Leap Year
+   IF Year = 0 THEN LeapYr = 1   'EW 12-13-95: 1900 <> leap year, 2000 is
+
+   Month = 1                                  'Loop to find month number
+   AD = 0: AD2 = 0
+   WHILE DaysInYr < DyMth(Month) + AD2 OR DaysInYr > DyMth(Month + 1) + AD
+     AD2 = AD
+     Month = Month + 1
+     IF LeapYr = 0 AND Month > 1 THEN AD = 1
+   WEND
+
+   Day = DaysInYr - DyMth(Month)                      'Find days into month
+   IF LeapYr = 0 AND Month > 2 THEN Day = Day - 1
+
+   Year = Year + 1900
+   Yr$ = RIGHT$(STR$(Year), LEN(STR$(Year)) - 1)      'Get year portion
+   IF LEN(Yr$) < 2 THEN Yr$ = "0" + Yr$
+
+   Mo$ = RIGHT$(STR$(Month), LEN(STR$(Month)) - 1)    'Get month portion
+   IF LEN(Mo$) < 2 THEN Mo$ = "0" + Mo$
+
+   Da$ = RIGHT$(STR$(Day), LEN(STR$(Day)) - 1)        'Find day portion
+   IF LEN(Da$) < 2 THEN Da$ = "0" + Da$
+
+   Dat$ = Mo$ + "-" + Da$ + "-" + Yr$                 'Make date string
+   Num2Date$ = Dat$
+
 END FUNCTION
 
-FUNCTION Num2Day%(D%)
-  ERROR 73 ' Feature Unavailable
+FUNCTION Num2Day%(d%)
+  dd% = d%
+  dd% = dd% - 1
+  IF dd% > -1 THEN dd% = dd% + 2
+  dd% = dd% MOD 7
+  dd% = dd% + 1
+  Num2Day% = dd%
 END FUNCTION
 
 FUNCTION Num2Time$(Time&)
