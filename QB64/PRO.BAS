@@ -1451,16 +1451,88 @@ SUB ASCIIPick(char%, color1%, color2%, exitCode%)
 
 END SUB
 
-SUB MASCIIPick(Char%, color1%, color2%, exitCode%)
-  CALL ASCIIPick(char, color1%, color2%, exitCode%)
+SUB MASCIIPick(char%, color1%, color2%, exitCode%)
+  CALL ASCIIPick(char%, color1%, color2%, exitCode%)
 END SUB
 
-SUB ColorPick(Colr%, BoxColor%, ExitCode%)
-  ERROR 73 ' Feature Unavailable
+SUB ColorPick(colr%, boxColor%, exitCode%)
+
+  prevClr% = colr%
+
+  ulRow% = CSRLIN
+  ulCol% = POS(0)
+  lrRow% = ulRow% + 17
+  lrCol% = ulCol% + 33
+
+  CALL MPaintBox (ulRow%, ulCol%, lrRow%, lrCol%, boxColor%)
+  CALL Box0 (ulRow%, ulCol%, lrRow%, lrCol%, 2, boxColor%)
+
+  DO
+
+    FOR r% = 1 TO 16
+      FOR c% = 1 TO 8
+        CALL QPrintRC (CHR$(177), ulRow% + r%, ulCol% + (c% * 4), boxColor%)
+      NEXT
+    NEXT
+
+    CALL SplitColor(boxColor%, fg%, bg%)
+    arrowColr% = OneColor(0, bg%)    
+
+    FOR c% = 1 TO 8
+      FOR r% = 1 TO 16
+        temp% = (((c% - 1) * 16) + r%) - 1
+        CALL QPrintRC (RIGHT$("  " + STR$(temp%), 3), ulRow% + r%, ulCol% + (c% * 4) - 3, temp%)
+        IF temp% = colr% THEN
+          CALL QPrintRC (RIGHT$("  " + STR$(temp%), 3), ulRow% + r%, ulCol% + (c% * 4) - 3, temp% + 128)
+          CALL QPrintRC (CHR$(17), ulRow% + r%, ulCol% + (c% * 4), arrowColr%)
+        END IF
+      NEXT
+    NEXT
+
+    WHILE INKEY$ <> "": WEND              ' not sure needed.
+    DO
+
+      scanCode% = MGetKey(row%, column%) ' scanCode% might be returned to caller.
+
+      SELECT CASE scanCode%
+        CASE -72 ' Up
+          colr% = colr% - 1: EXIT DO
+        CASE -80 ' Down
+          colr% = colr% + 1: EXIT DO
+        CASE -75 ' Left
+          colr% = colr% - 16: EXIT DO
+        CASE -77 ' Right
+          colr% = colr% + 16: EXIT DO
+        CASE -71 ' Home
+          colr% = 0: EXIT DO
+        CASE -79 ' End
+          colr% = 127: EXIT DO
+        CASE -73 ' PgUp
+          colr% = colr% - (colr% MOD 16): EXIT DO
+        CASE -81 ' PgDn
+          colr% = colr% - (colr% MOD 16) + 15: EXIT DO
+        CASE 13 ' Enter
+          exitCode% = 0: EXIT SUB
+        ' CASE 1000 ' Mouse click
+        '   r% = row% - (ulRow% + 1): c% = (col% - ulCol%) \ 2
+        '   colr% = ((r% * 16) + c%) - 1
+        '   exitCode% = 2: EXIT SUB
+        CASE 27
+          colr% = prevClr%: exitCode% = 2: EXIT SUB
+        CASE ELSE                         ' any other key,
+      END SELECT
+
+    LOOP
+
+    IF colr% < 0 THEN colr% = colr% + 128
+    IF colr% > 127 THEN colr% = colr% - 128
+
+  LOOP
+
 END SUB
 
-SUB MColorPick(Colr%, BoxColor%, ExitCode%)
-  ERROR 73 ' Feature Unavailable
+SUB MColorPick(colr%, boxColor%, exitCode%)
+  CALL ColorPick(colr%, boxColor%, exitCode%)
 END SUB
 
 SUB DirFile(array$(), first%, count%, scanCode%, msgColor%, fileColor%, hiLiteColor%, boxColor%)
