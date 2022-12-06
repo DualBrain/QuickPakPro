@@ -8,6 +8,7 @@ DEFINT A-Z
 'BUG: QB64 requires a full path, relative path doesn't work???
 'BUG: Shouldn't all meta-commands work with an apostrophe?
 '$EXEICON = 'c:\github\quickpakpro\icon.ico'
+
 _TITLE "ASCIIPIK"
 
 '$INCLUDE: 'PRO.BI'
