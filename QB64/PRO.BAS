@@ -1742,7 +1742,8 @@ SUB MaskIn(Mask$, Text$, Mski)
 END SUB
 
 SUB MEditor(ed$, activeLength%, scanCode%, numOnly%, isCapsOn%, normalColor%, editColor%, row%, column%, currentColumn%)
-  ERROR 73 ' Feature Unavailable
+  column% = currentColumn%
+  CALL Editor(ed$, activeLength%, scanCode%, numOnly%, isCapsOn%, normalColor%, editColor%, row%, column%)
 END SUB
 
 SUB MenuVert(Array$(), First%, NumLines%, ScanCode%, Choice%, NormalColr%, HiLiteColor%, Row%, Column%)
@@ -2354,8 +2355,18 @@ FUNCTION Date2Num% (dat$) STATIC
 
 END FUNCTION
 
-FUNCTION DayName$(Day%)
-  ERROR 73 ' Feature Unavailable
+FUNCTION DayName$(day%)
+  SELECT CASE day%
+    CASE 1: DayName$ = "Sun"
+    CASE 2: DayName$ = "Mon"
+    CASE 3: DayName$ = "Tue"
+    CASE 4: DayName$ = "Wed"
+    CASE 5: DayName$ = "Thu"
+    CASE 6: DayName$ = "Fri"
+    CASE 7: DayName$ = "Sat"
+    CASE ELSE
+      DayName$ = ""
+  END SELECT
 END FUNCTION
 
 SUB DirTree(Tree$(), FullPath$(), Levels%)

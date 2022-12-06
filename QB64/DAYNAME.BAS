@@ -1,10 +1,20 @@
-'********** DAYNAME.BAS - shows how DayName works
+' ********** DAYNAME.BAS - shows how DayName works
+
+' Modifications (c) 2022 Cory Smith
 
 DEFINT A-Z
-DECLARE FUNCTION DayName$ (X%)
+
+_TITLE "DAYNAME"
+
+'$INCLUDE: 'PRO.BI'
+
+_FULLSCREEN _SQUAREPIXELS
+
+DECLARE FUNCTION DayName$ (x%)
 
 CLS
-FOR X = 1 TO 7
-    PRINT X; DayName$(X)
+FOR x = 1 TO 7
+  PRINT x; DayName$(x)
 NEXT
 
+'$INCLUDE: 'PRO.BAS'

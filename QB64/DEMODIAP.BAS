@@ -1,7 +1,8 @@
-'******** DEMODIAP.BAS -- shows the DIALOG.BAS routine in re-entrant mode 6/91
+' ******** DEMODIAP.BAS -- shows the DIALOG.BAS routine in re-entrant mode 6/91
 
-'Copyright (c) 1990 Crescent Software
-'written by Phil Cramer
+' Copyright (c) 1990 Crescent Software
+' written by Phil Cramer
+' Modifications (c) 2022 Cory Smith
 
 '******************************* IMPORTANT!*********************************
 '
@@ -21,6 +22,13 @@
 '****************************************************************************
 
 DEFINT A-Z
+
+_TITLE "DEMODIAP"
+
+'$INCLUDE: 'PRO.BI'
+
+_FULLSCREEN _SQUAREPIXELS
+
 DECLARE SUB DeinstallKeyDown ()
 DECLARE SUB Dialog (Choice, Text$(), Response$(), Menu$(), ScRow, Style, Clr, Action)
 DECLARE SUB DisplayInfo (Row, Choice, Response$())
@@ -123,7 +131,7 @@ IF Action = 5 THEN    'Action 5 clears the Dialog box
 END IF
 
 LOOP UNTIL Action = 0
-CALL DeinstallKeyDown      'Uninstall the routine that checks for keys down
+'CALL DeinstallKeyDown      'Uninstall the routine that checks for keys down
                            '(Mandatory for QBX, not req'd for QuickBASIC)
 
 CALL QPrintRC(SPACE$(80), 23, 1, 30)      'Clear bottom 3 rows to blue
@@ -139,6 +147,8 @@ Here1:
 DATA " Item 1  ",  " Item 2  ",  " Item 3  ",  " Item 4  "
 DATA " Item 5  ",  " Item 6  ",  " Item 7  ",  " Item 8  "
 DATA " Item 9  ",  " Item 10 ",  " Item 11 "
+
+'$INCLUDE: 'DIALOG.BAS'
 
 SUB DisplayInfo (Row, Choice, Response$())
 
@@ -168,3 +178,4 @@ SUB DisplayInfo (Row, Choice, Response$())
 
 END SUB
 
+'$INCLUDE: 'PRO.BAS'

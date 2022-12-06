@@ -1,9 +1,16 @@
-'********** DEMODATE.BAS
+' ********** DEMODATE.BAS
 
-'Copyright (c) 1988 Ethan Winer
-
+' Copyright (c) 1988 Ethan Winer
+' Modifications (c) 2022 Cory Smith
 
 DEFINT A-Z
+
+_TITLE "DEMODATE"
+
+'$INCLUDE: 'PRO.BI'
+
+'_FULLSCREEN _SQUAREPIXELS
+
 DECLARE FUNCTION Date2Num% (Dat$)
 DECLARE FUNCTION Num2Date$ (Number)
 DECLARE FUNCTION Num2Day% (Days)
@@ -25,8 +32,9 @@ PRINT "                The day of the week is: "; DayName$(Num2Day%(Days))
 PRINT "After conversion back to a Date format: "; NewDat$
 
 IF NewDat$ <> Dat$ THEN
-   PLAY "L32O3ECEC"
-   PRINT
-   PRINT NewDat$; " is not the same as the date entered!"
+  PLAY "L32O3ECEC"
+  PRINT
+  PRINT NewDat$; " is not the same as the date entered!"
 END IF
 
+'$INCLUDE: 'PRO.BAS'
