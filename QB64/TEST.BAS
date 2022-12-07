@@ -6,6 +6,8 @@ DEFINT A-Z
 
 _TITLE "TEST"
 
+_FULLSCREEN _SQUAREPIXELS
+
 '$INCLUDE: 'PRO.BI'
 '$INCLUDE: 'DECLARE.BAS'
 
@@ -16,13 +18,18 @@ COMMON e$
 ON ERROR GOTO ErrorHandler
 
 DIM numbers(10)
-DIM numSgl(10) AS SINGLE
+DIM numLng(10) AS LONG
+DIM numSng(10) AS SINGLE
 DIM numDbl(10) AS DOUBLE
 FOR x = 0 TO 10
   numbers(x) = x
-  numSgl(x) = x
+  numSng(x) = x
   numDbl(x) = x
+  numLng(x) = x
 NEXT
+
+DIM idx(10) AS INTEGER
+DIM tbl(1 TO 2, 1 TO 3) AS INTEGER 
 
 DIM element$(10)
 DIM fixed(10) AS FLen
@@ -60,8 +67,8 @@ CALL Fill2(numbers(), 0, 0, 10)
 HandleResult numbers(5) = 0
 
 PRINT "Fill4"; 
-CALL Fill4(numSgl(), 0, 0, 10)
-HandleResult numSgl(5) = 0
+CALL Fill4(numSng(), 0, 0, 10)
+HandleResult numSng(5) = 0
 
 PRINT "Fill8"; 
 CALL Fill8(numDbl(), 0, 0, 10)
@@ -119,6 +126,255 @@ HandleResult last = 5
 PRINT "GetBit"; 
 bit = GetBit(bits$, 1)
 HandleResult bit = 1
+
+PRINT "IMaxD"; 
+el = IMaxD(numDbl(), 0, UBOUND(numDbl))
+HandleResult el = 10
+
+PRINT "IMaxI"; 
+el = IMaxI(numbers(), 0, UBOUND(numbers))
+HandleResult el = 10
+
+PRINT "IMaxL"; 
+el = IMaxL(numLng(), 0, UBOUND(numLng))
+HandleResult el = 10
+
+PRINT "IMaxS"; 
+el = IMaxS(numSng(), 0, UBOUND(numSng))
+HandleResult el = 10
+
+PRINT "IMaxC"; 
+el = IMaxC(numSng(), 0, UBOUND(numSng))
+HandleResult el = 10
+
+PRINT "IMaxD"; 
+el = IMaxD(numDbl(), 0, UBOUND(numDbl))
+HandleResult el = 10
+
+PRINT "IMinI"; 
+el = IMinI(numbers(), 0, UBOUND(numbers))
+HandleResult el = 10
+
+PRINT "IMinL"; 
+el = IMinL(numLng(), 0, UBOUND(numLng))
+HandleResult el = 10
+
+PRINT "IMinS"; 
+el = IMinS(numSng(), 0, UBOUND(numSng))
+HandleResult el = 10
+
+PRINT "IMinC"; 
+el = IMinC(numSng(), 0, UBOUND(numSng))
+HandleResult el = 10
+
+PRINT "InitInt"; 
+start = 0
+value = 0
+numEls = UBOUND(numbers)
+CALL Initint(numbers(), start, value, numEls)
+HandleResult numbers(5) = 5
+
+PRINT "InsertStr"; 
+el = 5
+numEls = UBOUND(numbers)
+CALL InsertStr(elements$(), el, "Inserted", numEls) 
+HandleResult elements$(5) = "Inserted"
+
+PRINT "InsertT";
+el = 5
+numEls = UBOUND(fixed)
+CALL InsertT(fixed(), el, 30, numEls) 
+HandleResult fixed(5).S = SPACE$(30)
+
+PRINT "ISortD"; 
+el = 0
+numEls = UBOUND(numDbl)
+dir = 0
+CALL ISortD(numDbl(), el, idx(), numEls, dir) 
+HandleResult idx(10) = 10
+
+PRINT "ISortI"; 
+el = 0
+numEls = UBOUND(numbers)
+dir = 0
+CALL ISortI(numbers(), el, idx(), numEls, dir) 
+HandleResult idx(10) = 10
+
+PRINT "ISortL"; 
+el = 0
+numEls = UBOUND(numLng)
+dir = 0
+CALL ISortL(numLng(), el, idx(), numEls, dir) 
+HandleResult idx(10) = 10
+
+PRINT "ISortS"; 
+el = 0
+numEls = UBOUND(numSng)
+dir = 0
+CALL ISortS(numSng(), el, idx(), numEls, dir) 
+HandleResult idx(10) = 10
+
+PRINT "ISortC"; 
+el = 0
+numEls = UBOUND(numSng)
+dir = 0
+CALL ISortC(numSng(), el, idx(), numEls, dir) 
+HandleResult idx(10) = 10
+
+PRINT "ISortStr"; 
+el = 0
+numEls = UBOUND(elements$)
+dir = 0
+CALL ISortStr(elements$(), el, ndx(), numEls, dir) 
+HandleResult idx(10) = 10
+
+PRINT "ISortStr2"; 
+el = 0
+numEls = UBOUND(elements$)
+dir = 0
+CALL ISortStr2(elements$(), el, ndx(), numEls, dir) 
+HandleResult idx(10) = 10
+
+PRINT "ISortT"; 
+el = 0
+numEls = UBOUND(fixed)
+dir = 0
+CALL ISortT(fixed(), el, ndx(), numEls, dir, 30, memberOffset, memberSize) 
+HandleResult idx(10) = 10
+
+PRINT "ISortT2"; 
+el = 0
+numEls = UBOUND(fixed)
+dir = 0
+CALL ISortT2(fixed(), el, ndx(), numEls, dir, 30, memberOffset, memberSize) 
+HandleResult idx(10) = 10
+
+PRINT "KeySort"; 
+el = 0
+numEls = UBOUND(fixed)
+numKeys = 1
+CALL KeySort(fixed(), el, 30, numEls, tbl(), numKeys) 
+HandleResult tbl(1, 1) = 10
+
+PRINT "MaxD"; 
+max = MaxD(numDbl(), 0, UBOUND(numDbl))
+HandleResult max = 10
+
+PRINT "MaxI"; 
+max = MaxI(numbers(), 0, UBOUND(numbers))
+HandleResult max = 10
+
+PRINT "MaxL"; 
+max = MaxL(numLng(), 0, UBOUND(numLng))
+HandleResult max = 10
+
+PRINT "MaxS"; 
+max = MaxS(numSng(), 0, UBOUND(numSng))
+HandleResult max = 10
+
+PRINT "MaxC"; 
+max = MaxC(numSng(), 0, UBOUND(numSng))
+HandleResult max = 10
+
+PRINT "MinD"; 
+min = MinD(numDbl(), 0, UBOUND(numDbl))
+HandleResult min = 10
+
+PRINT "MinI"; 
+min = MinI(numbers(), 0, UBOUND(numbers))
+HandleResult min = 10
+
+PRINT "MinL"; 
+min = MinL(numLng(), 0, UBOUND(numLng))
+HandleResult min = 10
+
+PRINT "MinS"; 
+min = MinS(numSng(), 0, UBOUND(numSng))
+HandleResult min = 10
+
+PRINT "MinC"; 
+min = MinC(numSng(), 0, UBOUND(numSng))
+HandleResult min = 0
+
+PRINT "Search"; 
+el = 0
+numEls = UBOUND(numbers)
+match = 5
+found = -1
+dir = 0
+matchCode = 0
+varType = 0
+CALL Search(numbers(), el, numEls, match, found, dir, matchCode, varType) 
+HandleResult found = 0
+
+PRINT "SearchT"; 
+el = 0
+numEls = UBOUND(fixed)
+match = 5
+found = -1
+dir = 0
+matchCode = 0
+CALL SearchT(fixed(), el, numE1s%, match, found, dir, matchCode, structSize, memberOff, memberSize) 
+HandleResult found = 0
+
+PRINT "SearchT2"; 
+el = 0
+numEls = UBOUND(fixed)
+match = 5
+found = -1
+dir = 0
+matchCode = 0
+CALL SearchT2(fixed(), el, numE1s%, match, found, dir, matchCode, structSize, memberOff, memberSize) 
+HandleResult found = 0
+
+PRINT "SetBit"; 
+CALL SetBit(bits$, 1, 1)
+HandleResult bit = 1
+
+PRINT "SortD"; 
+numEls = UBOUND(numDbl)
+CALL SortD(numDbl(), 0, numEls, dir)
+HandleResult numDbl(5) = 5
+
+PRINT "SortI"; 
+numEls = UBOUND(numbers)
+CALL SortI(numbers(), 0, numEls, dir)
+HandleResult numbers(5) = 5
+
+PRINT "SortL"; 
+numEls = UBOUND(numLng)
+CALL SortL(numLng(), 0, numEls, dir)
+HandleResult numLng(5) = 5
+
+PRINT "SortS"; 
+numEls = UBOUND(numSng)
+CALL SortS(numSng(), 0, numEls, dir)
+HandleResult numSng(5) = 5
+
+PRINT "SortC"; 
+numEls = UBOUND(numSng)
+CALL SortC(numSng(), 0, numEls, dir)
+HandleResult numSng(5) = 5
+
+PRINT "SortStr"; 
+numEls = UBOUND(elements$)
+CALL SortStr(elements$(), 0, numEls, dir)
+HandleResult elements$(5) = "Element 5"
+
+PRINT "SortStr2"; 
+numEls = UBOUND(elements$)
+CALL SortStr2(elements$(), 0, numEls, dir)
+HandleResult elements$(5) = "Element 5"
+
+PRINT "SortT"; 
+numEls = UBOUND(fixed)
+CALL SortT(fixed(), 0, numEls, dir, 30, memberOffset, memberSize)
+HandleResult fixed(5).S = "Element 5"
+
+PRINT "SortT2"; 
+numEls = UBOUND(fixed)
+CALL SortT2(fixed(), 0, numEls, dir, 30, memberOffset, memberSize)
+HandleResult fixed(5).S = "Element 5"
 
 END
 

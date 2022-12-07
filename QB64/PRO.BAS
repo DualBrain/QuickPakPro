@@ -152,7 +152,7 @@ FUNCTION IMaxS%(Array!(), Start%, NumEls%)
   ERROR 73 ' Feature Unavailable
 END FUNCTION
 
-FUNCTION IMaxC%(Array(), Start%, NumEls%)
+FUNCTION IMaxC%(Array!(), Start%, NumEls%)
   ERROR 73 ' Feature Unavailable
 END FUNCTION
 
@@ -172,7 +172,7 @@ FUNCTION IMinS%(Array!(), Start%, NumEls%)
   ERROR 73 ' Feature Unavailable
 END FUNCTION
 
-FUNCTION IMinC%(Array(), Start%, NumEls%)
+FUNCTION IMinC%(Array!(), Start%, NumEls%)
   ERROR 73 ' Feature Unavailable
 END FUNCTION
 
@@ -184,12 +184,12 @@ END SUB
 ' fixed-length) string array. 
 SUB InsertStr(array$(), element%, ins$, numEls%)
   FOR x = (element% + numEls%) TO (element% + 1) STEP -1 
-    SWAP array$(x), Array$(x - 1) 
+    SWAP array$(x), array$(x - 1) 
   NEXT 
-  SWAP array$(start), ins$ 
+  SWAP array$(element%), ins$ 
 END SUB
 
-SUB InsertT(Array(), Element%, ElSize%, NumEls%)
+SUB InsertT(Array() AS FLen, Element%, ElSize%, NumEls%)
   ERROR 73 ' Feature Unavailable
 END SUB
 
@@ -209,7 +209,7 @@ SUB ISortS(Array!(), Start%, Ndx%(), NumEls%, Dir%)
   ERROR 73 ' Feature Unavailable
 END SUB
 
-SUB ISortC(Array(), Start%, Ndx%(), NumEls%, Dir%)
+SUB ISortC(Array!(), Start%, Ndx%(), NumEls%, Dir%)
   ERROR 73 ' Feature Unavailable
 END SUB
 
@@ -221,15 +221,15 @@ SUB ISortStr2(Array$(), Start%, Ndx%(), NumEls%, Dir%)
   ERROR 73 ' Feature Unavailable
 END SUB
 
-SUB ISortStrT(Array$(), Start%, Ndx%(), NumEls%, Dir%, ElSize%, MemberOffset%, MemberSize%)
+SUB ISortT(Array() AS FLen, Start%, Ndx%(), NumEls%, Dir%, ElSize%, MemberOffset%, MemberSize%)
   ERROR 73 ' Feature Unavailable
 END SUB
 
-SUB ISortStrT2(Array(), Start%, Ndx%(), NumEls%, Dir%, ElSize%, MemberOffset%, MemberSize%)
+SUB ISortT2(Array() AS FLen, Start%, Ndx%(), NumEls%, Dir%, ElSize%, MemberOffset%, MemberSize%)
   ERROR 73 ' Feature Unavailable
 END SUB
 
-SUB KeySort(Array(), Start%, ElSize%, NumEls%, Table%(,), NumKey%)
+SUB KeySort(Array() AS FLen, Start%, ElSize%, NumEls%, Table%(,), NumKey%)
   ERROR 73 ' Feature Unavailable
 END SUB
 
@@ -265,7 +265,7 @@ FUNCTION MaxS!(Array!(), Start%, NumEls%)
   MaxS! = max!
 END FUNCTION
 
-FUNCTION MaxC(Array(), Start%, NumEls%)
+FUNCTION MaxC!(Array!(), Start%, NumEls%)
   ERROR 73 ' Feature Unavailable
 END FUNCTION
 
@@ -301,7 +301,7 @@ FUNCTION MinS!(Array!(), Start%, NumEls%)
   MinS! = min!
 END FUNCTION
 
-FUNCTION MinC(Array(), Start%, NumEls%)
+FUNCTION MinC!(Array!(), Start%, NumEls%)
   ERROR 73 ' Feature Unavailable
 END FUNCTION
 
@@ -309,11 +309,11 @@ SUB Search(Array(), Start%, NumEls%, Match, Found%, Direction%, MatchCode%, VarT
   ERROR 73 ' Feature Unavailable
 END SUB
 
-SUB SearchT(Array(), Start%, NumEls%, Match, Found%, Dir%, Code%, StructSize%, MemberOf%, MemberSize%)
+SUB SearchT(Array() AS FLen, Start%, NumEls%, Match, Found%, Dir%, Code%, StructSize%, MemberOf%, MemberSize%)
   ERROR 73 ' Feature Unavailable
 END SUB
 
-SUB SearchT2(Array(), Start%, NumEls%, Match, Found%, Dir%, Code%, StructSize%, MemberOf%, MemberSize%)
+SUB SearchT2(Array() AS FLen, Start%, NumEls%, Match, Found%, Dir%, Code%, StructSize%, MemberOf%, MemberSize%)
   ERROR 73 ' Feature Unavailable
 END SUB
 
@@ -333,7 +333,7 @@ SUB SortS(Array!(), Start%, NumEls%, Dir%)
   ERROR 73 ' Feature Unavailable
 END SUB
 
-SUB SortC(Array(), Start%, NumEls%, Dir%)
+SUB SortC(Array!(), Start%, NumEls%, Dir%)
   ERROR 73 ' Feature Unavailable
 END SUB
 
@@ -444,11 +444,11 @@ L4:
 
 END SUB
 
-SUB SortStrT(Array$, Start%, NumEls%, Dir%, MemberOffset%, MemberSize%)
+SUB SortT(Array() AS FLen, Start%, NumEls%, Dir%, ElSize%, MemberOffset%, MemberSize%)
   ERROR 73 ' Feature Unavailable
 END SUB
 
-SUB SortStrT2(Array$, Start%, NumEls%, Dir%, MemberOffset%, MemberSize%)
+SUB SortT2(Array() AS FLen, Start%, NumEls%, Dir%, ElSize%, MemberOffset%, MemberSize%)
   ERROR 73 ' Feature Unavailable
 END SUB
 
