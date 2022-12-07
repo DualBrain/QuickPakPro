@@ -27,7 +27,7 @@ _TITLE "DEMODIAP"
 
 '$INCLUDE: 'PRO.BI'
 
-_FULLSCREEN _SQUAREPIXELS
+'_FULLSCREEN _SQUAREPIXELS
 
 DECLARE SUB DeinstallKeyDown ()
 DECLARE SUB Dialog (Choice, Text$(), Response$(), Menu$(), ScRow, Style, Clr, Action)

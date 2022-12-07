@@ -13,77 +13,101 @@ SUB AddInt(Array%(), Start%, Value%, NumEls%)
   ERROR 73 ' Feature Unavailable
 END SUB
 
-' DeleteStr removes an element from a normal (not fixed-length) 
-' string array.
-SUB DeleteStr(array$(), element%, numEls%)
-  FOR x = element% TO element + numEls% 
-    SWAP array$(x), array$(x + 1) 
+' DeleteStr removes an element from a normal (not fixed-length) string array.
+SUB DeleteStr(elements$(), element%, numEls%)
+  e% = element% + numEls%
+  IF e% => UBOUND(elements$) THEN e% = UBOUND(elements$) - 1
+  FOR x% = element% TO e%
+    SWAP elements$(x%), elements$(x% + 1) 
   NEXT 
   ' array$(element + numEls%) = ""               ' clear the last element.
 END SUB
 
-SUB DeleteT(Array(), Element%, ElSize%, NumEls%)
+' DeleteT removes an element from a fixed-length string, numeric, or 
+' user-defined TYPE array. 
+SUB DeleteT(array() AS FLen, element%, elSize%, numEls%)
   ERROR 73 ' Feature Unavailable
 END SUB
 
-SUB Fill2(Array%(), Start%, Value%, NumEls%)
+' Fill2 will quickly assign all of the elements in a specified portion of 
+' an integer array to any value. 
+SUB Fill2(array%(), start%, value%, numEls%)
+  FOR x% = start% TO start% + numEls%
+    array%(x%) = value%
+  NEXT
+END SUB
+
+' Fill4 will quickly assign all of the elements in a specified portion of 
+' an single array to any value. 
+SUB Fill4(array!(), start%, value!, numEls%)
+  FOR x% = start% TO start% + numEls%
+    array!(x%) = value!
+  NEXT
+END SUB
+
+' Fill8 will quickly assign all of the elements in a specified portion of 
+' an double array to any value. 
+SUB Fill8(array#(), start%, value#, numEls%)
+  FOR x% = start% TO start% + numEls%
+    array#(x%) = value#
+  NEXT
+END SUB
+
+SUB Find(array$(), start%, numEls%, searchValue$)
+  numEls% = -1
   ERROR 73 ' Feature Unavailable
 END SUB
 
-SUB Fill4(Array!(), Start%, Value!, NumEls%)
-  ERROR 73 ' Feature Unavailable
-END SUB
-
-SUB Fill8(Array#(), Start%, Value#, NumEls%)
-  ERROR 73 ' Feature Unavailable
-END SUB
-
-SUB Find(Array$, Start%, NumEls%, SearchValue$)
-  ERROR 73 ' Feature Unavailable
-END SUB
-
-SUB Find2(Array$, Start%, NumEls%, SearchValue$)
+SUB Find2(array$(), start%, numEls%, searchValue$)
+  numEls% = -1
   ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB FindB(Array$(), CurEl%, SearchValue$)
+  CurEl% = -1
   ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB FindB2(Array$(), CurEl%, SearchValue$)
+  CurEl% = -1
   ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB FindExact(Array$(), Start%, NumEls%, SearchValue$)
+  NumEls% = -1
   ERROR 73 ' Feature Unavailable
 END SUB
 
-SUB FindT(Array$(), Start%, ElSize%, NumEls%, SearchValue$)
+SUB FindT(array() AS FLen, Start%, ElSize%, NumEls%, SearchValue$)
+  NumEls% = -1
   ERROR 73 ' Feature Unavailable
 END SUB
 
-SUB FindT2(Array$(), Start%, ElSize%, NumEls%, SearchValue$)
+SUB FindT2(Array() AS FLen, Start%, ElSize%, NumEls%, SearchValue$)
+  NumEls% = -1
   ERROR 73 ' Feature Unavailable
 END SUB
 
-SUB FindTB(Array$(), Start%, ElSize%, CurEl%, SearchValue$)
+SUB FindTB(Array() AS FLen, Start%, ElSize%, CurEl%, SearchValue$)
+  CurEl% = -1
   ERROR 73 ' Feature Unavailable
 END SUB
 
-SUB FindTB2(Array$(), Start%, ElSize%, CurEl%, SearchValue$)
+SUB FindTB2(Array() AS FLen, Start%, ElSize%, CurEl%, SearchValue$)
+  CurEl% = -1
   ERROR 73 ' Feature Unavailable
 END SUB
 
 ' FindLast scans a conventional (not fixed-length) string array 
 ' backwards looking for the last non-blank element. 
 FUNCTION FindLast% (array$(), numEls%)
-  FOR el = numEls% TO LBOUND(Array$)
-    IF array$(el) <> "" THEN
-      FindLast% = el
+  FOR el% = numEls% TO LBOUND(array$)
+    IF array$(el%) <> "" THEN
+      FindLast% = el%
       EXIT FUNCTION
     END IF
   NEXT
-  FindLast% = numEls%
+  FindLast% = -1 'numEls%
 END FUNCTION
 
 FUNCTION GetBit%(array$, element%)
@@ -2764,8 +2788,24 @@ FUNCTION ASCII% (Char$)
   ASCII% = ASC(Char$)
 END SUB
 
-FUNCTION Blanks%(Work$)
-  ERROR 73 ' Feature Unavailable
+' Blanks will report the number of leading blanks in the specified 
+' string. Both CHR$(32) and the CHR$(0) "null" character are recognized. 
+FUNCTION Blanks%(work$)
+  ' NumBlanks receives the number of leading blank and/or CHR$(0) 
+  ' bytes in Work$. 
+  IF work$ = "" THEN
+    result% = 0
+  ELSE
+    result% = LEN(work$)
+    FOR index% = 1 TO LEN(work$)
+      SELECT CASE ASC(MID$(work$, index%, 1))
+        CASE 0, 32
+        CASE ELSE
+          result% = index%: EXIT FOR
+      END SELECT
+    NEXT
+  END IF
+  Blanks% = result%
 END FUNCTION
 
 FUNCTION Compact$(Old$)
@@ -3022,8 +3062,20 @@ FUNCTION NotInstr%(Start%, Searched$, Table$)
   ERROR 73 ' Feature Unavailable
 END FUNCTION
 
-FUNCTION Null%(Work$)
-  ERROR 73 ' Feature Unavailable
+' Null will report if the specified string is either null, or is filled only 
+' with blank or CHR$(0) characters. 
+FUNCTION Null%(work$)
+  result% = -1
+  IF work$ <> "" THEN
+    FOR index% = 1 TO LEN(work$)
+      SELECT CASE ASC(MID$(work$, index%, 1))
+        CASE 0, 32
+        CASE ELSE
+          result% = 0: EXIT FOR
+      END SELECT
+    NEXT
+  END IF
+  Null% = result%
 END FUNCTION
 
 FUNCTION ParseString$(CurPos%, Work$, DelimitValue$)
@@ -3087,8 +3139,33 @@ FUNCTION QInstr2%(startPosition%, sourceValue$, searchValue$)
 
 END FUNCTION
 
-FUNCTION QInstrB%(StartPos%, Source$, SearchValue$)
-  ERROR 73 ' Feature Unavailable
+' QlnstrB is similar to the QuickPak Professional Qlnstr function, 
+' except it scans the source string backwards looking for a specified 
+' substring. Like Qlnstr, function accepts any number of "?" wild 
+' cards to match any character. 
+FUNCTION QInstrB%(startPosition%, sourceValue$, searchValue$)
+
+  ' Setting position to 0 will return 0; matching QB behavior.
+  IF startPosition% = 0 THEN QInstrB% = 0: EXIT FUNCTION
+
+  position% = startPosition%
+  DO
+    segment$ = MID$(sourceValue$, position%, LEN(searchValue$))
+    IF LEN(segment$) <> LEN(searchValue$) THEN EXIT DO
+    isMatch% = 1
+    FOR index = 1 TO LEN(searchValue$)
+      character$ = MID$(searchValue$, index, 1)
+      IF character$ <> "?" THEN
+        IF MID$(segment$, index, 1) <> character$ THEN isMatch% = 0 : EXIT FOR
+      END IF
+      IF isMatch% THEN QInstrB% = position% : EXIT FUNCTION
+    NEXT
+    position% = position% - 1
+    IF position% < 1 THEN EXIT DO
+  LOOP
+
+  QInstrB% = 0
+
 END FUNCTION
 
 FUNCTION QInstrB2%(StartPos%, Source$, SearchValue$)
