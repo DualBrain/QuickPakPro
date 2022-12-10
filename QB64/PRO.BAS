@@ -535,11 +535,11 @@ SUB FGet(Handle%, Destination$)
   ERROR 73 ' Feature Unavailable
 END SUB
 
-SUB FGetA(Handle%, Array(), Element%, NumBytes%)
+SUB FGetA(Handle%, Array$(), Element%, NumBytes%)
   ERROR 73 ' Feature Unavailable
 END SUB
 
-SUB FGetFH(FileName$, Array(), Start%, ElSize%, NumEls%)
+SUB FGetAH(FileName$, Array$(), Start%, ElSize%, NumEls%)
   ERROR 73 ' Feature Unavailable
 END SUB
 
@@ -547,15 +547,15 @@ SUB FGetR(Handle%, Destination$, RecNumber&)
   ERROR 73 ' Feature Unavailable
 END SUB
 
-SUB FGetRT(Handle%, Destination, RecNumber&, RecSize%)
+SUB FGetRT(Handle%, Destination AS FLen, RecNumber&, RecSize%)
   ERROR 73 ' Feature Unavailable
 END SUB
 
-SUB FGetRTA(Handle%, Destination, RecNumber&, RecSize%)
+SUB FGetRTA(Handle%, Destination AS FLen, RecNumber&, RecSize%)
   ERROR 73 ' Feature Unavailable
 END SUB
 
-SUB FGetT(Handle%, Destination, NumBytes%)
+SUB FGetT(Handle%, Destination AS FLen, NumBytes%)
   ERROR 73 ' Feature Unavailable
 END SUB
 
@@ -571,7 +571,7 @@ SUB FileCrypt(FileName$, PassWord$)
   ERROR 73 ' Feature Unavailable
 END SUB
 
-SUB FileInfo(FileName$, TypeVar)
+SUB FileInfo(FileName$, tVar AS FInfo)
   ERROR 73 ' Feature Unavailable
 END SUB
 
@@ -643,7 +643,7 @@ SUB FOpenAll(FileName$, AccessMode%, ShareMode%, Handle%)
   ERROR 73 ' Feature Unavailable
 END SUB
 
-FUNCTION FormatDiskette%(DriveNumber%, Capacity%, BufArray%)
+FUNCTION FormatDiskette%(DriveNumber%, Capacity%, BufArray%())
   ERROR 73 ' Feature Unavailable
 END FUNCTION
 
@@ -651,11 +651,11 @@ SUB FPut(Handle%, Source$)
   ERROR 73 ' Feature Unavailable
 END SUB
 
-SUB FPutA(Handle%, Array(), Start%, NumBytes%)
+SUB FPutA(Handle%, Array%(), Start%, NumBytes%)
   ERROR 73 ' Feature Unavailable
 END SUB
 
-SUB FPutAH(Handle%, Array(), ElSize%, NumEls%)
+SUB FPutAH(Handle%, Array%(), start%, ElSize%, NumEls%)
   ERROR 73 ' Feature Unavailable
 END SUB
 
@@ -663,15 +663,15 @@ SUB FPutR(Handle%, Source$, RecNumber&)
   ERROR 73 ' Feature Unavailable
 END SUB
 
-SUB FPutRT(Handle%, Source, RecNumber&, RecSize%)
+SUB FPutRT(Handle%, Source AS FLen, RecNumber&, RecSize%)
   ERROR 73 ' Feature Unavailable
 END SUB
 
-SUB FPutRTA(Handle%, Source, RecNumber&, RecSize%)
+SUB FPutRTA(Handle%, Source AS FLen, RecNumber&, RecSize%)
   ERROR 73 ' Feature Unavailable
 END SUB
 
-SUB FPutT(Handle%, Source, NumBytes%)
+SUB FPutT(Handle%, Source AS FLen, NumBytes%)
   ERROR 73 ' Feature Unavailable
 END SUB
 
@@ -749,7 +749,7 @@ FUNCTION GoodDrive%(Drive$)
   ERROR 73 ' Feature Unavailable
 END FUNCTION
 
-SUB Handle2Name(Handle%, FilName)
+SUB Handle2Name(Handle%, FilName AS NameType)
   ERROR 73 ' Feature Unavailable
 END SUB
 

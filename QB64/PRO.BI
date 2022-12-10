@@ -15,6 +15,22 @@ TYPE FLen                                 ' "Hard-coded" TYPE for xxxxT methods.
   S AS STRING * 30
 END TYPE
 
+TYPE FInfo
+  Year1   AS INTEGER
+  Month1  AS INTEGER
+  Day1    AS INTEGER
+  Hour1   AS INTEGER
+  Minute1 AS INTEGER
+  Second1 AS INTEGER
+  Size1   AS LONG
+  Attrib1 AS INTEGER
+END TYPE
+
+TYPE NameType 
+  FileName AS STRING* 8 
+  Extension AS STRING* 3 
+END TYPE 
+
 ' ********************************************************
 ' * Win32
 ' ********************************************************

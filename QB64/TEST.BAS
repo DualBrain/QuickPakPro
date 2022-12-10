@@ -6,7 +6,7 @@ DEFINT A-Z
 
 _TITLE "TEST"
 
-_FULLSCREEN _SQUAREPIXELS
+'_FULLSCREEN _SQUAREPIXELS
 
 '$INCLUDE: 'PRO.BI'
 '$INCLUDE: 'DECLARE.BAS'
@@ -376,6 +376,313 @@ numEls = UBOUND(fixed)
 CALL SortT2(fixed(), 0, numEls, dir, 30, memberOffset, memberSize)
 HandleResult fixed(5).S = "Element 5"
 
+PRINT
+PRINT "****************************************"
+PRINT " Chapter 3 - DOS Services"
+PRINT "****************************************"
+PRINT
+
+PRINT "CDir"; 
+CALL CDir("C:\")
+HandleResult 1 = 1
+
+PRINT "ClipFile"; 
+CALL ClipFile("c:\test.txt", 100)
+HandleResult 1 = 1
+
+PRINT "DCount"; 
+c = DCount("c:*.*")
+HandleResult c = 3
+
+PRINT "DiskInfo"; 
+CALL DiskInfo("c:", bytes, sectors, freeClusters, totalClusters)
+HandleResult bytes = 3
+
+PRINT "DiskRoom"; 
+room = DiskRoom("c:")
+HandleResult room = 3
+
+PRINT "DiskSize"; 
+size = DiskSize("c:")
+HandleResult size = 3
+
+PRINT "DOSError"; 
+result = DOSError
+HandleResult result = 0
+
+PRINT "DOSVer"; 
+ver = DOSVer
+HandleResult ver = 3
+
+PRINT "ErrorMsg"; 
+message$ = ErrorMsg(errorNumber)
+HandleResult message$ = ""
+
+PRINT "ExeName"; 
+name$ = ExeName
+HandleResult name$ = ""
+
+PRINT "Exist"; 
+there = Exist("c:\test.txt")
+HandleResult there
+
+' PRINT "FastLoad"; 
+' lines = FastLoadInt("c:\test.txt")
+' REDIM array$(1 TO lines)
+' CALL FastLoadStr(array$())
+' HandleResult array$(0) = ""
+
+PRINT "FastSave"; 
+CALL FastSave("c:\test.txt", array$())
+HandleResult -1
+
+PRINT "FClose";
+CALL FClose(handle)
+HandleResult -1
+
+PRINT "FCopy";
+buffer$ = SPACE$(4096)
+CALL FCopy("c:\test.txt", "c:\copy.txt", buffer$, errCode)
+HandleResult errCode = 0
+
+PRINT "FCount";
+c = FCount("c:\*.bas")
+HandleResult c = 0
+
+PRINT "FCreate";
+CALL FCreate("c:\test.tmp")
+HandleResult -1
+
+PRINT "FEof";
+result = FEof(handle)
+HandleResult result
+
+PRINT "FFlush";
+CALL FFlush(handle)
+HandleResult -1
+
+PRINT "FGet";
+buffer$ = " "
+CALL FGet(handle, buffer$)
+HandleResult buffer$ <> " "
+
+PRINT "FGetA";
+CALL FGetA(handle, array$(), el, numBytes)
+HandleResult array$(0) = ""
+
+PRINT "FGetAH";
+CALL FGetAH("c:\test.txt", array$(), el, elSize, numEls)
+HandleResult array$(0) = ""
+
+PRINT "FGetR";
+CALL FGetR(handle, buffer$, recNumber)
+HandleResult buffer$ <> ""
+
+PRINT "FGetRT";
+DIM dest AS FLen
+CALL FGetRT(handle, dest, recNumber, recSize)
+HandleResult dest.S <> ""
+
+PRINT "FGetRTA";
+CALL FGetRTA(handle, dest, recNumber, recSize)
+HandleResult dest.S <> ""
+
+PRINT "FGetT";
+CALL FGetT(handle, dest, numBytes)
+HandleResult dest.S <> ""
+
+PRINT "FileComp";
+result = FileComp("c:\test.txt", "c:\test.tmp", errCode)
+HandleResult errCode = 0
+
+PRINT "FileCopy";
+CALL FileCopy("c:\test.txt", "c:\test.tmp", copied, errCode)
+HandleResult errCode = 0
+
+PRINT "FileCrypt";
+pw$ = "password"
+CALL FileCrypt("c:\test.txt", pw$)
+HandleResult -1
+
+PRINT "FileInfo";
+Dim tVar AS FInfo
+CALL FileInfo("c:\test.txt", tVar)
+HandleResult -1
+
+PRINT "FileSize";
+size = FileSize("c:\test.txt")
+HandleResult size = 0
+
+PRINT "FileSort";
+CALL FileSort("c:\test.txt", "c:\text.idx", 1, 10, tbl(), recLength)
+HandleResult -1
+
+PRINT "FLInput";
+value$ = FLInput(handle, buffer$)
+HandleResult value$ <> ""
+
+PRINT "FLoc";
+result = FLoc(handle)
+HandleResult result <> 0
+
+PRINT "FLof";
+result = FLof(handle)
+HandleResult result <> 0
+
+PRINT "FOpen";
+CALL FOpen("c:\text.txt", handle)
+HandleResult handle <> -1
+
+PRINT "FOpenS";
+CALL FOpenS("c:\text.tmp", handle)
+HandleResult handle <> -1
+
+PRINT "FOpenAll";
+CALL FOpenAll("c:\text.all", 2, 4, handle)
+HandleResult handle <> -1
+
+PRINT "FormatDiskette";
+DIM bufArray%(1 TO 2340)
+result = FormatDiskette(0, 1440, bufArray%())
+HandleResult result <> 0
+
+PRINT "FPut";
+buffer$ = SPACE$(512)
+CALL FPut(handle, buffer$)
+HandleResult -1
+
+PRINT "FPutA";
+CALL FPutA(handle, bufArray%(), 1, 55)
+HandleResult -1
+
+PRINT "FPutAH";
+CALL FPutAH(handle, bufArray%(), 1, 2, 55)
+HandleResult -1
+
+PRINT "FPutR";
+CALL FPutR(handle, buffer$, 1)
+HandleResult -1
+
+PRINT "FPutRT";
+CALL FPutRT(handle, fixed(0), 1, 30)
+HandleResult -1
+
+PRINT "FPutRTA";
+CALL FPutRTA(handle, fixed(0), 1, 30)
+HandleResult -1
+
+PRINT "FPutT";
+CALL FPutT(handle, fixed(0), 30)
+HandleResult -1
+
+PRINT "FSeek";
+CALL FSeek(handle, 0)
+HandleResult -1
+
+PRINT "FStamp";
+CALL FStamp("c:\test.txt", "05:05", "05/02/88")
+HandleResult -1
+
+PRINT "FullName$";
+value$ = FullName("..\test.txt")
+HandleResult -1
+
+PRINT "GetAttr";
+result = GetAttr("c:\test.txt")
+HandleResult result <> 0
+
+PRINT "GetDir$";
+directory$ = GetDir("c")
+HandleResult directory$ <> ""
+
+PRINT "GetDisketteType";
+result = GetDisketType(0)
+HandleResult result <> 0
+
+PRINT "GetDrive";
+result = GetDrive
+HandleResult result <> 0
+
+PRINT "GetVol$";
+volume$ = GetVol$("c")
+HandleResult volume$ <> ""
+
+PRINT "GoodDrive";
+result = GoodDrive("z")
+HandleResult result <> 0
+
+PRINT "Handle2Name";
+DIM fname AS NameType
+CALL Handle2Name(handle, fname)
+HandleResult fname.Filename <> ""
+
+PRINT "KillDir";
+CALL KillDir("c:\blah")
+HandleResult -1
+
+PRINT "KillFile";
+CALL KillFile("c:\blahblah.txt")
+HandleResult -1
+
+PRINT "LastDrive";
+result = LastDrive
+HandleResult result <> 0
+
+PRINT "LineCount";
+buffer$ = SPACE$(4096)
+c = LineCount("c:\test.txt", buffer$)
+HandleResult c <> 0
+
+PRINT "LoadExec";
+cmdLine$ = ""
+exitCode = LoadExec("test.exe", cmdLine$)
+HandleResult exitCode <> 0
+
+PRINT "LockFile";
+CALL LockFile(handle, 1, -1)
+HandleResult -1
+
+PRINT "MakeDir";
+CALL MakeDir("c:\blah")
+HandleResult -1
+
+PRINT "NameDir";
+CALL NameDir("c:\blah", "c:\blah1")
+HandleResult -1
+
+PRINT "NameFile";
+CALL NameFile("c:\test.txt", "c:\test1.txt")
+HandleResult -1
+
+PRINT "NetDrive";
+remote = NetDrive("n")
+HandleResult -1
+
+PRINT "PutVol";
+CALL PutVol("d", "TestLabel")
+HandleResult -1
+
+PRINT "QBLoad";
+CALL QBLoad("c:\test.txt", numbers(), el)
+HandleResult -1
+
+PRINT "QBSave";
+CALL QBSave("c:\test.txt", numbers(), el, 10)
+HandleResult -1
+
+PRINT "ReadDir";
+CALL ReadDir(elements$())
+HandleResult -1
+
+' PRINT "ReadDirT";
+' DIM dirs(500) AS FLen
+' CALL ReadDirT("*.*", dirs(), 1)
+' HandleResult -1
+
+PRINT "ReadFile";
+CALL ReadFile(elements$())
+HandleResult -1
+
 END
 
 ErrorHandler:
@@ -388,7 +695,7 @@ ErrorHandler:
 
 SUB HandleResult(success)
   SHARED e$
-  IF success THEN 
+  IF success AND e$ = "" THEN 
     PRINT ""
   ELSE 
     PRINT "... ";
