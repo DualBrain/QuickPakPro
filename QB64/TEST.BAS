@@ -1347,6 +1347,8 @@ PRINT " Chapter 8 - String Manipulation Routines"
 PRINT "****************************************"
 PRINT
 
+' SEE: SPELLNUM.BAS
+
 PRINT "ASCII";
 result = ASCII("A")
 HandleResult result = 65
@@ -1422,6 +1424,213 @@ PRINT "LowerTbl";
 buffer$ = "AbCd"
 CALL LowerTbl(buffer$, table$) 
 HandleResult buffer$ = "abcd"
+
+PRINT "MidChar";
+buffer$ = "AbCd"
+result = MidChar(buffer$, 2) 
+HandleResult result = 98
+
+PRINT "MidCharS";
+buffer$ = "AbCd"
+CALL MidCharS(buffer$, 2, result) 
+HandleResult result = 98
+
+PRINT "NotInstr";
+buffer$ = "AbCd"
+table$ = "A"
+result = NotInstr(1, buffer$, table$)
+HandleResult result = 2
+
+PRINT "Null";
+buffer$ = CHR$(0)
+result = Null(buffer$)
+HandleResult result = -1
+
+PRINT "ParseString";
+buffer$ = "a,b,c,d"
+position = 1
+delimit$ = ","
+a$ = ParseString(position, buffer$, delimit$)
+HandleResult a$ = "a" AND position = 3
+
+PRINT "ProperName";
+buffer$ = "john doe, jr."
+CALL ProperName(buffer$) 
+HandleResult buffer$ = "John Doe, Jr."
+
+PRINT "QInstr";
+buffer$ = "a,b,c,d"
+startPos = 1
+srch$ = "a"
+position = QInstr(startPos, buffer$, srch$)
+HandleResult position = 1
+
+PRINT "QInstr2";
+buffer$ = "a,b,c,d"
+startPos = 1
+srch$ = "A"
+position = QInstr2(startPos, buffer$, srch$)
+HandleResult position = 1
+
+PRINT "QInstrB";
+buffer$ = "a,b,c,d"
+startPos = 1
+srch$ = ","
+position = QInstrB(startPos, buffer$, srch$)
+HandleResult position = 6
+
+PRINT "QInstrB2";
+buffer$ = "a,b,B,d"
+startPos = 1
+srch$ = "b"
+position = QInstrB2(startPos, buffer$, srch$)
+HandleResult position = 5
+
+PRINT "QInstrH";
+segement = 1
+address = 1
+srch$ = "b"
+numBytes& = 10
+CALL QInstrH(segment, address, srch$, numBytes&)
+HandleResult segment = 0 AND address = 0
+
+PRINT "QPLeft";
+work$ = "a,b,B,d"
+numChars = 2
+subString$ = QPLeft(work$, numChars)
+HandleResult subString$ = "a,"
+
+PRINT "QPMid";
+work$ = "a,b,B,d"
+numChars = 3
+startChar = 3
+subString$ = QPMid(work$, startChar, numChars)
+HandleResult subString$ = "b,B"
+
+PRINT "QPRight";
+work$ = "a,b,B,d"
+numChars = 2
+subString$ = QPRight(work$, numChars)
+HandleResult subString$ = ",d"
+
+PRINT "QPLen";
+work$ = "a,b,B,d"
+result = QPLen(work$)
+HandleResult result = 7
+
+PRINT "QPSadd";
+result = QPSadd(work$)
+HandleResult result = 0
+
+PRINT "QPStrI";
+work$ = QPStrI(5)
+HandleResult work$ = "5"
+
+PRINT "QPStrL";
+work$ = QPStrL(5)
+HandleResult work$ = "5"
+
+PRINT "QPTrim";
+work$ = "   a-z   "
+subString$ = QPTrim(work$)
+HandleResult subString$ = "a-z"
+
+PRINT "QPLTrim";
+work$ = "   a-z   "
+subString$ = QPLTrim(work$)
+HandleResult subString$ = "a-z   "
+
+PRINT "QPRTrim";
+work$ = "   a-z   "
+subString$ = QPRTrim(work$)
+HandleResult subString$ = "   a-z"
+
+PRINT "QPValI";
+work$ = "12345"
+result = QPValI(work$)
+HandleResult result = 12345
+
+PRINT "QPValL";
+work$ = "123456789"
+r& = QPValL(work$)
+HandleResult r& = 123456789
+
+PRINT "RemCtrl";
+work$ = CHR$(0) + CHR$(13) + "1234"
+CALL RemCtrl(work$, replace$)
+HandleResult replace$ = "1234"
+
+PRINT "ReplaceChar";
+work$ = "1234"
+CALL ReplaceChar(work$, "1", "2")
+HandleResult work$ = "2234"
+
+PRINT "ReplaceChar2";
+work$ = "a234"
+CALL ReplaceChar2(work$, "A", "2")
+HandleResult work$ = "2234"
+
+PRINT "ReplaceCharT... skip"
+PRINT "ReplaceCharT2... skip"
+
+PRINT "ReplaceString";
+work$ = "1234"
+CALL ReplaceString(work$, "123", "444")
+HandleResult work$ = "4444"
+
+PRINT "ReplaceTbl";
+work$ = "1234"
+CALL ReplaceTbl(work$, "142434")
+HandleResult work$ = "4444"
+
+PRINT "Sequence";
+work$ = "1234"
+CALL Sequence(work$)
+HandleResult work$ = "1235"
+
+' PRINT "SpellNumber";
+' work$ = "1"
+' english$ = SpellNumber(work$)
+' HandleResult english$ = "One"
+
+PRINT "Translate";
+work$ = CHR$(196)
+CALL Translate(work$)
+HandleResult work$ = "-"
+
+PRINT "Upper";
+work$ = "a"
+CALL Upper(work$)
+HandleResult work$ = "A"
+
+PRINT "UpperTbl... skip"
+
+PRINT
+PRINT "****************************************"
+PRINT " Chapter 9 - Video Routines"
+PRINT "****************************************"
+PRINT
+
+' SEE: COLORS.BAS
+
+' CALL APrint(BYVAL VARPTR(Array$(First)), NumEls%, FirstChar%, NumChars%, Colr%, Page%) 
+' CALL APrint0(BYVAL VARPTR(Array$(First)), NumEls%, FirstChar%, NumChars%, Colr%) 
+' CALL APrintT(BYVAL VARSEG(Array$(First)), BYVAL VARPTR(Array$(First)), ElSize%, NumE1s%, FirstChar%, NumChars%, Colr%, Page%) 
+' CALL APrintT0(BYVAL VARSEG(Array$(First)), BYVAL VARPTR(Array$(First)), E1Size%, NumEls%, FirstChar%, NumChars%, Colr%) 
+' Size = ArraySize%(ULRow%, ULCol%, LRRow%, LRCol%) 
+' CALL BlinkOff 
+' CALL BlinkOn 
+' CALL Box(ULRow%, ULCol%, LRRow%, LRCol%, Char%, Colr%, Page%)
+' CALL Box0(ULRow%, ULCol%, LRRow%, LRCol%, Char%, Colr%)
+' CALL BPrint(X$) 
+' CALL ClearEOL(Colr%)
+' CALL ClearScr(ULRow%, ULCo1%, LRRow%, LRCo1%, Colr%, Page%) 
+' CALL ClearScr0(ULRow%, ULCol%, LRRow%, LRCol%, Colr%) 
+' CALL CsrSize(Top%, Bottom%) 
+' CALL EGABLoad(FileName$) 
+' CALL EGABSave(FileName$) 
+' Memory= EGAMem%
+' CALL FillScrn(ULRow%, ULCol%, LRRow%, LRCo1%, Colr%, Char%, Page%) 
 
 END
 
