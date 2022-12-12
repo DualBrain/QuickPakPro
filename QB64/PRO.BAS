@@ -2258,6 +2258,16 @@ FUNCTION WaitKey%
   LOOP
 END SUB
 
+SUB WaitKeyS
+  WHILE INKEY$ <> "": WEND ' Clear any pending key strokes.
+  DO ' Wait for a key.
+    a$ = INKEY$
+    IF a$ <> "" THEN
+      EXIT DO
+    END IF
+  LOOP
+END SUB
+
 FUNCTION WaitScan%
   ERROR 73 ' Feature Unavailable
 END FUNCTION

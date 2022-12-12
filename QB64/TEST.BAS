@@ -1698,6 +1698,7 @@ ErrorHandler:
 
 SUB HandleResult(success)
   SHARED e$
+  STATIC handleCount%
   IF success AND e$ = "" THEN 
     PRINT ""
   ELSE 
@@ -1713,6 +1714,16 @@ SUB HandleResult(success)
     END IF
   END IF
   e$ = ""
+  IF handleCount% => 18 THEN
+    PRINT ""
+    PRINT "Press any key..."
+    k = WaitKey
+    if k = 27 THEN SYSTEM
+    PRINT ""
+    handleCount% = 1
+  ELSE
+    handleCount% = handleCount% + 1
+  END IF
 END SUB
 
 '$INCLUDE: 'CAPNUM.BAS'
