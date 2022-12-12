@@ -1042,10 +1042,12 @@ SUB ReadDirT(Spec$, Array())
 END SUB
 
 SUB ReadFileI(Array$())
+  ' 1234567890123456789012345678901234567 
+  ' namename.ext sizesize mm-dd-yy hh:rrm* <---- either "a" or "p" 
   ERROR 73 ' Feature Unavailable
 END SUB
 
-SUB ReadFileT(spec$, array() AS STRING * 12, first%)
+SUB ReadFileT(spec$, array() AS FLen, first%)
   IF INSTR(_OS$, "[WINDOWS]") THEN
     
     DIM pattern AS STRING
@@ -1065,7 +1067,7 @@ SUB ReadFileT(spec$, array() AS STRING * 12, first%)
           ffn = fd.cfilename
           p = INSTR(ffn, CHR$(0))
           IF p > 0 THEN ffn = LEFT$(ffn, p - 1)
-          LSET array$(index) = ffn
+          LSET array(index).S = ffn
           index = index + 1
         END IF
       LOOP UNTIL FindNextFile(hFind, _OFFSET(fd)) = 0
@@ -1086,7 +1088,7 @@ SUB ReadFileT(spec$, array() AS STRING * 12, first%)
   END IF
 END SUB
 
-SUB ReadFileX(Spec$, DirSize&, Array())
+SUB ReadFileX(Spec$, DirSize&, Array() AS FullInfo, first%)
   ERROR 73 ' Feature Unavailable
 END SUB
 
@@ -2405,7 +2407,7 @@ SUB Empty(dummy%)
   ERROR 73 ' Feature Unavailable
 END SUB
 
-FUNCTION ENum2Date%(Days%)
+FUNCTION ENum2Date$(Days%)
   ERROR 73 ' Feature Unavailable
 END FUNCTION
 
@@ -2421,7 +2423,7 @@ FUNCTION Factorial#(Number%)
   ERROR 73 ' Feature Unavailable
 END FUNCTION
 
-SUB FileView(FileName$, Ky%, Action%, FVInfo, Buffer%())
+SUB FileView(FileName$, Ky%, Action%, FVInfo AS FVInfo, Buffer%(), first%)
   ERROR 73 ' Feature Unavailable
 END SUB
 

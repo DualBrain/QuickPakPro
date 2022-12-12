@@ -26,9 +26,34 @@ TYPE FInfo
   Attrib1 AS INTEGER
 END TYPE
 
+TYPE FullInfo 
+  BaseName AS STRING * 8 
+  ExtName AS STRING * 3 
+  FileSize AS LONG 
+  FileDate AS STRING * 8 
+  FileTime AS STRING * 6 
+  Attrib AS STRING * 1 
+END TYPE 
+
 TYPE NameType 
   FileName AS STRING* 8 
   Extension AS STRING* 3 
+END TYPE 
+
+TYPE FVInfo 
+  Colr AS INTEGER
+  ULRow AS INTEGER 
+  ULCol AS INTEGER 
+  LRRow AS INTEGER 
+  LRCol AS INTEGER 
+  HorizOffset AS INTEGER 
+  LoPtr AS INTEGER 
+  FileHandle AS INTEGER 
+  EndOfFile AS INTEGER 
+  LineNumber AS LONG 
+  TabStop AS INTEGER 
+  FileSeek AS LONG 
+  FileOffset AS LONG 
 END TYPE 
 
 ' ********************************************************
