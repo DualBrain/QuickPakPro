@@ -4,10 +4,9 @@
 
 DEFINT A-Z
 
-$RESIZE:STRETCH
-
 _TITLE "TEST"
 
+$RESIZE:STRETCH
 '_FULLSCREEN _SQUAREPIXELS
 
 '$INCLUDE: 'PRO.BI'
@@ -1612,6 +1611,9 @@ PRINT "****************************************"
 PRINT
 
 ' SEE: COLORS.BAS
+' SEE: GETCOLOR.BAS
+' SEE: WINDOMGR.BAS
+' SEE: WIPES.BAS
 
 ' CALL APrint(BYVAL VARPTR(Array$(First)), NumEls%, FirstChar%, NumChars%, Colr%, Page%) 
 ' CALL APrint0(BYVAL VARPTR(Array$(First)), NumEls%, FirstChar%, NumChars%, Colr%) 
@@ -1631,6 +1633,58 @@ PRINT
 ' CALL EGABSave(FileName$) 
 ' Memory= EGAMem%
 ' CALL FillScrn(ULRow%, ULCol%, LRRow%, LRCo1%, Colr%, Char%, Page%) 
+' CALL FillScrn0(ULRow%, ULCo1%, LRRow%, LRCol%, Colr%, Char%) 
+' CALL GetColor(FG%, BG%)
+' CALL GetVMode(Mode%, Page%, PageSize&, Rows%, Columns%) 
+' CALL HCopy(FromPage%, ToPage%)
+' Loaded = HercThere% 
+' CALL MakeMono(SEG Array%(Element), Size%)
+' CALL MakeMon2(SEG Array%(Start), NumEls%, Code%) 
+' Mon = Monitor% 
+' CALL MPaintBox(ULRow%, ULCol%, LRRow%, LRCol%, Colr%) 
+' CALL MPRestore(ULRow%, ULCol%, LRRow%, LRCol%, Origina1Width%, SEG Array%(Start)) 
+' CALL MQPrint(X$, Colr%) 
+' CALL MScrnSave(ULRow%, ULCol%, LRRow%, LRCol%, SEG A%(0)) 
+' CALL MScrnRest(ULRow%, ULCol%, LRRow%, LRCol%, SEG A%(0)) 
+
+PRINT "OneColor";
+fg = 7
+bg = 0
+colr = OneColor(fg, bg) 
+HandleResult colr = 7
+
+' CALL PaintBox(ULRow%, ULCol%, LRRow%, LRCol%, Colr%, Page%) 
+' CALL PaintBoxO(ULRow%, ULCol%, LRRow%, LRCol%, Colr%) 
+' CALL PrtSc(LPTNumber%, Page%)
+' CALL PrtSc0(LPTNumber%) 
+' CALL PUsing(STR$(Number), Image$, Color1%, Color2%, Page%, Row%, Column%)
+' CALL QPrint(X$, Colr%, Page%) 
+' CALL QPrint0(X$, Colr%) 
+' CALL QPrintAny(X$, Colr%, MonCode%, Row%, Column%) 
+' CALL QPrintRC(Work$, Row%, Column%, Colr%) 
+' CALL QPWindowinit(BYVAL ULRow%, BYVAL ULCo1%, BYVAL LRRow%, BYVAL LRCo1%) 
+' CALL QPWindowPrint(Text$, BYVAL Colr%) 
+' CALL QPWindowCLS(BYVAL Colr%) 
+' CALL QPWindowLocate(BYVAL Row%, BYVAL Column%) 
+' CALL ReadScrn(Row%, Column%, X$, Page%) 
+' CALL ReadScrn0(Row%, Column%, X$)
+' CALL ScrnDump(DPI$, LPTNumber%, Translate%) 
+' CALL ScrnRest(ULRow%, ULCol%, LRRow%, LRCol%, SEG Array%(1), Page%) 
+' CALL ScrnRest0(ULRow%, ULCol%, LRRow%, LRCol%, SEG Array%(1)) 
+' CALL ScrnSave(ULRow%, ULCol%, LRRow%, LRCol%, SEG Array%(1), Page%) 
+' CALL ScrnSave0(ULRow%, ULCol%, LRRow%, LRCol%, SEG Array%(1)) 
+' CALL ScrollD(ULRow%, ULCol%, LRRow%, LRCol%, Lines%, Page%) 
+' CALL ScrollU(ULRow%, ULCol%, LRRow%, LRCol%, Lines%, Page%) 
+' CALL ScrollL(ULRow%, ULCol%, LRRow%, LRCol%, Lines%, Page%) 
+' CALL ScrollR(ULRow%, ULCol%, LRRow%, LRCol%, Lines%, Page%) 
+' CALL SetMonSeg(NewSegment%) 
+
+PRINT "SplitColor";
+colr = 7
+CALL SplitColor(colr, fg, bg) 
+HandleResult fg = 7 AND bg = 0
+
+' CALL WindowMgr(WindowNumber%, Action%, ULRow%, ULCol%, LRRow%, LRCol%, Colr%) 
 
 END
 
