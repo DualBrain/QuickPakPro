@@ -11,7 +11,7 @@
 ' AddInt adds a constant value to all of the elements in a specified 
 ' portion of an integer array.
 SUB AddInt(array%(), start%, value%, numEls%)
-  IF start% < LBOUND(array%) THEN EXIT SUB
+  IF start% = 0 THEN EXIT SUB
   FOR x% = start% TO start% + numEls% - 1
     array%(x%) = array%(x%) + value%
   NEXT
