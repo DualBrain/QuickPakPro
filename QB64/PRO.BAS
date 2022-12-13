@@ -8,9 +8,13 @@
 ' Chapter 2 - Array Routines 
 ' ****************************************
 
-SUB AddInt(Array%(), Start%, Value%, NumEls%)
-  ' See ADDINT.ASM
-  ERROR 73 ' Feature Unavailable
+' AddInt adds a constant value to all of the elements in a specified 
+' portion of an integer array.
+SUB AddInt(array%(), start%, value%, numEls%)
+  IF start% < LBOUND(array%) THEN EXIT SUB
+  FOR x% = start% TO start% + numEls% - 1
+    array%(x%) = array%(x%) + value%
+  NEXT
 END SUB
 
 ' DeleteStr removes an element from a normal (not fixed-length) string array.
@@ -26,13 +30,18 @@ END SUB
 ' DeleteT removes an element from a fixed-length string, numeric, or 
 ' user-defined TYPE array. 
 SUB DeleteT(array() AS FLen, element%, elSize%, numEls%)
-  ERROR 73 ' Feature Unavailable
+  'NOTE: elSize% is currently ignored since we are working directly with an included type.
+  e% = element% + numEls%
+  IF e% => UBOUND(array) THEN e% = UBOUND(array) - 1
+  FOR x% = element% TO e%
+    SWAP array(x%), array(x% + 1) 
+  NEXT 
 END SUB
 
 ' Fill2 will quickly assign all of the elements in a specified portion of 
 ' an integer array to any value. 
 SUB Fill2(array%(), start%, value%, numEls%)
-  FOR x% = start% TO start% + numEls%
+  FOR x% = start% TO start% + numEls% - 1
     array%(x%) = value%
   NEXT
 END SUB
@@ -40,7 +49,7 @@ END SUB
 ' Fill4 will quickly assign all of the elements in a specified portion of 
 ' an single array to any value. 
 SUB Fill4(array!(), start%, value!, numEls%)
-  FOR x% = start% TO start% + numEls%
+  FOR x% = start% TO start% + numEls% - 1
     array!(x%) = value!
   NEXT
 END SUB
@@ -48,34 +57,64 @@ END SUB
 ' Fill8 will quickly assign all of the elements in a specified portion of 
 ' an double array to any value. 
 SUB Fill8(array#(), start%, value#, numEls%)
-  FOR x% = start% TO start% + numEls%
+  FOR x% = start% TO start% + numEls% - 1
     array#(x%) = value#
   NEXT
 END SUB
 
 SUB Find(array$(), start%, numEls%, searchValue$)
+  c% = 0
+  FOR x% = start% TO start% + numEls% - 1
+    c% = c% + 1
+    IF QInstr%(1, array$(x%), searchValue$) THEN
+      numEls% = c%: EXIT FUNCTION
+    END IF
+  NEXT
   numEls% = -1
-  ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB Find2(array$(), start%, numEls%, searchValue$)
+  c% = 0
+  FOR x% = start% TO start% + numEls% - 1
+    c% = c% + 1
+    IF QInstr2%(1, array$(x%), searchValue$) THEN
+      numEls% = c%: EXIT FUNCTION
+    END IF
+  NEXT
   numEls% = -1
-  ERROR 73 ' Feature Unavailable
 END SUB
 
-SUB FindB(Array$(), CurEl%, SearchValue$)
-  CurEl% = -1
-  ERROR 73 ' Feature Unavailable
+SUB FindB(array$(), start%, curEl%, searchValue$)
+  max% = start%
+  min% = start% - curEl% + 1
+  FOR x% = max% TO min% STEP -1
+    IF QInstr%(1, array$(x%), searchValue$) THEN
+      curEl% = x%: EXIT FUNCTION
+    END IF
+  NEXT
+  curEl% = -1
 END SUB
 
-SUB FindB2(Array$(), CurEl%, SearchValue$)
-  CurEl% = -1
-  ERROR 73 ' Feature Unavailable
+SUB FindB2(array$(), start%, curEl%, searchValue$)
+  max% = start%
+  min% = start% - curEl% + 1
+  FOR x% = max% TO min% STEP -1
+    IF QInstr2%(1, array$(x%), searchValue$) THEN
+      curEl% = x%: EXIT FUNCTION
+    END IF
+  NEXT
+  curEl% = -1
 END SUB
 
-SUB FindExact(Array$(), Start%, NumEls%, SearchValue$)
-  NumEls% = -1
-  ERROR 73 ' Feature Unavailable
+SUB FindExact(array$(), start%, numEls%, searchValue$)
+  c% = 0
+  FOR x% = start% TO start% + numEls% - 1
+    c% = c% + 1
+    IF INSTR(1, array$(x%), searchValue$) THEN
+      numEls% = c%: EXIT FUNCTION
+    END IF
+  NEXT
+  numEls% = -1
 END SUB
 
 SUB FindT(array() AS FLen, Start%, ElSize%, NumEls%, SearchValue$)
@@ -100,14 +139,13 @@ END SUB
 
 ' FindLast scans a conventional (not fixed-length) string array 
 ' backwards looking for the last non-blank element. 
-FUNCTION FindLast% (array$(), numEls%)
-  FOR el% = numEls% TO LBOUND(array$)
-    IF array$(el%) <> "" THEN
-      FindLast% = el%
-      EXIT FUNCTION
+FUNCTION FindLast% (array$(), last%, size%)
+  FOR x% = last% TO last% - size% + 1 STEP - 1
+    IF array$(x%) <> "" THEN
+      FindLast% = x%: EXIT FUNCTION
     END IF
   NEXT
-  FindLast% = -1 'numEls%
+  FindLast% = -1
 END FUNCTION
 
 FUNCTION GetBit%(array$, element%)
@@ -136,89 +174,316 @@ SUB SetBit(array$, element%, value%)
   MID$(array$, entry%, 1) = CHR$(byt%)
 END SUB
 
-FUNCTION IMaxD%(Array#(), Start%, NumEls%)
-  ERROR 73 ' Feature Unavailable
+FUNCTION IMaxD#(array#(), start%, numEls%)
+  max# = array#(start%)
+  FOR x% = start% + 1 TO start% + numEls% - 1
+    IF array#(x%) > max# THEN max# = array#(x%)
+  NEXT
+  IMaxD# = max#
 END FUNCTION
 
-FUNCTION IMaxI%(Array%(), Start%, NumEls%)
-  ERROR 73 ' Feature Unavailable
+FUNCTION IMaxI%(array%(), start%, numEls%)
+  max% = array%(start%)
+  FOR x% = start% + 1 TO start% + numEls% - 1
+    IF array%(x%) > max% THEN max% = array%(x%)
+  NEXT
+  IMaxI% = max%
 END FUNCTION
 
-FUNCTION IMaxL%(Array&(), Start%, NumEls%)
-  ERROR 73 ' Feature Unavailable
+FUNCTION IMaxL&(array&(), start%, numEls%)
+  max& = array&(start%)
+  FOR x% = start% + 1 TO start% + numEls% - 1
+    IF array&(x%) > max& THEN max& = array&(x%)
+  NEXT
+  IMaxL& = max&
 END FUNCTION
 
-FUNCTION IMaxS%(Array!(), Start%, NumEls%)
-  ERROR 73 ' Feature Unavailable
+FUNCTION IMaxS!(array!(), start%, numEls%)
+  max! = array!(start%)
+  FOR x% = start% + 1 TO start% + numEls% - 1
+    IF array!(x%) > max! THEN max! = array!(x%)
+  NEXT
+  IMaxS! = max!
 END FUNCTION
 
-FUNCTION IMaxC%(Array!(), Start%, NumEls%)
-  ERROR 73 ' Feature Unavailable
+FUNCTION IMaxC!(array!(), start%, numEls%)
+  max! = array!(start%)
+  FOR x% = start% + 1 TO start% + numEls% - 1
+    IF array!(x%) > max! THEN max! = array!(x%)
+  NEXT
+  IMaxC! = max!
 END FUNCTION
 
-FUNCTION IMinD%(Array#(), Start%, NumEls%)
-  ERROR 73 ' Feature Unavailable
+FUNCTION IMinD#(array#(), start%, numEls%)
+  min# = array#(start%)
+  FOR x% = start% + 1 TO start% + numEls% - 1
+    IF array#(x%) < min# THEN min# = array#(x%)
+  NEXT
+  IMinD# = min#
 END FUNCTION
 
-FUNCTION IMinI%(Array%(), Start%, NumEls%)
-  ERROR 73 ' Feature Unavailable
+FUNCTION IMinI%(array%(), start%, numEls%)
+  min% = array%(start%)
+  FOR x% = start% + 1 TO start% + numEls% - 1
+    IF array%(x%) < min% THEN min% = array%(x%)
+  NEXT
+  IMinI% = min%
 END FUNCTION
 
-FUNCTION IMinL%(Array&(), Start%, NumEls%)
-  ERROR 73 ' Feature Unavailable
+FUNCTION IMinL&(array&(), start%, numEls%)
+  min& = array&(start%)
+  FOR x% = start% + 1 TO start% + numEls% - 1
+    IF array&(x%) < min& THEN min& = array&(x%)
+  NEXT
+  IMinL& = min&
 END FUNCTION
 
-FUNCTION IMinS%(Array!(), Start%, NumEls%)
-  ERROR 73 ' Feature Unavailable
+FUNCTION IMinS!(array!(), start%, numEls%)
+  min! = array!(start%)
+  FOR x% = start% + 1 TO start% + numEls% - 1
+    IF array!(x%) < min! THEN min! = array!(x%)
+  NEXT
+  IMinS! = min!
 END FUNCTION
 
-FUNCTION IMinC%(Array!(), Start%, NumEls%)
-  ERROR 73 ' Feature Unavailable
+FUNCTION IMinC!(array!(), start%, numEls%)
+  min! = array!(start%)
+  FOR x% = start% + 1 TO start% + numEls% - 1
+    IF array!(x%) < min! THEN min! = array!(x%)
+  NEXT
+  IMinC! = min!
 END FUNCTION
 
-SUB InitInt(Array%(), Start%, Value%, NumEls%)
-  ERROR 73 ' Feature Unavailable
+SUB InitInt(array%(), start%, value%, numEls%)
+  v% = value%
+  FOR x% = start% TO start% + numEls% - 1
+    array%(x%) = v%: v% = v% + 1
+  NEXT
 END SUB
 
 ' InsertStr will insert an element at any point into a conventional (not 
 ' fixed-length) string array. 
-SUB InsertStr(array$(), element%, ins$, numEls%)
-  FOR x = (element% + numEls%) TO (element% + 1) STEP -1 
-    SWAP array$(x), array$(x - 1) 
+SUB InsertStr(array$(), startElement%, insertValue$, numEls%)
+  FOR x% = startElement% + numEls% - 1 TO startElement% + 1 STEP -1 
+    SWAP array$(x%), array$(x% - 1) 
   NEXT 
-  SWAP array$(element%), ins$ 
+  SWAP array$(startElement%), insertValue$ 
 END SUB
 
-SUB InsertT(Array() AS FLen, Element%, ElSize%, NumEls%)
-  ERROR 73 ' Feature Unavailable
+SUB InsertT(array() AS FLen, startElement%, elSize%, numEls%)
+  FOR x% = startElement% + numEls% - 1 TO startElement% + 1 STEP -1
+    array(x%) = array(x% - 1)
+  NEXT
 END SUB
 
-SUB ISortD(Array#(), Start%, Ndx%(), NumEls%, Dir%)
-  ERROR 73 ' Feature Unavailable
+SUB ISortD(array#(), start%, ndx%(), numEls%, dir%)
+  
+  ' Determine range of elements
+
+  min% = start%
+  max% = start% + numEls% - 1
+
+  ' Initialize the ndx%() array
+  FOR i% = min% TO max%
+    ndx%(i%) = i%
+  NEXT
+
+  ' Sort the ndx% using array# values
+
+  FOR i% = min% TO max%
+    FOR j% = min% TO max% - i% 
+      IF dir% THEN ' descending
+        IF array#(ndx%(j%)) < array#(ndx%(j% + 1)) THEN 
+          SWAP ndx%(j%), ndx%(j% + 1) 
+        END IF
+      ELSE ' ascending
+        IF array#(ndx%(j%)) > array#(ndx%(j% + 1)) THEN 
+          SWAP ndx%(j%), ndx%(j% + 1) 
+        END IF
+      END IF
+    NEXT
+  NEXT
+
 END SUB
 
-SUB ISortI(Array%(), Start%, Ndx%(), NumEls%, Dir%)
-  ERROR 73 ' Feature Unavailable
+SUB ISortI(array%(), start%, ndx%(), numEls%, dir%)
+
+  ' Determine range of elements
+
+  min% = start%
+  max% = start% + numEls% - 1
+
+  ' Initialize the ndx%() array
+  FOR i% = min% TO max%
+    ndx%(i%) = i%
+  NEXT
+
+  ' Sort the ndx% using array% values
+
+  FOR i% = min% TO max%
+    FOR j% = min% TO max% - i% 
+      IF dir% THEN ' descending
+        IF array%(ndx%(j%)) < array%(ndx%(j% + 1)) THEN 
+          SWAP ndx%(j%), ndx%(j% + 1) 
+        END IF
+      ELSE ' ascending
+        IF array%(ndx%(j%)) > array%(ndx%(j% + 1)) THEN 
+          SWAP ndx%(j%), ndx%(j% + 1) 
+        END IF
+      END IF
+    NEXT
+  NEXT
+
 END SUB
 
-SUB ISortL(Array&(), Start%, Ndx%(), NumEls%, Dir%)
-  ERROR 73 ' Feature Unavailable
+SUB ISortL(array&(), start%, ndx%(), numEls%, dir%)
+
+  ' Determine range of elements
+
+  min% = start%
+  max% = start% + numEls% - 1
+
+  ' Initialize the ndx%() array
+  FOR i% = min% TO max%
+    ndx%(i%) = i%
+  NEXT
+
+  ' Sort the ndx% using array& values
+
+  FOR i% = min% TO max%
+    FOR j% = min% TO max% - i% 
+      IF dir% THEN ' descending
+        IF array&(ndx%(j%)) < array&(ndx%(j% + 1)) THEN 
+          SWAP ndx%(j%), ndx%(j% + 1) 
+        END IF
+      ELSE ' ascending
+        IF array&(ndx%(j%)) > array&(ndx%(j% + 1)) THEN 
+          SWAP ndx%(j%), ndx%(j% + 1) 
+        END IF
+      END IF
+    NEXT
+  NEXT
+
 END SUB
 
-SUB ISortS(Array!(), Start%, Ndx%(), NumEls%, Dir%)
-  ERROR 73 ' Feature Unavailable
+SUB ISortS(array!(), start%, ndx%(), numEls%, dir%)
+
+  ' Determine range of elements
+
+  min% = start%
+  max% = start% + numEls% - 1
+
+  ' Initialize the ndx%() array
+  FOR i% = min% TO max%
+    ndx%(i%) = i%
+  NEXT
+
+  ' Sort the ndx% using array! values
+
+  FOR i% = min% TO max%
+    FOR j% = min% TO max% - i% 
+      IF dir% THEN ' descending
+        IF array!(ndx%(j%)) < array!(ndx%(j% + 1)) THEN 
+          SWAP ndx%(j%), ndx%(j% + 1) 
+        END IF
+      ELSE ' ascending
+        IF array!(ndx%(j%)) > array!(ndx%(j% + 1)) THEN 
+          SWAP ndx%(j%), ndx%(j% + 1) 
+        END IF
+      END IF
+    NEXT
+  NEXT
+
 END SUB
 
-SUB ISortC(Array!(), Start%, Ndx%(), NumEls%, Dir%)
-  ERROR 73 ' Feature Unavailable
+SUB ISortC(array!(), start%, ndx%(), numEls%, dir%)
+
+  ' Determine range of elements
+
+  min% = start%
+  max% = start% + numEls% - 1
+
+  ' Initialize the ndx%() array
+  FOR i% = min% TO max%
+    ndx%(i%) = i%
+  NEXT
+
+  ' Sort the ndx% using array! values
+
+  FOR i% = min% TO max%
+    FOR j% = min% TO max% - i% 
+      IF dir% THEN ' descending
+        IF array!(ndx%(j%)) < array!(ndx%(j% + 1)) THEN 
+          SWAP ndx%(j%), ndx%(j% + 1) 
+        END IF
+      ELSE ' ascending
+        IF array!(ndx%(j%)) > array!(ndx%(j% + 1)) THEN 
+          SWAP ndx%(j%), ndx%(j% + 1) 
+        END IF
+      END IF
+    NEXT
+  NEXT
+
 END SUB
 
-SUB ISortStr(Array$(), Start%, Ndx%(), NumEls%, Dir%)
-  ERROR 73 ' Feature Unavailable
+SUB ISortStr(array$(), start%, ndx%(), numEls%, dir%)
+
+  ' Determine range of elements
+
+  min% = start%
+  max% = start% + numEls% - 1
+
+  ' Initialize the ndx%() array
+  FOR i% = min% TO max%
+    ndx%(i%) = i%
+  NEXT
+
+  ' Sort the ndx% using array! values
+
+  FOR i% = min% TO max%
+    FOR j% = min% TO max% - i% 
+      IF dir% THEN ' descending
+        IF array$(ndx%(j%)) < array$(ndx%(j% + 1)) THEN 
+          SWAP ndx%(j%), ndx%(j% + 1) 
+        END IF
+      ELSE ' ascending
+        IF array$(ndx%(j%)) > array$(ndx%(j% + 1)) THEN 
+          SWAP ndx%(j%), ndx%(j% + 1) 
+        END IF
+      END IF
+    NEXT
+  NEXT
+
 END SUB
 
 SUB ISortStr2(Array$(), Start%, Ndx%(), NumEls%, Dir%)
-  ERROR 73 ' Feature Unavailable
+
+  ' Determine range of elements
+
+  min% = start%
+  max% = start% + numEls% - 1
+
+  ' Initialize the ndx%() array
+  FOR i% = min% TO max%
+    ndx%(i%) = i%
+  NEXT
+
+  ' Sort the ndx% using array! values
+
+  FOR i% = min% TO max%
+    FOR j% = min% TO max% - i% 
+      IF dir% THEN ' descending
+        IF LCASE$(array$(ndx%(j%))) < LCASE$(array$(ndx%(j% + 1))) THEN 
+          SWAP ndx%(j%), ndx%(j% + 1) 
+        END IF
+      ELSE ' ascending
+        IF LCASE$(array$(ndx%(j%))) > LCASE$(array$(ndx%(j% + 1))) THEN 
+          SWAP ndx%(j%), ndx%(j% + 1) 
+        END IF
+      END IF
+    NEXT
+  NEXT
+
 END SUB
 
 SUB ISortT(Array() AS FLen, Start%, Ndx%(), NumEls%, Dir%, ElSize%, MemberOffset%, MemberSize%)
@@ -233,76 +498,84 @@ SUB KeySort(Array() AS FLen, Start%, ElSize%, NumEls%, Table%(,), NumKey%)
   ERROR 73 ' Feature Unavailable
 END SUB
 
-FUNCTION MaxD#(Array#(), Start%, NumEls%)
-  max# = Array#(Start%)
-  FOR x% = Start% + 1 TO NumEls%
-    IF Array#(x%) > max# THEN max# = Array#(x%)
+FUNCTION MaxD#(array#(), start%, numEls%)
+  max# = array#(start%)
+  FOR x% = start% + 1 TO numEls%
+    IF array#(x%) > max# THEN max# = array#(x%)
   NEXT
   MaxD# = max#
 END FUNCTION
 
-FUNCTION MaxI%(Array%(), Start%, NumEls%)
-  max% = Array%(Start%)
-  FOR x% = Start% + 1 TO NumEls%
-    IF Array%(x%) > max% THEN max% = Array%(x%)
+FUNCTION MaxI%(array%(), start%, numEls%)
+  max% = array%(start%)
+  FOR x% = start% + 1 TO numEls%
+    IF array%(x%) > max% THEN max% = array%(x%)
   NEXT
   MaxI% = max%
 END FUNCTION
 
-FUNCTION MaxL&(Array&(), Start%, NumEls%)
-  max& = Array&(Start%)
-  FOR x% = Start% + 1 TO NumEls%
-    IF Array&(x%) > max& THEN max& = Array&(x%)
+FUNCTION MaxL&(array&(), start%, numEls%)
+  max& = array&(start%)
+  FOR x% = start% + 1 TO numEls%
+    IF array&(x%) > max& THEN max& = array&(x%)
   NEXT
   MaxL& = max&
 END FUNCTION
 
-FUNCTION MaxS!(Array!(), Start%, NumEls%)
-  max! = Array!(Start%)
-  FOR x% = Start% + 1 TO NumEls%
-    IF Array!(x%) > max! THEN max! = Array!(x%)
+FUNCTION MaxS!(array!(), start%, numEls%)
+  max! = array!(start%)
+  FOR x% = start% + 1 TO numEls%
+    IF array!(x%) > max! THEN max! = array!(x%)
   NEXT
   MaxS! = max!
 END FUNCTION
 
-FUNCTION MaxC!(Array!(), Start%, NumEls%)
-  ERROR 73 ' Feature Unavailable
+FUNCTION MaxC!(array!(), start%, numEls%)
+  max! = array!(start%)
+  FOR x% = start% + 1 TO numEls%
+    IF array!(x%) > max! THEN max! = array!(x%)
+  NEXT
+  MaxC! = max!
 END FUNCTION
 
-FUNCTION MinD#(Array#(), Start%, NumEls%)
-  min# = Array#(Start%)
-  FOR x% = Start% + 1 TO NumEls%
-    IF Array#(x%) < min# THEN min# = Array#(x%)
+FUNCTION MinD#(array#(), start%, numEls%)
+  min# = array#(start%)
+  FOR x% = start% + 1 TO numEls%
+    IF array#(x%) < min# THEN min# = array#(x%)
   NEXT
   MinD# = min#
 END FUNCTION
 
-FUNCTION MinI%(Array%(), Start%, NumEls%)
-  min% = Array%(Start%)
-  FOR x% = Start% + 1 TO NumEls%
-    IF Array%(x%) < min% THEN min% = Array%(x%)
+FUNCTION MinI%(array%(), start%, numEls%)
+  min% = array%(start%)
+  FOR x% = start% + 1 TO numEls%
+    IF array%(x%) < min% THEN min% = array%(x%)
   NEXT
   MinI% = min%
 END FUNCTION
 
-FUNCTION MinL&(Array&(), Start%, NumEls%)
-  min& = Array&(Start%)
-  FOR x% = Start% + 1 TO NumEls%
-    IF Array&(x%) < min& THEN min& = Array&(x%)
+FUNCTION MinL&(array&(), start%, numEls%)
+  min& = array&(start%)
+  FOR x% = start% + 1 TO numEls%
+    IF array&(x%) < min& THEN min& = array&(x%)
   NEXT
   MinL& = min&
 END FUNCTION
 
-FUNCTION MinS!(Array!(), Start%, NumEls%)
-  min! = Array!(Start%)
-  FOR x% = Start% + 1 TO NumEls%
-    IF Array!(x%) < min! THEN min! = Array!(x%)
+FUNCTION MinS!(array!(), start%, numEls%)
+  min! = array!(start%)
+  FOR x% = start% + 1 TO numEls%
+    IF array!(x%) < min! THEN min! = array!(x%)
   NEXT
   MinS! = min!
 END FUNCTION
 
-FUNCTION MinC!(Array!(), Start%, NumEls%)
-  ERROR 73 ' Feature Unavailable
+FUNCTION MinC!(array!(), start%, numEls%)
+  min! = array!(Start%)
+  FOR x% = start% + 1 TO numEls%
+    IF array!(x%) < min! THEN min! = array!(x%)
+  NEXT
+  MinC! = min!
 END FUNCTION
 
 SUB Search(Array(), Start%, NumEls%, Match, Found%, Direction%, MatchCode%, VarType%)
@@ -1149,8 +1422,47 @@ FUNCTION ShareThere%
   ERROR 73 ' Feature Unavailable
 END FUNCTION
 
-SUB SplitName(WorkName$, Drive$, Path$, FileName$, Extension$)
-  ERROR 73 ' Feature Unavailable
+SUB SplitName (workName$, drive$, path$, fileName$, ext$) STATIC
+
+  drive$ = ""                                    ' clear out any old junk
+  path$ = ""
+  fileName$ = ""
+  ext$ = ""
+
+  IF LEN(workName$) = 0 THEN EXIT SUB            ' there's nothing to do, exit
+  fileName$ = workName$                          ' assume there's a name only
+
+  FOR x% = LEN(workName$) TO 1 STEP -1           ' walk backwards
+    thisChar% = ASC(MID$(workName$, x%))         ' isolate this character
+    IF thisChar = 58 OR thisChar = 92 THEN       '   ":" or "\"
+      path$ = LEFT$(workName$, X%)               ' separate the path
+      fileName$ = MID$(workName$, x% + 1)        '    from the name
+      EXIT FOR
+    END IF
+  NEXT
+
+  IF MID$(path$, 2, 1) = ":" THEN                ' if there's a drive letter
+    drive$ = LEFT$(path$, 1)                     ' isolate the drive
+    path$ = MID$(path$, 3)                       ' and the path
+  END IF
+
+  dot% = INSTR(fileName$, ".")                   ' see if there's an extension
+  IF dot% THEN                                   ' there is
+    ext$ = MID$(fileName$, dot%)                 ' and the extension
+    fileName$ = LEFT$(fileName$, dot% - 1)       ' separate the name
+  END IF
+
+  IF LEN(drive$) = 0 THEN                        ' if no drive use the default
+    drive$ = CHR$(GetDrive%)
+  END IF
+
+  IF LEN(path$) = 0 THEN                         ' if no path use the default
+    path$ = GetDir$(drive$)
+    IF path$ <> "\" THEN path$ = path$ + "\"
+  END IF
+
+  drive$ = drive$ + ":"                          ' add a trailing colon
+
 END SUB
 
 FUNCTION Unique$(Path$)
@@ -2413,8 +2725,11 @@ FUNCTION EDate2Num%(Dat$)
   ERROR 73 ' Feature Unavailable
 END FUNCTION
 
+' As its name implies, Empty is an empty procedure that does absolutely
+' nothing. However, Empty is invaluable when timing BASIC functions, 
+' precisely because it takes such little time to execute. 
 SUB Empty(dummy%)
-  ERROR 73 ' Feature Unavailable
+  ' do nothing.
 END SUB
 
 FUNCTION ENum2Date$(Days%)
@@ -2532,55 +2847,56 @@ SUB MsgBox(Message$, Wide%, Cfn)
   ERROR 73 ' Feature Unavailable
 END SUB
 
-FUNCTION Num2Date$ (days) STATIC
+FUNCTION Num2Date$ (days%) STATIC
 
-   REDIM DyMth(13)            'DyMth holds the number of days into the year
+   REDIM dyMth%(13)            ' DyMth holds the number of days into the year
    RESTORE
-   FOR C = 1 TO 13            'for a given month
-     READ DyMth(C)
+   FOR c% = 1 TO 13            ' for a given month
+     READ dyMth%(C%)
    NEXT
    DATA 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365
 
-   IF Days > 0 THEN SD = 1 ELSE SD = -1
-   Year = ((Days - SD - ((Days + 1401) \ 1461)) \ 365) 'Find year number
+   IF days% > 0 THEN sd% = 1 ELSE sd% = -1
+   year% = ((days% - sd% - ((days% + 1401) \ 1461)) \ 365) ' Find year number
 
-   IF Days > 0 THEN
-     Year = 80 + Year
-     SY = 77
+   IF days% > 0 THEN
+     year% = 80 + year%
+     sy% = 77
    ELSE
-     Year = 79 + Year
-     SY = 80
+     year% = 79 + year%
+     sy% = 80
    END IF
-                      'Find days into year
-   DaysInYr = ABS((((Year - 80!) * 365) + ((Year - SY) \ 4)) - Days)
+                                                     ' Find days into year
+   daysInYr% = ABS((((year% - 80!) * 365) + ((year% - sy%) \ 4)) - days%)
 
-   'LeapYr below is 0 when true!
-   LeapYr = Year MOD 4                        'See if its a Leap Year
-   IF Year = 0 THEN LeapYr = 1   'EW 12-13-95: 1900 <> leap year, 2000 is
+   ' LeapYr% below is 0 when true!
+   leapYr% = year% MOD 4                             ' See if its a Leap Year
+   IF year% = 0 THEN leapYr% = 1   'EW 12-13-95: 1900 <> leap year, 2000 is
 
-   Month = 1                                  'Loop to find month number
-   AD = 0: AD2 = 0
-   WHILE DaysInYr < DyMth(Month) + AD2 OR DaysInYr > DyMth(Month + 1) + AD
-     AD2 = AD
-     Month = Month + 1
-     IF LeapYr = 0 AND Month > 1 THEN AD = 1
+   month% = 1                                        ' Loop to find month number
+   ad% = 0: ad2% = 0
+   WHILE daysInYr% < dyMth%(month%) + ad2% OR daysInYr% > dyMth%(month% + 1) + ad%
+     ad2% = ad%
+     month% = month% + 1
+     IF leapYr% = 0 AND month% > 1 THEN ad% = 1
    WEND
 
-   Day = DaysInYr - DyMth(Month)                      'Find days into month
-   IF LeapYr = 0 AND Month > 2 THEN Day = Day - 1
+   day% = daysInYr% - dyMth%(month%)                  ' Find days into month
+   IF leapYr% = 0 AND month% > 2 THEN day% = day% - 1
 
-   Year = Year + 1900
-   Yr$ = RIGHT$(STR$(Year), LEN(STR$(Year)) - 1)      'Get year portion
-   IF LEN(Yr$) < 2 THEN Yr$ = "0" + Yr$
+   year% = year% + 1900
+   yr$ = RIGHT$(STR$(year%), LEN(STR$(year%)) - 1)    ' Get year portion
+   IF LEN(yr$) < 2 THEN yr$ = "0" + yr$
 
-   Mo$ = RIGHT$(STR$(Month), LEN(STR$(Month)) - 1)    'Get month portion
-   IF LEN(Mo$) < 2 THEN Mo$ = "0" + Mo$
+   mo$ = RIGHT$(STR$(month%), LEN(STR$(month%)) - 1)  ' Get month portion
+   IF LEN(mo$) < 2 THEN mo$ = "0" + mo$
 
-   Da$ = RIGHT$(STR$(Day), LEN(STR$(Day)) - 1)        'Find day portion
-   IF LEN(Da$) < 2 THEN Da$ = "0" + Da$
+   da$ = RIGHT$(STR$(day%), LEN(STR$(day%)) - 1)      ' Find day portion
+   IF LEN(da$) < 2 THEN da$ = "0" + da$
 
-   Dat$ = Mo$ + "-" + Da$ + "-" + Yr$                 'Make date string
-   Num2Date$ = Dat$
+   dat$ = mo$ + "-" + da$ + "-" + yr$                 ' Make date string
+
+   Num2Date$ = dat$
 
 END FUNCTION
 
@@ -3109,14 +3425,14 @@ FUNCTION QInstr%(startPosition%, sourceValue$, searchValue$)
   DO
     segment$ = MID$(sourceValue$, position%, LEN(searchValue$))
     IF LEN(segment$) <> LEN(searchValue$) THEN EXIT DO
-    isMatch% = 1
-    FOR index = 1 TO LEN(searchValue$)
-      character$ = MID$(searchValue$, index, 1)
-      IF character$ <> "?" THEN
+    isMatch% = 1 ' assume we are going to find a match
+    FOR index = 1 TO LEN(searchValue$) ' test against each character in search value
+      character$ = MID$(searchValue$, index, 1) ' determine character
+      IF character$ <> "?" THEN ' if not a wildcard,
         IF MID$(segment$, index, 1) <> character$ THEN isMatch% = 0 : EXIT FOR
       END IF
-      IF isMatch% THEN QInstr% = position% : EXIT FUNCTION
     NEXT
+    IF isMatch% THEN QInstr% = position% : EXIT FUNCTION
     position% = position% + 1
   LOOP
 
@@ -3134,16 +3450,16 @@ FUNCTION QInstr2%(startPosition%, sourceValue$, searchValue$)
 
   position% = startPosition%
   DO
-    segment$ = MID$(sourceValue$, position%, LEN(searchValue$))
+    segment$ = LCASE$(MID$(sourceValue$, position%, LEN(searchValue$)))
     IF LEN(segment$) <> LEN(searchValue$) THEN EXIT DO
     isMatch% = 1
     FOR index% = 1 TO LEN(searchValue$)
-      character$ = LCASE$(MID$(searchValue$, index%, 1))
+      character$ = MID$(searchValue$, index%, 1)
       IF character$ <> "?" THEN
         IF LCASE$(MID$(segment$, index%, 1)) <> character$ THEN isMatch% = 0 : EXIT FOR
       END IF
-      IF isMatch% THEN QInstr2% = position% : EXIT FUNCTION
     NEXT
+    IF isMatch% THEN QInstr2% = position% : EXIT FUNCTION
     position% = position% + 1
   LOOP
 
@@ -3170,8 +3486,8 @@ FUNCTION QInstrB%(startPosition%, sourceValue$, searchValue$)
       IF character$ <> "?" THEN
         IF MID$(segment$, index, 1) <> character$ THEN isMatch% = 0 : EXIT FOR
       END IF
-      IF isMatch% THEN QInstrB% = position% : EXIT FUNCTION
     NEXT
+    IF isMatch% THEN QInstrB% = position% : EXIT FUNCTION
     position% = position% - 1
     IF position% < 1 THEN EXIT DO
   LOOP
@@ -3181,7 +3497,28 @@ FUNCTION QInstrB%(startPosition%, sourceValue$, searchValue$)
 END FUNCTION
 
 FUNCTION QInstrB2%(StartPos%, Source$, SearchValue$)
-  ERROR 73 ' Feature Unavailable
+
+  ' Setting position to 0 will return 0; matching QB behavior.
+  IF startPosition% = 0 THEN QInstrB2% = 0: EXIT FUNCTION
+
+  position% = startPosition%
+  DO
+    segment$ = LCASE$(MID$(sourceValue$, position%, LEN(searchValue$)))
+    IF LEN(segment$) <> LEN(searchValue$) THEN EXIT DO
+    isMatch% = 1
+    FOR index = 1 TO LEN(searchValue$)
+      character$ = MID$(searchValue$, index, 1)
+      IF character$ <> "?" THEN
+        IF LCASE$(MID$(segment$, index, 1)) <> character$ THEN isMatch% = 0 : EXIT FOR
+      END IF
+    NEXT
+    IF isMatch% THEN QInstrB2% = position% : EXIT FUNCTION
+    position% = position% - 1
+    IF position% < 1 THEN EXIT DO
+  LOOP
+
+  QInstrB2% = 0
+
 END FUNCTION
 
 SUB QInstrH(Segment%, Address%, SearchValue$, NumBytes&)
