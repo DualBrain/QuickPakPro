@@ -578,8 +578,34 @@ FUNCTION MinC!(array!(), start%, numEls%)
   MinC! = min!
 END FUNCTION
 
-SUB Search(Array(), Start%, NumEls%, Match, Found%, Direction%, MatchCode%, VarType%)
-  ERROR 73 ' Feature Unavailable
+SUB Search(array(), start%, numEls%, match, found%, direction%, matchCode%, varType%)
+
+  c% = 0
+
+  min% = start%
+  max% = start% + numEls% - 1
+  IF NOT direction% THEN inc% = 1 ELSE inc% = -1: SWAP min%, max%
+
+  SELECT CASE matchCode%
+    CASE 0 ' find an exact match only
+      FOR i% = min% TO max% STEP inc%
+        c% = c% + 1
+        IF array(i%) = match THEN found% = c%: EXIT SUB
+      NEXT
+    CASE 1 ' match if the element is greater or equal
+      FOR i% = min% TO max% STEP inc%
+        c% = c% + 1
+        IF array(i%) => match THEN found% = c%: EXIT SUB
+      NEXT
+    CASE -1 ' match if the element is less or equal 
+      FOR i% = min% TO max% STEP inc%
+        c% = c% + 1
+        IF array(i%) =< match THEN found% = c%: EXIT SUB
+      NEXT
+    CASE ELSE
+      found% = 0
+  END SELECT
+
 END SUB
 
 SUB SearchT(Array() AS FLen, Start%, NumEls%, Match, Found%, Dir%, Code%, StructSize%, MemberOf%, MemberSize%)
@@ -590,24 +616,109 @@ SUB SearchT2(Array() AS FLen, Start%, NumEls%, Match, Found%, Dir%, Code%, Struc
   ERROR 73 ' Feature Unavailable
 END SUB
 
-SUB SortD(Array#(), Start%, NumEls%, Dir%)
-  ERROR 73 ' Feature Unavailable
+SUB SortD(array#(), start%, numEls%, dir%)
+
+  min% = start%
+  max% = start% + numEls% - 1
+
+  FOR i% = min% TO max%
+    FOR j% = min% TO max% - i% 
+      IF dir% THEN ' descending
+        IF array#(j%) < array#(j% + 1) THEN 
+          SWAP array#(j%), array#(j% + 1) 
+        END IF
+      ELSE ' ascending
+        IF array#(j%) > array#(j% + 1) THEN 
+          SWAP array#(j%), array#(j% + 1) 
+        END IF
+      END IF
+    NEXT
+  NEXT
+
 END SUB
 
-SUB SortI(Array%(), Start%, NumEls%, Dir%)
-  ERROR 73 ' Feature Unavailable
+SUB SortI(array%(), start%, numEls%, dir%)
+
+  min% = start%
+  max% = start% + numEls% - 1
+
+  FOR i% = min% TO max%
+    FOR j% = min% TO max% - i% 
+      IF dir% THEN ' descending
+        IF array%(j%) < array%(j% + 1) THEN 
+          SWAP array%(j%), array%(j% + 1) 
+        END IF
+      ELSE ' ascending
+        IF array%(j%) > array%(j% + 1) THEN 
+          SWAP array%(j%), array%(j% + 1) 
+        END IF
+      END IF
+    NEXT
+  NEXT
+
 END SUB
 
-SUB SortL(Array&(), Start%, NumEls%, Dir%)
-  ERROR 73 ' Feature Unavailable
+SUB SortL(array&(), start%, numEls%, dir%)
+
+  min% = start%
+  max% = start% + numEls% - 1
+
+  FOR i% = min% TO max%
+    FOR j% = min% TO max% - i% 
+      IF dir% THEN ' descending
+        IF array&(j%) < array&(j% + 1) THEN 
+          SWAP array&(j%), array&(j% + 1) 
+        END IF
+      ELSE ' ascending
+        IF array&(j%) > array&(j% + 1) THEN 
+          SWAP array&(j%), array&(j% + 1) 
+        END IF
+      END IF
+    NEXT
+  NEXT
+
 END SUB
 
-SUB SortS(Array!(), Start%, NumEls%, Dir%)
-  ERROR 73 ' Feature Unavailable
+SUB SortS(array!(), start%, numEls%, dir%)
+
+  min% = start%
+  max% = start% + numEls% - 1
+
+  FOR i% = min% TO max%
+    FOR j% = min% TO max% - i% 
+      IF dir% THEN ' descending
+        IF array!(j%) < array!(j% + 1) THEN 
+          SWAP array!(j%), array!(j% + 1) 
+        END IF
+      ELSE ' ascending
+        IF array!(j%) > array!(j% + 1) THEN 
+          SWAP array!(j%), array!(j% + 1) 
+        END IF
+      END IF
+    NEXT
+  NEXT
+
 END SUB
 
-SUB SortC(Array!(), Start%, NumEls%, Dir%)
-  ERROR 73 ' Feature Unavailable
+SUB SortC(array!(), start%, numEls%, dir%)
+
+  min% = start%
+  max% = start% + numEls% - 1
+
+  FOR i% = min% TO max%
+    FOR j% = min% TO max% - i% 
+      IF dir% THEN ' descending
+        IF array!(j%) < array!(j% + 1) THEN 
+          SWAP array!(j%), array!(j% + 1) 
+        END IF
+      ELSE ' ascending
+        IF array!(j%) > array!(j% + 1) THEN 
+          SWAP array!(j%), array!(j% + 1) 
+        END IF
+      END IF
+    NEXT
+  NEXT
+
 END SUB
 
 ' SortStr will sort (case-sensitive) all or just a portion of a conventional (not 
