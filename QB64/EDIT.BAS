@@ -9,6 +9,7 @@ hwnd = _WindowHandle: x = 100: y = 100: w = 640 * mult: h = 480 * mult
 IF INSTR(_OS$, "[WINDOWS]") THEN success = MoveWindow(hwnd, x, y, w, h, 1)
 CHDIR _STARTDIR$
 _TITLE "EDIT.EXE"
+'BUG: It would be nice specify the icon here, but... having to require full path or placing it in the qb64 folder is problematic. 
 'NOTE: The above boiler plate must be first in execution (top of file).
 '      Also appears to not work as an $INCLUDE; suggesting something might
 '      be wrong with the implementation of $INCLUDE.

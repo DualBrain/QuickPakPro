@@ -2646,7 +2646,23 @@ SUB MouseTrap(ulRow%, ulCol%, lrRow%, lrCol%)
   ' https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-clipcursor
   ' https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getclipcursor
   ' https://learn.microsoft.com/en-us/windows/win32/menurc/using-cursors
-  ERROR 73 ' Feature Unavailable
+
+  EXIT SUB 'NOTE: Disabling functionality.
+
+  DIM rec AS Rectangle
+  IF _PIXELSIZE = 0 THEN
+    rec.left = (ulCol - 1) * 8
+    rec.top = (ulRow - 1) * 8
+    rec.bottom = lrRow * 8
+    rec.right = lrcol * 8
+  ELSE
+    rec.left = ulCol
+    rec.top = ulRow
+    rec.bottom = lrRow
+    rec.right = lrcol
+  END IF
+  work%% = ClipCursor(rec)
+
 END SUB
 
 ' NumLock will quickly tell if the NumLock key is currently depressed. 
@@ -2683,9 +2699,9 @@ FUNCTION ScrlLock%
   ERROR 73 ' Feature Unavailable
 END FUNCTION
 
-SUB SetCursor(X%, Y%)
+SUB SetCursor(x%, y%)
   ' https://learn.microsoft.com/en-us/windows/win32/menurc/using-cursors
-  ERROR 73 ' Feature Unavailable
+  _MOUSEMOVE x%, y%
 END SUB
 
 FUNCTION ShiftKey%

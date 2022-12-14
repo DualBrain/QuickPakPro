@@ -93,6 +93,13 @@ TYPE Win32_Find_Data
   calternatefilename AS STRING * 14
 END TYPE
 
+TYPE Rectangle
+  left AS LONG
+  top AS LONG
+  right AS LONG
+  bottom AS LONG
+END TYPE
+
 DECLARE DYNAMIC LIBRARY "kernel32"
   FUNCTION FindFirstFile~%& ALIAS FindFirstFileA (BYVAL lpfilename AS _OFFSET, BYVAL lpfindfiledata AS _OFFSET)
   FUNCTION FindNextFile& ALIAS FindNextFileA (BYVAL hfind AS _UNSIGNED _OFFSET, BYVAL lpfindfiledata AS _OFFSET)
@@ -100,7 +107,9 @@ DECLARE DYNAMIC LIBRARY "kernel32"
   FUNCTION GetLastError& ()
 END DECLARE
 
-Declare Dynamic Library "User32"
+DECLARE DYNAMIC LIBRARY "user32"
   FUNCTION SetWindowPos& (ByVal hwnd As Long, Byval hWndInsertAfter As Long, Byval x As Long, Byval y As Long, Byval cx As Long, Byval cy As Long, Byval wFlags As Long)
   FUNCTION MoveWindow& (Byval hwnd AS LONG, Byval x AS LONG, Byval y AS LONG, byval nWidth AS LONG, Byval nHeight AS LONG, byval bRepaint AS LONG)
-End Declare
+  FUNCTION ClipCursor%% (Rect AS Rectangle) 'sets mouse box work area on desktop
+  SUB SetCursorPos (BYVAL x AS LONG, BYVAL y AS LONG) 'move cursor position
+END DECLARE
