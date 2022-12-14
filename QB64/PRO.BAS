@@ -870,11 +870,68 @@ FUNCTION DOSVer%
 END FUNCTION
 
 FUNCTION ErrorMsg$(ErrorNumber%)
-  ERROR 73 ' Feature Unavailable
+  SELECT CASE ErrorNumber%
+    CASE 1: ErrorMsg$ = "NEXT without FOR"
+    CASE 2: ErrorMsg$ = "Syntax error"
+    CASE 3: ErrorMsg$ = "RETURN without GOSUB"
+    CASE 4: ErrorMsg$ = "Out of DATA"
+    CASE 5: ErrorMsg$ = "Illegal function call"
+    CASE 6: ErrorMsg$ = "Overflow"
+    CASE 7: ErrorMsg$ = "Out of memory"
+    CASE 8: ErrorMsg$ = "Label not defined"
+    CASE 9: ErrorMsg$ = "Subscript out of range"
+    CASE 10: ErrorMsg$ = "Duplicate definition"
+    CASE 11: ErrorMsg$ = "Division by zero"
+    CASE 12: ErrorMsg$ = "Illegal in direct mode"
+    CASE 13: ErrorMsg$ = "Type mismatch"
+    CASE 14: ErrorMsg$ = "Out of string space"
+    CASE 16: ErrorMsg$ = "String formula too complex"
+    CASE 17: ErrorMsg$ = "Cannot continue"
+    CASE 18: ErrorMsg$ = "Function not defined"
+    CASE 19: ErrorMsg$ = "No RESUME"
+    CASE 20: ErrorMsg$ = "RESUME without error"
+    CASE 24: ErrorMsg$ = "Device timeout"
+    CASE 25: ErrorMsg$ = "Device fault"
+    CASE 26: ErrorMsg$ = "FOR without NEXT"
+    CASE 27: ErrorMsg$ = "Out of paper"
+    CASE 29: ErrorMsg$ = "WHILE without WEND"
+    CASE 30: ErrorMsg$ = "WEND without WHILE"
+    CASE 33: ErrorMsg$ = "Duplicate label"
+    CASE 35: ErrorMsg$ = "Subprogram not defined"
+    CASE 37: ErrorMsg$ = "Argument-count mismatch"
+    CASE 38: ErrorMsg$ = "Array not defined"
+    CASE 40: ErrorMsg$ = "Variable required"
+    CASE 50: ErrorMsg$ = "FIELD overflow"
+    CASE 51: ErrorMsg$ = "Internal error"
+    CASE 52: ErrorMsg$ = "Bad file name or number"
+    CASE 53: ErrorMsg$ = "File not found"
+    CASE 54: ErrorMsg$ = "Bad file mode"
+    CASE 55: ErrorMsg$ = "File already open"
+    CASE 56: ErrorMsg$ = "FIELD statement active"
+    CASE 57: ErrorMsg$ = "Device I/O error"
+    CASE 58: ErrorMsg$ = "File already exists"
+    CASE 59: ErrorMsg$ = "Bad record length"
+    CASE 61: ErrorMsg$ = "Disk full"
+    CASE 62: ErrorMsg$ = "Input past end of file"
+    CASE 63: ErrorMsg$ = "Bad record number"
+    CASE 64: ErrorMsg$ = "Bad file name"
+    CASE 67: ErrorMsg$ = "Too many files"
+    CASE 68: ErrorMsg$ = "Device unavailable"
+    CASE 69: ErrorMsg$ = "Communication-buffer overflow"
+    CASE 70: ErrorMsg$ = "Permission denied"
+    CASE 71: ErrorMsg$ = "Disk not ready"
+    CASE 72: ErrorMsg$ = "Disk-media error"
+    CASE 73: ErrorMsg$ = "Feature unavailable"
+    CASE 74: ErrorMsg$ = "Rename across disks"
+    CASE 75: ErrorMsg$ = "Path/File access error"
+    CASE 76: ErrorMsg$ = "Path not found"
+    CASE ELSE
+       ErrorMsg$ = "Unknown"
+  END SELECT
 END FUNCTION
 
 FUNCTION ExeName$
-  ERROR 73 ' Feature Unavailable
+  ExeName$ = UCASE$(COMMAND$(0))
 END FUNCTION
 
 FUNCTION Exist%(FileName$)

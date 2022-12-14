@@ -9,6 +9,7 @@ hwnd = _WindowHandle: x = 100: y = 100: w = 640 * mult: h = 480 * mult
 IF INSTR(_OS$, "[WINDOWS]") THEN success = MoveWindow(hwnd, x, y, w, h, 1)
 CHDIR _STARTDIR$
 _TITLE "TEST"
+'BUG: It would be nice specify the icon here, but... having to require full path or placing it in the qb64 folder is problematic. 
 'NOTE: The above boiler plate must be first in execution (top of file).
 '      Also appears to not work as an $INCLUDE; suggesting something might
 '      be wrong with the implementation of $INCLUDE.
@@ -442,8 +443,8 @@ CALL ClipFile("c:\test.txt", 100)
 HandleResult 1 = 1
 
 PRINT "DCount"; 
-c = DCount("c:*.*")
-HandleResult c = 3
+c = DCount("*.*")
+HandleResult c = 28
 
 PRINT "DiskInfo"; 
 CALL DiskInfo("c:", bytes, sectors, freeClusters, totalClusters)
@@ -463,15 +464,15 @@ HandleResult result = 0
 
 PRINT "DOSVer"; 
 ver = DOSVer
-HandleResult ver = 3
+HandleResult ver = 611
 
 PRINT "ErrorMsg"; 
-message$ = ErrorMsg(errorNumber)
-HandleResult message$ = ""
+message$ = ErrorMsg(53)
+HandleResult message$ = "File not found"
 
 PRINT "ExeName"; 
-name$ = ExeName
-HandleResult name$ = ""
+name$ = ExeName$
+HandleResult INSTR(name$, "TEST.EXE")
 
 PRINT "Exist"; 
 there = Exist("c:\test.txt")
@@ -1747,7 +1748,7 @@ ErrorHandler:
   IF ERR = 73 THEN
     e$ = "NOT IMPLEMENTED"
   ELSE
-    e$ = "ERROR:" + STR$(ERR) ' + " LINE:" + STR$(_ERRORLINE) + "."
+    e$ = "ERROR:" + ErrorMsg$(ERR) ' + " LINE:" + STR$(_ERRORLINE) + "."
   END IF
   RESUME NEXT
 
