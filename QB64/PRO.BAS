@@ -931,7 +931,8 @@ FUNCTION ErrorMsg$(ErrorNumber%)
 END FUNCTION
 
 FUNCTION ExeName$
-  ExeName$ = UCASE$(COMMAND$(0))
+  ' NOTE: Considered UCASE$, but an existing sample suggests that this shouldn't be done here.
+  ExeName$ = COMMAND$(0)
 END FUNCTION
 
 FUNCTION Exist%(FileName$)

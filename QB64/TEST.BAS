@@ -2,7 +2,9 @@
 
 ' Copyright (c) 2022 Cory Smith
 
-' Boiler plate
+' **************************
+' * BOILER PLATE BEGIN
+' **************************
 $Resize:Stretch
 CHDIR _STARTDIR$ ' Moved this line above resize to (hopefully) give more init time to window
 IF _DesktopHeight => 2160 THEN mult = 4 ELSE IF _DesktopHeight => 1440 THEN mult = 2 ELSE mult = 1
@@ -13,8 +15,11 @@ IF success = 0 THEN PRINT "FAILED TO RESIZE - "; GetLastError; " ("; hwnd; ")": 
 _TITLE "TEST" 'NOTE: Moving title above resize causes resize to fail (without an error???)
 'BUG: It would be nice specify the icon here, but... having to require full path or placing it in the qb64 folder is problematic. 
 'NOTE: The above boiler plate must be first in execution (top of file).
-'      Also appears to not work as an $INCLUDE; suggesting something might
+'BUG:  Also appears to not work as an $INCLUDE; suggesting something might
 '      be wrong with the implementation of $INCLUDE.
+' **************************
+' * BOILER PLATE END
+' **************************
 
 '$INCLUDE: 'PRO.BI'
 '$INCLUDE: 'DECLARE.BAS'
