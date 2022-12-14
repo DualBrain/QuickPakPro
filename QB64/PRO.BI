@@ -99,3 +99,8 @@ DECLARE DYNAMIC LIBRARY "kernel32"
   FUNCTION FindClose& (BYVAL hfind AS _UNSIGNED _OFFSET)
   FUNCTION GetLastError& ()
 END DECLARE
+
+Declare Dynamic Library "User32"
+  FUNCTION SetWindowPos& (ByVal hwnd As Long, Byval hWndInsertAfter As Long, Byval x As Long, Byval y As Long, Byval cx As Long, Byval cy As Long, Byval wFlags As Long)
+  FUNCTION MoveWindow& (Byval hwnd AS LONG, Byval x AS LONG, Byval y AS LONG, byval nWidth AS LONG, Byval nHeight AS LONG, byval bRepaint AS LONG)
+End Declare

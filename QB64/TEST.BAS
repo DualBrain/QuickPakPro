@@ -2,15 +2,21 @@
 
 ' Copyright (c) 2022 Cory Smith
 
-DEFINT A-Z
-
+' Boiler plate
+$Resize:Stretch
+IF _DesktopHeight => 2160 THEN mult = 4 ELSE IF _DesktopHeight => 1440 THEN mult = 2 ELSE mult = 1
+hwnd = _WindowHandle: x = 100: y = 100: w = 640 * mult: h = 480 * mult
+IF INSTR(_OS$, "[WINDOWS]") THEN success = MoveWindow(hwnd, x, y, w, h, 1)
+CHDIR _STARTDIR$
 _TITLE "TEST"
-
-$RESIZE:STRETCH
-'_FULLSCREEN _SQUAREPIXELS
+'NOTE: The above boiler plate must be first in execution (top of file).
+'      Also appears to not work as an $INCLUDE; suggesting something might
+'      be wrong with the implementation of $INCLUDE.
 
 '$INCLUDE: 'PRO.BI'
 '$INCLUDE: 'DECLARE.BAS'
+
+DEFINT A-Z
 
 CLS
 
