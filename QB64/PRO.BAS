@@ -2631,15 +2631,15 @@ SUB MouseRangeG1(array() AS Area, start%, numEls%, x%, y%, button%, rangeNum%)
 END SUB
 
 FUNCTION MBuffSize%
-  ERROR 73 ' Feature Unavailable
+  'ERROR 73 ' Feature Unavailable
 END FUNCTION
 
 SUB MGetState(Buffer$)
-  ERROR 73 ' Feature Unavailable
+  'ERROR 73 ' Feature Unavailable
 END SUB
 
 SUB MSetState(Buffer$)
-  ERROR 73 ' Feature Unavailable
+  'ERROR 73 ' Feature Unavailable
 END SUB
 
 ' MouseTrap will establish the allowable range of movement for the mouse cursor. 
@@ -3869,6 +3869,12 @@ END SUB
 ' fixed-length) string array, and contain the display within a specified 
 ' area of the screen. 
 SUB APrint(array$(), first%, numEls%, firstChar%, numChars%, colr%, page%)
+  'BUG: The VERTMENU.BAS file makes a call where colr% is -1;
+  '     however, it appears to be not using the current "basic" fg/bg but
+  '     the value from "somewhere else". Testing combined with COLOR, PRINT
+  '     MQPrint, QPrintRC, etc. and -1 for colr% does not seem to be affected
+  '     by any of these. COLOR, for example, seems to be completely ignored 
+  '     which doesn't seem to match what the documentation states.
   ' NOTE: page% is currently not implemented.
   ' If page% is -1, use current page.
   IF page% > -1 THEN SCREEN , , page%, page%

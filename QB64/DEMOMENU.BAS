@@ -7,11 +7,28 @@
 ' Modifications (c) 2022 Cory Smith
 '****************************************************************************
 
+' **************************
+' * BOILER PLATE BEGIN
+' **************************
+$Resize:Stretch
+CHDIR _STARTDIR$ ' Moved this line above resize to (hopefully) give more init time to window
+IF _DesktopHeight => 2160 THEN mult = 4 ELSE IF _DesktopHeight => 1440 THEN mult = 2 ELSE mult = 1
+DO: LOOP UNTIL _SCREENEXISTS ' Not sure if necessary; however, there does seem to be some sort of timing issue around getting hwnd
+hwnd = _WindowHandle: x = 100: y = 100: w = 640 * mult: h = 480 * mult ' inlined _WindowHandle (next line) because 1 out of every 4 or 5 executions, would encounter an invalid window handle (1400)
+IF INSTR(_OS$, "[WINDOWS]") THEN success = MoveWindow(_WindowHandle, x, y, w, h, 1) ELSE success = -1 ' Now that _WindowHandle is inlined, invalid window handle (1400) issue has yet to be reproduced - will have to continue to test
+IF success = 0 THEN PRINT "FAILED TO RESIZE - "; GetLastError; " ("; hwnd; ")": CALL WaitKeyS
+_TITLE "EXENAME" 'NOTE: Moving title above resize causes resize to fail (without an error???)
+'BUG: It would be nice specify the icon here, but... having to require full path or placing it in the qb64 folder is problematic. 
+'NOTE: The above boiler plate must be first in execution (top of file).
+'BUG:  Also appears to not work as an $INCLUDE; suggesting something might
+'      be wrong with the implementation of $INCLUDE.
+' **************************
+' * BOILER PLATE END
+' **************************
+
 DEFINT A-Z
 
 '$INCLUDE: 'PRO.BI'
-
-'_FULLSCREEN _SQUAREPIXELS
 
 '----- BASIC subprograms
 '
@@ -37,10 +54,9 @@ DECLARE SUB SetCursor (Row, Col)
 DECLARE SUB ShowCursor ()
 DECLARE SUB TextCursor (FG, BG)
 
-
-'The first Include file contains a structure definition for menu and screen
-'colors.  The second Include determines the type of monitor you are using and
-'assigns appropriate colors.
+' The first Include file contains a structure definition for menu and screen
+' colors. The second Include determines the type of monitor you are using and
+' assigns appropriate colors.
 '
 '$INCLUDE: 'DEFCNF.BI'
 '$INCLUDE: 'SETCNF.BI'
@@ -48,19 +64,19 @@ DECLARE SUB TextCursor (FG, BG)
 CONST Inactive = -1
 CONST Active = 0
 
-REDIM MMenu$(9, 5)                      'holds the menu choice strings
-REDIM Stat(9, 5)                        'holds the choice status flags
-REDIM Help$(9, 5)                       'holds Help strings
-REDIM ScrTxt$(50)                       'holds the screen text
+REDIM MMenu$(9, 5)                      ' holds the menu choice strings
+REDIM Stat(9, 5)                        ' holds the choice status flags
+REDIM Help$(9, 5)                       ' holds Help strings
+REDIM ScrTxt$(50)                       ' holds the screen text
 
-MMenu$(0, 0) = "�"                      'this was the MS Help Icon
+MMenu$(0, 0) = CHR$(240)                ' this was the MS Help Icon
 
 '******* Define Main Menu
-RESTORE MenuStrngs                      'read the menu choices into the Array
-FOR R = 0 TO 9                          'for each menu choice,
-    FOR C = 1 TO 5                      '  read each menu.
-        READ MMenu$(R, C)
-    NEXT C
+RESTORE MenuStrngs                      ' read the menu choices into the Array
+FOR R = 0 TO 9                          ' for each menu choice,
+  FOR C = 1 TO 5                        '   read each menu.
+    READ MMenu$(R, C)
+  NEXT C
 NEXT R
 
 '*** Set Inactive menu choices
@@ -69,7 +85,6 @@ Stat(2, 3) = Inactive                   'can't cut a block until its marked
 Stat(3, 3) = Inactive                   'ditto for copying and pasting.
 Stat(4, 3) = Inactive
 Stat(2, 4) = Inactive                   'can't repeat last find before find
-
 
 '*** Some help strings need to be built up since contsant string assignments
 '*** can only be 255 characters in length.
@@ -224,10 +239,10 @@ DO
                   Psn = LEN(MMenu$(Choice, 2))  'get length of choice
                                                 'see if its marked
                   Mark$ = MID$(MMenu$(Choice, 2), Psn, 1)
-                  IF Mark$ = "�" THEN           'if it is, then unmark it
+                  IF Mark$ = CHR$(251) THEN           'if it is, then unmark it
                      Mark$ = " "
                   ELSE
-                     Mark$ = "�"                'otherwise mark it
+                     Mark$ = CHR$(251)                'otherwise mark it
                   END IF
                   MID$(MMenu$(Choice, 2), Psn) = Mark$
                CASE 6

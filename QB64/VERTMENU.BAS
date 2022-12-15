@@ -1,7 +1,8 @@
 '********* VERTMENU.BAS
 
-'by Don Malin
-'Copyright (c) 1989-1990 Crescent Software
+' by Don Malin
+' Copyright (c) 1989-1990 Crescent Software
+' Modifications (c) 2022 Cory Smith
 
 DEFINT A-Z
 
@@ -25,7 +26,20 @@ DECLARE FUNCTION MBuffSize% ()
 DECLARE FUNCTION MinInt% (Val1, Val2)
 DECLARE FUNCTION PDQTimer& ()
 
-'$NOCLUDE: 'DefCnf.BI'
+' '$INCLUDE: 'PRO.BI'
+' '$INCLUDE: 'DefCnf.BI'
+' '$INCLUDE: 'SetCnf.BI'
+
+' REDIM Atrib$(3)
+' Atrib$(1) = "Foreground "
+' Atrib$(2) = "Background"
+' Atrib$(3) = "Intensity "
+
+' LOCATE 3, 42
+' VertAction = 1
+' DO
+'   CALL VertMenu(Atrib$(), Atrb, 10, 24, Ky$, VertAction, Cnf)
+' LOOP UNTIL VertAction = 4
 
 '****************************************************************************
 '   File Name: VERTMENU.BAS
@@ -101,7 +115,7 @@ SUB VertMenu (Item$(), Choice, MaxLen, BoxBot, Ky$, Action, Cnf AS Config) STATI
 
        '---- determine how many choices to display, and where to put the menu
        MaxNum = UBOUND(Item$)                   'find number of active items
-       MaxNum = FindLast%(Item$(), MaxNum)
+       MaxNum = FindLast%(Item$(), MaxNum, MaxNum)
 
        Top = CSRLIN + 1                         'put the menu at the current
        LeftMargin = POS(0)                      '  cursor location
@@ -133,29 +147,29 @@ SUB VertMenu (Item$(), Choice, MaxLen, BoxBot, Ky$, Action, Cnf AS Config) STATI
 
        '----- draw border and display items on the screen
        HideCursor
-       QPrintRC "�" + STRING$(MaxLen + 2, "�") + "�", CSRLIN, LeftMargin, Cnf.MenBox
+       QPrintRC CHR$(201) + STRING$(MaxLen + 2, CHR$(205)) + CHR$(187), CSRLIN, LeftMargin, Cnf.MenBox
        FOR X = Top TO Bottom                  'Draw sides, display items
            APos = X - Top + 1
 
            IF Item$(APos + Offset1) = "-" THEN
-              Item$(APos + Offset1) = STRING$(MaxLen, "�")
+              Item$(APos + Offset1) = STRING$(MaxLen, CHR$(196))
            END IF
            LSET Fill$ = Item$(APos + Offset1)
                                                    'Left box side and choice
-           QPrintRC "� ", X, LeftMargin, Cnf.MenBox
+           QPrintRC CHR$(186) + " ", X, LeftMargin, Cnf.MenBox
            QPrintRC Fill$, X, LeftMargin + 2, Cnf.ActivCh
            IF X = Top AND More = -1 THEN           'Draw Up arrow box side
               QPrintRC CHR$(24), X, RightMargin, ScrlClr
            ELSEIF X = Bottom AND More = -1 THEN    'Draw Down arrow box side
               QPrintRC CHR$(25), X, RightMargin, ScrlClr
            ELSEIF More THEN                        'Draw Scroll bar
-              QPrintRC "�", X, RightMargin, ScrlClr
+              QPrintRC CHR$(176), X, RightMargin, ScrlClr
            ELSE                                    'Draw normal box side
-              QPrintRC "�", X, RightMargin, Cnf.MenBox
+              QPrintRC CHR$(186), X, RightMargin, Cnf.MenBox
            END IF
        NEXT
                                                    'Draw the bottom of box
-       QPrintRC "�" + STRING$(MaxLen + 2, "�") + "�", X, LeftMargin, Cnf.MenBox
+       QPrintRC CHR$(200) + STRING$(MaxLen + 2, CHR$(205)) + CHR$(188), X, LeftMargin, Cnf.MenBox
 
        CALL MPaintBox(Top, RightMargin + 1, Bottom + 1, RightMargin + 2, 8)
        CALL MPaintBox(Bottom + 2, LeftMargin + 2, Bottom + 2, RightMargin + 2, 8)
@@ -297,7 +311,7 @@ SUB VertMenu (Item$(), Choice, MaxLen, BoxBot, Ky$, Action, Cnf AS Config) STATI
                  IF MRow <> LMRow OR MCol <> LMCol OR Presses THEN
                     IF MRow <= Bottom AND MRow >= Top THEN
                        TChoice = MRow - Top + 1 + Offset1 'Calc. Choice number
-                       IF LEFT$(Item$(TChoice), 1) <> "�" THEN
+                       IF LEFT$(Item$(TChoice), 1) <> CHR$(196) THEN
                           Choice = TChoice
                           FstPrsChoice = Choice
                           GOSUB VertHiLite              'Hi-Lite new choice
@@ -398,7 +412,7 @@ SUB VertMenu (Item$(), Choice, MaxLen, BoxBot, Ky$, Action, Cnf AS Config) STATI
                    DO
                       Choice = Choice - 1
                       IF Row - 1 < Top THEN Offset1 = Offset1 - 1
-                   LOOP WHILE LEFT$(Item$(Choice), 1) = "�"
+                   LOOP WHILE LEFT$(Item$(Choice), 1) = CHR$(196)
                    GOSUB VertDisplay
                 ELSEIF More = 0 THEN
                    Choice = MaxNum
@@ -409,7 +423,7 @@ SUB VertMenu (Item$(), Choice, MaxLen, BoxBot, Ky$, Action, Cnf AS Config) STATI
                    DO
                       Choice = Choice + 1
                       IF Row + 1 > Bottom THEN Offset1 = Offset1 + 1
-                   LOOP WHILE LEFT$(Item$(Choice), 1) = "�"
+                   LOOP WHILE LEFT$(Item$(Choice), 1) = CHR$(196)
                    GOSUB VertDisplay
                 ELSEIF More = 0 THEN
                    Choice = 1
@@ -469,7 +483,7 @@ VertHiLite:
        IF BarPtr <> OPtr THEN
           IF OPtr THEN
              LOCATE OPtr, RightMargin  'Update the Scroll Bar position
-             CALL MQPrint("�", ScrlClr)
+             CALL MQPrint(CHR$(176), ScrlClr)
           END IF
           LOCATE BarPtr, RightMargin
           CALL MQPrint(CHR$(8), Cnf.MenBox)
@@ -489,9 +503,11 @@ VertDisplay:
     END IF
 
     LOCATE Top, LeftMargin + 2
-    APrint Item$(), Offset1 + 1, Bottom - Top + 1, 1, MaxLen, -1, -1
+    'APrint Item$(), Offset1 + 1, Bottom - Top + 1, 1, MaxLen, -1, -1
+    APrint Item$(), Offset1 + 1, Bottom - Top + 1, 1, MaxLen, Cnf.ActivCh, -1
 
 RETURN
 
 END SUB
 
+' '$INCLUDE: 'PRO.BAS'

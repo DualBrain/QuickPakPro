@@ -8,7 +8,7 @@ clrDisp% = cnf.MonTyp = 3 OR (cnf.MonTyp >= 5 AND cnf.MonTyp <= 9) OR cnf.MonTyp
 IF INSTR(COMMAND$, "/B") THEN clrDisp% = 0
 
 IF clrDisp% THEN
-  IF 1 THEN
+  IF 0 THEN
     cnf.PulBar = 112 ' Black on White
     cnf.MenBox = 112 ' Black on White
     cnf.ActivCh = 112 ' Black on White
