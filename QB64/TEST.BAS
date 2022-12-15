@@ -1535,11 +1535,11 @@ position = QInstr2(startPos, buffer$, srch$)
 HandleResult position = 1
 
 PRINT "QInstrB";
-buffer$ = "a,b,c,d"
-startPos = 1
-srch$ = ","
+buffer$ = "1 12 123 1234"
+startPos = LEN(buffer$)
+srch$ = " "
 position = QInstrB(startPos, buffer$, srch$)
-HandleResult position = 6
+HandleResult position = 9
 
 PRINT "QInstrB2";
 buffer$ = "a,b,B,d"
