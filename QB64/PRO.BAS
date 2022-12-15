@@ -4252,6 +4252,7 @@ SUB QPrintAny (txt$, clr%, monCode%, row%, column%)
 END SUB
 
 SUB QPrintRC (txt$, r%, c%, clr%)
+  IF r% < 1 OR r% > 25 OR c% < 1 OR c% > 80 THEN EXIT SUB
   ofg% = -1: obg% = -1
   IF clr% = -1 THEN
     ' Maintain existing color...
