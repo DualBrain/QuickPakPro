@@ -8,11 +8,11 @@ DEFINT A-Z
 
 ''$INCLUDE: 'QEDITYPE.BI'
 
-TYPE BlkCoords                                  'Type for Block coordinates
-    B AS INTEGER                                'Block coordinates
-    PB AS INTEGER                               'Previous block coordinates
-    P AS INTEGER                                'Paint coordinates
-    PP AS INTEGER                               'Previous paint coordinates
+TYPE BlkCoords                                  ' Type for Block coordinates
+  B AS INTEGER                                  ' Block coordinates
+  PB AS INTEGER                                 ' Previous block coordinates
+  P AS INTEGER                                  ' Paint coordinates
+  PP AS INTEGER                                 ' Previous paint coordinates
 END TYPE
 
 '----- assembler calls
@@ -44,7 +44,6 @@ DECLARE SUB ShowCursor ()
 DECLARE SUB SplitColor (AColor, Fg, Bg)
 DECLARE SUB StringSave (BYVAL Address, SEG Element, NumEls)
 
-
 '----- ASM Functions
 DECLARE FUNCTION ArraySize% (UlRow, UlCol, BRRow, BRCol)
 DECLARE FUNCTION ASCII% (Ky$)
@@ -62,10 +61,9 @@ DECLARE FUNCTION ShiftKey% ()
 DECLARE FUNCTION StringSize& (BYVAL Address, NumEls)
 DECLARE FUNCTION StrLength% (SEG Element, NumBytes AS ANY, StrNumber)
 
-CONST NumPad$ = "12346789"                      'Shifted arrow keys
-CONST NumPad2$ = "stOPQKMGHK"                   'Unshifted arrow keys
-CONST SkipTbl$ = " ^*()[]-=+,.<>/\"             'Word delimiters
-
+CONST NumPad$ = "12346789"                      ' Shifted arrow keys
+CONST NumPad2$ = "stOPQKMGHK"                   ' Unshifted arrow keys
+CONST SkipTbl$ = " ^*()[]-=+,.<>/\"             ' Word delimiters
 
 '----- Returns the number of columns to advance at the end of a line
 ' DEF FnSpaces2Pad% (Text$)

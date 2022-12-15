@@ -27,158 +27,143 @@ DEFINT A-Z
 
 '$INCLUDE: 'PRO.BI'
 
-DECLARE SUB ClearEOL (colr%)    'for the demo only
-DECLARE FUNCTION Monitor% ()    'determines monitor type
+DECLARE SUB ClearEOL (colr%)    ' for the demo only
+DECLARE FUNCTION Monitor% ()    ' determines monitor type
 
 '----- this file contains a TYPE variable for several of QEdit's parameters
 '$INCLUDE: 'QEDITYPE.BI'
 
-DIM ed AS EditInfo              'create the editor's data structure
+DIM ed AS EditInfo              ' create the editor's data structure
 
 DECLARE SUB QEdit (array$(), ky$, action, ed AS EditInfo)
 
-'Note: The Action" parameter can be used to operate the editor in a
-'      polled mode.  The "Action" values and corresponding meanings are
-'      as follows:
+' Note: The Action" parameter can be used to operate the editor in a polled mode.
+'       The "Action" values and corresponding meanings are as follows:
 '
-'      Action = 0:  Use the editor in a non-polled mode.  The editor will
-'                   take control and return only when the user presses the
-'                   Escape key.  The screen will be saved and restored.
+'       Action = 0:  Use the editor in a non-polled mode.  The editor will
+'                    take control and return only when the user presses the
+'                    Escape key.  The screen will be saved and restored.
+' 
+'       Action = 1:  Initialize the editor for polled mode.  The screen
+'                    will be saved, the edit window will be drawn, and the
+'                    text will be displayed.  Control will be returned to the
+'                    caller without checking the keyboard.  The Action flag
+'                    will be reset to 3 automatically (see below).
+' 
+'       Action = 2:  Redisplays the edit window and text without saving the
+'                    screen.  Control is returned to the caller without
+'                    checking the keyboard.  As above, the Action parameter
+'                    will be reset to 3.  Note: If you change a window size
+'                    or location parameter, use this code to force a redisplay
+'                    to the new size.
+' 
+'                    Note that if word wrap is on, Actions 0, 1 and 2 will
+'                    cause the text to be wrapped to the value of "Ed.Wrap".
+' 
+'       Action = 3:  This is the idle state of the editor.  Each time the
+'                    editor is called with this value, it will check the
+'                    keyboard and perform tasks dictated by a key press.
+'                    Control will then be returned to the caller.
+' 
+'                    While the editor is being polled, the caller can examine
+'                    the "Ky$" parameter to determine which if any keys were
+'                    pressed.  The members of the "Ed" structure can also be
+'                    examined and changed.  Note that if the caller does
+'                    change these, the editor should next be called with an
+'                    Action of 2 to redisplay the edit window.
 '
-'      Action = 1:  Initialize the editor for polled mode.  The screen
-'                   will be saved, the edit window will be drawn, and the
-'                   text will be displayed.  Control will be returned to the
-'                   caller without checking the keyboard.  The Action flag
-'                   will be reset to 3 automatically (see below).
-'
-'      Action = 2:  Redisplays the edit window and text without saving the
-'                   screen.  Control is returned to the caller without
-'                   checking the keyboard.  As above, the Action parameter
-'                   will be reset to 3.  Note: If you change a window size
-'                   or location parameter, use this code to force a redisplay
-'                   to the new size.
-'
-'                   Note that if word wrap is on, Actions 0, 1 and 2 will
-'                   cause the text to be wrapped to the value of "Ed.Wrap".
-'
-'      Action = 3:  This is the idle state of the editor.  Each time the
-'                   editor is called with this value, it will check the
-'                   keyboard and perform tasks dictated by a key press.
-'                   Control will then be returned to the caller.
-'
-'                   While the editor is being polled, the caller can examine
-'                   the "Ky$" parameter to determine which if any keys were
-'                   pressed.  The members of the "Ed" structure can also be
-'                   examined and changed.  Note that if the caller does
-'                   change these, the editor should next be called with an
-'                   Action of 2 to redisplay the edit window.
-'
-'      Action = 5:  Restores the screen that was saved with Action = 1.
-'
+'       Action = 5:  Restores the screen that was saved with Action = 1.
+' 
 '----------------------------------------------------------------------------
 
-
-    F2$ = CHR$(0) + CHR$(60)        'extended code for the F2 function key
-                                    '(used in this demo to change margins)
+  F2$ = CHR$(0) + CHR$(60)        ' extended code for the F2 function key
+                                  ' (used in this demo to change margins)
                                    
-    REDIM Array$(500)               'holds the main editor string array
-    FOR X = 1 TO 117                'read some sample text into our array
-        READ Array$(X)
-    NEXT
+  REDIM array$(500)               ' holds the main editor string array
+  FOR x = 1 TO 117                ' read some sample text into our array
+    READ array$(X)
+  NEXT
 
-    COLOR 6, 0                      'fill the screen with a pattern to
-    CLS                             '  show how QEdit saves the screen
-    PRINT STRING$(2000, CHR$(254));
+  COLOR 6, 0                      ' fill the screen with a pattern to
+  CLS                             '   show how QEdit saves the screen
+  PRINT STRING$(2000, CHR$(254));
 
-    COLOR 15, 0                     'print instructions on bottom of screen
-    LOCATE 25, 1
-    PRINT " ESC - Quit    F1 - Help    F2 - Change Margin"; TAB(79);
+  COLOR 15, 0                     ' print instructions on bottom of screen
+  LOCATE 25, 1
+  PRINT " ESC - Quit    F1 - Help    F2 - Change Margin"; TAB(79);
 
+  ' ----- fill in editing parameters
+  SELECT CASE Monitor%            ' determine the monitor type
+    CASE 3, 5, 7, 9, 10, 12       ' CGA, EGA, VGA monitors
+      ed.AColor = 23              ' white on blue
+    CASE ELSE                     ' all other monitors
+     ed.AColor = 7                ' white on black
+  END SELECT
 
+  ed.Wrap = 60   ' word wrap at column 65 (use 0 for to disable word wrap)
+  ed.Frame = -1  ' frame code (1 = show ruler line & scroll bars, 0 = don't)
+  ed.Rows = 14   ' number of text lines to display on the screen (3 - 25)
+  ed.Wide = 70   ' width of the active screen (10 - 80)
+  ed.HTab = 4    ' set tab stops to 4 spaces
 
-    '----- fill in editing parameters
-    SELECT CASE Monitor%            'determine the monitor type
-       CASE 3, 5, 7, 9, 10, 12      'CGA, EGA, VGA monitors
-          Ed.AColor = 23            'white on blue
-       CASE ELSE                    'all other monitors
-          Ed.AColor = 7             'white on black
-    END SELECT
+  LOCATE 5, 5    ' locate the upper left corner of the edit window frame
 
-    Ed.Wrap = 60   'word wrap at column 65 (use 0 for to disable word wrap)
-    Ed.Frame = -1  'frame code (1 = show ruler line & scroll bars, 0 = don't)
-    Ed.Rows = 14   'number of text lines to display on the screen (3 - 25)
-    Ed.Wide = 70   'width of the active screen (10 - 80)
-    Ed.HTab = 4    'set tab stops to 4 spaces
+  CALL InitMouse(mouseThere)
+  CALL TextCursor(-2, -2)        ' define the Mouse cursor
+  CALL ShowCursor                ' turn it on
 
-    LOCATE 5, 5    'locate the upper left corner of the edit window frame
+  action = 1                     ' Action 1 to save underlying screen and
+                                 '   display text, operate in polled mode
+  '----- main loop for editing
+  DO
+    '----- call QEdit in polled mode
+    CALL QEdit(array$(), ky$, action, ed)
+    '----- F2 function key pressed? - change margin
+    IF ky$ = F2$ THEN GOSUB ChangeMargin
+  LOOP UNTIL ky$ = CHR$(27)      ' keep calling QEdit until Esc is pressed
 
-    CALL InitMouse(MouseThere)
-    CALL TextCursor(-2, -2)         'define the Mouse cursor
-    CALL ShowCursor                 'turn it on
+  '----- call QEdit again with an Action flag of 5 to restore the screen
+  CALL QEdit(array$(), ky$, 5, ed)
+  CALL HideCursor                ' turn the mouse cursor off
 
-    Action = 1                      'Action 1 to save underlying screen and
-                                    '  display text, operate in polled mode
-    '----- main loop for editing
-    DO
-        '----- call QEdit in polled mode
-        CALL QEdit(Array$(), Ky$, Action, Ed)
-
-        '----- F2 function key pressed? - change margin
-        IF Ky$ = F2$ THEN GOSUB ChangeMargin
-
-    LOOP UNTIL Ky$ = CHR$(27)       'keep calling QEdit until Esc is pressed
-
-    '----- call QEdit again with an Action flag of 5 to restore the screen
-    CALL QEdit(Array$(), Ky$, 5, Ed)
-    CALL HideCursor                 'turn the mouse cursor off
-
-    END
-
+  END
 
 '----- subroutine to change the right margin
 ChangeMargin:
-
-    DO
-        IF Ed.Wrap THEN                         'is Word Wrap on?
-           LOCATE 25, 1, 0                      'print instructions
-           PRINT "LEFT or RIGHT arrow keys change margin.  ENTER to set.  ESC to enter manually.";
-
-           DO                                   'wait for a key press
-               X$ = INKEY$
-           LOOP UNTIL LEN(X$)
-
-           IF X$ = CHR$(27) THEN                'Escape key pressed?
-              LOCATE 25, 1
-              CALL ClearEOL(-1)                 'erase bottom line
-              INPUT ; "Enter new right margin: "; Ed.Wrap
-              Action = 2                        'set Action flag to re-display
-
-           ELSEIF X$ = CHR$(0) + CHR$(75) THEN  'Left-Arrow key pressed?
-              Ed.Wrap = Ed.Wrap - 1             'decrement right margin
-              Action = 2                        'set Action flag to re-display
-                                                'call QEdit to re-display
-              CALL QEdit(Array$(), Ky$, Action, Ed)
-
-           ELSEIF X$ = CHR$(0) + CHR$(77) THEN  'right arrow key pressed?
-              Ed.Wrap = Ed.Wrap + 1             'increment right margin
-              Action = 2                        'set Action flag to re-display
-                                                'call QEdit to re-display
-              CALL QEdit(Array$(), Ky$, Action, Ed)
-           END IF
-
-        ELSE                                    'word wrap was off
-           LOCATE 25, 1
-           CALL ClearEOL(-1)                    'erase bottom line
-           INPUT ; "Enter new right margin: "; Ed.Wrap
-           Action = 2                           'set Action flag to re-display
-           X$ = CHR$(27)                        'set X$ to Escape so we fall
-        END IF                                  '  out of the loop below
-
-    LOOP UNTIL X$ = CHR$(13) OR X$ = CHR$(27)   'wait for Enter or Escape
-    LOCATE 25, 1                                're-print instructions
-    PRINT " ESC - Quit    F1 - Help    F2 - Change Margin"; TAB(79);
-
-RETURN
+  DO
+    IF ed.Wrap THEN                           ' is Word Wrap on?
+      LOCATE 25, 1, 0                         ' print instructions
+      PRINT "LEFT or RIGHT arrow keys change margin.  ENTER to set.  ESC to enter manually.";
+      DO                                      ' wait for a key press
+        x$ = INKEY$
+      LOOP UNTIL LEN(x$)
+      IF x$ = CHR$(27) THEN                   ' Escape key pressed?
+        LOCATE 25, 1
+        CALL ClearEOL(-1)                     ' erase bottom line
+        INPUT ; "Enter new right margin: "; ed.Wrap
+        action = 2                            ' set Action flag to re-display
+      ELSEIF x$ = CHR$(0) + CHR$(75) THEN     ' Left-Arrow key pressed?
+        ed.Wrap = ed.Wrap - 1                 ' decrement right margin
+        action = 2                            ' set Action flag to re-display
+                                              ' call QEdit to re-display
+        CALL QEdit(array$(), ky$, action, ed)
+      ELSEIF x$ = CHR$(0) + CHR$(77) THEN     ' right arrow key pressed?
+        ed.Wrap = ed.Wrap + 1                 ' increment right margin
+        action = 2                            ' set Action flag to re-display
+                                              ' call QEdit to re-display
+        CALL QEdit(array$(), ky$, action, ed)
+      END IF
+    ELSE                                      ' word wrap was off
+      LOCATE 25, 1
+      CALL ClearEOL(-1)                       ' erase bottom line
+      INPUT ; "Enter new right margin: "; ed.Wrap
+      action = 2                              ' set Action flag to re-display
+      x$ = CHR$(27)                           ' set X$ to Escape so we fall
+    END IF                                    '   out of the loop below
+  LOOP UNTIL x$ = CHR$(13) OR x$ = CHR$(27)   ' wait for Enter or Escape
+  LOCATE 25, 1                                ' re-print instructions
+  PRINT " ESC - Quit    F1 - Help    F2 - Change Margin"; TAB(79);
+  RETURN
 
 DATA "                       QEdit Instructions"
 DATA ""
