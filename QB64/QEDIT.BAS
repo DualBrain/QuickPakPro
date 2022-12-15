@@ -2,6 +2,7 @@
 
 ' Copyright (c) 1988-1990 Crescent Software
 ' by Don Malin
+' Modifications (c) 2022 Cory Smith
 
 DEFINT A-Z
 
@@ -206,7 +207,7 @@ SUB QEdit (Array$(), X$, Action%, Ed AS EditInfo) STATIC
 
        '----- Find the last element being used in the text array
        ArrayEnd = UBOUND(Array$)
-       Ed.LCount = FindLast%(Array$(), ArrayEnd)
+       Ed.LCount = FindLast%(Array$(), ArrayEnd, ArrayEnd)
 
 
        IF Ed.Wrap THEN     'If word wrap is on, use "¶" paragraph marker
@@ -1581,7 +1582,7 @@ SUB QEdit (Array$(), X$, Action%, Ed AS EditInfo) STATIC
                         GOSUB DeleteLine
                     NEXT
                  END IF
-                 Ed.LCount = FindLast%(Array$(), ArrayEnd)
+                 Ed.LCount = FindLast%(Array$(), ArrayEnd, ArrayEnd)
                  Ed.CurLine = Ed.UlCRow         'Re-establish current cursor
                  Ed.CurCol = Ed.UlCCol          '  and window coordinates.
                  Ed.TL = MinInt%(SaveT, Ed.CurLine)
@@ -1653,7 +1654,7 @@ SUB QEdit (Array$(), X$, Action%, Ed AS EditInfo) STATIC
                         END IF
                     NEXT
                                                 'Update number of lines
-                    Ed.LCount = FindLast%(Array$(), ArrayEnd)
+                    Ed.LCount = FindLast%(Array$(), ArrayEnd, ArrayEnd)
 
                  ELSE                           'Restore one line of text
                     IF Ed.CurCol > QPLen%(Array$(Ed.CurLine)) THEN Array$(Ed.CurLine) = Array$(Ed.CurLine) + SPACE$(Ed.CurCol - QPLen%(Array$(Ed.CurLine)) - 1)
@@ -1706,7 +1707,7 @@ SUB QEdit (Array$(), X$, Action%, Ed AS EditInfo) STATIC
                     NEXT                        'Insert last line
                     Array$(Temp) = RTRIM$(Array$(Temp) + ClipBd2$ + RightSide$)
                                                 'Update last line number
-                    Ed.LCount = FindLast%(Array$(), ArrayEnd)
+                    Ed.LCount = FindLast%(Array$(), ArrayEnd, ArrayEnd)
                     Temp$ = ""                  'Erase the restore buffer
 
                     WrapLine = Ed.CurLine
@@ -1738,7 +1739,7 @@ SUB QEdit (Array$(), X$, Action%, Ed AS EditInfo) STATIC
                     NEXT
                     Temp$ = ""                  'Erase the restore buffer
                                                 'Update last line number
-                    Ed.LCount = FindLast%(Array$(), ArrayEnd)
+                    Ed.LCount = FindLast%(Array$(), ArrayEnd, ArrayEnd)
 
                  END IF
               END IF

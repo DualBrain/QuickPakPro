@@ -3001,9 +3001,12 @@ SUB Get1Str(work$, array%(), element%, stringNumber%)
 END SUB
 
 FUNCTION StringSize&(array$(), start%, numStringEls%)
-  ERROR 73 ' Feature Unavailable
+  c& = 0
+  FOR x% = start% TO start% + numStringEls% - 1
+    c& = c& + LEN(array$(x%)) '+ 2 to handle CRLF????
+  NEXT
+  StringSize& = c&
 END FUNCTION
-
 
 ' MinInt compares two integer variables, and returns the value of the 
 ' smaller one. MinLong is similar, but is intended for use with long 
@@ -3296,9 +3299,9 @@ END SUB
 ' ASCII obtains the ASCII value for a string exactly as BASIC's ASC 
 ' function does, but it will not cause an "Illegal Function Call" error 
 ' if the string is null. 
-FUNCTION ASCII% (Char$)
+FUNCTION ASCII% (char$)
   ' See ASCII.ASM
-  ASCII% = ASC(Char$)
+  IF LEN(c$) THEN ASCII% = ASC(c$) ELSE ASCII% = -1
 END SUB
 
 ' Blanks will report the number of leading blanks in the specified 
@@ -4079,8 +4082,27 @@ SUB MPaintBox (ulRow%, ulCol%, lrRow%, lrCol%, colr%)
   CALL PaintBox0 (ulRow%, ulCol%, lrRow%, lrCol%, colr%)
 END SUB
 
-SUB MPRestore(ulRow%, ulCol%, lrRow%, lrCol%, originalWidth%, array%(), start%)
-  ERROR 73 ' Feature Unavailable
+SUB MPRestore(ulRow%, ulCol%, lrRow%, lrCol%, originalWidth%, element%(), start%)
+
+  w% = lrCol% - ulCol% + 1
+  h% = lrRow% - ulRow% + 1
+
+  index% = start% + 1 ' not really sure why the +1 is needed???
+                      ' but I've verified that index% of 1 is the correct starting
+                      ' element for a saved array.
+  offset% = start% MOD originalWidth%
+
+  r% = 0
+  DO
+    FOR c% = 0 TO w% - 1
+      clr% = element%(index%) AND &H00FF ' split color
+      ch% = ((element%(index%) AND &HFF00) \ 256) AND &H00FF ' split character
+      QPrintRC CHR$(ch%), ulRow% + r%, ulCol% + c%, clr%
+      index% = index% + 1
+    NEXT
+    r% = r% + 1: index% = index% + offset%
+  LOOP UNTIL r% => h% OR index% => UBOUND(element%)
+
 END SUB
 
 ' MQPrint is similar to QPrint, except it always turns off the mouse cursor
