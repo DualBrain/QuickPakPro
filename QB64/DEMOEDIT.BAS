@@ -81,7 +81,7 @@ DECLARE SUB QEdit (array$(), ky$, action, ed AS EditInfo)
                                    
   REDIM array$(500)               ' holds the main editor string array
   FOR x = 1 TO 117                ' read some sample text into our array
-    READ array$(X)
+    READ array$(x)
   NEXT
 
   COLOR 6, 0                      ' fill the screen with a pattern to

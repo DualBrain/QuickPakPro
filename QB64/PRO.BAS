@@ -3301,7 +3301,7 @@ END SUB
 ' if the string is null. 
 FUNCTION ASCII% (char$)
   ' See ASCII.ASM
-  IF LEN(c$) THEN ASCII% = ASC(c$) ELSE ASCII% = -1
+  IF LEN(char$) THEN ASCII% = ASC(char$) ELSE ASCII% = -1
 END SUB
 
 ' Blanks will report the number of leading blanks in the specified 
