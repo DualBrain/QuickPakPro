@@ -3817,8 +3817,23 @@ FUNCTION Null%(work$)
   Null% = result%
 END FUNCTION
 
-FUNCTION ParseString$(CurPos%, Work$, DelimitValue$)
-  ERROR 73 ' Feature Unavailable
+' ParseString accepts a string containing delimited information, and 
+' returns portions of that string each time it is invoked. 
+FUNCTION ParseString$(curPos%, work$, table$)
+  ' curPos% tells where in the string to begin processing, work$ is the 
+  ' string being read, and delimitTbl$ is a table of one or more delimiting 
+  ' characters. result$ then receives the next delimited component from work$. 
+
+  IF curPos% > LEN(work$) THEN ParseString$ = "": EXIT FUNCTION
+  IF curPos% < 1 THEN curPos% = 1
+
+  match% = InstrTbl%(curPos%, work$, table$)
+
+  IF match% < 1 THEN curPos% = LEN(work$) + 1: ParseString$ = "": EXIT FUNCTION
+
+  ParseString$ = MID$(work$, curPos%, match% - curPos%)
+  curPos% = match% + 1
+
 END FUNCTION
 
 FUNCTION PMatch% (work$)
