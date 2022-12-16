@@ -1489,7 +1489,7 @@ SUB ReadFileI(Array$())
   ERROR 73 ' Feature Unavailable
 END SUB
 
-SUB ReadFileT(spec$, array() AS FLen, first%)
+SUB ReadFileT(spec$, array() AS STRING * 12, first%)
   IF INSTR(_OS$, "[WINDOWS]") THEN
     
     DIM pattern AS STRING
@@ -1509,7 +1509,8 @@ SUB ReadFileT(spec$, array() AS FLen, first%)
           ffn = fd.cfilename
           p = INSTR(ffn, CHR$(0))
           IF p > 0 THEN ffn = LEFT$(ffn, p - 1)
-          LSET array(index).S = ffn
+          'LSET array(index).S = ffn
+          LSET array(index) = ffn
           index = index + 1
         END IF
       LOOP UNTIL FindNextFile(hFind, _OFFSET(fd)) = 0
@@ -3287,10 +3288,6 @@ END SUB
 FUNCTION WeekDay%(D$)
   ERROR 73 ' Feature Unavailable
 END FUNCTION
-
-SUB WordWrap(Message$, Wide%)
-  ERROR 73 ' Feature Unavailable
-END SUB
 
 ' ****************************************
 ' Chapter 8 - String Manipulation Routines
