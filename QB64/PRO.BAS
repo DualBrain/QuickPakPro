@@ -109,10 +109,10 @@ END SUB
 SUB FindExact(array$(), start%, numEls%, searchValue$)
   c% = 0
   FOR x% = start% TO start% + numEls% - 1
-    c% = c% + 1
     IF INSTR(1, array$(x%), searchValue$) THEN
       numEls% = c%: EXIT FUNCTION
     END IF
+    c% = c% + 1
   NEXT
   numEls% = -1
 END SUB

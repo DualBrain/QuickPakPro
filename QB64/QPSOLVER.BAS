@@ -362,36 +362,36 @@ END SUB
 '----- This function replaces all occurrences of all variable names with
 '      the current variable values.
 '
-FUNCTION Var2Value$ (Expression$) STATIC
+FUNCTION Var2Value$ (expression$) STATIC
    
-    Table$ = " +-/*\^()="                       'recognized delimiters
-    Work$ = Expression$ + " "                   'force an ending delimiter
-    Pointer = 1                                 'start at the beginning
+  table$ = " +-/*\^()="                       ' recognized delimiters
+  work$ = expression$ + " "                   ' force an ending delimiter
+  pointer = 1                                 ' start at the beginning
 
 Again:
-    SavePtr = Pointer                           'save where we are for later
-    Pointer = InstrTbl%(Pointer, Work$, Table$) 'search for a delimiter
-    IF Pointer = SavePtr THEN                   'trap two delimiters in a row
-      Pointer = Pointer + 1                     'bump past this one
-      GOTO Again                                'and continue
-    END IF
+  savePtr = pointer                           ' save where we are for later
+  pointer = InstrTbl%(pointer, work$, table$) ' search for a delimiter
+  IF pointer = savePtr THEN                   ' trap two delimiters in a row
+    pointer = pointer + 1                     ' bump past this one
+    GOTO Again                                ' and continue
+  END IF
 
-    IF Pointer THEN                             'we found one, isolate the
-      VarName$ = MID$(Work$, SavePtr, Pointer - SavePtr)     'variable name
-      VarLen = LEN(VarName$)                                 'save the length
-      Element = MaxVars% - 1                    'calculate how many to search
-      CALL FindExact(Variable$(), 1, Element, VarName$) 'try to find it
-      Element = Element + 1                     'FindExact is zero-based
-      IF Element THEN                           'it's in there
-        ThisVal$ = STR$(Variable#(Element))     'make a string of its value
-        ThisLen = LEN(ThisVal$)                 'calc the replacement length
-        Work$ = LEFT$(Work$, SavePtr - 1) + ThisVal$ + MID$(Work$, Pointer)
-        Pointer = Pointer + (ThisLen - VarLen) + 1  'bump past this delimiter
-      END IF
-      GOTO Again                                'and keep searching
+  IF pointer > 0 THEN                         ' we found one, isolate the
+    varName$ = MID$(work$, savePtr, pointer - savePtr)     ' variable name
+    varLen = LEN(varName$)                                 ' save the length
+    element = maxVars% - 1                    ' calculate how many to search
+    CALL FindExact(variable$(), 1, element, varName$) ' try to find it
+    element = element + 1                     ' FindExact is zero-based
+    IF element > 0 THEN                       ' it's in there
+      thisVal$ = STR$(variable#(element))     ' make a string of its value
+      thisLen = LEN(thisVal$)                 ' calc the replacement length
+      work$ = LEFT$(work$, savePtr - 1) + thisVal$ + MID$(work$, pointer)
+      pointer = pointer + (thisLen - varLen) + 1  ' bump past this delimiter
     END IF
+    GOTO Again                                ' and keep searching
+  END IF
 
-    Var2Value$ = Work$                          'assign the function output
+  Var2Value$ = work$                          ' assign the function output
 
 END FUNCTION
 
