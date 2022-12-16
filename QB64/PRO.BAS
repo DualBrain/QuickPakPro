@@ -3094,8 +3094,13 @@ FUNCTION Num2Day%(d%)
   Num2Day% = dd%
 END FUNCTION
 
-FUNCTION Num2Time$(Time&)
-  ERROR 73 ' Feature Unavailable
+' Time2Num converts a time in string form to an equivalent number 
+' of seconds after midnight. 
+FUNCTION Num2Time$(time&)
+  s& = time&
+  h& = s& \ 3600: s& = s& - (h& * 3600)
+  m& = s& \ 60: s& = s& - (m& * 60)
+  Num2Time$ = RIGHT$("0" + LTRIM$(STR$(h&)), 2) + ":" + RIGHT$("0" + LTRIM$(STR$(m&)), 2) + ":" + RIGHT$("0" + LTRIM$(STR$(s&)), 2)
 END FUNCTION
 
 ' Pause will pause a program's execution for a specified period of 
@@ -3241,8 +3246,13 @@ SUB SysTime(T$)
   ERROR 73 ' Feature Unavailable
 END SUB
 
-FUNCTION Time2Num&(T$)
-  ERROR 73 ' Feature Unavailable
+' Time2Num converts a time in string form to an equivalent number 
+' of seconds after midnight. 
+FUNCTION Time2Num&(t$)
+  h$ = LEFT$(t$, 2)
+  IF MID$(t$, 3, 1) = ":" THEN m$ = MID$(t$, 4, 2) ELSE m$ = MID$(t$, 3, 2)
+  s$ = RIGHT$(t$, 2)
+  Time2Num& = (VAL(h$) * 3600) + (VAL(m$) * 60) + VAL(s$)
 END FUNCTION
 
 FUNCTION Times2%(Number%)
