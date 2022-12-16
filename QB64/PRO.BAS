@@ -4077,6 +4077,10 @@ FUNCTION Monitor%
   Monitor% = 7 ' VGA adapter with a color monitor.
 END FUNCTION
 
+FUNCTION EGAMem% ()
+  EGAMem% = 4 ' Assuming VGA and matching what is reported in DOSBOX.
+END FUNCTION
+
 ' MPaintBox is similar to PaintBox, except it always turns off the 
 ' mouse cursor before painting the screen. When it is finished the 
 ' cursor is turned back on. 
