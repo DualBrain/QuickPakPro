@@ -1,10 +1,11 @@
 ' **** EVALUATE.BAS - evaluates an equation to a double precision value
 
-'Copyright (c) 1988 Crescent Software, Inc.
-'Written by Paul Passarelli
-
+' Copyright (c) 1988 Crescent Software, Inc.
+' Written by Paul Passarelli
+' Modifications (c) 2022 Cory Smith
 
 DEFINT A-Z
+
 DECLARE FUNCTION Evaluate# (Equation$)
 
 'ASM Functions
@@ -21,14 +22,15 @@ DECLARE FUNCTION QPLen% (Strng$)
 
 FUNCTION Evaluate# (Equation$)
 
-'Copyright (c) 1988 Crescent Software
-'Copyright (c) 1988 Paul Passarelli
-'Revised 07/16/90
+' Copyright (c) 1988 Crescent Software
+' Copyright (c) 1988 Paul Passarelli
+' Revised 07/16/90
+' Modifications (c) 2022 Cory Smith
 
 STATIC Again%, OP$(), OP%(), Logic$(), Constant$(), Constant%()
 STATIC Functn%, Position%, LeftSide$, RightSide$, Term#, Term$, RTerm#, LTerm#
 STATIC RTerm$, LTerm$, L%, Ticker%, PstnMult%, PstnDiv%, Pstn1%, Pstn2%, Pstn3%
-STATIC Valid$, DE$, Digit$, Numeric$, Substitute%
+STATIC IsValid$, DE$, Digit$, Numeric$, Substitute%
 
 Incoming$ = Compact$((Equation$))       'work with a copy to leave the
                                         'original alone
@@ -550,28 +552,28 @@ ErrorExit: Evaluate# = 0
 
 '----- Isolate the left$ & left#, right# & right$ around the operator
 TermBlock:
-           Valid$ = "1234567890.-+DE"
+           IsValid$ = "1234567890.-+DE"
            Begin% = Position%
            DO
-              Valid% = 1
+              IsValid% = 1
               Begin% = Begin% - 1
-              P% = INSTR(Valid$, MID$(Incoming$, Begin%, 1))
+              P% = INSTR(IsValid$, MID$(Incoming$, Begin%, 1))
               IF P% THEN
                  IF ((P% = 12) OR (P% = 13)) AND (Sign% = 0) AND (Begin% > 1) THEN
                     IF INSTR("1234567890.", MID$(Incoming$, Begin% - 1, 1)) THEN
-                       Valid% = 0: Begin% = Begin% + 1
+                       IsValid% = 0: Begin% = Begin% + 1
                     END IF
                     Sign% = -1
                  ELSEIF (P% = 14) OR (P% = 15) THEN
-                    Sign% = 0: Valid$ = "1234567890.-+"
+                    Sign% = 0: IsValid$ = "1234567890.-+"
                  ELSEIF P% > 11 THEN
-                    Valid% = 0
+                    IsValid% = 0
                     IF Sign THEN Begin = Begin + 1       '6/20/90
                  END IF
               ELSE
-                 Valid% = 0: Begin% = Begin% + 1
+                 IsValid% = 0: Begin% = Begin% + 1
               END IF
-           LOOP WHILE (Valid% = 1) AND (Begin% > 1)
+           LOOP WHILE (IsValid% = 1) AND (Begin% > 1)
            LeftSide$ = LEFT$(Incoming$, Begin% - 1)
            LTerm# = VAL(MID$(Incoming$, Begin%, Position% - Begin%))
 
@@ -621,7 +623,7 @@ FinisTB:   P% = 0
            QPlenRightSide% = P%
            EX% = P%
            DP% = P%
-           Valid$ = ""
+           IsValid$ = ""
            Digit$ = ""
 EndTB:     RETURN
 

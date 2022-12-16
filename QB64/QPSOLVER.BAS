@@ -1,9 +1,30 @@
 '********** QPSOLVER.BAS - it may not be MathCad, but what the hey...
 
-'Copyright (c) 1990 Ethan Winer
+' Copyright (c) 1990 Ethan Winer
+' Modifications (c) 2022 Cory Smith
 
+' **************************
+' * BOILER PLATE BEGIN
+' **************************
+$Resize:Stretch
+CHDIR _STARTDIR$ ' Moved this line above resize to (hopefully) give more init time to window
+IF _DesktopHeight => 2160 THEN mult = 4 ELSE IF _DesktopHeight => 1440 THEN mult = 2 ELSE mult = 1
+DO: LOOP UNTIL _SCREENEXISTS ' Not sure if necessary; however, there does seem to be some sort of timing issue around getting hwnd
+hwnd = _WindowHandle: x = 100: y = 100: w = 640 * mult: h = 480 * mult ' inlined _WindowHandle (next line) because 1 out of every 4 or 5 executions, would encounter an invalid window handle (1400)
+IF INSTR(_OS$, "[WINDOWS]") THEN success = MoveWindow(_WindowHandle, x, y, w, h, 1) ELSE success = -1 ' Now that _WindowHandle is inlined, invalid window handle (1400) issue has yet to be reproduced - will have to continue to test
+IF success = 0 THEN PRINT "FAILED TO RESIZE - "; GetLastError; " ("; hwnd; ")": CALL WaitKeyS
+_TITLE "QPSOLVER" 'NOTE: Moving title above resize causes resize to fail (without an error???)
+'BUG: It would be nice specify the icon here, but... having to require full path or placing it in the qb64 folder is problematic. 
+'NOTE: The above boiler plate must be first in execution (top of file).
+'BUG:  Also appears to not work as an $INCLUDE; suggesting something might
+'      be wrong with the implementation of $INCLUDE.
+' **************************
+' * BOILER PLATE END
+' **************************
 
 DEFINT A-Z
+
+'$INCLUDE: 'PRO.BI'
 
 '----- assembly language subs
 DECLARE SUB ClearEOL (Colr)
@@ -50,6 +71,8 @@ LOCATE 1, 31
 PRINT "QP - S o l v e r"
 LOCATE 3, 21
 PRINT "Copyright (c) 1990 Crescent Software"
+LOCATE 4, 22
+PRINT "Modifications (c) 2022 Cory Smith"
 LOCATE 18
 PRINT "Commands:";
 PRINT " var = [expression]; PRINT or ? [expression]; LOAD or SAVE [filename]"
@@ -165,7 +188,7 @@ FUNCTION FindVar% (VarName$) STATIC
   END IF
 
   Element = MaxVars% - 1                        'calculate how many to search
-  CALL FindExact(VARPTR(Variable$(1)), Element, VarName$)   'try to find it
+  CALL FindExact(Variable$(), 1, Element, VarName$)   'try to find it
 
   IF Element = -1 THEN                          'if it doesn't yet exist
     CurVars = CurVars + 1                       'show that we have another
@@ -197,7 +220,7 @@ SUB GetInput (Action$) STATIC
         IF NumHist < MaxHist% THEN              'don't go past the end
           NumHist = NumHist + 1                 'we're remembering another
         ELSE                                    'else, slide 'em down one
-          CALL DeleteStr(VARPTR(History$(1)), MaxHist% - 1)
+          CALL DeleteStr(History$(), 1, MaxHist% - 1)
         END IF
         CurHist = NumHist + 1                   'this is the current history
         History$(NumHist) = Action$             'remember this command
@@ -357,7 +380,7 @@ Again:
       VarName$ = MID$(Work$, SavePtr, Pointer - SavePtr)     'variable name
       VarLen = LEN(VarName$)                                 'save the length
       Element = MaxVars% - 1                    'calculate how many to search
-      CALL FindExact(VARPTR(Variable$(1)), Element, VarName$) 'try to find it
+      CALL FindExact(Variable$(), 1, Element, VarName$) 'try to find it
       Element = Element + 1                     'FindExact is zero-based
       IF Element THEN                           'it's in there
         ThisVal$ = STR$(Variable#(Element))     'make a string of its value
@@ -372,3 +395,5 @@ Again:
 
 END FUNCTION
 
+'$INCLUDE: 'EVALUATE.BAS'
+'$INCLUDE: 'PRO.BAS'

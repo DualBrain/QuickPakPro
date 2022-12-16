@@ -2854,12 +2854,26 @@ END FUNCTION
 FUNCTION Date2Num% (dat$) STATIC
 
   REDIM dyMth%(13)            ' DyMth() holds number of days into the year
-  RESTORE                     '   for a given month
-  FOR c% = 1 TO 13
-    READ dyMth%(C%)
-  NEXT
-  DATA 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365
-  
+  ' RESTORE                     '   for a given month
+  ' FOR c% = 1 TO 13
+  '   READ dyMth%(C%)
+  ' NEXT
+  ' DATA 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365
+
+  dyMth%(1) = 0
+  dyMth%(2) = 31
+  dyMth%(3) = 59
+  dyMth%(4) = 90
+  dyMth%(5) = 120
+  dyMth%(6) = 151
+  dyMth%(7) = 181
+  dyMth%(8) = 212
+  dyMth%(9) = 243
+  dyMth%(10) = 273
+  dyMth%(11) = 304
+  dyMth%(12) = 334
+  dyMth%(13) = 365
+
   year% = VAL(MID$(dat$, 7))                  ' Read year
   IF year% >= 1900 THEN year% = year% - 1900
 
@@ -2918,16 +2932,186 @@ FUNCTION ENum2Date$(Days%)
   ERROR 73 ' Feature Unavailable
 END FUNCTION
 
-FUNCTION Evaluate#(Expression$)
-  ERROR 73 ' Feature Unavailable
-END FUNCTION
-
 SUB Extended
   ERROR 73 ' Feature Unavailable
 END SUB
 
 FUNCTION Factorial#(Number%)
-  ERROR 73 ' Feature Unavailable
+  SELECT CASE number%
+    CASE 0: Factorial# = 1.0                           
+    CASE 1: Factorial# = 1.0                           
+    CASE 2: Factorial# = 2.0                           
+    CASE 3: Factorial# = 6.0                           
+    CASE 4: Factorial# = 24.0                          
+    CASE 5: Factorial# = 120.0                         
+    CASE 6: Factorial# = 720.0                         
+    CASE 7: Factorial# = 5040.0                        
+    CASE 8: Factorial# = 40320.0                       
+    CASE 9: Factorial# = 362880.0                      
+    CASE 10: Factorial# = 3628800.0                    
+    CASE 11: Factorial# = 39916800.0                   
+    CASE 12: Factorial# = 479001600.0                  
+    CASE 13: Factorial# = 6227020800.0                 
+    CASE 14: Factorial# = 87178291200.0                
+    CASE 15: Factorial# = 1307674368000.0              
+    CASE 16: Factorial# = 20922789888000.0             
+    CASE 17: Factorial# = 355687428096000.0            
+    CASE 18: Factorial# = 6402373705728000.0           
+    CASE 19: Factorial# = 1.21645100408832E+17         
+    CASE 20: Factorial# = 2.43290200817664E+18         
+    CASE 21: Factorial# = 5.109094217170944E+19        
+    CASE 22: Factorial# = 1.124000727777608E+21        
+    CASE 23: Factorial# = 2.585201673888498E+22        
+    CASE 24: Factorial# = 6.204484017332394E+23        
+    CASE 25: Factorial# = 1.551121004333098E+25        
+    CASE 26: Factorial# = 4.032914611266057E+26        
+    CASE 27: Factorial# = 1.088886945041835E+28        
+    CASE 28: Factorial# = 3.048883446117138E+29        
+    CASE 29: Factorial# = 8.841761993739701E+30        
+    CASE 30: Factorial# = 2.652528598121911E+32        
+    CASE 31: Factorial# = 8.222838654177924E+33        
+    CASE 32: Factorial# = 2.631308369336936E+35        
+    CASE 33: Factorial# = 8.683317618811889E+36        
+    CASE 34: Factorial# = 2.952327990396041E+38        
+    CASE 35: Factorial# = 1.033314796638614E+40        
+    CASE 36: Factorial# = 3.719933267899013E+41        
+    CASE 37: Factorial# = 1.376375309122635E+43        
+    CASE 38: Factorial# = 5.23022617466601E+44         
+    CASE 39: Factorial# = 2.039788208119745E+46        
+    CASE 40: Factorial# = 8.15915283247898E+47         
+    CASE 41: Factorial# = 3.34525266131638E+49         
+    CASE 42: Factorial# = 1.40500611775288E+51         
+    CASE 43: Factorial# = 6.041526306337384E+52        
+    CASE 44: Factorial# = 2.65827157478845E+54         
+    CASE 45: Factorial# = 1.196222208654802E+56        
+    CASE 46: Factorial# = 5.502622159812089E+57        
+    CASE 47: Factorial# = 2.586232415111683E+59        
+    CASE 48: Factorial# = 1.241391559253607E+61        
+    CASE 49: Factorial# = 6.082818640342679E+62        
+    CASE 50: Factorial# = 3.041409320171338E+64        
+    CASE 51: Factorial# = 1.551118753287382E+66        
+    CASE 52: Factorial# = 8.06581751709439E+67         
+    CASE 53: Factorial# = 4.274883284060024E+69        
+    CASE 54: Factorial# = 2.308436973392413E+71        
+    CASE 55: Factorial# = 1.269640335365826E+73        
+    CASE 56: Factorial# = 7.109985878048632E+74        
+    CASE 57: Factorial# = 4.052691950487723E+76        
+    CASE 58: Factorial# = 2.350561331282879E+78        
+    CASE 59: Factorial# = 1.386831185456898E+80        
+    CASE 60: Factorial# = 8.32098711274139E+81         
+    CASE 61: Factorial# = 5.075802138772246E+83        
+    CASE 62: Factorial# = 3.146997326038794E+85        
+    CASE 63: Factorial# = 1.98260831540444E+87         
+    CASE 64: Factorial# = 1.268869321858841E+89        
+    CASE 65: Factorial# = 8.247650592082472E+90        
+    CASE 66: Factorial# = 5.443449390774432E+92        
+    CASE 67: Factorial# = 3.647111091818871E+94        
+    CASE 68: Factorial# = 2.48003554243683E+96         
+    CASE 69: Factorial# = 1.711224524281413E+98        
+    CASE 70: Factorial# = 1.197857166996989E+100       
+    CASE 71: Factorial# = 8.504785885678624E+101       
+    CASE 72: Factorial# = 6.123445837688612E+103       
+    CASE 73: Factorial# = 4.470115461512686E+105       
+    CASE 74: Factorial# = 3.307885441519387E+107       
+    CASE 75: Factorial# = 2.48091408113954E+109        
+    CASE 76: Factorial# = 1.885494701666051E+111       
+    CASE 77: Factorial# = 1.451830920282859E+113       
+    CASE 78: Factorial# = 1.132428117820629E+115       
+    CASE 79: Factorial# = 8.94618213078298E+116        
+    CASE 80: Factorial# = 7.15694570462638E+118        
+    CASE 81: Factorial# = 5.797126020747369E+120       
+    CASE 82: Factorial# = 4.753643337012843E+122       
+    CASE 83: Factorial# = 3.94552396972066E+124        
+    CASE 84: Factorial# = 3.314240134565354E+126       
+    CASE 85: Factorial# = 2.817104114380549E+128       
+    CASE 86: Factorial# = 2.422709538367274E+130       
+    CASE 87: Factorial# = 2.107757298379527E+132       
+    CASE 88: Factorial# = 1.854826422573984E+134       
+    CASE 89: Factorial# = 1.650795516090847E+136       
+    CASE 90: Factorial# = 1.485715964481761E+138       
+    CASE 91: Factorial# = 1.352001527678403E+140       
+    CASE 92: Factorial# = 1.243841405464131E+142       
+    CASE 93: Factorial# = 1.156772507081641E+144       
+    CASE 94: Factorial# = 1.087366156656743E+146       
+    CASE 95: Factorial# = 1.032997848823906E+148       
+    CASE 96: Factorial# = 9.916779348709491E+149       
+    CASE 97: Factorial# = 9.619275968248216E+151       
+    CASE 98: Factorial# = 9.426890448883248E+153       
+    CASE 99: Factorial# = 9.332621544394415E+155       
+    CASE 100: Factorial# = 9.332621544394418E+157      
+    CASE 101: Factorial# = 9.42594775983836E+159       
+    CASE 102: Factorial# = 9.614466715035125E+161      
+    CASE 103: Factorial# = 9.902900716486178E+163      
+    CASE 104: Factorial# = 1.029901674514563E+166      
+    CASE 105: Factorial# = 1.081396758240291E+168      
+    CASE 106: Factorial# = 1.146280563734709E+170      
+    CASE 107: Factorial# = 1.226520203196137E+172      
+    CASE 108: Factorial# = 1.324641819451829E+174      
+    CASE 109: Factorial# = 1.443859583202494E+176      
+    CASE 110: Factorial# = 1.588245541522742E+178      
+    CASE 111: Factorial# = 1.762952551090246E+180      
+    CASE 112: Factorial# = 1.974506857221075E+182      
+    CASE 113: Factorial# = 2.231192748659814E+184      
+    CASE 114: Factorial# = 2.543559733472186E+186      
+    CASE 115: Factorial# = 2.925093693493014E+188      
+    CASE 116: Factorial# = 3.393108684451899E+190      
+    CASE 117: Factorial# = 3.96993716080872E+192       
+    CASE 118: Factorial# = 4.68452584975429E+194       
+    CASE 119: Factorial# = 5.574585761207606E+196      
+    CASE 120: Factorial# = 6.689502913449135E+198      
+    CASE 121: Factorial# = 8.094298525273444E+200      
+    CASE 122: Factorial# = 9.875044200833601E+202      
+    CASE 123: Factorial# = 1.214630436702533E+205      
+    CASE 124: Factorial# = 1.506141741511141E+207      
+    CASE 125: Factorial# = 1.882677176888926E+209      
+    CASE 126: Factorial# = 2.372173242880048E+211      
+    CASE 127: Factorial# = 3.012660018457662E+213      
+    CASE 128: Factorial# = 3.856204823625808E+215      
+    CASE 129: Factorial# = 4.974504222477287E+217      
+    CASE 130: Factorial# = 6.466855489220473E+219      
+    CASE 131: Factorial# = 8.471580690878813E+221      
+    CASE 132: Factorial# = 1.118248651196004E+224      
+    CASE 133: Factorial# = 1.487270706090685E+226      
+    CASE 134: Factorial# = 1.99294274616152E+228       
+    CASE 135: Factorial# = 2.690472707318049E+230      
+    CASE 136: Factorial# = 3.659042881952548E+232      
+    CASE 137: Factorial# = 5.012888748274988E+234      
+    CASE 138: Factorial# = 6.917786472619482E+236      
+    CASE 139: Factorial# = 9.615723196941089E+238      
+    CASE 140: Factorial# = 1.346201247571752E+241      
+    CASE 141: Factorial# = 1.898143759076171E+243      
+    CASE 142: Factorial# = 2.695364137888163E+245      
+    CASE 143: Factorial# = 3.854370717180069E+247      
+    CASE 144: Factorial# = 5.550293832739308E+249      
+    CASE 145: Factorial# = 8.047926057471989E+251      
+    CASE 146: Factorial# = 1.174997204390911E+254      
+    CASE 147: Factorial# = 1.72724589045464E+256       
+    CASE 148: Factorial# = 2.556323917872864E+258      
+    CASE 149: Factorial# = 3.808922637630569E+260      
+    CASE 150: Factorial# = 5.713383956445857E+262      
+    CASE 151: Factorial# = 8.627209774233244E+264      
+    CASE 152: Factorial# = 1.311335885683453E+267      
+    CASE 153: Factorial# = 2.006343905095684E+269      
+    CASE 154: Factorial# = 3.089769613847352E+271      
+    CASE 155: Factorial# = 4.789142901463393E+273      
+    CASE 156: Factorial# = 7.471062926282892E+275      
+    CASE 157: Factorial# = 1.172956879426413E+278      
+    CASE 158: Factorial# = 1.853271869493735E+280      
+    CASE 159: Factorial# = 2.946702272495036E+282      
+    CASE 160: Factorial# = 4.714723635992061E+284      
+    CASE 161: Factorial# = 7.590705053947223E+286      
+    CASE 162: Factorial# = 1.229694218739449E+289      
+    CASE 163: Factorial# = 2.004401576545303E+291      
+    CASE 164: Factorial# = 3.287218585534299E+293      
+    CASE 165: Factorial# = 5.423910666131583E+295      
+    CASE 166: Factorial# = 9.003691705778434E+297      
+    CASE 167: Factorial# = 1.503616514864998E+300      
+    CASE 168: Factorial# = 2.526075744973199E+302      
+    CASE 169: Factorial# = 4.269068009004706E+304      
+    CASE 170: Factorial# = 7.257415615308004E+306      
+    CASE ELSE 
+      Factorial# = -1.0
+  END SELECT
 END FUNCTION
 
 SUB FileView(FileName$, Ky%, Action%, FVInfo AS FVInfo, Buffer%(), first%)
@@ -2935,7 +3119,6 @@ SUB FileView(FileName$, Ky%, Action%, FVInfo AS FVInfo, Buffer%(), first%)
 END SUB
 
 FUNCTION FudgeFactor&
-  'TODO: 
   FudgeFactor& = 33814
 END FUNCTION
 
@@ -3327,8 +3510,19 @@ FUNCTION Blanks%(work$)
   Blanks% = result%
 END FUNCTION
 
-FUNCTION Compact$(Old$)
-  ERROR 73 ' Feature Unavailable
+' Compact compresses a string by removing all embedded blanks.
+FUNCTION Compact$(old$)
+  result$ = ""
+  FOR index% = 1 TO LEN(old$)
+    ch$ = MID$(old$, index%, 1)
+    SELECT CASE ch$
+      CASE " "
+      CASE ELSE
+        result$ = result$ + ch$
+    END SELECT
+  NEXT
+  old$ = result$ ' to match original behavior; see docs.
+  Compact$ = result$
 END FUNCTION
 
 SUB Encrypt(X$, PassWord$)
@@ -3537,12 +3731,38 @@ FUNCTION InCountTbl%(Source$, Table$)
   ERROR 73 ' Feature Unavailable
 END FUNCTION
 
-FUNCTION InstrTbl%(Start%, Source$, Table$)
-  ERROR 73 ' Feature Unavailable
+FUNCTION InstrTbl%(start%, source$, table$)
+  l% = LEN(source$)
+  c% = start%
+  DO
+    IF c% > l% THEN EXIT DO
+    ch$ = MID$(source$, c%, 1)
+    FOR x% = 1 TO LEN(table$)
+      m$ = MID$(table$, x%, 1)
+      IF ch$ = m$ THEN
+        InstrTbl% = c%: EXIT FUNCTION
+      END IF
+    NEXT
+    c% = c% + 1
+  LOOP
+  InstrTbl% = -1
 END FUNCTION
 
 FUNCTION InstrTbl2%(Start%, Source$, Table$)
-  ERROR 73 ' Feature Unavailable
+  l% = LEN(source$)
+  c% = start%
+  DO
+    IF c% > l% THEN EXIT DO
+    ch$ = LCASE$(MID$(source$, c%, 1))
+    FOR x% = 1 TO LEN(table$)
+      m$ = LCASE$(MID$(table$, x%, 1))
+      IF ch$ = m$ THEN
+        InstrTbl2% = c%: EXIT FUNCTION
+      END IF
+    NEXT
+    c% = c% + 1
+  LOOP
+  InstrTbl2% = -1
 END FUNCTION
 
 FUNCTION InstrTblB%(Start%, Source$, Table$)
@@ -3599,6 +3819,37 @@ END FUNCTION
 
 FUNCTION ParseString$(CurPos%, Work$, DelimitValue$)
   ERROR 73 ' Feature Unavailable
+END FUNCTION
+
+FUNCTION PMatch% (work$)
+
+  l% = LEN(work$)
+
+  IF l% = 0 THEN PMatch% = -1: EXIT FUNCTION
+
+  c% = 2: p% = 0
+
+  DO
+
+    If c% > l% THEN EXIT DO
+
+    ch$ = MID$(work$, c%, 1)
+
+    IF ch$ = "(" THEN
+      p% = p% + 1
+    ELSEIF ch$ = ")" THEN
+      IF p% > 0 THEN 
+        p% = p% - 1
+      ELSE
+        PMatch% = c%: EXIT FUNCTION
+      END IF
+    END IF
+    c% = c% + 1
+
+  LOOP
+
+  PMatch% = -1
+
 END FUNCTION
 
 SUB ProperName(Work$)
