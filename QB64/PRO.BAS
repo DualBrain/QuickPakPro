@@ -578,6 +578,36 @@ FUNCTION MinC!(array!(), start%, numEls%)
   MinC! = min!
 END FUNCTION
 
+SUB SearchD(array#(), start%, numEls%, match, found%, direction%, matchCode%, varType%)
+
+  c% = 0
+
+  min% = start%
+  max% = start% + numEls% - 1
+  IF NOT direction% THEN inc% = 1 ELSE inc% = -1: SWAP min%, max%
+
+  SELECT CASE matchCode%
+    CASE 0 ' find an exact match only
+      FOR i% = min% TO max% STEP inc%
+        c% = c% + 1
+        IF array#(i%) = match THEN found% = c%: EXIT SUB
+      NEXT
+    CASE 1 ' match if the element is greater or equal
+      FOR i% = min% TO max% STEP inc%
+        c% = c% + 1
+        IF array#(i%) => match THEN found% = c%: EXIT SUB
+      NEXT
+    CASE -1 ' match if the element is less or equal 
+      FOR i% = min% TO max% STEP inc%
+        c% = c% + 1
+        IF array#(i%) =< match THEN found% = c%: EXIT SUB
+      NEXT
+    CASE ELSE
+      found% = 0
+  END SELECT
+
+END SUB
+
 SUB Search(array(), start%, numEls%, match, found%, direction%, matchCode%, varType%)
 
   c% = 0
