@@ -29,7 +29,7 @@ END SUB
 
 ' DeleteT removes an element from a fixed-length string, numeric, or 
 ' user-defined TYPE array. 
-SUB DeleteT(array() AS FLen, element%, elSize%, numEls%)
+SUB DeleteT(array(), element%, elSize%, numEls%)
   'NOTE: elSize% is currently ignored since we are working directly with an included type.
   e% = element% + numEls%
   IF e% => UBOUND(array) THEN e% = UBOUND(array) - 1
@@ -2290,10 +2290,6 @@ FUNCTION MGetKey%(row%, col%)
 END FUNCTION
 
 SUB MMenuVert(Array$(), First%, Selection%, Start%, ScanCode%, NormalColr%, Hilight%, NumRows%, Row%, Column%)
-  ERROR 73 ' Feature Unavailable
-END SUB
-
-SUB PickList(Item$(), Picked%(), NPicked%, Cnf)
   ERROR 73 ' Feature Unavailable
 END SUB
 
