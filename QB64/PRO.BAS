@@ -65,10 +65,10 @@ END SUB
 SUB Find(array$(), start%, numEls%, searchValue$)
   c% = 0
   FOR x% = start% TO start% + numEls% - 1
-    c% = c% + 1
     IF QInstr%(1, array$(x%), searchValue$) THEN
       numEls% = c%: EXIT FUNCTION
     END IF
+    c% = c% + 1
   NEXT
   numEls% = -1
 END SUB
@@ -76,10 +76,10 @@ END SUB
 SUB Find2(array$(), start%, numEls%, searchValue$)
   c% = 0
   FOR x% = start% TO start% + numEls% - 1
-    c% = c% + 1
     IF QInstr2%(1, array$(x%), searchValue$) THEN
       numEls% = c%: EXIT FUNCTION
     END IF
+    c% = c% + 1
   NEXT
   numEls% = -1
 END SUB
