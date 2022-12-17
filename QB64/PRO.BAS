@@ -3742,14 +3742,14 @@ END FUNCTION
 ' InCount2 will quickly report how many times one string occurs 
 ' within another, and the case-insensitive search string may contain 
 ' any number of "?" wild cards. 
-FUNCTION InCount2%(Source$, SearchValue$)
+FUNCTION InCount2%(source$, searchValue$)
   result% = 0
   pos1% = 1
   DO
-    p% = QInstr2%(pos1%, Source$, SearchValue$)
+    p% = QInstr2%(pos1%, source$, searchValue$)
     IF p% > 0 THEN
       result% = result% + 1
-      pos1% = p% + LEN(SearchValue$)
+      pos1% = p% + LEN(searchValue$)
     ELSE
       EXIT DO
     END IF
@@ -3941,9 +3941,9 @@ FUNCTION QInstr2%(startPosition%, sourceValue$, searchValue$)
     IF LEN(segment$) <> LEN(searchValue$) THEN EXIT DO
     isMatch% = 1
     FOR index% = 1 TO LEN(searchValue$)
-      character$ = MID$(searchValue$, index%, 1)
+      character$ = LCASE$(MID$(searchValue$, index%, 1))
       IF character$ <> "?" THEN
-        IF LCASE$(MID$(segment$, index%, 1)) <> character$ THEN isMatch% = 0 : EXIT FOR
+        IF MID$(segment$, index%, 1) <> character$ THEN isMatch% = 0 : EXIT FOR
       END IF
     NEXT
     IF isMatch% THEN QInstr2% = position% : EXIT FUNCTION
