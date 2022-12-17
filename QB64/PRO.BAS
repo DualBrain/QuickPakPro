@@ -4410,7 +4410,9 @@ END SUB
 ' GetVMode will report the current video mode, the currently active 
 ' display page, the page size, and the number of rows and columns. 
 SUB GetVMode (mode%, page%, pageSize%, rows%, columns%)
-  'TODO: Need to implement other values.
+  mode% = 3 ' matches DOSBOX
+  page% = 0 'TODO: Need to handle, but the default is 0.
+  pageSize% = 4096 ' matches DOSBOX
   columns% = _WIDTH
   rows% = _HEIGHT
 END SUB
