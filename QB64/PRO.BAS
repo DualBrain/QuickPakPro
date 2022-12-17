@@ -1155,8 +1155,31 @@ SUB FStamp(FileName$, NewTime$, NewDate$)
   ERROR 73 ' Feature Unavailable
 END SUB
 
-FUNCTION FullName$(PartName$)
-  ERROR 73 ' Feature Unavailable
+FUNCTION FullName$(partName$)
+  s = 1
+  DO
+    p = InstrTbl(s, partName$, "\/")
+    section$ = MID$(partName$, s, p - s)
+    IF section$ = ".." THEN 
+      c = c + 1
+    ELSE
+      s = s - 1 ' walk one character back.
+      EXIT DO
+    END IF
+    IF p = -1 THEN EXIT DO
+    s = p + 1
+  LOOP
+  section$ = MID$(partName$, s)
+  cwd$ = _CWD$
+  FOR x = 1 TO c
+    p = InstrTblB(LEN(cwd$), cwd$, "\/")
+    IF p > 0 THEN
+      cwd$ = LEFT$(cwd$, p - 1)
+    ELSE
+      EXIT FOR ' error?
+    END IF
+  NEXT
+  FullName$ = cwd$ + section$
 END FUNCTION
 
 FUNCTION GetAttr%(FileName$)
@@ -3780,7 +3803,7 @@ FUNCTION InstrTbl%(start%, source$, table$)
   InstrTbl% = -1
 END FUNCTION
 
-FUNCTION InstrTbl2%(Start%, Source$, Table$)
+FUNCTION InstrTbl2%(start%, source$, table$)
   l% = LEN(source$)
   c% = start%
   DO
@@ -3797,12 +3820,38 @@ FUNCTION InstrTbl2%(Start%, Source$, Table$)
   InstrTbl2% = -1
 END FUNCTION
 
-FUNCTION InstrTblB%(Start%, Source$, Table$)
-  ERROR 73 ' Feature Unavailable
+FUNCTION InstrTblB%(start%, source$, table$)
+  l% = LEN(source$)
+  c% = start%
+  DO
+    IF c% < 1 THEN EXIT DO
+    ch$ = MID$(source$, c%, 1)
+    FOR x% = 1 TO LEN(table$)
+      m$ = MID$(table$, x%, 1)
+      IF ch$ = m$ THEN
+        InstrTblB% = c%: EXIT FUNCTION
+      END IF
+    NEXT
+    c% = c% - 1
+  LOOP
+  InstrTblB% = -1
 END FUNCTION
 
-FUNCTION InstrTblB2%(Start%, Source$, Table$)
-  ERROR 73 ' Feature Unavailable
+FUNCTION InstrTblB2%(start%, source$, table$)
+  l% = LEN(source$)
+  c% = start%
+  DO
+    IF c% < 1 THEN EXIT DO
+    ch$ = LCASE$(MID$(source$, c%, 1))
+    FOR x% = 1 TO LEN(table$)
+      m$ = LCASE$(MID$(table$, x%, 1))
+      IF ch$ = m$ THEN
+        InstrTblB2% = c%: EXIT FUNCTION
+      END IF
+    NEXT
+    c% = c% - 1
+  LOOP
+  InstrTblB2% = -1
 END FUNCTION
 
 FUNCTION LongestStr%(Array$())
