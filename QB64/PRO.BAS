@@ -4147,8 +4147,55 @@ SUB ReplaceTbl(Work$, Table$)
   ERROR 73 ' Feature Unavailable
 END SUB
 
-SUB Sequence(Work$)
-  ERROR 73 ' Feature Unavailable
+SUB Sequence(work$)
+  p% = LEN(work$)
+  DO
+    IF p% < 1 THEN 
+      IF carry% THEN
+        ' handle "overflow"
+        FOR p% = 1 TO LEN(work$)
+          ch% = ASC(MID$(work$, p%, 1))
+          SELECT CASE ch%
+            CASE 48 TO 57: MID$(work$, p%, 1) = CHR$(48)
+            CASE 97 TO 122: MID$(work$, p%, 1) = CHR$(97)
+            CASE 65 TO 90: MID$(work$, p%, 1) = CHR$(65)
+            CASE ELSE
+          END SELECT
+        NEXT
+        EXIT DO          
+      END IF
+      EXIT DO
+    END IF
+    carry% = 0
+    ch% = ASC(MID$(work$, p%, 1))
+    SELECT CASE ch%
+      CASE 48 TO 57
+        IF ch% = 57 THEN
+          ch% = 48: carry% = -1
+        ELSE
+          ch% = ch% + 1
+        END IF
+        MID$(work$, p%, 1) = CHR$(ch%)
+      CASE 97 TO 122
+        IF ch% = 122 THEN
+          ch% = 97: carry% = -1
+        ELSE
+          ch% = ch% + 1
+        END IF
+        MID$(work$, p%, 1) = CHR$(ch%)
+      CASE 65 TO 90
+        IF ch% = 90 THEN
+          ch% = 65: carry% = -1
+        ELSE
+          ch% = ch% + 1
+        END IF
+        MID$(work$, p%, 1) = CHR$(ch%)
+      CASE ELSE
+        carry% = -1
+    END SELECT
+    p% = p% - 1
+    IF NOT carry% THEN EXIT DO
+  LOOP
 END SUB
 
 SUB Translate(X$)
