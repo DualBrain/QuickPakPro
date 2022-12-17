@@ -174,84 +174,84 @@ SUB SetBit(array$, element%, value%)
   MID$(array$, entry%, 1) = CHR$(byt%)
 END SUB
 
-FUNCTION IMaxD#(array#(), start%, numEls%)
-  max# = array#(start%)
+FUNCTION IMaxD%(array#(), start%, numEls%)
+  max# = array#(start%): entry% = start%
   FOR x% = start% + 1 TO start% + numEls% - 1
-    IF array#(x%) > max# THEN max# = array#(x%)
+    IF array#(x%) > max# THEN max# = array#(x%): entry% = x%
   NEXT
-  IMaxD# = max#
+  IMaxD% = entry% - start%
 END FUNCTION
 
 FUNCTION IMaxI%(array%(), start%, numEls%)
-  max% = array%(start%)
+  max% = array%(start%): entry% = start%
   FOR x% = start% + 1 TO start% + numEls% - 1
-    IF array%(x%) > max% THEN max% = array%(x%)
+    IF array%(x%) > max% THEN max% = array%(x%): entry% = x%
   NEXT
-  IMaxI% = max%
+  IMaxI% = entry% - start%
 END FUNCTION
 
-FUNCTION IMaxL&(array&(), start%, numEls%)
-  max& = array&(start%)
+FUNCTION IMaxL%(array&(), start%, numEls%)
+  max& = array&(start%): entry% = start%
   FOR x% = start% + 1 TO start% + numEls% - 1
-    IF array&(x%) > max& THEN max& = array&(x%)
+    IF array&(x%) > max& THEN max& = array&(x%): entry% = x%
   NEXT
-  IMaxL& = max&
+  IMaxL% = entry% - start%
 END FUNCTION
 
-FUNCTION IMaxS!(array!(), start%, numEls%)
-  max! = array!(start%)
+FUNCTION IMaxS%(array!(), start%, numEls%)
+  max! = array!(start%): entry% = start%
   FOR x% = start% + 1 TO start% + numEls% - 1
-    IF array!(x%) > max! THEN max! = array!(x%)
+    IF array!(x%) > max! THEN max! = array!(x%): entry% = x%
   NEXT
-  IMaxS! = max!
+  IMaxS% = entry% - start%
 END FUNCTION
 
-FUNCTION IMaxC!(array!(), start%, numEls%)
-  max! = array!(start%)
+FUNCTION IMaxC%(array!(), start%, numEls%)
+  max! = array!(start%): entry% = start%
   FOR x% = start% + 1 TO start% + numEls% - 1
-    IF array!(x%) > max! THEN max! = array!(x%)
+    IF array!(x%) > max! THEN max! = array!(x%): entry% = x%
   NEXT
-  IMaxC! = max!
+  IMaxC% = entry% - start%
 END FUNCTION
 
-FUNCTION IMinD#(array#(), start%, numEls%)
-  min# = array#(start%)
+FUNCTION IMinD%(array#(), start%, numEls%)
+  min# = array#(start%): entry% = start%
   FOR x% = start% + 1 TO start% + numEls% - 1
-    IF array#(x%) < min# THEN min# = array#(x%)
+    IF array#(x%) < min# THEN min# = array#(x%): entry% = x%
   NEXT
-  IMinD# = min#
+  IMinD% = entry% - start%
 END FUNCTION
 
 FUNCTION IMinI%(array%(), start%, numEls%)
-  min% = array%(start%)
+  min% = array%(start%): entry% = start%
   FOR x% = start% + 1 TO start% + numEls% - 1
-    IF array%(x%) < min% THEN min% = array%(x%)
+    IF array%(x%) < min% THEN min% = array%(x%): entry% = x%
   NEXT
-  IMinI% = min%
+  IMinI% = entry% - start%
 END FUNCTION
 
-FUNCTION IMinL&(array&(), start%, numEls%)
-  min& = array&(start%)
+FUNCTION IMinL%(array&(), start%, numEls%)
+  min& = array&(start%): entry% = start%
   FOR x% = start% + 1 TO start% + numEls% - 1
-    IF array&(x%) < min& THEN min& = array&(x%)
+    IF array&(x%) < min& THEN min& = array&(x%): entry% = x%
   NEXT
-  IMinL& = min&
+  IMinL% = entry% - start%
 END FUNCTION
 
-FUNCTION IMinS!(array!(), start%, numEls%)
-  min! = array!(start%)
+FUNCTION IMinS%(array!(), start%, numEls%)
+  min! = array!(start%): entry% = start%
   FOR x% = start% + 1 TO start% + numEls% - 1
-    IF array!(x%) < min! THEN min! = array!(x%)
+    IF array!(x%) < min! THEN min! = array!(x%): entry% = x%
   NEXT
-  IMinS! = min!
+  IMinS% = entry% - start%
 END FUNCTION
 
-FUNCTION IMinC!(array!(), start%, numEls%)
-  min! = array!(start%)
+FUNCTION IMinC%(array!(), start%, numEls%)
+  min! = array!(start%): entry% = start%
   FOR x% = start% + 1 TO start% + numEls% - 1
-    IF array!(x%) < min! THEN min! = array!(x%)
+    IF array!(x%) < min! THEN min! = array!(x%): entry% = x%
   NEXT
-  IMinC! = min!
+  IMinC% = entry% - start%
 END FUNCTION
 
 SUB InitInt(array%(), start%, value%, numEls%)
