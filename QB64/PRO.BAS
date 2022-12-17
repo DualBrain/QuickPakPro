@@ -3153,15 +3153,17 @@ FUNCTION FudgeFactor&
 END FUNCTION
 
 FUNCTION GetCPU%
-  ERROR 73 ' Feature Unavailable
+  GetCPU% = 486 ' matches DOSBOX
 END FUNCTION
 
 FUNCTION GetDS%
   ERROR 73 ' Feature Unavailable
 END FUNCTION
 
-SUB GetEquip(Floppies%, Parallels%, Serials%)
-  ERROR 73 ' Feature Unavailable
+SUB GetEquip(floppies%, parallels%, serials%)
+  floppies% = 1  ' matches DOSBOX
+  parallels% = 3 ' matches DOSBOX
+  serials% = 2   ' matches DOSBOX
 END SUB
 
 SUB LockUp
@@ -3169,17 +3171,17 @@ SUB LockUp
 END SUB
 
 FUNCTION MathChip%
-  ERROR 73 ' Feature Unavailable
+  MathChip% = -1
 END FUNCTION
 
 ' MaxInt compares two integer variables, and returns the value of the 
 ' higher one. MaxLong is similar, but is intended for use with long 
 ' integers. 
-FUNCTION MaxInt% (Num1%, Num2%)
-  IF Num1% > Num2% THEN 
-    MaxInt% = Num1% 
+FUNCTION MaxInt% (num1%, num2%)
+  IF num1% > num2% THEN 
+    MaxInt% = num1% 
   ELSE 
-    MaxInt% = Num2% 
+    MaxInt% = num2% 
   END IF 
 END FUNCTION
 
