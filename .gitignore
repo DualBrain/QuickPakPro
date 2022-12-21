@@ -355,7 +355,6 @@ SHARED/
 # Files keeping locally (out of repo).
 ASM/
 *.mak
-*.scr
 *.zip
 *.pdf
 *.exe
