@@ -3497,8 +3497,11 @@ FUNCTION Times2%(Number%)
   ERROR 73 ' Feature Unavailable
 END FUNCTION
 
-FUNCTION TrapInt%(Value%, LoLimit%, HiLimit%)
-  ERROR 73 ' Feature Unavailable
+' Traplnt will constrain an incoming value to within a specified upper and lower limit. 
+FUNCTION TrapInt%(value%, loLimit%, hiLimit%)
+  IF value% < loLimit% THEN TrapInt% = loLimit%: EXIT FUNCTION
+  IF value% > hiLimit% THEN TrapInt% = hiLimit%: EXIT FUNCTION
+  TrapInt% = value%
 END FUNCTION
 
 SUB ViewFile(FileName$, Wide%, High%, Colr%, HiBit%, Action%)
@@ -4477,6 +4480,38 @@ FUNCTION EGAMem% ()
   EGAMem% = 4 ' Assuming VGA and matching what is reported in DOSBOX.
 END FUNCTION
 
+' ChatGPT conversion????
+' SUB MakeMono(ArrayAdr AS LONG, NumEls AS LONG)
+'   DIM Array%(NumEls)
+'   FOR i = 1 TO NumEls
+'   Array%(i) = PEEK(ArrayAdr + i - 1)
+'   IF (Array%(i) AND 7) <> 0 THEN
+'   Array%(i) = (Array%(i) AND 248) OR 7
+'   END IF
+'   NEXT
+' END SUB
+
+' MakeMono will convert the colors on a text screen held in an 
+' integer array to those suitable for display on a monochrome monitor. 
+SUB MakeMono(array%(), element%, size%)
+  IF size% < 1 THEN EXIT SUB
+  ' element is the location in the array%() array where the screen 
+  ' begins, and size% is the size of the screen in characters. 
+  FOR index% = element% TO element% + size% - 1
+    ' clr% = element%(index%) AND &H00FF ' split color
+    ' 'ch% = ((element%(index%) AND &HFF00) \ 256) AND &H00FF ' split character
+    ' CALL SplitColor(clr%, fg%, bg%)
+
+    ' If the text foreground color is black (inverse), then the color is left unchanged.
+    ' Otherwise the background is cleared to black, and the 
+    ' foreground is set to white. However, the intensity and flashing color 
+    ' attributes are left unchanged. 
+    IF (array%(i) AND 7) <> 0 THEN
+      array%(index%) = (array%(index) AND 248) OR 7
+    END IF
+  NEXT
+END SUB
+
 ' MPaintBox is similar to PaintBox, except it always turns off the 
 ' mouse cursor before painting the screen. When it is finished the 
 ' cursor is turned back on. 
@@ -4490,20 +4525,19 @@ SUB MPRestore(ulRow%, ulCol%, lrRow%, lrCol%, originalWidth%, element%(), start%
   w% = lrCol% - ulCol% + 1
   h% = lrRow% - ulRow% + 1
 
-  index% = start% + 1 ' not really sure why the +1 is needed???
-                      ' but I've verified that index% of 1 is the correct starting
-                      ' element for a saved array.
-  offset% = start% MOD originalWidth%
-
+  index% = start% '+ LBOUND(element%)  ' not really sure why the +1 is needed???
+                                      ' but I've verified that index% of 1 is the correct starting
+                                      ' element for a saved array.
   r% = 0
   DO
     FOR c% = 0 TO w% - 1
-      clr% = element%(index%) AND &H00FF ' split color
-      ch% = ((element%(index%) AND &HFF00) \ 256) AND &H00FF ' split character
+      ' clr% = element%(index% + c%) AND &H00FF ' split color
+      ' ch% = ((element%(index% + c%) AND &HFF00) \ 256) AND &H00FF ' split character
+      ch% = element%(index% + c%) AND &H00FF ' split color
+      clr% = ((element%(index% + c%) AND &HFF00) \ 256) AND &H00FF ' split character
       QPrintRC CHR$(ch%), ulRow% + r%, ulCol% + c%, clr%
-      index% = index% + 1
     NEXT
-    r% = r% + 1: index% = index% + offset%
+    r% = r% + 1: index% = index% + originalWidth%
   LOOP UNTIL r% => h% OR index% => UBOUND(element%)
 
 END SUB
@@ -4707,9 +4741,11 @@ SUB ScrnRest (ulRow%, ulCol%, lrRow%, lrCol%, element%(), page%)
   cols% = (lrCol% - ulCol%) + 1
   FOR r% = 0 TO rows% - 1
     FOR c% = 0 TO cols% - 1
-      index% = 1 + ((r% * cols%) + c%)
-      clr% = element%(index%) AND &H00FF ' split color
-      ch% = ((element%(index%) AND &HFF00) \ 256) AND &H00FF ' split character
+      index% = LBOUND(element%) + ((r% * cols%) + c%)
+      ' clr% = element%(index%) AND &H00FF ' split color
+      ' ch% = ((element%(index%) AND &HFF00) \ 256) AND &H00FF ' split character
+      ch% = element%(index%) AND &H00FF ' split color
+      clr% = ((element%(index%) AND &HFF00) \ 256) AND &H00FF ' split character
       QPrintRC CHR$(ch%), ulRow% + r%, ulCol% + c%, clr%
     NEXT
   NEXT
@@ -4729,9 +4765,11 @@ SUB ScrnSave (ulRow%, ulCol%, lrRow%, lrCol%, element%(), page%)
   cols% = (lrCol% - ulCol%) + 1
   FOR r% = 0 TO rows% - 1
     FOR c% = 0 TO cols% - 1
-      index% = 1 + ((r% * cols%) + c%)
-      ch% = SCREEN(ulRow% + r%, ulCol% + c%, 0)
-      clr% = SCREEN(ulRow% + r%, ulCol% + c%, 1)
+      index% = LBOUND(element%) + ((r% * cols%) + c%)
+      ' ch% = SCREEN(ulRow% + r%, ulCol% + c%, 0)
+      ' clr% = SCREEN(ulRow% + r%, ulCol% + c%, 1)
+      clr% = SCREEN(ulRow% + r%, ulCol% + c%, 0)
+      ch% = SCREEN(ulRow% + r%, ulCol% + c%, 1)
       element%(index%) = (ch% * 256) + clr% ' combine
     NEXT
   NEXT
