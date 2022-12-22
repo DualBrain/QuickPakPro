@@ -86,6 +86,10 @@ We also want to thank [Gene Buckle](https://github.com/geneb) for making this al
 
 Files marked with *INCLUDE* are meant to be included, while files marked as *EXE* are to be compiled as an executable (stand-alone example). The replacement of the PRO.LIB functionality is implemented in the *PRO.BAS* and *PRO.BI* source files.
 
+## Contributing
+
+To contribute to this project, you must first create a GitHub account, then clone the project to your account. Create your edits in your local copy of the project and then "Sync" your project back to your GitHub repository. Once your GitHub repository is up to date, you can create a "Pull Request". The "Pull Request" will be seen and reviewed by the team and, if accepted, will be updated to the main project. Please be sure to refresh your repository with the original project often, as changes are made without notice and could affect you changes as well.
+
 ## Code Formatting Guidelines
 
 - Attempt to retain/augment all existing comments (preserving some the history).
