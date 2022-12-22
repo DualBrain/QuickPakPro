@@ -3277,21 +3277,22 @@ FUNCTION StringSize&(array$(), start%, numStringEls%)
 END FUNCTION
 
 ' MinInt compares two integer variables, and returns the value of the 
-' smaller one. MinLong is similar, but is intended for use with long 
-' integers. 
-FUNCTION MinInt% (Num1%, Num2%)
-  IF Num1% < Num2% THEN 
-    MinInt% = Num1% 
+' smaller one.
+FUNCTION MinInt% (num1%, num2%)
+  IF num1% < num2% THEN 
+    MinInt% = num1% 
   ELSE 
-    MinInt% = Num2% 
+    MinInt% = num2% 
   END IF 
 END FUNCTION
 
-FUNCTION MinLong& (Num1&, Num2&)
-  IF Num1% < Num2& THEN 
-    MinLong& = Num1& 
+' MinInt compares two long integer variables, and returns the value 
+' of the smaller one.
+FUNCTION MinLong& (num1&, num2&)
+  IF num1& < num2& THEN 
+    MinLong& = num1& 
   ELSE 
-    MinLong& = Num2& 
+    MinLong& = num2& 
   END IF 
 END FUNCTION
 
@@ -4075,7 +4076,7 @@ FUNCTION QInstrB%(startPosition%, sourceValue$, searchValue$)
 
 END FUNCTION
 
-FUNCTION QInstrB2%(StartPos%, Source$, SearchValue$)
+FUNCTION QInstrB2%(startPosition%, sourceValue$, searchValue$)
 
   ' Setting position to 0 will return 0; matching QB behavior.
   IF startPosition% = 0 THEN QInstrB2% = 0: EXIT FUNCTION
@@ -4086,9 +4087,9 @@ FUNCTION QInstrB2%(StartPos%, Source$, SearchValue$)
     IF LEN(segment$) <> LEN(searchValue$) THEN EXIT DO
     isMatch% = 1
     FOR index = 1 TO LEN(searchValue$)
-      character$ = MID$(searchValue$, index, 1)
+      character$ = LCASE$(MID$(searchValue$, index, 1))
       IF character$ <> "?" THEN
-        IF LCASE$(MID$(segment$, index, 1)) <> character$ THEN isMatch% = 0 : EXIT FOR
+        IF MID$(segment$, index, 1) <> character$ THEN isMatch% = 0 : EXIT FOR
       END IF
     NEXT
     IF isMatch% THEN QInstrB2% = position% : EXIT FUNCTION
