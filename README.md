@@ -8,9 +8,9 @@ You can find the original [here](http://annex.retroarchive.org/crescent/index.ht
 
 We also want to thank [Gene Buckle](https://github.com/geneb) for making this all possible as well as to Ethan Winer for creating the product in the first place.
 
-## Conversion Status
+## Status
 
-| File       | Status  |   | File       | Status  |   | File       | Status  |
+| File       |         |   | File       |         |   | File       |         |
 | ---------- | ------- | - | ---------- | ------- | - | ---------- | ------- |
 |AMENU.BAS   | EXE     |   |APRINT.BAS  | EXE     |   |APRINTT.BAS | EXE     |
 |ASCCHART.BAS| INCLUDE |   |ASCIIPIK.BAS| EXE     |   |ASSEMBLY.BAS| EXE     |
