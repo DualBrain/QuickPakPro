@@ -2906,6 +2906,8 @@ END FUNCTION
 ' Date2Num converts a date in string form to an equivalent integer variable. 
 FUNCTION Date2Num% (dat$) STATIC
 
+  d$ = dat$
+
   REDIM dyMth%(13)            ' DyMth() holds number of days into the year
   ' RESTORE                     '   for a given month
   ' FOR c% = 1 TO 13
@@ -2927,11 +2929,42 @@ FUNCTION Date2Num% (dat$) STATIC
   dyMth%(12) = 334
   dyMth%(13) = 365
 
-  year% = VAL(MID$(dat$, 7))                  ' Read year
+  p% = 1 ' pointer
+  c$ = "" ' collector
+  part% = 1 ' 3 parts; 1) month, 2) day, 3) year
+  collect% = 0 ' 
+  DO
+    IF p% > LEN(dat$) THEN
+      ch$ = ""
+    ELSE
+      ch$ = MID$(dat$, p%, 1) ' current character
+    END IF
+    SELECT CASE ch$
+      CASE "1", "2", "3", "4", "5", "6", "7", "8", "9", "0"
+        c$ = c$ + ch$
+        IF part% < 3 AND LEN(c$) = 2 THEN collect% = -1
+      CASE ELSE
+        IF LEN(c$) > 0 THEN collect% = -1
+    END SELECT
+    IF collect% <> 0 THEN
+      SELECT CASE part%
+        CASE 1: month% = VAL(c$): c$ = "": part% = part% + 1
+        CASE 2: day% = VAL(c$): c$ = "": part% = part% + 1
+        CASE 3: year% = VAL(c$): EXIT DO
+        CASE ELSE
+      END SELECT
+      collect% = 0
+    END IF
+    p% = p% + 1
+  LOOP
+
+  'NOTE: remarked out the three lines below in favor of a more complete parser (above)
+
+  ' year% = VAL(MID$(dat$, 7))                  ' Read year
   IF year% >= 1900 THEN year% = year% - 1900
 
-  month% = VAL(LEFT$(dat$, 2))                ' Extract Month #
-  day% = VAL(MID$(dat$, 4, 2))                ' Extract Day #
+  'month% = VAL(LEFT$(dat$, 2))                ' Extract Month #
+  'day% = VAL(MID$(dat$, 4, 2))                ' Extract Day #
 
   days% = (year% - 80!) * 365
   IF year% >= 80 THEN
@@ -3325,11 +3358,14 @@ END FUNCTION
 
 FUNCTION Num2Day%(d%)
   dd% = d%
-  dd% = dd% - 1
-  IF dd% > -1 THEN dd% = dd% + 2
-  dd% = dd% MOD 7
-  dd% = dd% + 1
-  Num2Day% = dd%
+                                      ' 12/31/1979 (0) was a Monday (2)
+  dd% = dd% + 1                       ' adjust for the turnover point is
+  dd% = dd% MOD 7                     ' modulus 7
+  IF dd% < 0 THEN                     ' is it a negative value?  
+    dd% = 7 + dd%                     ' add this fudge
+  END IF
+  dd% = dd% + 1                       ' adjust 0-6 to 1-7
+  Num2Day% = dd%                      ' return result
 END FUNCTION
 
 ' Time2Num converts a time in string form to an equivalent number 
@@ -3532,8 +3568,10 @@ SUB VLUnpack(Alias#, Number$, ErrFlag%)
   ERROR 73 ' Feature Unavailable
 END SUB
 
-FUNCTION WeekDay%(D$)
-  ERROR 73 ' Feature Unavailable
+' WeekDay will return the day of the week (1 through 7) given a 
+' legal DOS date in a string form. 
+FUNCTION WeekDay%(dy$)
+  WeekDay% = Num2Day%(Date2Num%(dy$))
 END FUNCTION
 
 ' ****************************************
