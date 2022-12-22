@@ -8,7 +8,7 @@ You can find the original [here](http://annex.retroarchive.org/crescent/index.ht
 
 We also want to thank [Gene Buckle](https://github.com/geneb) for making this all possible as well as to Ethan Winer for creating the product in the first place.
 
-## Status
+## Progress
 
 | File       |         |   | File       |         |   | File       |         |
 | ---------- | ------- | - | ---------- | ------- | - | ---------- | ------- |
