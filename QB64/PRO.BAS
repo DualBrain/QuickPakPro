@@ -4290,8 +4290,18 @@ SUB Sequence(work$)
   LOOP
 END SUB
 
-SUB Translate(X$)
-  ERROR 73 ' Feature Unavailable
+SUB Translate(x$)
+  FOR p% = 1 TO LEN(x$)
+    c% = ASC(MID$(x$, p%, 1))
+    SELECT CASE c%
+      CASE 196: MID$(x$, p%, 1) = "-"
+      CASE 205, 240: MID$(x$, p%, 1) = "="
+      CASE 176, 177, 178, 179, 186, 220, 221, 222, 223: MID$(x$, p%, 1) = "|"
+      CASE 218, 194, 191, 195, 197, 180, 192, 193, 217, 201, 203, 187, 204, 208, 185, 200, 202, 188: MID$(x$, p%, 1) = "+"
+      CASE IS > 127: MID$(x$, p%, 1) = "+"
+      CASE ELSE
+    END SELECT
+  NEXT
 END SUB
 
 SUB Upper(value$)
