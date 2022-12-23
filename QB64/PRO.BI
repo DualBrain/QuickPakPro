@@ -101,6 +101,7 @@ TYPE Rectangle
 END TYPE
 
 DECLARE DYNAMIC LIBRARY "kernel32"
+  FUNCTION GetDiskFreeSpace& ALIAS GetDiskFreeSpaceA (BYVAL lprootpathname AS _OFFSET, BYVAL lpSectorsPerCluster AS _OFFSET, BYVAL lpBytesPerSector AS _OFFSET, BYVAL lpNumberOfFreeClusters AS _OFFSET, BYVAL lpTotalNumberOfClusters AS _OFFSET)
   FUNCTION FindFirstFile~%& ALIAS FindFirstFileA (BYVAL lpfilename AS _OFFSET, BYVAL lpfindfiledata AS _OFFSET)
   FUNCTION FindNextFile& ALIAS FindNextFileA (BYVAL hfind AS _UNSIGNED _OFFSET, BYVAL lpfindfiledata AS _OFFSET)
   FUNCTION FindClose& (BYVAL hfind AS _UNSIGNED _OFFSET)

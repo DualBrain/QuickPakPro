@@ -880,27 +880,70 @@ SUB ClipFile(FileName$, NewLength&)
   ERROR 73 ' Feature Unavailable
 END SUB
 
-SUB DiskInfo(Drive$, Byte, Sectors, FreeClusters&, TotalClusters&)
-  ERROR 73 ' Feature Unavailable
+' Disklnfo calls on DOS to examine a disk, and reports its 
+' sector and cluster makeup. 
+SUB DiskInfo(drive$, bytes, sectors, freeClusters&, totalClusters&)
+ ' Drive$ contains the letter of the drive to examine, and Bytes% returns 
+ ' how many bytes each sector holds. Sectors% contains the number of sectors 
+ ' in each disk cluster, FreeClusters& tells how many of them are available, 
+ ' and Total Clusters& indicates the total disk capacity. 
+  path$ = drive$
+  IF INSTR(_OS$, "[WINDOWS]") THEN
+    IF LEN(path$) = 1 THEN path$ = path$ + ":\"
+    result& = GetDiskFreeSpace(_OFFSET(path$), _OFFSET(bytes), _OFFSET(sectors), _OFFSET(freeClusters&), _OFFSET(totalClusters&))
+    IF result& = 0 THEN ' Failed
+      bytes = 0
+      sectors = 0
+      freeClusters& = 0
+      totalClusters& = 0
+      'TODO: Need to set DOSError.
+
+      ' A note regarding how to calculate the total free bytes...
+      ' freeBytes& = sectors * bytes * freeClusters&
+
+    ELSE 
+      'NOTE: Appears to not be working due to (guessing)
+      '      lack of "very large" drive support in GetDiskFreeSpaceA;
+      '      may have to switch to use GetDiskFreeSpaceExA possibly
+      '      combined with GetDiskFreeSpaceA???
+    END IF
+  ELSE
+    ERROR 73 ' Feature Unavailable
+  END IF
 END SUB
 
+' DiskRoom returns the number of bytes that are 
+' currently available on a specified disk drive. 
 FUNCTION DiskRoom&(Drive$)
+  ' Drive$ contains either an upper or lower case letter for the disk 
+  ' drive being examined, or is null to indicate the default drive. Room 
+  ' is assigned the number of available bytes. 
   ERROR 73 ' Feature Unavailable
 END FUNCTION
 
+' DiskSize returns the total capacity in bytes of a specified disk drive. 
 FUNCTION DiskSize&(Drive$)
+  ' Drive$ contains an upper or lower case letter for the disk drive 
+  ' being examined, or is null to indicate the default drive. Size is 
+  ' assigned the total number of bytes the disk can hold.
   ERROR 73 ' Feature Unavailable
 END FUNCTION
 
+' DOSError reports if an error occurred during the last call to a 
+' QuickPak Professional DOS routine.
 FUNCTION DosError
-  'TODO: 
+  ' DOSError% returns O if there was no error, or -1 if there was. 
   DosError = 0 ' No error.
 END FUNCTION
 
+' DOSVer returns the version of DOS that is presently 
+' running on the host PC. 
 FUNCTION DOSVer
   DOSVer = 611 ' Fixed as DOS 6.11
 END FUNCTION
 
+' ErrorMsg returns an appropriate message given 
+' any of the BASIC error numbers for a DOS service. 
 FUNCTION ErrorMsg$(ErrorNumber)
   SELECT CASE ErrorNumber
     CASE 1: ErrorMsg$ = "NEXT without FOR"
@@ -962,53 +1005,83 @@ FUNCTION ErrorMsg$(ErrorNumber)
   END SELECT
 END FUNCTION
 
+' ExeName returns the full name of the currently executing program, 
+' including the drive, path, and file name. ExeName requires DOS 
+' 3.0 or higher, and returns a null string when run under DOS 2. 
 FUNCTION ExeName$
   ' NOTE: Considered UCASE$, but an existing sample suggests that this shouldn't be done here.
   ExeName$ = COMMAND$(0)
 END FUNCTION
 
+' Exist will quickly determine the presence of a file. 
 FUNCTION Exist(FileName$)
   Exist = _FileExists(FileName$)
 END FUNCTION
 
+' FastLoadInt returns the number of lines
+' needed (array size) in order to prepare
+' the string array needed by FastLoadStr.
 FUNCTION FastLoadInt(FileName$)
   ERROR 73 ' Feature Unavailable
 END FUNCTION
 
-SUB FastLoadStr(Array$())
+' FastLoadStr allows your programs to load 
+' an entire text file to a conventional 
+' (not fixed-length) string array very quickly. 
+SUB FastLoadStr(array$())
   ERROR 73 ' Feature Unavailable
 END SUB
 
+' FastSave allows your programs save an entire 
+' text file from a conventional (not fixed-length) 
+' string array very quickly. 
 SUB FastSave(FileName$, Text$())
   ERROR 73 ' Feature Unavailable
 END SUB
 
+' FClose will close a file that had been previously opened with the 
+' QuickPak Professional FOpen command. 
 SUB FClose(Handle)
   CLOSE #Handle
 END SUB
 
+' FCopy will copy a file from within a BASIC program without 
+' requiring the use of SHELL. 
 SUB FCopy(Source$, Dest$, Buffer$, ErrCode)
   ERROR 73 ' Feature Unavailable
 END SUB
 
+' FCreate is used to create a file in preparation for writing to it with 
+' the QuickPak Professional file handling routines. 
 SUB FCreate(FileName$)
   ff = FREEFILE
   OPEN FileName$ FOR OUTPUT AS #ff
   CLOSE #ff
 END SUB
 
+' FEof will report if the current DOS Seek location is at the end of 
+' the specified file. 
 FUNCTION FEof(Handle)
   FEof = EOF(Handle)
 END FUNCTION
 
+' FFlush will flush a file's data buffers to disk without requiring the 
+' file to be closed. 
 SUB FFlush(Handle)
   ERROR 73 ' Feature Unavailable
 END SUB
 
+' FGet reads data from a disk file in a manner similar to BASIC's 
+' binary GET command, but it returns an error code rather than 
+' requiring the use of ON ERROR. 
 SUB FGet(Handle, Destination$)
   ERROR 73 ' Feature Unavailable
 END SUB
 
+' FGetA is similar to the QuickPak Professional FGetT routine, 
+' however it accepts a segmented address thus allowing an entire 
+' array to be loaded in one operation. FGetA will load up to 64k 
+' bytes at a time. 
 SUB FGetA(Handle, Array$(), Element, NumBytes)
   ERROR 73 ' Feature Unavailable
 END SUB
@@ -1210,6 +1283,7 @@ FUNCTION GetDir$(drive$)
 END FUNCTION
 
 FUNCTION GetDisketteType(DriveNumber)
+  ' Use GetDriveType?
   ERROR 73 ' Feature Unavailable
 END FUNCTION
 
@@ -1227,14 +1301,18 @@ FUNCTION GetDrive
   ' _CWD$ (function) returns the current working directory as a STRING value.
   ' _STARTDIR$ (function) returns the user's program calling path as a STRING.
 
-  ch$ = MID$(_CWD$, 1, 1)
-  a = ASC(UCASE$(ch$))
-  SELECT CASE a
-    CASE ASC("A") TO ASC("Z")
-      GetDrive = a
-    CASE ELSE
-      GetDrive = 0
-  END SELECT
+  IF INSTR(_OS$, "[WINDOWS]") THEN
+    ch$ = MID$(_CWD$, 1, 1)
+    a = ASC(UCASE$(ch$))
+    SELECT CASE a
+      CASE 65 TO 90 ' A to Z
+        GetDrive = a
+      CASE ELSE
+        GetDrive = 0
+    END SELECT
+  ELSE
+    ERROR 73 ' Feature Unavailable
+  END IF
 
 END FUNCTION
 
@@ -1242,8 +1320,20 @@ FUNCTION GetVol$(Drive$)
   ERROR 73 ' Feature Unavailable
 END FUNCTION
 
-FUNCTION GoodDrive(Drive$)
-  ERROR 73 ' Feature Unavailable
+' GoodDrive will quickly determine whether a 
+' specified drive letter is valid. 
+FUNCTION GoodDrive(drive$)
+  ' Drive$ is either an upper or lower case letter that represents the 
+  ' drive to check, and Okay receives either -1 if the drive is valid, 
+  ' or 0 if it is not. 
+  ' Possibly use GetLogicalDrives or GetLogicalDriveStringsW
+  ' along with GetDriveType and/or GetDiskFreeSpace/GetDiskFreeSpaceEx.
+  CALL DiskInfo(drive$, bytes, sectors, freeClusters&, totalClusters&)
+  IF bytes = 0 THEN
+    GoodDrive = 0 ' Not good
+  ELSE
+    GoodDrive = -1 ' Good
+  END IF
 END FUNCTION
 
 SUB Handle2Name(Handle, FilName AS NameType)
