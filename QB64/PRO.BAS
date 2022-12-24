@@ -1118,8 +1118,47 @@ SUB FileCrypt(FileName$, PassWord$)
   ERROR 73 ' Feature Unavailable
 END SUB
 
-SUB FileInfo(FileName$, tVar AS FInfo)
-  ERROR 73 ' Feature Unavailable
+SUB FileInfo(fileName$, tVar AS FInfo)
+
+  f$ = fileName$
+
+  IF RIGHT$(f$, 1) <> CHR$(0) THEN f$ = f$ + CHR$(0)
+
+  DIM createDate AS FILETIME
+  DIM modifyDate AS FILETIME
+  DIM accessDate AS FILETIME
+  DIM systime1 AS SYSTEMTIME
+  DIM fileHandle AS _OFFSET
+
+  fileHandle = CreateFileA%&(_OFFSET(f$), GENERIC_READ, FILE_SHARE_READ OR FILE_SHARE_WRITE, 0, OPEN_EXISTING, 0, 0)
+  IF fileHandle <> INVALID_HANDLE_VALUE THEN
+    IF GetFileTime&(fileHandle, _OFFSET(createDate), _OFFSET(modifyDate), _OFFSET(accessDate)) THEN
+      'PRINT HEX$(createDate.dwLowDateTime) + HEX$(createDate.dwHighDateTime)
+      'PRINT HEX$(modifyDate.dwLowDateTime) + HEX$(modifyDate.dwHighDateTime)
+      'PRINT HEX$(accessDate.dwLowDateTime) + HEX$(accessDate.dwHighDateTime)
+      IF FileTimeToSystemTime&(_OFFSET(createDate), _OFFSET(systime1)) THEN
+        tVar.Year = systime1.wYear
+        tVar.Month = systime1.wMonth
+        tVar.Day = systime1.wDay
+        tVar.Hour = systime1.wHour
+        tVar.Minute = systime1.wMinute
+        tVar.Second = systime1.wSecond
+      ELSE
+        'PRINT "FileTimeToSystemTime failed. Error: 0x" + LCASE$(HEX$(GetLastError&))
+      END IF
+    ELSE
+      'PRINT "GetFileTime failed. Error: 0x" + LCASE$(HEX$(GetLastError&))
+    END IF
+    IF CloseHandle&(fileHandle) = 0 THEN
+      'PRINT "CloseHandle failed. Error: 0x" + LCASE$(HEX$(GetLastError&))
+    END IF
+  ELSE
+    'PRINT "CreateFileA failed. Error: 0x" + LCASE$(HEX$(GetLastError&))
+  END IF
+
+  tVar.Size = FileSize(fileName$)
+  tVar.Attrib = GetFileAttributes(f$)
+
 END SUB
 
 ' FileSize will quickly return the length of a named file. 
@@ -1257,8 +1296,18 @@ FUNCTION FullName$(partName$)
   FullName$ = cwd$ + section$
 END FUNCTION
 
-FUNCTION GetAttr(FileName$)
-  ERROR 73 ' Feature Unavailable
+FUNCTION GetAttr(fileName$)
+  IF Exist(fileName$) THEN
+    IF INSTR(_OS$, "[WINDOWS]") THEN
+      f$ = fileName$
+      IF RIGHT$(f$, 1) <> CHR$(0) THEN f$ = f$ + CHR$(0)
+      GetAttr = GetFileAttributes(f$)
+    ELSE
+      ERROR 73 ' Feature Unavailable
+    END IF
+  ELSE
+    GetAttr = -1
+  END IF
 END FUNCTION
 
 ' GetDir will return the current directory for either a specified drive 

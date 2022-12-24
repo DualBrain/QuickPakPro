@@ -38,12 +38,12 @@ We also want to thank [Gene Buckle](https://github.com/geneb) for making this al
 |EXIST.BAS   |         |   |FAPPEND.BAS |         |   |FASTFILE.BAS|         |
 |FGETAH.BAS  |         |   |FGETR.BAS   |         |   |FGETRT.BAS  |         |
 |FILECOMP.BAS|         |   |FILECOPY.BAS|         |   |FILECRPT.BAS|         |
-|FILEINFO.BAS|         |   |FILESORT.BAS|         |   |FILEVIEW.BAS|         |
+|FILEINFO.BAS| EXE     |   |FILESORT.BAS|         |   |FILEVIEW.BAS|         |
 |FILL.BAS    |         |   |FILLSCRN.BAS| EXE     |   |FIND.BAS    | EXE     |
 |FINDLAST.BAS| EXE     |   |FINDT.BAS   |         |   |FLINPUT.BAS |         |
 |FLUSH.BAS   |         |   |FNOTHER.BAS | EXE     |   |FNSPREAD.BAS| EXE     |
 |FORMAT.BAS  |         |   |FULLNAME.BAS| EXE     |   |GASGAUGE.BAS| INCLUDE |
-|GET1STR.BAS |         |   |GETATTR.BAS |         |   |GETCMOS.BAS |         |
+|GET1STR.BAS |         |   |GETATTR.BAS | EXE     |   |GETCMOS.BAS |         |
 |GETCOLOR.BAS| EXE     |   |GETDIR.BAS  | EXE     |   |GETEQUIP.BAS| EXE     |
 |GETVMODE.BAS| EXE     |   |GRAFCURS.BAS|         |   |HAND2NAM.BAS|         |
 |HCOPY.BAS   |         |   |HUGE.BAS    |         |   |IMINMAX.BAS | EXE     |

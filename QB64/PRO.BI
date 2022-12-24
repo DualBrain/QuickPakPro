@@ -16,14 +16,14 @@ TYPE FLen                                 ' "Hard-coded" TYPE for xxxxT methods.
 END TYPE
 
 TYPE FInfo
-  Year1   AS INTEGER
-  Month1  AS INTEGER
-  Day1    AS INTEGER
-  Hour1   AS INTEGER
-  Minute1 AS INTEGER
-  Second1 AS INTEGER
-  Size1   AS LONG
-  Attrib1 AS INTEGER
+  Year   AS INTEGER
+  Month  AS INTEGER
+  Day    AS INTEGER
+  Hour   AS INTEGER
+  Minute AS INTEGER
+  Second AS INTEGER
+  Size   AS LONG
+  Attrib AS INTEGER
 END TYPE
 
 TYPE FullInfo 
@@ -60,6 +60,13 @@ END TYPE
 ' * Win32
 ' ********************************************************
 
+Const GENERIC_READ = -&H80000000
+Const GENERIC_WRITE = &H40000000
+Const FILE_SHARE_READ = &H1
+Const FILE_SHARE_WRITE = &H2
+Const OPEN_EXISTING = &H3
+Const INVALID_HANDLE_VALUE = -1
+
 CONST MAX_PATH = 260
 CONST INVALID_HANDLE_VALUE = -1
 CONST FILE_ATTRIBUTE_HIDDEN = &H2
@@ -69,16 +76,32 @@ CONST FILE_ATTRIBUTE_DEVICE = &H40
 CONST FILE_ATTRIBUTE_NORMAL = &H80
 CONST FILE_ATTRIBUTE_COMPRESSED = &H800
 CONST FILE_ATTRIBUTE_ENCRYPTED = &H4000
+CONST DRIVE_REMOVABLE = 2
+CONST DRIVE_FIXED = 3
+CONST DRIVE_REMOTE = 4
+CONST DRIVE_CDROM = 5
+CONST DRIVE_RAMDISK = 6
 
 ' https://learn.microsoft.com/en-us/windows/win32/debug/system-error-codes--0-499-
 CONST ERROR_FILE_NOT_FOUND = &H2
 CONST ERROR_PATH_NOT_FOUND = &H3
 CONST ERROR_ACCESS_DENIED = &H5
 
-TYPE FileTime
-  dwlowdatetime AS _UNSIGNED LONG
-  dwhighdatetime AS _UNSIGNED LONG
-END TYPE
+Type FILETIME
+  dwLowDateTime As _Unsigned Long
+  dwHighDateTime As _Unsigned Long
+End Type
+
+Type SYSTEMTIME
+  wYear As _Unsigned Integer
+  wMonth As _Unsigned Integer
+  wDayOfWeek As _Unsigned Integer
+  wDay As _Unsigned Integer
+  wHour As _Unsigned Integer
+  wMinute As _Unsigned Integer
+  wSecond As _Unsigned Integer
+  wMilliseconds As _Unsigned Integer
+End Type
 
 TYPE Win32_Find_Data
   dwfileattributes AS _UNSIGNED LONG
@@ -100,12 +123,31 @@ TYPE Rectangle
   bottom AS LONG
 END TYPE
 
-DECLARE DYNAMIC LIBRARY "kernel32"
+Declare Dynamic Library "kernel32"
+  FUNCTION CreateFileA%& (BYVAL lpFileName AS _OFFSET, BYVAL dwDesiredAccess AS _UNSIGNED LONG, _
+                          BYVAL dwShareMode AS _UNSIGNED LONG, BYVAL lpSecurityAttributes AS _OFFSET, _
+                          BYVAL dwCreationDisposition AS _UNSIGNED LONG, BYVAL dwFlagsAndAttributes AS _UNSIGNED LONG, _
+                          BYVAL hTemplateFile AS _OFFSET)
+  Function CloseHandle& (ByVal hObject As _Offset)
+  Function GetFileTime& (ByVal hFile As _Offset, Byval lpCreationTime As _Offset, Byval lpLastAccessTime As _Offset, Byval lpLastWriteTime As _Offset)
+  Function SetFileTime& (ByVal hFile As _Offset, Byval lpCreationTime As _Offset, Byval lpLastAccessTime As _Offset, Byval lpLastWriteTime As _Offset)
+  Function FileTimeToLocalFileTime& (ByVal lpFileTime As _Offset, Byval lpLocalFileTime As _Offset)
+  Function LocalFileTimeToFileTime& (ByVal lpLocalFileTime As _Offset, Byval lpFileTime As _Offset)
+  Function FileTimeToSystemTime& (ByVal lpFileTime As _Offset, Byval lpSystemTime As _Offset)
+  Function SystemTimeToFileTime& (ByVal lpSystemTime As _Offset, Byval lpFileTime As _Offset)
+  FUNCTION GetFileSizeEx& (BYVAL hFile AS _Offset, lpFileSize AS _Offset)
   FUNCTION GetDiskFreeSpace& ALIAS GetDiskFreeSpaceA (BYVAL lprootpathname AS _OFFSET, BYVAL lpSectorsPerCluster AS _OFFSET, BYVAL lpBytesPerSector AS _OFFSET, BYVAL lpNumberOfFreeClusters AS _OFFSET, BYVAL lpTotalNumberOfClusters AS _OFFSET)
   FUNCTION FindFirstFile~%& ALIAS FindFirstFileA (BYVAL lpfilename AS _OFFSET, BYVAL lpfindfiledata AS _OFFSET)
   FUNCTION FindNextFile& ALIAS FindNextFileA (BYVAL hfind AS _UNSIGNED _OFFSET, BYVAL lpfindfiledata AS _OFFSET)
   FUNCTION FindClose& (BYVAL hfind AS _UNSIGNED _OFFSET)
   FUNCTION GetLastError& ()
+End Declare
+
+DECLARE LIBRARY
+  FUNCTION GetFileAttributes& (f$)
+  FUNCTION SetFileAttributes& (f$, Byval attrib&)
+  FUNCTION GetDriveTypeA& (nDrive AS STRING)
+  FUNCTION GetLogicalDriveStringsA (BYVAL nBuff AS LONG, lpbuff AS STRING)
 END DECLARE
 
 DECLARE DYNAMIC LIBRARY "user32"
