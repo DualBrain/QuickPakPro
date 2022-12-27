@@ -17,7 +17,7 @@ We also want to thank [Gene Buckle](https://github.com/geneb) for making this al
 |BCOPYT.BAS  | EXE     |   |BIGPRINT.BAS| EXE     |   |BITS.BAS    | EXE     |
 |BLPRINT.BAS |         |   |BPRINT.BAS  | EXE     |   |CALC.BAS    | INCLUDE |
 |CALENDAR.BAS| INCLUDE |   |CAPNUM.BAS  | INCLUDE |   |CLEARSCR.BAS| EXE     |
-|COLORPIK.BAS| EXE     |   |COLORS.BAS  | EXE     |   |COMPARE.BAS |         |
+|COLORPIK.BAS| EXE     |   |COLORS.BAS  | EXE     |   |COMPARE.BAS | EXE     |
 |DATA.BAS    |         |   |DATE2DAY.BAS| EXE     |   |DATEIN.BAS  | INCLUDE |
 |DAYNAME.BAS | EXE     |   |DECLARE.BAS | INCLUDE |   |DEFCNF.BI   | INCLUDE |
 |DEMO123.BAS |         |   |DEMOCM.BAS  | EXE     |   |DEMOCOMP.BAS|         |

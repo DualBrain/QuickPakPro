@@ -3109,12 +3109,33 @@ SUB Clock24(Row, Column, Colr, Mode)
   ERROR 73 ' Feature Unavailable
 END SUB
 
-FUNCTION Compare(Seg1, Adr1, Seg2, Adr2, NumBytes)
-  ERROR 73 ' Feature Unavailable
+' Compare will compare any two blocks of memory, and report if they are the same. 
+FUNCTION Compare(segAdr1 AS _MEM, segAdr2 AS _MEM, numBytes)
+'FUNCTION Compare(Seg1, Adr1, Seg2, Adr2, NumBytes)
+
+  SELECT CASE numBytes
+    CASE -1: size = 2
+    CASE -2: size = 4
+    CASE -3: size = 4
+    CASE -4: size = 8
+    CASE ELSE: size = numBytes
+  END SELECT
+
+  s1$ = SPACE$(size)
+  s2$ = SPACE$(size)
+  _MEMGET segAdr1, segAdr1.OFFSET, s1$
+  _MEMGET segAdr2, segAdr2.OFFSET, s2$
+  Compare = (s1$ = s2$)
+
 END FUNCTION
 
-FUNCTION CompareT(Type1, Type2, NumBytes)
-  ERROR 73 ' Feature Unavailable
+' CompareT will compare any two TYPE variables, and report if they are the same. 
+FUNCTION CompareT(type1 AS _MEM, type2 AS _MEM, numBytes)
+  s1$ = SPACE$(numBytes)
+  s2$ = SPACE$(numBytes)
+  _MEMGET type1, type1.OFFSET, s1$
+  _MEMGET type2, type2.OFFSET, s2$
+  CompareT = (s1$ = s2$)
 END FUNCTION
 
 ' Date2Num converts a date in string form to an equivalent integer variable. 
