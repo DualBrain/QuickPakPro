@@ -4563,12 +4563,47 @@ END SUB
 ' APrintT will quickly print any portion of a fixed-length string array 
 ' or the string component of a TYPE array, and contain the display 
 ' within a specified area of the screen. 
-SUB APrintT(array() AS FLen, first, elSize, numEls, firstChar, numChars, colr, page)
-  DIM s$(LBOUND(array) TO UBOUND(array))
-  FOR x = LBOUND(array) TO UBOUND(array)
-    s$(x) = array(x).S
+'SUB APrintT(array() AS FLen, first, elSize, numEls, firstChar, numChars, colr, page)
+SUB APrintT(src AS _MEM, elSize, numEls, firstChar, numChars, colr, page)
+
+  ' array$(first) is the first element to be included, and elSize% is the 
+  ' total length in bytes of each element. 
+  '
+  ' numEls% is the total number of elements to print, firstChar% is 
+  ' the first character in each string to be displayed, and numChars% 
+  ' is the number of characters to print. 
+  '
+  ' colr% specifies the display color, coded in the format used by 
+  ' QuickPak Professional. If -1 is used for colr%, the current screen 
+  ' colors will be maintained. 
+  ' 
+  ' page% indicates the video page to write to, which is relevant only 
+  ' when a color monitor is installed. If page% is set to -1, APrintT 
+  ' will use the current page. 
+  '
+  ' Printing always begins at the current cursor location.
+
+  DIM offset AS _OFFSET: offset = src.OFFSET
+  'DIM s AS STRING ' * elSize
+
+  IF page > -1 THEN SCREEN , , page, page
+  row = CSRLIN
+  col = POS(0)
+  FOR x = 1 TO numEls
+    s$ = SPACE$(elSize)
+    _MEMGET src, offset, s$
+    value$ = MID$(s$, firstChar, numChars)
+    QPrintRC value$ + SPACE$(numChars - LEN(value$)), row, col, colr
+    row = row + 1
+    offset = offset + elSize
   NEXT
-  CALL APrint(s$(), first, numEls, firstChar, numChars, colr, page)
+
+  ' DIM s$(LBOUND(array) TO UBOUND(array))
+  ' FOR x = LBOUND(array) TO UBOUND(array)
+  '   s$(x) = array(x).S
+  ' NEXT
+  ' CALL APrint(s$(), first, numEls, firstChar, numChars, colr, page)
+
 END SUB
 
 ' APrintT0 will quickly print any portion of a fixed-length string 

@@ -54,7 +54,6 @@ DECLARE SUB APrintT (SEG arrayElement AS FLen, elSize, numEls, midStart, numChar
 ' END DEF
 
 REDIM array(3100) AS FLen
-'REDIM array(3100) AS STRING * 30
 
 CLS
 OPEN "KEYSORT.BAS" FOR INPUT AS #1
@@ -70,8 +69,8 @@ FOR x = 2100 TO 2200
 NEXT
 
 LOCATE 1, 45
-CALL APrintT(array(), 2175, 30, 20, 1, 30, 7, -1)
 'CALL APrintT (VARSEG(array$(2175)), VARPTR(array$(2175)), 30, 20, 1, 30, 7, -1)
+DIM src AS _MEM: src = _MEM(array(2175)): CALL APrintT(src, 30, 20, 1, 30, 7, -1): _MEMFREE src
 
 FUNCTION FnSigned& (value%)                       ' for testing only
   IF value% < 0 THEN
