@@ -2980,8 +2980,32 @@ SUB BCopy(FromSeg, FromAddr, ToSeg, ToAddr, NumBytes, Direction)
   ERROR 73 ' Feature Unavailable
 END SUB
 
-SUB BCopyT(FromEl, ToEl, ElSize, NumEls)
-  ERROR 73 ' Feature Unavailable
+SUB BCopyT(src AS _MEM, srcEl, dest AS _MEM, destEl, elSize, numEls)
+  SELECT CASE elSize
+    CASE -1 : size = 2 ' 2-byte integer 
+    CASE -2 : size = 4 ' 4-byte long integer
+    CASE -3 : size = 4 ' 4-byte single precision
+    CASE -4 : size = 8 ' 8-byte double precision
+    CASE IS > 0: size = elSize
+    CASE ELSE
+      EXIT SUB
+  END SELECT
+  offset = 0
+
+  DIM srcOffset AS _OFFSET
+  DIM destOffset AS _OFFSET
+  DIM totalSize AS _OFFSET
+  srcOffset = src.OFFSET + ((srcEl - 1) * size)
+  destOffset = dest.OFFSET + ((destEl - 1) * size)
+  totalSize = numEls * size
+  _MEMCOPY src, srcOffset, totalSize TO dest, destOffset
+
+  ' FOR i = 1 TO numEls - 1
+  '   PRINT offset
+  '   _MEMCOPY src, src.OFFSET + offset, size TO dest, dest.OFFSET + offset
+  '   offset = offset + size
+  ' NEXT
+
 END SUB
 
 SUB BLPrint(LPTNumber, X$, ErrorCount)

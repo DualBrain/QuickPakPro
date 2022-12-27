@@ -14,7 +14,7 @@ We also want to thank [Gene Buckle](https://github.com/geneb) for making this al
 | ---------- | ------- | - | ---------- | ------- | - | ---------- | ------- |
 |AMENU.BAS   | EXE     |   |APRINT.BAS  | EXE     |   |APRINTT.BAS | EXE     |
 |ASCCHART.BAS| INCLUDE |   |ASCIIPIK.BAS| EXE     |   |ASSEMBLY.BAS| EXE     |
-|BCOPYT.BAS  |         |   |BIGPRINT.BAS| EXE     |   |BITS.BAS    | EXE     |
+|BCOPYT.BAS  | EXE     |   |BIGPRINT.BAS| EXE     |   |BITS.BAS    | EXE     |
 |BLPRINT.BAS |         |   |BPRINT.BAS  | EXE     |   |CALC.BAS    | INCLUDE |
 |CALENDAR.BAS| INCLUDE |   |CAPNUM.BAS  | INCLUDE |   |CLEARSCR.BAS| EXE     |
 |COLORPIK.BAS| EXE     |   |COLORS.BAS  | EXE     |   |COMPARE.BAS |         |
