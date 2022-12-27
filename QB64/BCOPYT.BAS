@@ -43,8 +43,8 @@ NEXT
 
 ' CALL BCopyT(FromArray(16301), DestArray(16301), -2, 700)
 ' The above line has been converted to the following three lines. 
-DIM src AS _MEM: DIM dest AS _MEM: src = _MEM(fromArray()): dest = _MEM(destArray())
-CALL BCopyT(src, 16301, dest, 16301, -2, 700)
+DIM src AS _MEM: DIM dest AS _MEM: src = _MEM(fromArray(16301)): dest = _MEM(destArray(16301))
+CALL BCopyT(src, dest, -2, 700)
 _MEMFREE dest: _MEMFREE src
 
 FOR x = 16300 TO 17001          ' ***** elements 16300 and 17001 SHOULD fail

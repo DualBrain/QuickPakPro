@@ -2976,11 +2976,69 @@ FUNCTION AddUSI(X, Y)
   ERROR 73 ' Feature Unavailable
 END FUNCTION
 
-SUB BCopy(FromSeg, FromAddr, ToSeg, ToAddr, NumBytes, Direction)
-  ERROR 73 ' Feature Unavailable
+SUB BCopy(src AS _MEM, dest AS _MEM, numBytes, direction)
+'SUB BCopy(fromSeg, fromAddr, toSeg, toAddr, numBytes, direction)
+
+  ' FromSeg% and FromAddr% indicate the source location of the 
+  ' block, and ToSeg% and ToAddr% tell where to copy it to. 
+  ' NumBytes% is, well, you can figure that one out. Direction% is 
+  ' either O to copy in the forward direction, or -1 to copy backwards. 
+
+  DIM totalSize AS _OFFSET: totalSize = numEls * size
+  
+  IF direction = 0 THEN
+    _MEMCOPY src, src.OFFSET, totalSize TO dest, dest.OFFSET
+  ELSE
+    ' Not really sure what this means.
+    ' Also, of the included examples that use BCopy, 
+    ' **ALL** of them are passing a 0 for this param.
+    ERROR 73 ' Feature Unavailable
+  END IF
+
 END SUB
 
-SUB BCopyT(src AS _MEM, srcEl, dest AS _MEM, destEl, elSize, numEls)
+' BCopyT will copy one or more elements in a TYPE array to 
+' another array, or to any location in memory. Alternately, BCopyT 
+' can be used to move any contiguous block of memory, even if the 
+' number of bytes exceeds 65536. 
+SUB BCopyT(src AS _MEM, dest AS _MEM, elSize, numEls)
+'SUB BCopyT(SEG fromEl, SEG toEl, elSize, numEls) 
+'SUB BCopyT(fromSeg, fromAdr, toSeg, toAdr%, numBytes, numEls) 
+'SUB BCopyT(src AS _MEM, srcEl, dest AS _MEM, destEl, elSize, numEls)
+
+  ' FromEl is the starting element of the source array and ToEl is the 
+  ' starting element in the destination array. El Size% is the size of each 
+  ' element in bytes, or a special code (see below). NumEls% is the 
+  ' number of elements to be copied. 
+  '
+  ' With the alternate call form, FromSeg%, FromAdr%, ToSeg%, and 
+  ' ToAdr% define the source and destination segments and addresses. 
+  ' NumBytes % then tells how many bytes are to be copied. 
+
+  ' PRINT v.OFFSET; " the beginning of the memory block as _OFFSET"
+  ' PRINT v.SIZE; " the largest available region of memory of the ELEMENT in bytes as _OFFSET"
+  ' PRINT v.ELEMENTSIZE; " the byte size of the elements within the blocks AS _OFFSET"
+  ' PRINT "     ^----- represents the memory block 'left', from the current element to max"
+
+  ' PRINT v.TYPE; " the type (represented as bits combined to form a value"
+  ' IF v.TYPE AND 1 THEN PRINT "   BIT 01: _BYTE"
+  ' IF v.TYPE AND 2 THEN PRINT "   BIT 02: INTEGER"
+  ' IF v.TYPE AND 4 THEN PRINT "   BIT 03: LONG or SINGLE"
+  ' IF v.TYPE AND 8 THEN PRINT "   BIT 04: DOUBLE or _INTEGER64"
+  ' IF v.TYPE AND 16 THEN PRINT "   BIT 05: Not Defined"
+  ' IF v.TYPE AND 32 THEN PRINT "   BIT 06: _FLOAT"
+  ' IF v.TYPE AND 64 THEN PRINT "   BIT 07: Not Defined"
+  ' IF v.TYPE AND 128 THEN PRINT "   BIT 08: 'integer type'"
+  ' IF v.TYPE AND 256 THEN PRINT "   BIT 09: 'floating point type'"
+  ' IF v.TYPE AND 512 THEN PRINT "   BIT 10: string (fixed or variable length)"
+  ' IF v.TYPE AND 1024 THEN PRINT "   BIT 11: _UNSIGNED"
+  ' IF v.TYPE AND 2048 THEN PRINT "   BIT 12: _MEMIMAGE"
+  ' IF v.TYPE AND 4096 THEN PRINT "   BIT 13: _MEM TYPE structure"
+  ' IF v.TYPE AND 8192 THEN PRINT "   BIT 14: _OFFSET"
+  ' IF v.TYPE AND 16384 THEN PRINT "   BIT 15: _MEMNEW(size) or _MEMNEW(offset_size)"
+  ' IF v.TYPE AND 32768 THEN PRINT "   BIT 16: UDT (TYPE...END TYPE)"
+  ' IF v.TYPE AND 65536 THEN PRINT "   BIT 17: an array of data"
+
   SELECT CASE elSize
     CASE -1 : size = 2 ' 2-byte integer 
     CASE -2 : size = 4 ' 4-byte long integer
@@ -2990,21 +3048,12 @@ SUB BCopyT(src AS _MEM, srcEl, dest AS _MEM, destEl, elSize, numEls)
     CASE ELSE
       EXIT SUB
   END SELECT
-  offset = 0
 
-  DIM srcOffset AS _OFFSET
-  DIM destOffset AS _OFFSET
-  DIM totalSize AS _OFFSET
-  srcOffset = src.OFFSET + ((srcEl - 1) * size)
-  destOffset = dest.OFFSET + ((destEl - 1) * size)
-  totalSize = numEls * size
-  _MEMCOPY src, srcOffset, totalSize TO dest, destOffset
-
-  ' FOR i = 1 TO numEls - 1
-  '   PRINT offset
-  '   _MEMCOPY src, src.OFFSET + offset, size TO dest, dest.OFFSET + offset
-  '   offset = offset + size
-  ' NEXT
+  'DIM srcOffset AS _OFFSET: srcOffset = src.OFFSET + ((srcEl - 1) * size)
+  'DIM destOffset AS _OFFSET: destOffset = dest.OFFSET + ((destEl - 1) * size)
+  DIM totalSize AS _OFFSET: totalSize = numEls * size
+  
+  _MEMCOPY src, src.OFFSET, totalSize TO dest, dest.OFFSET
 
 END SUB
 
