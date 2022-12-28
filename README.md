@@ -15,12 +15,12 @@ We also want to thank [Gene Buckle](https://github.com/geneb) for making this al
 |AMENU.BAS   | EXE     |   |APRINT.BAS  | EXE     |   |APRINTT.BAS | EXE     |
 |ASCCHART.BAS| INCLUDE |   |ASCIIPIK.BAS| EXE     |   |ASSEMBLY.BAS| EXE     |
 |BCOPYT.BAS  | EXE     |   |BIGPRINT.BAS| EXE     |   |BITS.BAS    | EXE     |
-|BLPRINT.BAS |         |   |BPRINT.BAS  | EXE     |   |CALC.BAS    | INCLUDE |
+|BLPRINT.BAS | N/A     |   |BPRINT.BAS  | EXE     |   |CALC.BAS    | INCLUDE |
 |CALENDAR.BAS| INCLUDE |   |CAPNUM.BAS  | INCLUDE |   |CLEARSCR.BAS| EXE     |
 |COLORPIK.BAS| EXE     |   |COLORS.BAS  | EXE     |   |COMPARE.BAS | EXE     |
-|DATA.BAS    |         |   |DATE2DAY.BAS| EXE     |   |DATEIN.BAS  | INCLUDE |
+|DATA.BAS    | N/A     |   |DATE2DAY.BAS| EXE     |   |DATEIN.BAS  | INCLUDE |
 |DAYNAME.BAS | EXE     |   |DECLARE.BAS | INCLUDE |   |DEFCNF.BI   | INCLUDE |
-|DEMO123.BAS |         |   |DEMOCM.BAS  | EXE     |   |DEMOCOMP.BAS|         |
+|DEMO123.BAS | EXE     |   |DEMOCM.BAS  | EXE     |   |DEMOCOMP.BAS|         |
 |DEMOCOPY.BAS|         |   |DEMOCRPT.BAS|         |   |DEMODATE.BAS| EXE     |
 |DEMODIA2.BAS| EXE     |   |DEMODIAL.BAS| EXE     |   |DEMODIAP.BAS| EXE     |
 |DEMOEDIT.BAS| EXE     |   |DEMOEMS.BAS |         |   |DEMOEMS2.BAS|         |

@@ -1014,8 +1014,19 @@ FUNCTION ExeName$
 END FUNCTION
 
 ' Exist will quickly determine the presence of a file. 
-FUNCTION Exist(FileName$)
-  Exist = _FileExists(FileName$)
+FUNCTION Exist(fileName$)
+  ' FileName$ is the file or file specification whose presence is being 
+  ' determined, and There is assigned either to -1 if the file exists, or 0 
+  ' if it does not. 
+  ' The FileName$ parameter may optionally contain a drive letter, a 
+  ' directory path, and either of the DOS wild cards. For example, 
+  ' "B:\STUFF\*.BAS" would tell if any BASIC program files are 
+  ' present on drive B in the \STUFF directory.
+  IF INSTR(fileName$, "*") > 0 OR INSTR(fileName$, "?") > 0 THEN
+    Exist = FCount(fileName$) > 0
+  ELSE
+    Exist = _FileExists(fileName$)
+  END IF
 END FUNCTION
 
 ' FastLoadInt returns the number of lines
