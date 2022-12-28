@@ -84,7 +84,7 @@ We also want to thank [Gene Buckle](https://github.com/geneb) for making this al
 |WINDOW.BAS  |         |   |WIPES.BAS   | EXE     |   |WORDWRAP.BAS| EXE     |
 |YESNOB.BAS  | INCLUDE |   |            |         |   |            |         |
 
-Files marked with *INCLUDE* are meant to be included, while files marked as *EXE* are to be compiled as an executable (stand-alone example). The replacement of the PRO.LIB functionality is implemented in the *PRO.BAS* and *PRO.BI* source files.
+Files marked with *INCLUDE* are meant to be included, while files marked as *EXE* are to be compiled as an executable (stand-alone example). The replacement of the PRO.LIB functionality is implemented in the *PRO.BAS* and *PRO.BI* source files. (Files marked with *N/A* are either hardware specific and/or simply "not possible" with the current release of QB64. If you disagree, please share.)
 
 ## Contributing
 

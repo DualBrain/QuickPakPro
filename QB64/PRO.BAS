@@ -1058,7 +1058,7 @@ END SUB
 
 ' FCopy will copy a file from within a BASIC program without 
 ' requiring the use of SHELL. 
-SUB FCopy(Source$, Dest$, Buffer$, ErrCode)
+SUB FCopy(source$, dest$, buffer$, errCode)
   ERROR 73 ' Feature Unavailable
 END SUB
 
@@ -1120,10 +1120,6 @@ END SUB
 FUNCTION FileComp(File1$, File2$, ErrCode)
   ERROR 73 ' Feature Unavailable
 END FUNCTION
-
-SUB FileCopy(Source$, Dest$, Copied, ErrCode)
-  ERROR 73 ' Feature Unavailable
-END SUB
 
 SUB FileCrypt(FileName$, PassWord$)
   ERROR 73 ' Feature Unavailable
