@@ -1145,8 +1145,47 @@ SUB FGetT(Handle, Destination AS FLen, NumBytes)
   ERROR 73 ' Feature Unavailable
 END SUB
 
-FUNCTION FileComp(File1$, File2$, ErrCode)
-  ERROR 73 ' Feature Unavailable
+' FileComp will report if any two disk files are the same. 
+FUNCTION FileComp(file1$, file2$, errCode)
+
+  ' File1$ and File2$ are the two files being compared, and Same 
+  ' receives either -1 if they are the same, or O if they are not. 
+  '
+  ' If a DOS error occurs (file not found, drive door open, etc.), then 
+  ' ErrCode% will tell which file the error relates to. An ErrCode% of 
+  ' 1 means the problem was with File1$, and 2 means it was with File2$.
+  '
+  ' Besides returning a true or false condition based on a comparison of 
+  ' the two files, FileComp also uses the DOSError and WhichError 
+  ' services to report disk errors. This is illustrated in the 
+  ' DEMOCOMP .BAS example program.
+
+  IF NOT Exist(file1$) THEN errCode = 1: EXIT FUNCTION
+  IF NOT Exist(file2$) THEN errCode = 2: EXIT FUNCTION
+  
+  s1& = FileSize&(file1$)
+  s2& = FileSize&(file2$)
+
+  IF s1& <> s2& THEN FileComp = 0: EXIT FUNCTION
+
+  result = 1 ' assume files match
+
+  DIM value1 AS _BYTE
+  DIM value2 AS _BYTE
+
+  CALL FOpen(file1$, f1)
+  CALL FOpen(file2$, f2)
+
+  DO
+    GET #f1, , value1
+    GET #f2, , value2
+    IF value1 <> value2 THEN result = 0: EXIT DO ' unless they don't
+  LOOP UNTIL FEof(f1)
+
+  CALL FClose(f2): CALL FClose(f1)
+
+  FileComp = result
+
 END FUNCTION
 
 SUB FileCrypt(FileName$, PassWord$)
