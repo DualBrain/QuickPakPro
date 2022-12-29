@@ -1059,7 +1059,35 @@ END SUB
 ' FCopy will copy a file from within a BASIC program without 
 ' requiring the use of SHELL. 
 SUB FCopy(source$, dest$, buffer$, errCode)
-  ERROR 73 ' Feature Unavailable
+
+  ' TODO: Consider if there is a way to leverage LOF/EOF and buffer$
+  ' NOTE: This is currently (most likely) very "slow" given it is 
+  '       working one byte at a time - see the TODO: above.
+
+  errCode = 0
+
+  IF Exist(source$) THEN
+
+    ' TODO: Check destination folder exists.
+    ' TODO: Protect against trying to overwrite (same source and dest path).
+
+    DIM value AS _BYTE
+
+    CALL FOpen(source$, src)
+    CALL FOpen(dest$, dest)
+
+    DO
+      GET #src, , value
+      IF FEof(src) THEN EXIT DO
+      PUT #dest, , value
+    LOOP
+
+    CALL FClose(dest): CALL FClose(source)
+
+  ELSE
+    errCode = 2 ' problem with the source file
+  END IF
+
 END SUB
 
 ' FCreate is used to create a file in preparation for writing to it with 
@@ -1072,8 +1100,8 @@ END SUB
 
 ' FEof will report if the current DOS Seek location is at the end of 
 ' the specified file. 
-FUNCTION FEof(Handle)
-  FEof = EOF(Handle)
+FUNCTION FEof(handle)
+  FEof = EOF(handle)
 END FUNCTION
 
 ' FFlush will flush a file's data buffers to disk without requiring the 
@@ -1224,8 +1252,9 @@ FUNCTION FLof&(Handle)
   FLof& = LOF(Handle)
 END FUNCTION
 
-SUB FOpen(FileName$, Handle)
-  ERROR 73 ' Feature Unavailable
+SUB FOpen(fileName$, handle)
+  handle = FREEFILE
+  OPEN fileName$ FOR BINARY AS #handle
 END SUB
 
 SUB FOpenS(FileName$, Handle)
@@ -1300,6 +1329,14 @@ FUNCTION FullName$(partName$)
       EXIT FOR ' error?
     END IF
   NEXT
+  IF InstrTblB(LEN(cwd$), cwd$, "\/") <> LEN(cwd$) AND _
+    InstrTbl(1, section$, "\/") <> 1 THEN
+    IF InstrTbl(1, cwd$, "\") > 0 THEN
+      cwd$ = cwd$ + "\"
+    ELSE
+      cwd$ = cwd$ + "/"
+    END IF
+  END IF
   FullName$ = cwd$ + section$
 END FUNCTION
 

@@ -21,7 +21,7 @@ We also want to thank [Gene Buckle](https://github.com/geneb) for making this al
 |DATA.BAS    | N/A     |   |DATE2DAY.BAS| EXE     |   |DATEIN.BAS  | INCLUDE |
 |DAYNAME.BAS | EXE     |   |DECLARE.BAS | INCLUDE |   |DEFCNF.BI   | INCLUDE |
 |DEMO123.BAS | EXE     |   |DEMOCM.BAS  | EXE     |   |DEMOCOMP.BAS|         |
-|DEMOCOPY.BAS|         |   |DEMOCRPT.BAS|         |   |DEMODATE.BAS| EXE     |
+|DEMOCOPY.BAS| EXE     |   |DEMOCRPT.BAS|         |   |DEMODATE.BAS| EXE     |
 |DEMODIA2.BAS| EXE     |   |DEMODIAL.BAS| EXE     |   |DEMODIAP.BAS| EXE     |
 |DEMOEDIT.BAS| EXE     |   |DEMOEMS.BAS |         |   |DEMOEMS2.BAS|         |
 |DEMOEVAL.BAS| EXE     |   |DEMOFAST.BAS|         |   |DEMOFC.BAS  |         |
@@ -37,7 +37,7 @@ We also want to thank [Gene Buckle](https://github.com/geneb) for making this al
 |EGABSAVE.BAS|         |   |EVALUATE.BAS| INCLUDE |   |EXENAME.BAS | EXE     |
 |EXIST.BAS   |         |   |FAPPEND.BAS |         |   |FASTFILE.BAS|         |
 |FGETAH.BAS  |         |   |FGETR.BAS   |         |   |FGETRT.BAS  |         |
-|FILECOMP.BAS|         |   |FILECOPY.BAS|         |   |FILECRPT.BAS|         |
+|FILECOMP.BAS|         |   |FILECOPY.BAS| INCLUDE |   |FILECRPT.BAS|         |
 |FILEINFO.BAS| EXE     |   |FILESORT.BAS|         |   |FILEVIEW.BAS|         |
 |FILL.BAS    |         |   |FILLSCRN.BAS| EXE     |   |FIND.BAS    | EXE     |
 |FINDLAST.BAS| EXE     |   |FINDT.BAS   |         |   |FLINPUT.BAS |         |
