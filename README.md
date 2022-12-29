@@ -21,9 +21,9 @@ We also want to thank [Gene Buckle](https://github.com/geneb) for making this al
 |DATA.BAS    | N/A     |   |DATE2DAY.BAS| EXE     |   |DATEIN.BAS  | INCLUDE |
 |DAYNAME.BAS | EXE     |   |DECLARE.BAS | INCLUDE |   |DEFCNF.BI   | INCLUDE |
 |DEMO123.BAS | EXE     |   |DEMOCM.BAS  | EXE     |   |DEMOCOMP.BAS| EXE     |
-|DEMOCOPY.BAS| EXE     |   |DEMOCRPT.BAS|         |   |DEMODATE.BAS| EXE     |
+|DEMOCOPY.BAS| EXE     |   |DEMOCRPT.BAS| EXE     |   |DEMODATE.BAS| EXE     |
 |DEMODIA2.BAS| EXE     |   |DEMODIAL.BAS| EXE     |   |DEMODIAP.BAS| EXE     |
-|DEMOEDIT.BAS| EXE     |   |DEMOEMS.BAS |         |   |DEMOEMS2.BAS|         |
+|DEMOEDIT.BAS| EXE     |   |DEMOEMS.BAS | N/A     |   |DEMOEMS2.BAS| N/A     |
 |DEMOEVAL.BAS| EXE     |   |DEMOFAST.BAS|         |   |DEMOFC.BAS  |         |
 |DEMOGAS.BAS | EXE     |   |DEMOIN.BAS  | EXE     |   |DEMOLTS.BAS |         |
 |DEMOMAIN.BAS| EXE     |   |DEMOMASK.BAS|         |   |DEMOMENU.BAS| EXE     |

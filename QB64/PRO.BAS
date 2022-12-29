@@ -3940,12 +3940,41 @@ FUNCTION Compact$(old$)
   Compact$ = result$
 END FUNCTION
 
-SUB Encrypt(X$, PassWord$)
-  ERROR 73 ' Feature Unavailable
+SUB Encrypt(text$, password$)
+
+  ' NOTE: This isn't matching the original algorythm.
+  '       But I'm assuming that Encrypt2 was meant to replace
+  '       Encrypt as they were not interchangable; so using the
+  '       same approach.
+
+  m = LEN(text$)
+  l = LEN(password$)
+
+  IF m < 1 THEN EXIT SUB
+  IF l < 1 THEN EXIT SUB
+  IF l > 44 THEN EXIT SUB
+
+  FOR x = 1 TO LEN(text$)
+    char = ASC(MID$(password$, (x MOD l) - l * ((x MOD l) = 0), 1))
+    MID$(text$, x, 1) = CHR$(ASC(MID$(text$, x, 1)) XOR char)
+  NEXT
+
 END SUB
 
-SUB Encrypt2(X$, PassWord$)
-  ERROR 73 ' Feature Unavailable
+SUB Encrypt2(text$, password$)
+
+  m = LEN(text$)
+  l = LEN(password$)
+
+  IF m < 1 THEN EXIT SUB
+  IF l < 1 THEN EXIT SUB
+  IF l > 44 THEN EXIT SUB
+
+  FOR x = 1 TO LEN(text$)
+    char = ASC(MID$(password$, (x MOD l) - l * ((x MOD l) = 0), 1))
+    MID$(text$, x, 1) = CHR$(ASC(MID$(text$, x, 1)) XOR char)
+  NEXT
+
 END SUB
 
 FUNCTION Far2Str$(Segment, Address)
