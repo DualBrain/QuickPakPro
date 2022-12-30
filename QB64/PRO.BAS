@@ -150,6 +150,22 @@ FUNCTION FindLast (array$(), last, size)
   FindLast = -1
 END FUNCTION
 
+' FindLastSM (SM stands for String Manager) determines the actual 
+' number of bytes occupied by strings in an integer storage array. 
+FUNCTION FindLastSM (array(), first, numBytes)
+  di = numBytes - 1
+  FOR index = UBOUND(array) TO first STEP -1 'LBOUND(array)
+    value = array(index) ' two bytes
+    l = value MOD 256 ' low byte
+    h = value \ 256 ' high byte
+    IF h <> 0 THEN EXIT FOR ELSE di = di - 1
+    IF l <> 0 THEN EXIT FOR ELSE di = di - 1
+  NEXT
+  IF (di MOD 2 = 0) AND h = 26 THEN di = di - 1
+  IF (di MOD 2 = 1) AND l = 26 THEN di = di - 1
+  FindLastSM = di
+END FUNCTION
+
 FUNCTION GetBit(array$, element)
   ' NOTE: Not sure if this matches the original QPPro implementation.
   entry = (element \ 8) + 1

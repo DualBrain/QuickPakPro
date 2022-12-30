@@ -554,9 +554,9 @@ PRINT "FileComp";
 result = FileComp("c:\test.txt", "c:\test.tmp", errCode)
 HandleResult errCode = 0
 
-PRINT "FileCopy";
-CALL FileCopy("c:\test.txt", "c:\test.tmp", copied, errCode)
-HandleResult errCode = 0
+'PRINT "FileCopy";
+'CALL FileCopy("c:\test.txt", "c:\test.tmp", copied, errCode)
+'HandleResult errCode = 0
 
 PRINT "FileCrypt";
 pw$ = "password"
@@ -1088,13 +1088,13 @@ HandleResult -1
 
 ' CALL ASCIIChart(ulRow, ulCol, height)
 
-PRINT "BCopy";
-CALL BCopy(fromSeg, fromAddr, toSeg, toAddr, numBytes, direction) 
-HandleResult -1
+'PRINT "BCopy";
+'CALL BCopy(fromSeg, fromAddr, toSeg, toAddr, numBytes, direction) 
+'HandleResult -1
 
 'CALL BCopyT(SEG fromEl, SEG toEl, elSize, numEls)
 
-PRINT "BCopy";
+PRINT "BLPrint";
 CALL BLPrint(lptNumber, x$, errCount)
 HandleResult -1
 
@@ -1118,13 +1118,13 @@ PRINT "Clock24";
 CALL Clock24(1, 1, 7, 1)
 HandleResult -1
 
-PRINT "Compare";
-result = Compare (seg1, adr1, seg2, adr2, numBytes) 
-HandleResult -1
+' PRINT "Compare";
+' result = Compare (seg1, adr1, seg2, adr2, numBytes) 
+' HandleResult -1
 
-PRINT "CompareT";
-result = CompareT (type1, type2, numBytes) 
-HandleResult -1
+' PRINT "CompareT";
+' result = CompareT (type1, type2, numBytes) 
+' HandleResult -1
 
 ' PRINT "Date2Day";
 ' result = Date2Day ("12/11/2022") 
