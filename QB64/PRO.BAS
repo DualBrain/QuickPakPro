@@ -153,8 +153,8 @@ END FUNCTION
 ' FindLastSM (SM stands for String Manager) determines the actual 
 ' number of bytes occupied by strings in an integer storage array. 
 FUNCTION FindLastSM (array(), first, numBytes)
-  di = numBytes - 1
-  FOR index = UBOUND(array) TO first STEP -1 'LBOUND(array)
+  di = numBytes - 1 ' not sure why this is here, but it does match the original behavior.
+  FOR index = UBOUND(array) TO first STEP -1
     value = array(index) ' two bytes
     l = value MOD 256 ' low byte
     h = value \ 256 ' high byte
