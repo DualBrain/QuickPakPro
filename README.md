@@ -6,7 +6,7 @@ The original QuickPak Professional for QB4.5/PDS7.1/VBDOS1.0 was released into t
 
 You can find the original [here](http://annex.retroarchive.org/crescent/index.html) along with a [PDF copy of the manual](http://annex.retroarchive.org/crescent/QuickPak%20Professional.pdf). You can also access the [original repo here](https://github.com/geneb/QuickPak-Pro-DOS).
 
-We also want to thank [Gene Buckle](https://github.com/geneb) for making this all possible as well as to Ethan Winer for creating the product in the first place.
+We also want to thank [Gene Buckle](https://github.com/geneb) for making this all possible as well as to [Ethan Winer](http://ethanwiner.com/fullmoon.html) for creating the product in the first place.
 
 ## Progress
 
