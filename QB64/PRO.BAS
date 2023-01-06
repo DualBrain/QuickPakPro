@@ -1068,8 +1068,8 @@ END SUB
 
 ' FClose will close a file that had been previously opened with the 
 ' QuickPak Professional FOpen command. 
-SUB FClose(Handle)
-  CLOSE #Handle
+SUB FClose(handle)
+  CLOSE #handle
 END SUB
 
 ' FCopy will copy a file from within a BASIC program without 
@@ -1108,9 +1108,9 @@ END SUB
 
 ' FCreate is used to create a file in preparation for writing to it with 
 ' the QuickPak Professional file handling routines. 
-SUB FCreate(FileName$)
+SUB FCreate(fileName$)
   ff = FREEFILE
-  OPEN FileName$ FOR OUTPUT AS #ff
+  OPEN fileName$ FOR OUTPUT AS #ff
   CLOSE #ff
 END SUB
 
@@ -1137,8 +1137,8 @@ END SUB
 ' however it accepts a segmented address thus allowing an entire 
 ' array to be loaded in one operation. FGetA will load up to 64k 
 ' bytes at a time. 
-SUB FGetA(Handle, Array$(), Element, NumBytes)
-  ERROR 73 ' Feature Unavailable
+SUB FGetA(handle, array(), element, numBytes)
+  GET #handle, , array()
 END SUB
 
 SUB FGetAH(FileName$, Array$(), Start, ElSize, NumEls)
@@ -1307,13 +1307,19 @@ FUNCTION FLof&(Handle)
   FLof& = LOF(Handle)
 END FUNCTION
 
+' FOpen is used to open a disk file in preparation for reading or 
+' writing using the QuickPak Professional file access routines. 
 SUB FOpen(fileName$, handle)
   handle = FREEFILE
   OPEN fileName$ FOR BINARY AS #handle
 END SUB
 
-SUB FOpenS(FileName$, Handle)
-  ERROR 73 ' Feature Unavailable
+' FOpenS is used to open for Shared (network access) a disk file in 
+' preparation for reading or writing using the QuickPak Professional 
+' file access routines.
+SUB FOpenS(fileName$, handle)
+  handle = FREEFILE
+  OPEN fileName$ FOR BINARY ACCESS READ WRITE SHARED AS #handle
 END SUB
 
 SUB FOpenAll(FileName$, AccessMode, ShareMode, Handle)
@@ -1328,8 +1334,37 @@ SUB FPut(Handle, Source$)
   ERROR 73 ' Feature Unavailable
 END SUB
 
-SUB FPutA(Handle, Array(), Start, NumBytes)
-  ERROR 73 ' Feature Unavailable
+' FPutA is similar to the QuickPak Professional FPut routine, 
+' however it accepts a segmented address thus allowing an entire 
+' array to be saved in one operation. FPutA will write up to 64k 
+' bytes at a time. 
+SUB FPutA(handle, array(), start, numBytes)
+
+  'ORIGINAL: CALL FPutA(Handle%, SEG Array(Start), NumBytes%)
+
+  ' Handle% is the DOS file handle that was assigned when the file was 
+  ' opened, and Array(Start) is any array (except a conventional string 
+  ' array) that is to be saved. 
+  ' 
+  ' NumBytes% indicates the number of bytes to be written. If the 
+  ' number of bytes exceeds 32767, then you must instead use a long 
+  ' integer variable or number. 
+
+  written = 0
+  FOR element = start TO UBOUND(array)
+    IF written + 2 > numBytes THEN
+      IF written + 1 <= numBytes THEN
+        byt = 0 'TODO: Need to determine the byte to be written.
+        ch$ = CHR$(byt)
+        PUT #handle, , ch$
+        written = written + 1
+      END IF
+      EXIT FOR
+    END IF
+    PUT #handle, , array(element)
+    written = written + 2
+  NEXT
+
 END SUB
 
 SUB FPutAH(Handle, Array(), start, ElSize, NumEls)
@@ -3638,20 +3673,88 @@ SUB MidStrSave (array$(), element, numEls, FirstChar, numChars, storage())
   ERROR 73 ' Feature Unavailable
 END SUB
 
-SUB StringSave (array$(), stringElement, array(), integerElement, numStrings)
-  ERROR 73 ' Feature Unavailable
+' Returns the number of strings stored in an integer array. 
+FUNCTION NumStrings%(array(), element, numBytes)
+
+  'ORIGINAL: DIM Array$(NumStrings%(SEG Array%(!}, NumBytes)) 
+
+  ' Once an array has been loaded from disk or copied from expanded 
+  ' memory, you will need to know how many strings it contains. This 
+  ' is what NumStrings% is for. If the array is going to be sent to 
+  ' QEdit for editing, you will probably want to include additional 
+  ' elements when dimensioning the string array. 
+
+  ' write the code to determine how many CRLF are in the array....
+
+  ERROR 73
+
+END FUNCTION
+
+' Copies all or part of a string array to an integer array. 
+SUB StringSave (array$(), stringElement, array(), integerElement, numStr)
+
+  'ORIGINAL: CALL StringSave (BYVAL VARPTR(Array$(1)), SEG Array%(1), NumStrings%)
+
+  ' Where Array$(1) is the first element in the string array, Array%(1) 
+  ' is the first element in the integer array, and NumStrings % is the 
+  ' number of string elements in Array$() to be saved. Of course, you 
+  ' would specify element zero instead of element one for either array 
+  ' if that is appropriate. It is essential that the integer array be 
+  ' sufficiently dimensioned to hold the string data. See the description 
+  ' for the StringSize function to see how to determine the number of 
+  ' elements needed. 
+
+  'NOTE: Testing against the original found that a CR/LF are added to each string.
+
+  index = integerElement
+  FOR element = stringElement TO stringElement + numStr - 1
+    element$ = carry$ + array$(element) + CHR$(13) + CHR$(10): carry$ = ""
+    FOR char = 1 TO LEN(element$) STEP 2
+      value$ = MID$(element$, char, 2)
+      IF LEN(value$) = 1 THEN carry$ = value$: EXIT FOR
+      l = ASC(LEFT$(value$, 1)): r = ASC(RIGHT$(value$, 1))
+      array(index) = l + (r * 256): index = index + 1
+    NEXT
+  NEXT
+  IF LEN(carry$) > 0 THEN
+    l = ASC(carry$): r = 0
+    array(index) = l + (r + 256)
+  END IF
+
 END SUB
 
 SUB Get1Str(work$, array(), element, stringNumber)
   ERROR 73 ' Feature Unavailable
 END SUB
 
+' Returns the number of bytes needed to store a string array in an integer array. 
 FUNCTION StringSize&(array$(), start, numStringEls)
-  c& = 0
+  
+  'ORIGINAL: NumBytes = StringSize&(BYVAL VARPTR(Array$(Start)), NumStringEls%)
+
+  ' Where Array$(Start) is the first element to save in the string array, 
+  ' and NumStringEls % is the number of elements in the string array to include. 
+  '
+  ' This function returns the number of bytes needed rather than the 
+  ' number of elements, so you will know exactly how many bytes to 
+  ' specify when saving the integer array to disk. To determine how 
+  ' large to dimension the integer array to, simply divide the number of 
+  ' bytes by two. If you intend to dimension the integer array starting at 
+  ' element 1 (instead of 0), you should also add one extra element in 
+  ' case the number of bytes is an odd number. 
+  '
+  '   DIM Array%(NumBytes \ 2)
+  ' 
+  ' or
+  ' 
+  '   DIM Array$(1 TO NumBytes \ 2 + 1)
+
+  c& = numStringEls * 2 ' At least 2 bytes per array element (CRLF)...
   FOR x = start TO start + numStringEls - 1
-    c& = c& + LEN(array$(x)) '+ 2 to handle CRLF????
+    c& = c& + LEN(array$(x)) ' add the number of bytes that make of length for each string element
   NEXT
   StringSize& = c&
+
 END FUNCTION
 
 ' MinInt compares two integer variables, and returns the value of the 

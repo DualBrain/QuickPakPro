@@ -76,17 +76,17 @@ DEFINT A-Z
 ' the functions below are assembler, except as noted.
 
 DECLARE FUNCTION DOSError% ()
-DECLARE FUNCTION ErrorMsg$ (ErrNumber)
-DECLARE FUNCTION FindLastSM& (SEG Element, NumBytes AS ANY)
-DECLARE FUNCTION FLof& (Handle)
-DECLARE FUNCTION Get1String$ (Array(), StrNumber)               'BASIC
-DECLARE FUNCTION NumStrings% (SEG Element, NumBytes AS ANY)
-DECLARE FUNCTION StringSize& (BYVAL Address, NumEls)
+DECLARE FUNCTION ErrorMsg$ (errNumber)
+DECLARE FUNCTION FindLastSM& (SEG element, numBytes AS ANY)
+DECLARE FUNCTION FLof& (handle)
+DECLARE FUNCTION Get1String$ (array(), strNumber)               'BASIC
+DECLARE FUNCTION NumStrings% (SEG element, numBytes AS ANY)
+DECLARE FUNCTION StringSize& (BYVAL address, numEls)
 DECLARE FUNCTION WhichError% ()
 
-DECLARE SUB StringSave (BYVAL Address, SEG Element, NumEls)
-DECLARE SUB StringRestore (Array$(), Array())                   'BASIC
-DECLARE SUB Sub1String (New$, SEG Element, NumBytes AS ANY, StrNumber)
+DECLARE SUB StringSave (BYVAL address, SEG element, numEls)
+DECLARE SUB StringRestore (array$(), array())                   'BASIC
+DECLARE SUB Sub1String (new$, SEG element, numBytes AS ANY, strNumber)
 
 CLS
 LOCATE , , 0
@@ -113,27 +113,30 @@ PRINT
 '      will be needed in the integer array, and then dimension the array
 '      to half the number of bytes (2 bytes per element).
 
-numBytes& = StringSize&(VARPTR(array$(1)), numStr)
+'numBytes& = StringSize&(VARPTR(array$(1)), numStr)
+numBytes& = StringSize&(array$(), 1, numStr)
 REDIM array(1 TO numBytes& / 2 + 1)             ' +1 for safety
 
 '----- Copy the string array into the integer array.
 
 t! = TIMER
-StringSave VARPTR(array$(1)), array(1), numStr
+'StringSave VARPTR(array$(1)), array(1), numStr
+StringSave array$(), 1, array(), 1, numStr
 t! = TIMER - t!
 PRINT USING "#.## seconds to copy the string array to an integer array"; t!
 
 '----- Save the integer array to disk to prove all of this is actually working
 
 PRINT "Saving the array to disk"
-CALL FCreate("$trMgr.Txt")                      ' create the output file
+CALL FCreate("$trMgr.txt")                      ' create the output file
 IF DOSError% THEN
   PRINT ErrorMsg$(WhichError%); " error creating the file."
   END
 END IF
 
 CALL FOpen("$trMgr.Txt", handle)                ' open it for QP Pro binary
-CALL FPutA(handle, SEG array(1), numBytes&)
+'CALL FPutA(handle, SEG array(1), numBytes&)
+CALL FPutA(handle, array(), 1, numBytes&)
 IF DOSError% THEN
   PRINT ErrorMsg$(WhichError%); " error saving the string array."
   END
@@ -145,11 +148,13 @@ CALL FClose(handle)                             ' close the file
 PRINT "Loading the array back again"
 CALL FOpen("$trMgr.Txt", handle)
 numBytes& = FLof&(handle)                  ' FLof reports the file size
-REDIM Array(1 TO (numBytes& / 2) + 100)    ' + 100 allows Sub1String to replace
+REDIM array(1 TO (numBytes& / 2) + 100)    ' + 100 allows Sub1String to replace
                                            '   a string with a longer one later
-CALL FGetA(handle, SEG array(1), numBytes&)
+'CALL FGetA(handle, SEG array(1), numBytes&)
+CALL FGetA(handle, array(), 1, numBytes&)
 CALL FClose(handle)
-numStr = NumStrings%(array(1), numBytes&)
+'numStr = NumStrings%(array(1), numBytes&)
+numStr = NumStrings%(array(), 1, numBytes&)
 CALL KillFile("$trMgr.Txt")                ' clean up by erasing the file
 
 '----- Show how to replace a single string in the far integer array
@@ -158,7 +163,7 @@ Sub1String "This replaces what was in element 999", array(1), numBytes&, 999
 
 '----- Erase the string array, and then restore it to prove this all worked.
 
-REDIM array$(1 TO NumStr)
+REDIM array$(1 TO numStr)
 
 t! = TIMER
 StringRestore array$(), array()
@@ -183,12 +188,12 @@ IF INPUT$(1) = CHR$(27) THEN END
 
 PRINT
 FOR x = 1 TO numStr
-   PRINT x; "{"; array$(x); "}"
-   x$ = INKEY$                         ' see if they pressed a key
-   IF LEN(x$) THEN                     ' they did
-     IF x$ = CHR$(27) THEN END         ' end if Escape
-     WHILE INKEY$ = "": WEND           ' otherwise just pause
-   END IF
+  PRINT x; "{"; array$(x); "}"
+  x$ = INKEY$                         ' see if they pressed a key
+  IF LEN(x$) THEN                     ' they did
+    IF x$ = CHR$(27) THEN END         ' end if Escape
+    WHILE INKEY$ = "": WEND           ' otherwise just pause
+  END IF
 NEXT
 
 '$INCLUDE: 'PRO.BAS'

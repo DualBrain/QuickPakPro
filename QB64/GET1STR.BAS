@@ -1,26 +1,26 @@
-'********** Get1Str.Bas - retrieves a single string from an integer array
+' ********** GET1STR.BAS - retrieves a single string from an integer array
 
-'Copyright (c) 1988 Ethan Winer
-
+' Copyright (c) 1988 Ethan Winer
+' Modifications (c) 2022 Cory Smith
 
 DEFINT A-Z
-DECLARE SUB Get1Str (Work$, SEG Element, StrNumber)
-DECLARE FUNCTION FindLastSM& (SEG Element, NumBytes AS ANY)
-DECLARE FUNCTION Get1String$ (Array%(), StrNumber)
-DECLARE FUNCTION StrLength% (SEG Element, NumBytes AS ANY, StrNumber)
 
-FUNCTION Get1String$ (Array(), StrNumber) STATIC
+DECLARE SUB Get1Str (work$, SEG element, strNumber)
+DECLARE FUNCTION FindLastSM& (SEG element, numBytes AS ANY)
+DECLARE FUNCTION Get1String$ (array%(), strNumber)
+DECLARE FUNCTION StrLength% (SEG element, numBytes AS ANY, strNumber)
 
-    UB = UBOUND(Array)                              'find the array bounds
-    LB = LBOUND(Array)
-    NumBytes& = (UB - LB + 1) * 2                   'total bytes in Array
-    NumBytes& = FindLastSM&(Array(LB), NumBytes&)   'ignore extra elements
+FUNCTION Get1String$ (array(), strNumber) STATIC
 
-    Work$ = SPACE$(StrLength%(Array(LB), NumBytes&, StrNumber))
-    CALL Get1Str(Work$, Array(LB), StrNumber)       'copy the string to Work$
-    Get1String$ = Work$                             'assign the function
+  ub = UBOUND(array)                              ' find the array bounds
+  lb = LBOUND(array)
+  numBytes& = (ub - lb + 1) * 2                   ' total bytes in Array
+  numBytes& = FindLastSM&(array(lb), numBytes&)   ' ignore extra elements
 
-    Work$ = ""                                      'free up the memory
+  work$ = SPACE$(StrLength%(Array(lb), numBytes&, strNumber))
+  CALL Get1Str(work$, array(lb), strNumber)       ' copy the string to Work$
+  Get1String$ = work$                             ' assign the function
+
+  work$ = ""                                      ' free up the memory
 
 END FUNCTION
-
