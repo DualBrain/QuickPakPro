@@ -1932,8 +1932,52 @@ SUB UnLockFile(Handle, Offset&, Length&)
   ERROR 73 ' Feature Unavailable
 END SUB
 
-FUNCTION Valid(FileName$)
-  ERROR 73 ' Feature Unavailable
+' Valid examines a string to see if it could be a valid file name. 
+FUNCTION Valid(fileName$)
+
+  ' fileName$ contains the name of a file, and may optionally include a 
+  ' drive letter and colon, as well as a path name. If the name is legal 
+  ' according to the rules of DOS, Okay will receive -1. Otherwise 
+  ' Okay will be set to zero. 
+
+  IF LEFT$(fileName$, 1) = " " THEN Valid = 0: EXIT FUNCTION
+  IF RIGHT$(fileName$, 1) = " " THEN Valid = 0: EXIT FUNCTION
+
+  index = 1
+  character$ = "1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_$!%-@'^~#&{}`()."
+  slashCount = 0
+  DO
+    ch$ = MID$(fileName$, index, 1)
+    IF ch$ = "\" OR ch$ = "/" THEN
+      slashCount = slashCount + 1
+      IF index = 1 THEN
+        ' OK
+      ELSEIF index = 2 AND slashCount = 2 THEN
+        ' OK
+      ELSEIF slashCount = 1 THEN
+        ' OK
+      ELSE
+        Valid = 0: EXIT FUNCTION
+      END IF
+    ELSEIF ch$ = ":" THEN
+      IF index = 2 THEN
+        IF slashCount > 0 THEN Valid = 0: EXIT FUNCTION 
+      ELSE
+        Valid = 0: EXIT FUNCTION
+      END IF
+      slashCount = 0
+    ELSEIF INSTR(character$, ch$) > 0 THEN
+      ' OK
+      slashCount = 0
+    ELSE
+      Valid = 0: EXIT FUNCTION
+    END IF
+    index = index + 1
+    IF index > LEN(fileName$) THEN EXIT DO
+  LOOP
+
+  Valid = -1 ' Valid
+
 END FUNCTION
 
 ' WhichError reports which error if any occurred during the last call 

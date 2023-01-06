@@ -78,7 +78,7 @@ We also want to thank [Gene Buckle](https://github.com/geneb) for making this al
 |SPREAD.BAS  |         |   |SRCHPATH.BAS|         |   |STRREST.BAS |         |
 |STUFFBUF.BAS|         |   |TEST.BAS    | EXE     |   |TEXTIN.BAS  | INCLUDE |
 |TEXTSORT.BAS|         |   |TIME.BAS    | EXE     |   |TRANSLAT.BAS| EXE     |
-|UNIQUE.BAS  | INCLUDE |   |VALID.BAS   |         |   |VERTMENT.BAS|         |
+|UNIQUE.BAS  | INCLUDE |   |VALID.BAS   | EXE     |   |VERTMENT.BAS|         |
 |VERTMENU.BAS| INCLUDE |   |VIEWFILE.BAS|         |   |VIRTUAL.BAS |         |
 |VLONG.BAS   |         |   |WEEKDAY.BAS | EXE     |   |WINDOMGR.BAS|         |
 |WINDOW.BAS  |         |   |WIPES.BAS   | EXE     |   |WORDWRAP.BAS| EXE     |
