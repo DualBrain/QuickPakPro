@@ -75,7 +75,7 @@ We also want to thank [Gene Buckle](https://github.com/geneb) for making this al
 |SETATTR.BAS |         |   |SETCNF.BI   | INCLUDE |   |SHIFT.BAS   | EXE     |
 |SORTI.BAS   |         |   |SORTSTR.BAS | EXE     |   |SORTT.BAS   |         |
 |SOUNDEX.BAS |         |   |SPELLNUM.BAS| EXE     |   |SPLITNAM.BAS| EXE     |
-|SPREAD.BAS  |         |   |SRCHPATH.BAS|         |   |STRREST.BAS |         |
+|SPREAD.BAS  |         |   |SRCHPATH.BAS| INCLUDE |   |STRREST.BAS |         |
 |STUFFBUF.BAS|         |   |TEST.BAS    | EXE     |   |TEXTIN.BAS  | INCLUDE |
 |TEXTSORT.BAS|         |   |TIME.BAS    | EXE     |   |TRANSLAT.BAS| EXE     |
 |UNIQUE.BAS  | INCLUDE |   |VALID.BAS   | EXE     |   |VERTMENT.BAS|         |

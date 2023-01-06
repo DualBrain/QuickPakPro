@@ -1844,10 +1844,6 @@ FUNCTION ScanFile&(FileName$, Text$, Start&)
   ERROR 73 ' Feature Unavailable
 END FUNCTION
 
-FUNCTION SearchPath$(FileName$)
-  ERROR 73 ' Feature Unavailable
-END FUNCTION
-
 SUB SetAttr(FileName$, Attribute)
   ERROR 73 ' Feature Unavailable
 END SUB
