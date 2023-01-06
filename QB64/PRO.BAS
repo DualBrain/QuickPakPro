@@ -1928,10 +1928,6 @@ SUB SplitName (workName$, drive$, path$, fileName$, ext$) STATIC
 
 END SUB
 
-FUNCTION Unique$(Path$)
-  ERROR 73 ' Feature Unavailable
-END FUNCTION
-
 SUB UnLockFile(Handle, Offset&, Length&)
   ERROR 73 ' Feature Unavailable
 END SUB
