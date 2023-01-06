@@ -3871,20 +3871,24 @@ SUB Reboot
   ERROR 73 ' Feature Unavailable
 END SUB
 
-SUB ShiftIL(IntVar, NumBits)
-  ERROR 73 ' Feature Unavailable
+' ShiftIL shifts the bits in an integer variable a specified number of 
+' positions to the left. 
+SUB ShiftIL(intVar, numBits)
+  intVar = _SHL(intVar, numBits)
 END SUB
 
-SUB ShiftIR(IntVar, NumBits)
-  ERROR 73 ' Feature Unavailable
+' ShiftIR shifts the bits in an integer variable a specified number of 
+' positions to the right. 
+SUB ShiftIR(intVar, numBits)
+  intVar = _SHR(intVar, numBits)
 END SUB
 
-SUB ShiftLL(IntVar&, NumBits)
-  ERROR 73 ' Feature Unavailable
+SUB ShiftLL(intVar&, numBits)
+  intVar& = _SHL(intVar&, numBits)
 END SUB
 
-SUB ShiftLR(IntVar&, NumBits)
-  ERROR 73 ' Feature Unavailable
+SUB ShiftLR(intVar&, numBits)
+  intVar& = _SHR(intVar&, numBits)
 END SUB
 
 FUNCTION Soundex$(Word$)

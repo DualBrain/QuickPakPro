@@ -72,7 +72,7 @@ We also want to thank [Gene Buckle](https://github.com/geneb) for making this al
 |RWTEST.BAS  |         |   |SCANFILE.BAS|         |   |SCIFORM.BAS | EXE     |
 |SCRNDUMP.BAS|         |   |SCRNSR.BAS  | EXE     |   |SCROLL.BAS  | EXE     |
 |SCROLLIN.BAS| INCLUDE |   |SEARCH.BAS  | EXE     |   |SEQUENCE.BAS| EXE     |
-|SETATTR.BAS |         |   |SETCNF.BI   | INCLUDE |   |SHIFT.BAS   |         |
+|SETATTR.BAS |         |   |SETCNF.BI   | INCLUDE |   |SHIFT.BAS   | EXE     |
 |SORTI.BAS   |         |   |SORTSTR.BAS | EXE     |   |SORTT.BAS   |         |
 |SOUNDEX.BAS |         |   |SPELLNUM.BAS| EXE     |   |SPLITNAM.BAS| EXE     |
 |SPREAD.BAS  |         |   |SRCHPATH.BAS|         |   |STRREST.BAS |         |
