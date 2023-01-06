@@ -2702,16 +2702,20 @@ SUB ButtonPress (button, status, count, x, y)
 
 END SUB
 
+' CapsLock will quickly tell if the CapsLock key is currently depressed. 
 FUNCTION CapsLock
-  ERROR 73 ' Feature Unavailable
+  ' Active receives -1 if the CapsLock key is currently down, or O if it is not. 
+  CapsLock = _CAPSLOCK
 END FUNCTION
 
+' CapsOff turns off the CapsLock key status. 
 SUB CapsOff
-  ERROR 73 ' Feature Unavailable
-ENd SUB
+  _CAPSLOCK OFF
+END SUB
 
+' CapsOn turns on the CapsLock key status. 
 SUB CapsOn
-  ERROR 73 ' Feature Unavailable
+  _CAPSLOCK ON
 END SUB
 
 ' ClearBuf will quickly clear the keyboard of any key strokes that are 
@@ -2722,7 +2726,9 @@ SUB ClearBuf
 END SUB
 
 FUNCTION CtrlKey
-  ERROR 73 ' Feature Unavailable
+  RCTRL& = 100305
+  LCTRL& = 100306
+  CtrlKey = _KEYDOWN(RCTRL&) OR _KEYDOWN(LCTRL&)
 END FUNCTION
 
 ' GetCursor reports the current location of the mouse cursor, and 
@@ -3022,8 +3028,10 @@ SUB RptKey(Char, Count)
   ERROR 73 ' Feature Unavailable
 END SUB
 
+' ScrlLock will quickly tell if the ScrlLock key is currently depressed. 
 FUNCTION ScrlLock
-  ERROR 73 ' Feature Unavailable
+  ' Active receives -1 if the ScrlLock key is currently down, or O if it is not. 
+  ScrlLock = _SCROLLLOCK
 END FUNCTION
 
 SUB SetCursor(x, y)

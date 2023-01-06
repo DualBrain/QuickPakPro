@@ -51,7 +51,7 @@ We also want to thank [Gene Buckle](https://github.com/geneb) for making this al
 |INSTALL.BAS |         |   |INSTAT.BAS  |         |   |INSTRTBL.BAS|         |
 |ISORTI.BAS  |         |   |ISORTI2.BAS |         |   |ISORTSTR.BAS|         |
 |ISORTT.BAS  |         |   |KEYDOWN.BAS | EXE     |   |KEYS.BAS    | EXE     |
-|KEYSORT.BAS |         |   |KEYSTAT.BAS |         |   |LINCOUNT.BAS|         |
+|KEYSORT.BAS |         |   |KEYSTAT.BAS | EXE     |   |LINCOUNT.BAS|         |
 |LOADEXEC.BAS|         |   |LOCKFILE.BAS|         |   |LONGSTR.BAS |         |
 |LTS2MENU.BAS|         |   |LTSMENU.BAS |         |   |MAINMENU.BAS|         |
 |MAKEQLB.BAS |         |   |MARQUEE.BAS | EXE     |   |MASKIN.BAS  |         |
