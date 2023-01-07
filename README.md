@@ -30,7 +30,7 @@ We also want to thank [Gene Buckle](https://github.com/geneb) for making this al
 |DEMOMGR.BAS |         |   |DEMOPICK.BAS| EXE     |   |DEMOPLMS.BAS| EXE     |
 |DEMOPOP.BAS | EXE     |   |DEMOPULL.BAS| EXE     |   |DEMORK.BAS  |         |
 |DEMOSCAN.BAS|         |   |DEMOSCRL.BAS| EXE     |   |DEMOSECT.BAS|         |
-|DEMOSORT.BAS|         |   |DEMOSS.BAS  |         |   |DEMOSTR.BAS |         |
+|DEMOSORT.BAS|         |   |DEMOSS.BAS  |         |   |DEMOSTR.BAS | EXE     |
 |DEMOTSRT.BAS|         |   |DEMOVERT.BAS| EXE     |   |DEMOVIEW.BAS|         |
 |DEMOVRTT.BAS|         |   |DEMOXMS.BAS |         |   |DIALOG.BAS  | INCLUDE |
 |DIRTREE.BAS |         |   |DISKINFO.BAS|         |   |EDIT.BAS    | EXE     |
@@ -43,7 +43,7 @@ We also want to thank [Gene Buckle](https://github.com/geneb) for making this al
 |FINDLAST.BAS| EXE     |   |FINDT.BAS   |         |   |FLINPUT.BAS |         |
 |FLUSH.BAS   |         |   |FNOTHER.BAS | EXE     |   |FNSPREAD.BAS| EXE     |
 |FORMAT.BAS  |         |   |FULLNAME.BAS| EXE     |   |GASGAUGE.BAS| INCLUDE |
-|GET1STR.BAS |         |   |GETATTR.BAS | EXE     |   |GETCMOS.BAS |         |
+|GET1STR.BAS | INCLUDE |   |GETATTR.BAS | EXE     |   |GETCMOS.BAS |         |
 |GETCOLOR.BAS| EXE     |   |GETDIR.BAS  | EXE     |   |GETEQUIP.BAS| EXE     |
 |GETVMODE.BAS| EXE     |   |GRAFCURS.BAS|         |   |HAND2NAM.BAS|         |
 |HCOPY.BAS   |         |   |HUGE.BAS    |         |   |IMINMAX.BAS | EXE     |
@@ -75,7 +75,7 @@ We also want to thank [Gene Buckle](https://github.com/geneb) for making this al
 |SETATTR.BAS |         |   |SETCNF.BI   | INCLUDE |   |SHIFT.BAS   | EXE     |
 |SORTI.BAS   |         |   |SORTSTR.BAS | EXE     |   |SORTT.BAS   |         |
 |SOUNDEX.BAS |         |   |SPELLNUM.BAS| EXE     |   |SPLITNAM.BAS| EXE     |
-|SPREAD.BAS  |         |   |SRCHPATH.BAS| INCLUDE |   |STRREST.BAS |         |
+|SPREAD.BAS  |         |   |SRCHPATH.BAS| INCLUDE |   |STRREST.BAS | INCLUDE |
 |STUFFBUF.BAS|         |   |TEST.BAS    | EXE     |   |TEXTIN.BAS  | INCLUDE |
 |TEXTSORT.BAS|         |   |TIME.BAS    | EXE     |   |TRANSLAT.BAS| EXE     |
 |UNIQUE.BAS  | INCLUDE |   |VALID.BAS   | EXE     |   |VERTMENT.BAS|         |

@@ -159,7 +159,8 @@ CALL KillFile("$trMgr.Txt")                ' clean up by erasing the file
 
 '----- Show how to replace a single string in the far integer array
 
-Sub1String "This replaces what was in element 999", array(1), numBytes&, 999
+'Sub1String "This replaces what was in element 999", array(1), numBytes&, 999
+Sub1String "This replaces what was in element 999", array(), 1, numBytes&, 999
 
 '----- Erase the string array, and then restore it to prove this all worked.
 
@@ -177,7 +178,7 @@ PRINT USING "#.## seconds to restore the string array from the integer array"; t
 '----- This shows how to retrieve a single string from the integer array.
 
 t! = TIMER
-PRINT "{"; Get1String$(Array(), numStr); "}"    ' get the last string element
+PRINT "{"; Get1String$(array(), numStr); "}"    ' get the last string element
 t! = TIMER - t!
 PRINT USING "#.## seconds to retrieve the last string"; t!
 
@@ -196,4 +197,6 @@ FOR x = 1 TO numStr
   END IF
 NEXT
 
+'$INCLUDE: 'GET1STR.BAS'
+'$INCLUDE: 'STRREST.BAS'
 '$INCLUDE: 'PRO.BAS'

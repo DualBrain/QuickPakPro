@@ -15,10 +15,13 @@ FUNCTION Get1String$ (array(), strNumber) STATIC
   ub = UBOUND(array)                              ' find the array bounds
   lb = LBOUND(array)
   numBytes& = (ub - lb + 1) * 2                   ' total bytes in Array
-  numBytes& = FindLastSM&(array(lb), numBytes&)   ' ignore extra elements
+  'numBytes& = FindLastSM&(array(lb), numBytes&)   ' ignore extra elements
+  numBytes& = FindLastSM&(array(), lb, numBytes&) ' ignore extra elements
 
-  work$ = SPACE$(StrLength%(Array(lb), numBytes&, strNumber))
-  CALL Get1Str(work$, array(lb), strNumber)       ' copy the string to Work$
+  'work$ = SPACE$(StrLength%(array(lb), numBytes&, strNumber))
+  work$ = SPACE$(StrLength%(array(), lb, numBytes&, strNumber))
+  'CALL Get1Str(work$, array(lb), strNumber)       ' copy the string to Work$
+  CALL Get1Str(work$, array(), lb, strNumber)     ' copy the string to Work$
   Get1String$ = work$                             ' assign the function
 
   work$ = ""                                      ' free up the memory

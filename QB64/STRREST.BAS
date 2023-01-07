@@ -25,28 +25,32 @@ SUB StringRestore (array$(), array()) STATIC
 
   CALL SetError(0)                    ' clear the WhichError function
   numBytes& = (hiEl - loEl + 1) * 2&
-  numBytes& = FindLastSM&(Array(loEl), numBytes&)
-  lastAdr& = numBytes& - VARPTR(Array(loEl))
+  'numBytes& = FindLastSM&(array(loEl), numBytes&)
+  numBytes& = FindLastSM&(array(), loEl, numBytes&)
+  lastAdr& = numBytes& - VARPTR(array(loEl))
 
   '----- See if the string array has been dimensioned to enough elements
-  numStr = NumStrings%(array(loEl), numBytes&)
+  'numStr = NumStrings%(array(loEl), numBytes&)
+  numStr = NumStrings%(array(), loEl, numBytes&)
   IF numStr > last - first + 1 THEN
     CALL SetError(100)                ' not enough, set an error and exit
     EXIT SUB
   END IF
 
-  '----- Make room in each string element.  The GetNext function is
-  '      intended to be invoked successively, and it modifies the StrAdr
-  '      variable to point to the next string in the integer array for
-  '      the next time.  Do NOT use GetNext as part of a QuickBASIC watch
-  '      variable/expression.
-  FOR x = first TO first + numStr - 1
-    thisLen = GetNext%(strSeg, strAdr, lastAdr&)
-    IF thisLen AND &H8000 THEN EXIT FOR       ' GetNext returns -1 if it runs
-    array$(x) = SPACE$(thisLen)               ' out of data, "AND" is a very
-  NEXT                                        ' fast test for negative values
+' The following isn't needed (at least not as currently implemented)...
+'   '----- Make room in each string element.  The GetNext function is
+'   '      intended to be invoked successively, and it modifies the StrAdr
+'   '      variable to point to the next string in the integer array for
+'   '      the next time.  Do NOT use GetNext as part of a QuickBASIC watch
+'   '      variable/expression.
+'   FOR x = first TO first + numStr - 1
+'     thisLen = GetNext%(strSeg, strAdr, lastAdr&)
+'     IF thisLen AND &H8000 THEN EXIT FOR       ' GetNext returns -1 if it runs
+'     array$(x) = SPACE$(thisLen)               ' out of data, "AND" is a very
+'   NEXT                                        ' fast test for negative values
 
   '----- Copy the integer array into the string array
-  CALL StringRest(VARPTR(array$(first)), array(loEl), numStr)
+  'CALL StringRest(VARPTR(array$(first)), array(loEl), numStr)
+  CALL StringRest(array$(), first, array(), loEl, numStr)
 
 END SUB

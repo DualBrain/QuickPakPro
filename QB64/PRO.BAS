@@ -150,22 +150,6 @@ FUNCTION FindLast (array$(), last, size)
   FindLast = -1
 END FUNCTION
 
-' FindLastSM (SM stands for String Manager) determines the actual 
-' number of bytes occupied by strings in an integer storage array. 
-FUNCTION FindLastSM (array(), first, numBytes)
-  di = numBytes - 1 ' not sure why this is here, but it does match the original behavior.
-  FOR index = UBOUND(array) TO first STEP -1
-    value = array(index) ' two bytes
-    l = value MOD 256 ' low byte
-    h = value \ 256 ' high byte
-    IF h <> 0 THEN EXIT FOR ELSE di = di - 1
-    IF l <> 0 THEN EXIT FOR ELSE di = di - 1
-  NEXT
-  IF (di MOD 2 = 0) AND h = 26 THEN di = di - 1
-  IF (di MOD 2 = 1) AND l = 26 THEN di = di - 1
-  FindLastSM = di
-END FUNCTION
-
 FUNCTION GetBit(array$, element)
   ' NOTE: Not sure if this matches the original QPPro implementation.
   entry = (element \ 8) + 1
@@ -3674,9 +3658,9 @@ SUB MidStrSave (array$(), element, numEls, FirstChar, numChars, storage())
 END SUB
 
 ' Returns the number of strings stored in an integer array. 
-FUNCTION NumStrings%(array(), element, numBytes)
+FUNCTION NumStrings(array(), element, numBytes)
 
-  'ORIGINAL: DIM Array$(NumStrings%(SEG Array%(!}, NumBytes)) 
+  'ORIGINAL: DIM Array$(NumStrings%(SEG Array%(1), NumBytes)) 
 
   ' Once an array has been loaded from disk or copied from expanded 
   ' memory, you will need to know how many strings it contains. This 
@@ -3685,13 +3669,26 @@ FUNCTION NumStrings%(array(), element, numBytes)
   ' elements when dimensioning the string array. 
 
   ' write the code to determine how many CRLF are in the array....
+  prev = 0
+  count = 0
+  FOR index = element TO UBOUND(array)
+    value = array(index)
+    b1 = value AND &HFF
+    b2 = (value AND &HFF00) \ 256
+    IF prev = 13 AND b1 = 10 THEN
+      count = count + 1
+    ELSEIF b1 = 13 AND b2 = 10 THEN
+      count = count + 1
+    END IF
+    prev = b2
+  NEXT
 
-  ERROR 73
+  NumStrings = count
 
 END FUNCTION
 
 ' Copies all or part of a string array to an integer array. 
-SUB StringSave (array$(), stringElement, array(), integerElement, numStr)
+SUB StringSave (array$(), strElement, array(), intElement, numStr)
 
   'ORIGINAL: CALL StringSave (BYVAL VARPTR(Array$(1)), SEG Array%(1), NumStrings%)
 
@@ -3706,8 +3703,8 @@ SUB StringSave (array$(), stringElement, array(), integerElement, numStr)
 
   'NOTE: Testing against the original found that a CR/LF are added to each string.
 
-  index = integerElement
-  FOR element = stringElement TO stringElement + numStr - 1
+  index = intElement
+  FOR element = strElement TO strElement + numStr - 1
     element$ = carry$ + array$(element) + CHR$(13) + CHR$(10): carry$ = ""
     FOR char = 1 TO LEN(element$) STEP 2
       value$ = MID$(element$, char, 2)
@@ -3723,8 +3720,147 @@ SUB StringSave (array$(), stringElement, array(), integerElement, numStr)
 
 END SUB
 
-SUB Get1Str(work$, array(), element, stringNumber)
+' FindLastSM (SM stands for String Manager) determines the actual 
+' number of bytes occupied by strings in an integer storage array. 
+FUNCTION FindLastSM& (array(), first, numBytes&)
+
+  ' di = numBytes - 1 ' not sure why this is here, but it does match the original behavior.
+  ' b1 = -1
+  ' b2 = -1
+  ' FOR index = UBOUND(array) TO first STEP -1
+  '   value = array(index) ' two bytes
+  '   b1 = value AND &HFF
+  '   b2 = (value AND &HFF00) \ 256
+  '   IF b1 <> 0 THEN EXIT FOR ELSE di = di - 1
+  '   IF b2 <> 0 THEN EXIT FOR ELSE di = di - 1
+  ' NEXT
+  ' IF (di MOD 2 = 0) AND b1 = 26 THEN di = di - 1
+  ' IF (di MOD 2 = 1) AND b2 = 26 THEN di = di - 1
+  ' FindLastSM = di
+
+  totalSize = UBOUND(array) - LBOUND(array) + 1 ' how many bytes (total)?
+  DIM work(1 TO totalSize * 2) AS _BYTE         ' prepare a byte array
+
+  '---------------------------------------------  copy the integer array to the byte array
+  DIM src AS _MEM: src = _MEM(array())
+  DIM dst AS _MEM: dst = _MEM(work())
+  _MEMCOPY src, src.OFFSET, src.SIZE TO dst, dst.OFFSET
+  _MEMFREE dst: _MEMFREE src
+
+  FOR index = UBOUND(work) TO 1 STEP - 1
+    IF work(index) > 0 THEN FindLastSM& = index: EXIT FUNCTION
+  NEXT
+
+  FindLastSM& = -1
+
+END FUNCTION
+
+SUB Get1Str(work$, array(), element, strNumber)
+
+  totalSize = UBOUND(array) - LBOUND(array) + 1 ' how many bytes (total)?
+  DIM work(1 TO totalSize * 2) AS _BYTE         ' prepare a byte array
+
+  '---------------------------------------------  copy the integer array to the byte array
+  DIM src AS _MEM: src = _MEM(array())
+  DIM dst AS _MEM: dst = _MEM(work())
+  _MEMCOPY src, src.OFFSET, src.SIZE TO dst, dst.OFFSET
+  _MEMFREE dst: _MEMFREE src
+
+  '---------------------------------------------  determine starting offset for the target string
+  entry = 1
+  index = 1
+  offsetStart = -1
+  DO
+    IF work(index) = 13 AND work(index + 1) = 10 THEN
+      entry = entry + 1
+      IF entry = strNumber THEN offsetStart = index + 2: EXIT DO
+    END IF
+    index = index + 1
+    IF index + 1 > UBOUND(work) THEN EXIT DO
+  LOOP
+
+  if offsetStart = -1 THEN work$ = "": EXIT SUB
+
+  '----------------------------------------------  determine the span for this string.
+  offsetEnd = UBOUND(work)
+  index = offsetStart
+  DO
+    IF work(index) = 13 AND work(index + 1) = 10 THEN
+      offsetEnd = index - 1: EXIT DO
+    END IF
+    index = index + 1
+    IF index + 1 > UBOUND(work) THEN EXIT DO
+  LOOP
+
+  result$ = ""
+  FOR index = offsetStart TO offsetEnd
+    result$ = result$ + CHR$(work(index))
+  NEXT
+
+  work$ = result$
+
+END SUB
+
+' Tells StringRestore the length of the next string to retrieve. GetN ext 
+' is a low-level routine that scans ahead in the integer storage array 
+' looking for the CHR$(13) that marks the end of the current string. 
+' Once it is found, the length of the string is calculated and returned 
+' to StringRestore. ThisAddress % is also modified to point to the next 
+' string element in storage for the next time it is called. It is 
+' extremely unlikely that you would need to call this routine directly. 
+
+FUNCTION GetNext(segment, thisAddress, lastAddress)
+
+  'ORIGINAL: Array$(X) = SPACE$(GetNext%(Segment%, ThisAddress%, LastAddress%)) 
+
+  ' Where Segment% and ThisAddress% indicate where in 
+  ' the integer array GetNext is to begin scanning, and LastAddress% 
+  ' points to the last active byte in the integer array. 
+
   ERROR 73 ' Feature Unavailable
+
+END FUNCTION
+
+' Copies strings from an integer array into a string array. This is a 
+' low-level routine used by the BASIC StringRestore subprogram, 
+' and it is very unlikely that you would need to call it directly. 
+SUB StringRest(array$(), strElement, array(), intElement, numStr) 
+  
+  'ORIGINAL: CALL StringRest(BYVAL VARPTR(Array$(1)), SEG Array%(1), NumStrings%) 
+
+  ' Where Array$(1) is the first element in the string array, Array%(1) 
+  ' is the first element in the integer array, and NumStrings% is the 
+  ' number of string elements being restored. Of course, you would 
+  ' specify element zero instead of element one for either array if that 
+  ' is appropriate. StringRest requires that the correct number of 
+  ' characters has already been set aside in each string element. 
+
+  totalSize = UBOUND(array) - LBOUND(array) + 1 ' how many bytes (total)?
+  DIM work(1 TO totalSize * 2) AS _BYTE         ' prepare a byte array
+
+  '---------------------------------------------  copy the integer array to the byte array
+  DIM src AS _MEM: src = _MEM(array())
+  DIM dst AS _MEM: dst = _MEM(work())
+  _MEMCOPY src, src.OFFSET, src.SIZE TO dst, dst.OFFSET
+  _MEMFREE dst: _MEMFREE src
+
+  index = strElement
+
+  ch = 1
+  DO
+    c = work(ch)
+    SELECT CASE c
+      CASE 13
+        index = index + 1
+        ch = ch + 1: IF work(ch) = 10 THEN ch = ch + 1
+      CASE ELSE
+        array$(index) = array$(index) + CHR$(c)
+        ch = ch + 1
+    END SELECT
+    IF ch > UBOUND(work) THEN EXIT DO
+    IF index > UBOUND(array$) THEN EXIT DO
+  LOOP
+
 END SUB
 
 ' Returns the number of bytes needed to store a string array in an integer array. 
@@ -3756,6 +3892,155 @@ FUNCTION StringSize&(array$(), start, numStringEls)
   StringSize& = c&
 
 END FUNCTION
+
+' Returns the length of a single string stored in an integer array. 
+' StrLength is a low-level routine used by the BASIC Get1String 
+' function. It is unlikely that you will need to access StrLength 
+' directly. 
+FUNCTION StrLength (array(), element, numBytes&, strNumber)
+
+  'ORIGINAL: Length= Strlength%(SEG Array%(1), NumBytes, StringNumber%) 
+
+  ' Where Array%(1) is the first element in the integer storage array, 
+  ' NumBytes is the total number of bytes in the array (as reported by 
+  ' StringSize), and StringNumber% tells which string's length to 
+  ' return. Notice that NumBytes may be either an integer or long 
+  ' integer. A long integer is required if the array exceeds 32767 bytes 
+  ' in size. 
+
+  totalSize = UBOUND(array) - LBOUND(array) + 1 ' how many bytes (total)?
+  DIM work(1 TO totalSize * 2) AS _BYTE         ' prepare a byte array
+
+  '---------------------------------------------  copy the integer array to the byte array
+  DIM src AS _MEM: src = _MEM(array())
+  DIM dst AS _MEM: dst = _MEM(work())
+  _MEMCOPY src, src.OFFSET, src.SIZE TO dst, dst.OFFSET
+  _MEMFREE dst: _MEMFREE src
+
+  '---------------------------------------------  determine starting offset for the target string
+  entry = 1
+  index = 1
+  offsetStart = -1
+  DO
+    IF work(index) = 13 AND work(index + 1) = 10 THEN
+      entry = entry + 1
+      IF entry = strNumber THEN offsetStart = index + 2: EXIT DO
+    END IF
+    index = index + 1
+    IF index + 1 > UBOUND(work) THEN EXIT DO
+  LOOP
+
+  if offsetStart = -1 THEN StrLength = -1: EXIT SUB
+
+  '----------------------------------------------  determine the span for this string.
+  offsetEnd = UBOUND(work)
+  index = offsetStart
+  DO
+    IF work(index) = 13 AND work(index + 1) = 10 THEN
+      offsetEnd = index - 1: EXIT DO
+    END IF
+    index = index + 1
+    IF index + 1 > UBOUND(work) THEN EXIT DO
+  LOOP
+
+  StrLength = offsetEnd - offsetStart + 1
+
+END FUNCTION
+
+' Sub1String will substitute a string contained in a "far" integer array 
+' with a new one of the same or different length.
+SUB Sub1String(new$, array(), element, numBytes&, strNumber)
+  
+  'ORIGINAL: CALL Sub1String(New$, SEG Array%(1), NumBytes%, StrNumber%)
+
+  ' Where New$ is the new string to assign into the array, Array%(1) 
+  ' is the first element in the integer storage array, NumBytes is the 
+  ' number of active bytes (see below), and StrNumber% indicates 
+  ' which string to replace. After SublString has performed the 
+  ' substitution, NumBytes is modified to reflect the new number of 
+  ' bytes taken. NumBytes may be either an integer or long integer. 
+  ' 
+  ' Sub1String is meant to be used in conjunction with the string 
+  ' manager routines, and it is demonstrated in the DEMONSTR.BAS 
+  ' example program. 
+  '
+  ' Because it is possible the new string may be longer than the original 
+  ' string, we recommend that you include enough extra elements when 
+  ' dimensioning the integer array. The demo program includes an 
+  ' additional 100 elements (200 bytes), but you may need even more, 
+  ' based on the number of substitutions you may make, and the added 
+  ' length of the new strings.
+
+  ' first we need to determine where in the array the string number
+  ' start and end currently exist.
+
+  totalSize = UBOUND(array) - LBOUND(array) + 1 ' how many bytes (total)?
+  DIM work(1 TO totalSize * 2) AS _BYTE         ' prepare a byte array
+
+  '---------------------------------------------  copy the integer array to the byte array
+  DIM src AS _MEM: src = _MEM(array())
+  DIM dst AS _MEM: dst = _MEM(work())
+  _MEMCOPY src, src.OFFSET, src.SIZE TO dst, dst.OFFSET
+  _MEMFREE dst: _MEMFREE src
+
+  '---------------------------------------------  determine starting offset for the target string
+  entry = 1
+  index = 1
+  offsetStart = -1
+  DO
+    IF work(index) = 13 AND work(index + 1) = 10 THEN
+      entry = entry + 1
+      IF entry = strNumber THEN offsetStart = index + 2: EXIT DO
+    END IF
+    index = index + 1
+    IF index + 1 > UBOUND(work) THEN EXIT DO
+  LOOP
+
+  '----------------------------------------------  determine the span for this string.
+  offsetEnd = UBOUND(work)
+  index = offsetStart
+  DO
+    IF work(index) = 13 AND work(index + 1) = 10 THEN
+      offsetEnd = index - 1: EXIT DO
+    END IF
+    index = index + 1
+    IF index + 1 > UBOUND(work) THEN EXIT DO
+  LOOP
+  
+  currentLength = offsetEnd - offsetStart + 1 ' does not include CRLF
+
+  diff = currentLength - LEN(new$)
+
+  IF diff < 0 THEN
+    ' need to expand
+    diff = -diff
+    FOR index = UBOUND(work) TO offsetStart + diff STEP - 1
+      work(index) = work(index - diff)
+    NEXT
+  ELSEIF diff > 0 THEN
+    ' need to collapse
+    FOR index = offsetStart TO UBOUND(work) - diff STEP - 1
+      work(index) = work(index + diff)
+    NEXT
+  END IF
+
+  ' now apply the new text into the available region
+  FOR ch = 0 TO LEN(new$) - 1
+    work(offsetStart + ch) = ASC(MID$(new$, ch + 1, 1))
+  NEXT
+
+  '---------------------------------------------  determine the new overall byte count
+  FOR index = UBOUND(work) TO 1 STEP - 1
+    IF work(index) > 0 THEN numBytes& = index: EXIT FOR
+  NEXT
+
+  '---------------------------------------------  copy the byte array to the integer array
+  src = _MEM(array())
+  dst = _MEM(work())
+  _MEMCOPY dst, dst.OFFSET, dst.SIZE TO src, src.OFFSET
+  _MEMFREE dst: _MEMFREE src
+
+END SUB
 
 ' MinInt compares two integer variables, and returns the value of the 
 ' smaller one.
