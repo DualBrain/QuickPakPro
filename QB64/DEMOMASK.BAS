@@ -1,8 +1,27 @@
-'*********** DEMOMASK.BAS - demonstrates the MaskIn BASIC input routine
+' *********** DEMOMASK.BAS - demonstrates the MaskIn BASIC input routine
 
-'Copyright (c) 1990 Crescent Software
-'Written by Jay Munro
+' Copyright (c) 1990 Crescent Software
+' Written by Jay Munro
+' Modifications (c) 2023 Cory Smith
 
+' **************************
+' * BOILER PLATE BEGIN
+' **************************
+$Resize:Stretch
+CHDIR _STARTDIR$ ' Moved this line above resize to (hopefully) give more init time to window
+IF _DesktopHeight => 2160 THEN mult = 4 ELSE IF _DesktopHeight => 1440 THEN mult = 2 ELSE mult = 1
+DO: LOOP UNTIL _SCREENEXISTS ' Not sure if necessary; however, there does seem to be some sort of timing issue around getting hwnd
+hwnd = _WindowHandle: x = 100: y = 100: w = 640 * mult: h = 480 * mult ' inlined _WindowHandle (next line) because 1 out of every 4 or 5 executions, would encounter an invalid window handle (1400)
+IF INSTR(_OS$, "[WINDOWS]") THEN success = MoveWindow(_WindowHandle, x, y, w, h, 1) ELSE success = -1 ' Now that _WindowHandle is inlined, invalid window handle (1400) issue has yet to be reproduced - will have to continue to test
+IF success = 0 THEN PRINT "FAILED TO RESIZE - "; GetLastError; " ("; hwnd; ")": CALL WaitKeyS
+_TITLE "DEMOMASK" 'NOTE: Moving title above resize causes resize to fail (without an error???)
+'BUG: It would be nice specify the icon here, but... having to require full path or placing it in the qb64 folder is problematic. 
+'NOTE: The above boiler plate must be first in execution (top of file).
+'BUG:  Also appears to not work as an $INCLUDE; suggesting something might
+'      be wrong with the implementation of $INCLUDE.
+' **************************
+' * BOILER PLATE END
+' **************************
 
 'Table of mask characters
 '    Bits 1 to 5 are flags for these types of characters
@@ -42,21 +61,25 @@
 
 
 DEFINT A-Z
+
+'$INCLUDE: 'PRO.BI'
+'$INCLUDE: 'MASKIN.BI'
+
 DECLARE SUB MaskIn (Mask$, Text$, Msk AS ANY)
 
 '--------- Type defines colors, action and returns last key pressed
 
-TYPE MaskParms
-  Ky AS INTEGER                 'Last key stroke entered
-  Action AS INTEGER             'Action flag
-  MColr AS INTEGER              'Message color
-  FColr AS INTEGER              'Field color
-END TYPE
+' TYPE MaskParms
+'   Ky AS INTEGER                 ' Last key stroke entered
+'   Action AS INTEGER             ' Action flag
+'   MColr AS INTEGER              ' Message color
+'   FColr AS INTEGER              ' Field color
+' END TYPE
 
-DIM Msk AS MaskParms            'Control array MSK
-Msk.MColr = 7                   'Mask color
-Msk.FColr = 112                 'Field color
-Msk.Action = 0                  'Action 0 to start
+DIM Msk AS MaskParms            ' Control array MSK
+Msk.MColr = 7                   ' Mask color
+Msk.FColr = 112                 ' Field color
+Msk.Action = 0                  ' Action 0 to start
 
 CLS
 
@@ -112,43 +135,43 @@ PRINT Info$
 ' -------- First print just the fields by setting the action to 2
 
 CALL QPrintRC("Now something useful for a change...Press ESC to end", 14, 1, Msk.MColr)
-DIM DArray$(6)                          'set up some variables
+DIM DArray$(6)                          ' set up some variables
 FOR X = 1 TO 6
-   READ DArray$(X)
-   READ Mask$(X)
-   READ R(X), C(X)
-   Msk.Action = 2                       'just initialize
-   LOCATE R(X), C(X)                    'locate field
-   CALL MaskIn(Mask$(X), DArray$(X), Msk)
+  READ DArray$(X)
+  READ Mask$(X)
+  READ R(X), C(X)
+  Msk.Action = 2                       ' just initialize
+  LOCATE R(X), C(X)                    ' locate field
+  CALL MaskIn(Mask$(X), DArray$(X), Msk)
 NEXT X
 
 ' -------- Now go back with an action 1 and loop for input
 
-I = 1                                   'field counter
+I = 1                                   ' field counter
 DO
-  Msk.Action = 1                        'action of 1 initializes and loops
-  LOCATE R(I), C(I)                     'locate field
-  DO                                    'input loop
+  Msk.Action = 1                        ' action of 1 initializes and loops
+  LOCATE R(I), C(I)                     ' locate field
+  DO                                    ' input loop
     CALL MaskIn(Mask$(I), DArray$(I), Msk)
  
-  SELECT CASE Msk.Ky
-    CASE 9, 13, -80                     'tab, enter, down arrow
-      I = I + 1                         'increment the field
-      IF I > 6 THEN I = 1
-      EXIT DO
-    CASE 27                             'escape key
-      EXIT DO
-    CASE -15, -72                       'shift tab, up arrow
-      I = I - 1
-      IF I < 1 THEN I = 6
-      EXIT DO
-    CASE ELSE
-  END SELECT
+    SELECT CASE Msk.Ky
+      CASE 9, 13, -80                     ' tab, enter, down arrow
+        I = I + 1                         ' increment the field
+        IF I > 6 THEN I = 1
+        EXIT DO
+      CASE 27                             ' escape key
+        EXIT DO
+      CASE -15, -72                       ' shift tab, up arrow
+        I = I - 1
+        IF I < 1 THEN I = 6
+        EXIT DO
+      CASE ELSE
+    END SELECT
   LOOP
-  IF Msk.Ky = 27 THEN EXIT DO           'loop until escape is pressed
+  IF Msk.Ky = 27 THEN EXIT DO           ' loop until escape is pressed
 LOOP
 
-FOR I = 1 TO 6                          'print the results
+FOR I = 1 TO 6                          ' print the results
   LOCATE R(I) + 5, C(I)
   PRINT DArray$(I);
 NEXT I
@@ -157,9 +180,9 @@ END
 
 ' -------- demo field input data
 
-DATA   "Bugs             "                      : 'default field string
-DATA   "First name: "          : 'mask string
-DATA   16,5                                     : 'location on screen
+DATA   "Bugs             "                      : ' default field string
+DATA   "First name: "          : ' mask string
+DATA   16,5                                     : ' location on screen
 
 DATA   "Bunny            "
 DATA   " Last name: "
@@ -186,5 +209,7 @@ DATA   19,37
 PrintInfo:                           
   LOCATE , 60
   PRINT Info$
-RETURN
+  RETURN
 
+'$INCLUDE: 'MASKIN.BAS'
+'$INCLUDE: 'PRO.BAS'

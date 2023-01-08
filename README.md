@@ -26,7 +26,7 @@ We also want to thank [Gene Buckle](https://github.com/geneb) for making this al
 |DEMOEDIT.BAS| EXE     |   |DEMOEMS.BAS | N/A     |   |DEMOEMS2.BAS| N/A     |
 |DEMOEVAL.BAS| EXE     |   |DEMOFAST.BAS|         |   |DEMOFC.BAS  |         |
 |DEMOGAS.BAS | EXE     |   |DEMOIN.BAS  | EXE     |   |DEMOLTS.BAS |         |
-|DEMOMAIN.BAS| EXE     |   |DEMOMASK.BAS|         |   |DEMOMENU.BAS| EXE     |
+|DEMOMAIN.BAS| EXE     |   |DEMOMASK.BAS| EXE     |   |DEMOMENU.BAS| EXE     |
 |DEMOMGR.BAS |         |   |DEMOPICK.BAS| EXE     |   |DEMOPLMS.BAS| EXE     |
 |DEMOPOP.BAS | EXE     |   |DEMOPULL.BAS| EXE     |   |DEMORK.BAS  |         |
 |DEMOSCAN.BAS|         |   |DEMOSCRL.BAS| EXE     |   |DEMOSECT.BAS|         |
@@ -54,7 +54,7 @@ We also want to thank [Gene Buckle](https://github.com/geneb) for making this al
 |KEYSORT.BAS |         |   |KEYSTAT.BAS | EXE     |   |LINCOUNT.BAS|         |
 |LOADEXEC.BAS|         |   |LOCKFILE.BAS|         |   |LONGSTR.BAS |         |
 |LTS2MENU.BAS|         |   |LTSMENU.BAS |         |   |MAINMENU.BAS|         |
-|MAKEQLB.BAS |         |   |MARQUEE.BAS | EXE     |   |MASKIN.BAS  |         |
+|MAKEQLB.BAS |         |   |MARQUEE.BAS | EXE     |   |MASKIN.BAS  | INCLUDE |
 |MIDSTRSR.BAS|         |   |MINMAX.BAS  | EXE     |   |MONITOR.BAS | EXE     |
 |MOUSE.BAS   | EXE     |   |MOUSECM.BAS | EXE     |   |MPREST.BAS  | EXE     |
 |MRANGE.BAS  | EXE     |   |MRANGEG.BAS | EXE     |   |MSGBOX.BAS  | INCLUDE |

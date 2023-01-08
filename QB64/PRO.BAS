@@ -2593,10 +2593,6 @@ SUB MAMenuT(Array$(), First, Selection, Start, Length, Count, ScanCode, NormalCo
   ERROR 73 ' Feature Unavailable
 END SUB
 
-SUB MaskIn(Mask$, Text$, Mski)
-  ERROR 73 ' Feature Unavailable
-END SUB
-
 SUB MEditor(ed$, activeLength, scanCode, numOnly, isCapsOn, normalColor, editColor, row, column, currentColumn)
   column = currentColumn
   CALL Editor(ed$, activeLength, scanCode, numOnly, isCapsOn, normalColor, editColor, row, column)
@@ -4707,8 +4703,27 @@ SUB Lower(value$)
   value$ = LCASE$(value$)
 END SUB
 
-SUB LowerTbl(Work$, Table$)
-  ERROR 73 ' Feature Unavailable
+' LowerTbl will convert all of the characters in a string to lower 
+' case, and it also looks in a supplied table to determine how to 
+' handle foreign characters. 
+SUB LowerTbl(work$, table$)
+
+  ' Work$ is the string to be processed, and Table$ holds one or more 
+  ' pairs of lower and upper case extended characters. 
+
+  FOR entry = 1 TO LEN(table$) STEP 2
+    match$ = MID$(table$, entry, 1)
+    replacement$ = MID$(table$, entry + 1, 1)
+    DO
+      cx = INSTR(work$, match$)
+      IF cx > 0 THEN
+        MID$(work$, cx, 1) = replacement$
+      ELSE
+        EXIT DO
+      END IF  
+    LOOP
+  NEXT
+
 END SUB
 
 FUNCTION MidChar(Work$, Position)
@@ -5108,8 +5123,26 @@ SUB Upper(value$)
   value$ = UCASE$(value$)
 END SUB
 
-SUB UpperTbl(Work$, Table$)
-  ERROR 73 ' Feature Unavailable
+' UpperTbl will capitalize all of the characters in a string, and it also 
+' looks in a supplied table to determine how to handle foreign characters. 
+SUB UpperTbl(work$, table$)
+
+  ' Work$ is the string to be capitalized, and Table$ holds one or more 
+  ' pairs of lower and upper case extended characters. 
+
+  FOR entry = 1 TO LEN(table$) STEP 2
+    match$ = MID$(table$, entry, 1)
+    replacement$ = MID$(table$, entry + 1, 1)
+    DO
+      cx = INSTR(work$, match$)
+      IF cx > 0 THEN
+        MID$(work$, cx, 1) = replacement$
+      ELSE
+        EXIT DO
+      END IF  
+    LOOP
+  NEXT
+
 END SUB
 
 ' ****************************************
