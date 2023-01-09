@@ -2785,8 +2785,74 @@ FUNCTION InStat
   ERROR 73 ' Feature Unavailable
 END FUNCTION
 
-SUB Keyboard(Row, Column, Color1, Color2, Mode)
-  ERROR 73 ' Feature Unavailable
+' Keyboard provides a continual display of the current Cap and NumLock
+' status, but without having to loop repeatedly to obtain the information. 
+SUB Keyboard(row, column, color1, color2, mode) STATIC
+
+  ' Row% and Column% indicate where on the screen the status is to 
+  ' be displayed. 
+  '
+  ' Colorl % and Color2% tell Keyboard what colors to use when 
+  ' removing and displaying the "CAP" and "NUM" messages 
+  ' respectively. 
+  '
+  ' Mode% is either 1 to install the Keyboard routine, or Oto remove it. 
+
+  IF mode = 1 THEN
+
+    IF KeyboardMethodTimerId <> 0 THEN
+      TIMER(KeyboardMethodTimerId) OFF
+      TIMER(KeyboardMethodTimerId) FREE
+      KeyboardMethodTimerId = 0
+    END IF
+
+    KeyboardMethodRow = row
+    KeyboardMethodCol = column
+    KeyboardMethodColor1 = color1
+    KeyboardMethodColor2 = color2
+
+    KeyboardMethodTimerId = _FREETIMER
+    ON TIMER(KeyboardMethodTimerId, .05) Internal_Keyboard_Timer
+    TIMER(KeyboardMethodTimerId) ON
+
+  ELSE
+
+    IF KeyboardMethodTimerId <> 0 THEN
+      TIMER(KeyboardMethodTimerId) OFF
+      TIMER(KeyboardMethodTimerId) FREE
+      KeyboardMethodTimerId = 0
+    END IF
+
+    QPrintRC "        ", KeyboardMethodRow, KeyboardMethodCol, KeyboardMethodColor1
+
+  END IF
+
+END SUB
+
+SUB Internal_Keyboard_Timer STATIC
+
+  STATIC prevNumState AS INTEGER
+  STATIC prevCapState AS INTEGER
+
+  numState = NumLock
+  IF numState <> prevNumState THEN
+    IF numState THEN 
+      QPrintRC "NUM", KeyboardMethodRow, KeyboardMethodCol, KeyboardMethodColor2
+    ELSE
+      QPrintRC "   ", KeyboardMethodRow, KeyboardMethodCol, KeyboardMethodColor1
+    END IF
+    prevNumState = numState
+  END IF
+  capState = CapsLock
+  IF capState <> prevCapState THEN
+    IF capState THEN 
+      QPrintRC "CAPS", KeyboardMethodRow, KeyboardMethodCol + 4, KeyboardMethodColor2
+    ELSE
+      QPrintRC "    ", KeyboardMethodRow, KeyboardMethodCol + 4, KeyboardMethodColor1
+    END IF
+    prevCapState = capState
+  END IF
+
 END SUB
 
 ' KeyDown reports if any keys are currently being pressed. 
@@ -3226,12 +3292,87 @@ SUB Chime(number)
 
 END SUB
 
-SUB Clock(Row, Column, Colr, Mode)
-  ERROR 73 ' Feature Unavailable
+' Clock provides a continual display of the current time, but without 
+' having to loop repeatedly in the BASIC program.
+SUB Clock(row, column, colr, mode)
+
+  ' Row% and Column% indicate where on the screen the time is to be 
+  ' displayed, Colr% tells Clock what color to use, and Mode% is 
+  ' either 1 to install the routine, or O to remove it. 
+
+  IF mode = 1 THEN
+
+    IF ClockMethodTimerId <> 0 THEN
+      TIMER(ClockMethodTimerId) OFF
+      TIMER(ClockMethodTimerId) FREE
+      ClockMethodTimerId = 0
+    END IF
+
+    ClockMethodRow = row
+    ClockMethodCol = column
+    ClockMethodColr = colr
+    ClockMethod24 = 0
+
+    ClockMethodTimerId = _FREETIMER
+    ON TIMER(ClockMethodTimerId, .05) Internal_Clock_Timer
+    TIMER(ClockMethodTimerId) ON
+
+  ELSE
+
+    IF ClockMethodTimerId <> 0 THEN
+      TIMER(ClockMethodTimerId) OFF
+      TIMER(ClockMethodTimerId) FREE
+      ClockMethodTimerId = 0
+    END IF
+
+    QPrintRC "        ", ClockMethodRow, ClockMethodCol, ClockMethodColr
+
+  END IF
+
 END SUB
 
-SUB Clock24(Row, Column, Colr, Mode)
-  ERROR 73 ' Feature Unavailable
+' Clock24 provides a continual 24-hour display of the current time, but 
+' without having to loop repeatedly in the BASIC program.
+SUB Clock24(row, column, colr, mode)
+
+  ' Row% and Column% indicate where on the screen the time is to be 
+  ' displayed, Colr% tells Clock what color to use, and Mode% is 
+  ' either 1 to install the routine, or O to remove it. 
+
+  IF mode = 1 THEN
+
+    IF ClockMethodTimerId <> 0 THEN
+      TIMER(ClockMethodTimerId) OFF
+      TIMER(ClockMethodTimerId) FREE
+      ClockMethodTimerId = 0
+    END IF
+
+    ClockMethodRow = row
+    ClockMethodCol = column
+    ClockMethodColr = colr
+    ClockMethod24 = -1
+
+    ClockMethodTimerId = _FREETIMER
+    ON TIMER(ClockMethodTimerId, .05) Internal_Clock_Timer
+    TIMER(ClockMethodTimerId) ON
+
+  ELSE
+
+    IF ClockMethodTimerId <> 0 THEN
+      TIMER(ClockMethodTimerId) OFF
+      TIMER(ClockMethodTimerId) FREE
+      ClockMethodTimerId = 0
+    END IF
+
+    QPrintRC "        ", ClockMethodRow, ClockMethodCol, ClockMethodColr
+
+  END IF
+
+END SUB
+
+SUB Internal_Clock_Timer
+  display$ = TIME$
+  QPrintRC display$, ClockMethodRow, ClockMethodCol, ClockMethodColr
 END SUB
 
 ' Compare will compare any two blocks of memory, and report if they are the same. 

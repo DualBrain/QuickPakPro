@@ -56,6 +56,18 @@ TYPE FVInfo
   FileOffset AS LONG 
 END TYPE 
 
+DIM SHARED KeyboardMethodTimerId AS INTEGER
+DIM SHARED KeyboardMethodRow AS INTEGER
+DIM SHARED KeyboardMethodCol AS INTEGER
+DIM SHARED KeyboardMethodColor1 AS INTEGER
+DIM SHARED KeyboardMethodColor2 AS INTEGER
+
+DIM SHARED ClockMethodTimerId AS INTEGER
+DIM SHARED ClockMethodRow AS INTEGER
+DIM SHARED ClockMethodCol AS INTEGER
+DIM SHARED ClockMethodColr AS INTEGER
+DIM SHARED ClockMethod24 AS INTEGER
+
 ' ********************************************************
 ' * Win32
 ' ********************************************************
