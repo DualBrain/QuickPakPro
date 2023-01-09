@@ -25,7 +25,7 @@ We also want to thank [Gene Buckle](https://github.com/geneb) for making this al
 |DEMODIA2.BAS| EXE     |   |DEMODIAL.BAS| EXE     |   |DEMODIAP.BAS| EXE     |
 |DEMOEDIT.BAS| EXE     |   |DEMOEMS.BAS | N/A     |   |DEMOEMS2.BAS| N/A     |
 |DEMOEVAL.BAS| EXE     |   |DEMOFAST.BAS| EXE     |   |DEMOFC.BAS  | EXE     |
-|DEMOGAS.BAS | EXE     |   |DEMOIN.BAS  | EXE     |   |DEMOLTS.BAS |         |
+|DEMOGAS.BAS | EXE     |   |DEMOIN.BAS  | EXE     |   |DEMOLTS.BAS | EXE     |
 |DEMOMAIN.BAS| EXE     |   |DEMOMASK.BAS| EXE     |   |DEMOMENU.BAS| EXE     |
 |DEMOMGR.BAS |         |   |DEMOPICK.BAS| EXE     |   |DEMOPLMS.BAS| EXE     |
 |DEMOPOP.BAS | EXE     |   |DEMOPULL.BAS| EXE     |   |DEMORK.BAS  |         |
@@ -53,7 +53,7 @@ We also want to thank [Gene Buckle](https://github.com/geneb) for making this al
 |ISORTT.BAS  |         |   |KEYDOWN.BAS | EXE     |   |KEYS.BAS    | EXE     |
 |KEYSORT.BAS |         |   |KEYSTAT.BAS | EXE     |   |LINCOUNT.BAS| EXE     |
 |LOADEXEC.BAS|         |   |LOCKFILE.BAS|         |   |LONGSTR.BAS |         |
-|LTS2MENU.BAS|         |   |LTSMENU.BAS |         |   |MAINMENU.BAS|         |
+|LTS2MENU.BAS| INCLUDE |   |LTSMENU.BAS | INCLUDE |   |MAINMENU.BAS|         |
 |MAKEQLB.BAS |         |   |MARQUEE.BAS | EXE     |   |MASKIN.BAS  | INCLUDE |
 |MIDSTRSR.BAS|         |   |MINMAX.BAS  | EXE     |   |MONITOR.BAS | EXE     |
 |MOUSE.BAS   | EXE     |   |MOUSECM.BAS | EXE     |   |MPREST.BAS  | EXE     |

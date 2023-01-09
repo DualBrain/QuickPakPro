@@ -2486,14 +2486,6 @@ SUB Editor(ed$, activeLength, scanCode, numOnly, isCapsOn, normalColor, editColo
   LOOP
 END SUB
 
-SUB Lts2Menu(Item$(), PromptParam$(), Choice, Colr)
-  ERROR 73 ' Feature Unavailable
-END SUB
-
-SUB LtsMenu(Item$(), Choice, Colr)
-  ERROR 73 ' Feature Unavailable
-END SUB
-
 ' MAMenu is a full-featured multi-column menu routine, which allows
 ' selecting items either with the keyboard or a mouse. This is a mouse-aware
 ' version of the original AMenu routine, which is described elsewhere.
