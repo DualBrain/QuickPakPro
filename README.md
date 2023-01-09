@@ -27,7 +27,7 @@ We also want to thank [Gene Buckle](https://github.com/geneb) for making this al
 |DEMOEVAL.BAS| EXE     |   |DEMOFAST.BAS| EXE     |   |DEMOFC.BAS  | EXE     |
 |DEMOGAS.BAS | EXE     |   |DEMOIN.BAS  | EXE     |   |DEMOLTS.BAS | EXE     |
 |DEMOMAIN.BAS| EXE     |   |DEMOMASK.BAS| EXE     |   |DEMOMENU.BAS| EXE     |
-|DEMOMGR.BAS |         |   |DEMOPICK.BAS| EXE     |   |DEMOPLMS.BAS| EXE     |
+|DEMOMGR.BAS | EXE     |   |DEMOPICK.BAS| EXE     |   |DEMOPLMS.BAS| EXE     |
 |DEMOPOP.BAS | EXE     |   |DEMOPULL.BAS| EXE     |   |DEMORK.BAS  |         |
 |DEMOSCAN.BAS|         |   |DEMOSCRL.BAS| EXE     |   |DEMOSECT.BAS|         |
 |DEMOSORT.BAS|         |   |DEMOSS.BAS  |         |   |DEMOSTR.BAS | EXE     |
@@ -80,7 +80,7 @@ We also want to thank [Gene Buckle](https://github.com/geneb) for making this al
 |TEXTSORT.BAS|         |   |TIME.BAS    | EXE     |   |TRANSLAT.BAS| EXE     |
 |UNIQUE.BAS  | INCLUDE |   |VALID.BAS   | EXE     |   |VERTMENT.BAS|         |
 |VERTMENU.BAS| INCLUDE |   |VIEWFILE.BAS|         |   |VIRTUAL.BAS |         |
-|VLONG.BAS   |         |   |WEEKDAY.BAS | EXE     |   |WINDOMGR.BAS|         |
+|VLONG.BAS   |         |   |WEEKDAY.BAS | EXE     |   |WINDOMGR.BAS| INCLUDE |
 |WINDOW.BAS  |         |   |WIPES.BAS   | EXE     |   |WORDWRAP.BAS| EXE     |
 |YESNOB.BAS  | INCLUDE |   |            |         |   |            |         |
 
