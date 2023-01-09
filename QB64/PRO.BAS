@@ -1092,8 +1092,8 @@ END SUB
 ' FGet reads data from a disk file in a manner similar to BASIC's 
 ' binary GET command, but it returns an error code rather than 
 ' requiring the use of ON ERROR. 
-SUB FGet(Handle, Destination$)
-  ERROR 73 ' Feature Unavailable
+SUB FGet(handle, destination$)
+  GET #handle, , destination$
 END SUB
 
 ' FGetA is similar to the QuickPak Professional FGetT routine, 
@@ -1166,10 +1166,6 @@ FUNCTION FileComp(file1$, file2$, errCode)
   FileComp = result
 
 END FUNCTION
-
-SUB FileCrypt(FileName$, PassWord$)
-  ERROR 73 ' Feature Unavailable
-END SUB
 
 SUB FileInfo(fileName$, tVar AS FInfo)
 
@@ -1266,15 +1262,15 @@ FUNCTION FLoc&(Handle)
   FLoc& = LOC(Handle)
 END FUNCTION
 
-FUNCTION FLof&(Handle)
-  FLof& = LOF(Handle)
+FUNCTION FLof&(handle)
+  FLof& = LOF(handle)
 END FUNCTION
 
 ' FOpen is used to open a disk file in preparation for reading or 
 ' writing using the QuickPak Professional file access routines. 
 SUB FOpen(fileName$, handle)
   handle = FREEFILE
-  OPEN fileName$ FOR BINARY AS #handle
+  OPEN fileName$ FOR BINARY ACCESS READ WRITE AS #handle
 END SUB
 
 ' FOpenS is used to open for Shared (network access) a disk file in 
@@ -1293,8 +1289,8 @@ FUNCTION FormatDiskette(DriveNumber, Capacity, BufArray())
   ERROR 73 ' Feature Unavailable
 END FUNCTION
 
-SUB FPut(Handle, Source$)
-  ERROR 73 ' Feature Unavailable
+SUB FPut(handle, source$)
+  PUT #handle, , source$
 END SUB
 
 ' FPutA is similar to the QuickPak Professional FPut routine, 
@@ -1350,8 +1346,8 @@ SUB FPutT(Handle, Source AS FLen, NumBytes)
   ERROR 73 ' Feature Unavailable
 END SUB
 
-SUB FSeek(Handle, Location&)
-  ERROR 73 ' Feature Unavailable
+SUB FSeek(handle, location&)
+  SEEK handle, location& + 1
 END SUB
 
 SUB FStamp(FileName$, NewTime$, NewDate$)

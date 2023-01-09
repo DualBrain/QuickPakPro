@@ -1,64 +1,67 @@
-'******** FileCrpt.Bas - encrypts a file with a password
+' ******** FILECRPT.BAS - encrypts a file with a password
 
-'Copyright (c) 1988 Ethan Winer
+' Copyright (c) 1988 Ethan Winer
+' Modifications (c) 2023 Cory Smith
 
-'IMPORTANT: Do NOT forget your password!
-
+' IMPORTANT: Do NOT forget your password!
 
 DEFINT A-Z
+
 DECLARE FUNCTION DOSError% ()
-DECLARE FUNCTION Exist% (FileName$)
-DECLARE FUNCTION FLof& (Handle)
-DECLARE SUB Encrypt (Secret$, PassWord$)
-DECLARE SUB FClose (Handle)
-DECLARE SUB FGet (Handle, Destination$)
-DECLARE SUB FOpen (FileName$, Handle)
-DECLARE SUB FPut (Handle, Source$)
-DECLARE SUB FSeek (Handle, Offset&)
+DECLARE FUNCTION Exist% (fileName$)
+DECLARE FUNCTION FLof& (handle)
+DECLARE SUB Encrypt (secret$, passWord$)
+DECLARE SUB FClose (handle)
+DECLARE SUB FGet (handle, destination$)
+DECLARE SUB FOpen (fileName$, handle)
+DECLARE SUB FPut (handle, source$)
+DECLARE SUB FSeek (handle, offset&)
 
-'********** FileCrpt.Bas - encrypts and decrypts files using a password
+' ********** FILECRPT.BAS - encrypts and decrypts files using a password
 '
-'Copyright (c) 1987 Ethan Winer
+' Copyright (c) 1987 Ethan Winer
+' Modifications (c) 2023 Cory Smith
 '
-SUB FileCrypt (FileName$, PWord$) STATIC
+SUB FileCrypt (fileName$, pWord$) STATIC
 
-    PassWord$ = PWord$                  'don't actually change the password
-    Encrypt PassWord$, "ΔA2ρή,"         'double encrypt the password copy
-    L = LEN(PassWord$)                  'remember the length of PassWord$
+  secondKey$ = CHR$(196) + "A2" + CHR$(241) + CHR$(222) + ","
 
-    FOpen FileName$, Handle             'open the file for QuickPak binary
-    IF DOSError% THEN EXIT SUB          'it's not there or drive door is open
+  passWord$ = pWord$                  ' don't actually change the password
+  Encrypt passWord$, secondKey$       ' double encrypt the password copy
+  l = LEN(passWord$)                  ' remember the length of PassWord$
 
-    FileSize& = FLof&(Handle)           'find how long the file is
-    BufSize = 4096                      '4096 evenly holds four sectors
-    IF FileSize& < BufSize THEN         'but we can't use more than FileSize&
-       BufSize = FileSize&              'so use that instead
+  FOpen fileName$, handle             ' open the file for QuickPak binary
+  IF DOSError% THEN EXIT SUB          ' it's not there or drive door is open
+
+  fileSz& = FLof&(handle)           ' find how long the file is
+  bufSize = 4096                    ' 4096 evenly holds four sectors
+  IF fileSz& < bufSize THEN         ' but we can't use more than FileSz&
+    bufSize = fileSz&               ' so use that instead
+  END IF
+
+  bufSize = bufSize - (fileSz& MOD l)       ' LEN(Buffer$) must be an even
+                                              '   multiple of LEN(PassWord$)
+  IF bufSize = 0 THEN                         ' it's a very small file, use
+    bufSize = fileSz&                       '   FileSz& instead
+  END IF
+
+  buffer$ = SPACE$(bufSize)             ' create a buffer to hold the file
+  done& = 0                             ' Done& tracks how much we've done
+
+  DO
+    FGet handle, buffer$                ' get this portion of the file
+    Encrypt buffer$, passWord$          ' encrypt it
+    FSeek handle, done&                 ' seek back to the start of this block
+    FPut handle, buffer$                ' write out the encrypted data
+    done& = done& + LEN(buffer$)        ' track what we've already done
+
+    IF fileSz& - done& < LEN(buffer$) THEN  ' less than LEN(Buffer$) remains
+      buffer$ = ""                            ' this shouldn't be necessary
+      buffer$ = SPACE$(filSiz& - done&)     ' adjust buffer to what remains
     END IF
 
-    BufSize = BufSize - (FileSize& MOD L)       'LEN(Buffer$) must be an even
-                                                '  multiple of LEN(PassWord$)
-    IF BufSize = 0 THEN                         'it's a very small file, use
-       BufSize = FileSize&                      '  FileSize& instead
-    END IF
+  LOOP WHILE LEN(buffer$) AND NOT DOSError%   ' loop while there's still more to do
+                                              '   and no errors have occurred
+  FClose handle                               ' close the file
 
-    Buffer$ = SPACE$(BufSize)           'create a buffer to hold the file
-    Done& = 0                           'Done& tracks how much we've done
-
-DO
-    FGet Handle, Buffer$                'get this portion of the file
-    Encrypt Buffer$, PassWord$          'encrypt it
-    FSeek Handle, Done&                 'seek back to the start of this block
-    FPut Handle, Buffer$                'write out the encrypted data
-    Done& = Done& + LEN(Buffer$)        'track what we've already done
-
-    IF FileSize& - Done& < LEN(Buffer$) THEN   'less than LEN(Buffer$) remains
-       Buffer$ = ""                            'this shouldn't be necessary
-       Buffer$ = SPACE$(FileSize& - Done&)     'adjust buffer to what remains
-    END IF
-
-LOOP WHILE LEN(Buffer$) AND NOT DOSError%      'loop while there's still more to do
-                                               '  and no errors have occurred
-    FClose Handle                              'close the file
-
-END SUB                                        'see ya later, oscillator
-
+END SUB                                       ' see ya later, oscillator
