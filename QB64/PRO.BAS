@@ -1029,27 +1029,6 @@ FUNCTION Exist(fileName$)
   END IF
 END FUNCTION
 
-' FastLoadInt returns the number of lines
-' needed (array size) in order to prepare
-' the string array needed by FastLoadStr.
-FUNCTION FastLoadInt(FileName$)
-  ERROR 73 ' Feature Unavailable
-END FUNCTION
-
-' FastLoadStr allows your programs to load 
-' an entire text file to a conventional 
-' (not fixed-length) string array very quickly. 
-SUB FastLoadStr(array$())
-  ERROR 73 ' Feature Unavailable
-END SUB
-
-' FastSave allows your programs save an entire 
-' text file from a conventional (not fixed-length) 
-' string array very quickly. 
-SUB FastSave(FileName$, Text$())
-  ERROR 73 ' Feature Unavailable
-END SUB
-
 ' FClose will close a file that had been previously opened with the 
 ' QuickPak Professional FOpen command. 
 SUB FClose(handle)

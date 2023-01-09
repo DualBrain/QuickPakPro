@@ -1,0 +1,1 @@
+REDIM txt(0)            'establish the array that will hold the retrieved file

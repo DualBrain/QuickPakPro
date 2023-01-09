@@ -24,7 +24,7 @@ We also want to thank [Gene Buckle](https://github.com/geneb) for making this al
 |DEMOCOPY.BAS| EXE     |   |DEMOCRPT.BAS| EXE     |   |DEMODATE.BAS| EXE     |
 |DEMODIA2.BAS| EXE     |   |DEMODIAL.BAS| EXE     |   |DEMODIAP.BAS| EXE     |
 |DEMOEDIT.BAS| EXE     |   |DEMOEMS.BAS | N/A     |   |DEMOEMS2.BAS| N/A     |
-|DEMOEVAL.BAS| EXE     |   |DEMOFAST.BAS|         |   |DEMOFC.BAS  |         |
+|DEMOEVAL.BAS| EXE     |   |DEMOFAST.BAS| EXE     |   |DEMOFC.BAS  |         |
 |DEMOGAS.BAS | EXE     |   |DEMOIN.BAS  | EXE     |   |DEMOLTS.BAS |         |
 |DEMOMAIN.BAS| EXE     |   |DEMOMASK.BAS| EXE     |   |DEMOMENU.BAS| EXE     |
 |DEMOMGR.BAS |         |   |DEMOPICK.BAS| EXE     |   |DEMOPLMS.BAS| EXE     |
@@ -35,7 +35,7 @@ We also want to thank [Gene Buckle](https://github.com/geneb) for making this al
 |DEMOVRTT.BAS|         |   |DEMOXMS.BAS | N/A     |   |DIALOG.BAS  | INCLUDE |
 |DIRTREE.BAS |         |   |DISKINFO.BAS|         |   |EDIT.BAS    | EXE     |
 |EGABSAVE.BAS|         |   |EVALUATE.BAS| INCLUDE |   |EXENAME.BAS | EXE     |
-|EXIST.BAS   |         |   |FAPPEND.BAS |         |   |FASTFILE.BAS|         |
+|EXIST.BAS   |         |   |FAPPEND.BAS |         |   |FASTFILE.BAS| INCLUDE |
 |FGETAH.BAS  |         |   |FGETR.BAS   |         |   |FGETRT.BAS  |         |
 |FILECOMP.BAS|         |   |FILECOPY.BAS| INCLUDE |   |FILECRPT.BAS|         |
 |FILEINFO.BAS| EXE     |   |FILESORT.BAS|         |   |FILEVIEW.BAS|         |
