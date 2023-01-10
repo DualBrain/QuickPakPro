@@ -1293,13 +1293,14 @@ FUNCTION FLInput$(handle, buffer$)
     CALL FGet(handle, buffer$)
 
     cr = INSTR(buffer$, CHR$(13))
+    feed = INSTR(buffer$, CHR$(10))
     ef = INSTR(buffer$, CHR$(26))
 
     IF cr > 0 THEN
       result$ = LEFT$(buffer$, cr - 1)
-      IF MID$(buffer$, cr + 1, 1) = CHR$(10) THEN
-        IF cp + cr + 1 < lf THEN
-          SEEK handle, cp + cr + 1
+      IF cr + 1 = feed THEN
+        IF cp + feed + 1 < lf THEN
+          SEEK handle, cp + feed + 1
         END IF
       ELSE
         IF cp + cr < lf THEN
@@ -1307,7 +1308,6 @@ FUNCTION FLInput$(handle, buffer$)
         END IF
       END IF
     ELSEIF ef > 0 THEN
-      'print "found eof": call waitkeys
       result$ = LEFT$(buffer$, ef - 1)
       SEEK handle, cp + ef
       SetError 62 ' End of File

@@ -144,7 +144,7 @@ SUB ViewFile (fileName$, numChars, rows, clr, hiBit, action) STATIC
     ClearScr0 ulRow, ulCol, ulRow + rows + 1, ulCol + numChars + 1, clr
 
     fileName$ = UCASE$(LTRIM$(RTRIM$(fileName$))) ' Trim and Cap file name
-    top$ = "�" + STRING$(numChars, "�") + "�"   ' Make top line of window
+    top$ = CHR$(201) + STRING$(numChars, CHR$(205)) + CHR$(187)   ' Make top line of window
     IF QPLen%(top$) > QPLen%(fileName$) + 6 THEN
       MID$(top$, (QPLen%(top$) - QPLen%(fileName$) - 4) \ 2) = "[ " + fileName$ + " ]"
     END IF
@@ -166,7 +166,7 @@ SUB ViewFile (fileName$, numChars, rows, clr, hiBit, action) STATIC
   IF action < 3 THEN
     MQPrint top$, clr                        ' Print the top line
     FOR n = 1 TO rows                        ' Print the window sides
-      LOCATE n + ulRow, ulCol: MQPrint "�", clr
+      LOCATE n + ulRow, ulCol: MQPrint CHR$(186), clr
       LOCATE , ulCol + numChars + 1
       IF rows > 2 THEN
         IF n = 1 THEN                     ' If there is enough room for
@@ -179,13 +179,13 @@ SUB ViewFile (fileName$, numChars, rows, clr, hiBit, action) STATIC
           MQPrint CHR$(177), invClr
         END IF
       ELSE                                 ' Window too small for scroll
-        MQPrint "�", clr                  '   bar, print double line
+        MQPrint CHR$(186), clr             '   bar, print double line
       END IF
     NEXT
 
     botRow = n + ulRow                       ' Save the bottom row #
     LOCATE botRow, ulCol                     ' Print horizontal scroll bar
-    MQPrint "�" + CHR$(27) + CHR$(4) + STRING$(numChars - 3, CHR$(177)) + CHR$(26) + "�", clr
+    MQPrint CHR$(200) + CHR$(27) + CHR$(4) + STRING$(numChars - 3, CHR$(177)) + CHR$(26) + CHR$(188), clr
     CALL PaintBox0(botRow, ulCol + 1, botRow, ulCol + numChars, invClr)
 
     oClr = clr
