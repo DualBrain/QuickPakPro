@@ -31,7 +31,7 @@ We also want to thank [Gene Buckle](https://github.com/geneb) for making this al
 |DEMOPOP.BAS | EXE     |   |DEMOPULL.BAS| EXE     |   |DEMORK.BAS  | EXE     |
 |DEMOSCAN.BAS|         |   |DEMOSCRL.BAS| EXE     |   |DEMOSECT.BAS|         |
 |DEMOSORT.BAS|         |   |DEMOSS.BAS  |         |   |DEMOSTR.BAS | EXE     |
-|DEMOTSRT.BAS|         |   |DEMOVERT.BAS| EXE     |   |DEMOVIEW.BAS|         |
+|DEMOTSRT.BAS|         |   |DEMOVERT.BAS| EXE     |   |DEMOVIEW.BAS| EXE     |
 |DEMOVRTT.BAS|         |   |DEMOXMS.BAS | N/A     |   |DIALOG.BAS  | INCLUDE |
 |DIRTREE.BAS |         |   |DISKINFO.BAS|         |   |EDIT.BAS    | EXE     |
 |EGABSAVE.BAS|         |   |EVALUATE.BAS| INCLUDE |   |EXENAME.BAS | EXE     |
@@ -40,7 +40,7 @@ We also want to thank [Gene Buckle](https://github.com/geneb) for making this al
 |FILECOMP.BAS|         |   |FILECOPY.BAS| INCLUDE |   |FILECRPT.BAS| INCLUDE |
 |FILEINFO.BAS| EXE     |   |FILESORT.BAS|         |   |FILEVIEW.BAS|         |
 |FILL.BAS    |         |   |FILLSCRN.BAS| EXE     |   |FIND.BAS    | EXE     |
-|FINDLAST.BAS| EXE     |   |FINDT.BAS   |         |   |FLINPUT.BAS |         |
+|FINDLAST.BAS| EXE     |   |FINDT.BAS   |         |   |FLINPUT.BAS | EXE     |
 |FLUSH.BAS   |         |   |FNOTHER.BAS | EXE     |   |FNSPREAD.BAS| EXE     |
 |FORMAT.BAS  |         |   |FULLNAME.BAS| EXE     |   |GASGAUGE.BAS| INCLUDE |
 |GET1STR.BAS | INCLUDE |   |GETATTR.BAS | EXE     |   |GETCMOS.BAS |         |
@@ -79,7 +79,7 @@ We also want to thank [Gene Buckle](https://github.com/geneb) for making this al
 |STUFFBUF.BAS|         |   |TEST.BAS    | EXE     |   |TEXTIN.BAS  | INCLUDE |
 |TEXTSORT.BAS|         |   |TIME.BAS    | EXE     |   |TRANSLAT.BAS| EXE     |
 |UNIQUE.BAS  | INCLUDE |   |VALID.BAS   | EXE     |   |VERTMENT.BAS|         |
-|VERTMENU.BAS| INCLUDE |   |VIEWFILE.BAS|         |   |VIRTUAL.BAS |         |
+|VERTMENU.BAS| INCLUDE |   |VIEWFILE.BAS| INCLUDE |   |VIRTUAL.BAS |         |
 |VLONG.BAS   |         |   |WEEKDAY.BAS | EXE     |   |WINDOMGR.BAS| INCLUDE |
 |WINDOW.BAS  |         |   |WIPES.BAS   | EXE     |   |WORDWRAP.BAS| EXE     |
 |YESNOB.BAS  | INCLUDE |   |            |         |   |            |         |

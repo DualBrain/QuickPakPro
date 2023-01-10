@@ -68,6 +68,9 @@ DIM SHARED ClockMethodCol AS INTEGER
 DIM SHARED ClockMethodColr AS INTEGER
 DIM SHARED ClockMethod24 AS INTEGER
 
+DIM SHARED Pro_Internal_DosError AS INTEGER
+DIM SHARED Pro_Internal_WhichError AS INTEGER
+
 ' ********************************************************
 ' * Win32
 ' ********************************************************

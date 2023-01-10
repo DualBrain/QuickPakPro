@@ -933,7 +933,7 @@ END FUNCTION
 ' QuickPak Professional DOS routine.
 FUNCTION DosError
   ' DOSError% returns O if there was no error, or -1 if there was. 
-  DosError = 0 ' No error.
+  DosError = Pro_Internal_DosError
 END FUNCTION
 
 ' DOSVer returns the version of DOS that is presently 
@@ -1254,8 +1254,74 @@ SUB FileSort(DataFile$, IndexFile$, First&, Last&, Table(), RecLength)
   ERROR 73 ' Feature Unavailable
 END SUB
 
-FUNCTION FLInput$(Handle, Buffer$)
-  ERROR 73 ' Feature Unavailable
+' FLinput will read a line of input from a file that has been opened 
+' using the QuickPak Professional FOpen routine. 
+FUNCTION FLInput$(handle, buffer$)
+  
+  ' Handle% is the file handle that was assigned when the file was first 
+  ' opened, and Buffer$ is a temporary work string needed by FLinput 
+  ' as it reads the file contents. 
+  '
+  ' Unlike the other QuickPak Professional binary input routines that 
+  ' read a specified number of bytes, words, or elements from a file, 
+  ' FLinput reads until it encounters the CHR$(13) that marks the end 
+  ' of a line, or the CHR$(26) that indicates the end of a file. For files 
+  ' that do not contain an end of file marker, FLinput stops reading at 
+  ' the physical end of the file. 
+  '
+  ' The only errors that are likely when using FLinput are "Input Past 
+  ' End" (number 62) or "Buffer Too Small" (number 83). It is up to 
+  ' the calling program to provide a temporary work buffer for 
+  ' FLinput. If that buff er is too small to read an entire line, you 
+  ' should invoke FLinput again to obtain the remainder. This is 
+  ' illustrated in the FLINPUT.BAS example program.
+
+  SetError 0
+
+  result$ = ""
+
+  cp = LOC(handle)
+  lf = LOF(handle)
+  lb = LEN(buffer$)
+
+  IF (cp - 1) + lb => lf THEN
+    lb = lf - cp
+  END IF
+
+  IF lb > 0 THEN
+
+    CALL FGet(handle, buffer$)
+
+    cr = INSTR(buffer$, CHR$(13))
+    ef = INSTR(buffer$, CHR$(26))
+
+    IF cr > 0 THEN
+      result$ = LEFT$(buffer$, cr - 1)
+      IF MID$(buffer$, cr + 1, 1) = CHR$(10) THEN
+        IF cp + cr + 1 < lf THEN
+          SEEK handle, cp + cr + 1
+        END IF
+      ELSE
+        IF cp + cr < lf THEN
+          SEEK handle, cp + cr
+        END IF
+      END IF
+    ELSEIF ef > 0 THEN
+      'print "found eof": call waitkeys
+      result$ = LEFT$(buffer$, ef - 1)
+      SEEK handle, cp + ef
+      SetError 62 ' End of File
+    ELSE
+      result$ = buffer$
+      SetError 83 ' Buffer too small
+    END IF
+
+  ELSE
+    SetError 62 ' End of File
+  END IF
+
+  FLInput$ = result$
+
 END FUNCTION
 
 FUNCTION FLoc&(Handle)
@@ -1861,10 +1927,19 @@ END SUB
 ' SetError allows a BASIC program to set or clear the DOSError and 
 ' WhichError functions. 
 SUB SetError(errNum)
-  'TODO: Need to figure out how to handle setting of an error
-  ' so that, somehow, SYSTEM and/or END can be called
-  ' before exiting the application so that the error set
-  ' can be exposed to the caller (externally - os level).
+
+  ' ErrCode % is either zero to clear DOSError and WhichError, or an 
+  ' error value to place into WhichError. If ErrCode% is not zero, then 
+  ' DOSError will be set to -1.
+
+  IF errNum = 0 THEN
+    Pro_Internal_DosError = 0
+    Pro_Internal_WhichError = 0
+  ELSE
+    Pro_Internal_DosError = -1
+    Pro_Internal_WhichError = errNum
+  END IF
+
 END SUB
 
 SUB SetLevel(ErrValue)
@@ -1990,7 +2065,7 @@ FUNCTION WhichError
   
   ' Also see the complimentary function DOSError
 
-  WhichError = 0 'TODO: Need to implement. 
+  WhichError = Pro_Internal_WhichError 
 
 END FUNCTION
 
@@ -4414,10 +4489,6 @@ FUNCTION TrapInt(value, loLimit, hiLimit)
   IF value > hiLimit THEN TrapInt = hiLimit: EXIT FUNCTION
   TrapInt = value
 END FUNCTION
-
-SUB ViewFile(FileName$, Wide, High, Colr, HiBit, Action)
-  ERROR 73 ' Feature Unavailable
-END SUB
 
 SUB VLAdd(Value1#, Value2#, Sum#, ErrFlag)
   ERROR 73 ' Feature Unavailable
