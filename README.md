@@ -1,10 +1,10 @@
-# QuickPak Professional for QB64
+# QuickPak Professional Resurrected
 
-The QuickPak Professional add-on was the absolute *best* product for writing professional applications using QB4.5/PDS7.1 in the late-1980s and early-1990s. It was touted as *The Most Comprehensive Collection of BASIC Tools Ever Produced*.
+The original QuickPak Professional add-on was the absolute *best* product for writing professional applications using QB4.5/PDS7.1 in the late-1980s and early-1990s. It was touted as *The Most Comprehensive Collection of BASIC Tools Ever Produced*.
 
-The original QuickPak Professional for QB4.5/PDS7.1/VBDOS1.0 was released into the *public domain* around the end of 2018 by [Gene Buckle](https://github.com/geneb). This project serves to resurrect much of the functionality (where possible) for use with QB64 v2.1+.
+QuickPak Professional for QB4.5/PDS7.1/VBDOS1.0 (MS-DOS) was released into the *public domain* around the end of 2018 by [Gene Buckle](https://github.com/geneb). This project serves to resurrect much of the functionality (where possible) for use with QB64 v2.1+ (MIT License).
 
-You can find the original [here](http://annex.retroarchive.org/crescent/index.html) along with a [PDF copy of the manual](http://annex.retroarchive.org/crescent/QuickPak%20Professional.pdf). You can also access the [original repo here](https://github.com/geneb/QuickPak-Pro-DOS).
+You can find the original QuickPak Professional installation [here](http://annex.retroarchive.org/crescent/index.html) along with a [PDF copy of the manual](http://annex.retroarchive.org/crescent/QuickPak%20Professional.pdf). You can also access the [original repo here](https://github.com/geneb/QuickPak-Pro-DOS).
 
 We also want to thank [Gene Buckle](https://github.com/geneb) for making this all possible as well as to [Ethan Winer](http://ethanwiner.com/fullmoon.html) for creating the product in the first place.
 
@@ -84,7 +84,7 @@ We also want to thank [Gene Buckle](https://github.com/geneb) for making this al
 |WINDOW.BAS  |         |   |WIPES.BAS   | EXE     |   |WORDWRAP.BAS| EXE     |
 |YESNOB.BAS  | INCLUDE |   |            |         |   |            |         |
 
-Files marked with *INCLUDE* are meant to be included, while files marked as *EXE* are to be compiled as an executable (stand-alone example). The replacement of the PRO.LIB functionality is implemented in the *PRO.BAS* and *PRO.BI* source files. (Files marked with *N/A* are either hardware specific and/or simply "not possible" with the current release of QB64. If you disagree, please share.)
+Files marked with *INCLUDE* are meant to be included, while files marked as *EXE* are to be compiled as an executable (stand-alone example). The replacement of the PRO.LIB functionality is implemented in the *PRO.BAS* and *PRO.BI* source files. (Files marked with *N/A* are either hardware specific and/or simply "not possible" with the current release of QB64. If you disagree, please discuss.)
 
 ## Contributing
 
