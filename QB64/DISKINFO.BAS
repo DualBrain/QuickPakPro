@@ -26,23 +26,23 @@ DEFINT A-Z
 
 '$INCLUDE: 'PRO.BI'
 
-DECLARE SUB DiskInfo (Drive$, Bytes, Sectors, FreeClusters, TotalClusters)
-DECLARE FUNCTION GoodDrive% (Drive$)
+DECLARE SUB DiskInfo (drive$, bytes, sectors, freeClusters, totalClusters)
+DECLARE FUNCTION GoodDrive% (drive$)
 DECLARE FUNCTION GetDrive% ()
 
 CLS
-INPUT "Enter the drive to check, or press Enter for the default drive: ", Drive$
-IF Drive$ = "" THEN Drive$ = CHR$(GetDrive%)
+INPUT "Enter the drive to check, or press Enter for the default drive: ", drive$
+IF drive$ = "" THEN drive$ = CHR$(GetDrive%)
 PRINT
 
-IF GoodDrive%(Drive$) THEN
-  DiskInfo Drive$, Bytes, Sectors, FreeClusters, TotalClusters
-  PRINT "Drive "; Drive$; " has"; Sectors; "sectors per cluster, ";
-  PRINT "and each sector holds"; Bytes; "bytes."
-  PRINT "There are a total of"; CLNG(TotalClusters) * Sectors; "sectors, ";
-  PRINT "of which"; CLNG(FreeClusters) * Sectors; "sectors are free."
+IF GoodDrive%(drive$) THEN
+  DiskInfo drive$, bytes, sectors, freeClusters, totalClusters
+  PRINT "Drive "; drive$; " has"; sectors; "sectors per cluster, ";
+  PRINT "and each sector holds"; bytes; "bytes."
+  PRINT "There are a total of"; CLNG(totalClusters) * sectors; "sectors, ";
+  PRINT "of which"; CLNG(freeClusters) * sectors; "sectors are free."
 ELSE
-  PRINT Drive$; " is an invalid drive"
+  PRINT drive$; " is an invalid drive"
 END IF
 
 '$INCLUDE: 'PRO.BAS'

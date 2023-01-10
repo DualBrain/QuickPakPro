@@ -20,7 +20,7 @@ We also want to thank [Gene Buckle](https://github.com/geneb) for making this al
 |COLORPIK.BAS| EXE     |   |COLORS.BAS  | EXE     |   |COMPARE.BAS | EXE     |
 |DATA.BAS    | N/A     |   |DATE2DAY.BAS| EXE     |   |DATEIN.BAS  | INCLUDE |
 |DAYNAME.BAS | EXE     |   |DECLARE.BAS | INCLUDE |   |DEFCNF.BI   | INCLUDE |
-|DEMO123.BAS | EXE     |   |DEMOCM.BAS  | EXE     |   |DEMOCOMP.BAS| EXE     |
+|DEMO123.BAS | EXE     |   |DEMOCM.BAS  | EXE     |   |DEMOCOMP.BAS|         |
 |DEMOCOPY.BAS| EXE     |   |DEMOCRPT.BAS| EXE     |   |DEMODATE.BAS| EXE     |
 |DEMODIA2.BAS| EXE     |   |DEMODIAL.BAS| EXE     |   |DEMODIAP.BAS| EXE     |
 |DEMOEDIT.BAS| EXE     |   |DEMOEMS.BAS | N/A     |   |DEMOEMS2.BAS| N/A     |

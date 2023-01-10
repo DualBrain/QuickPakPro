@@ -55,4 +55,5 @@ ELSE                                    ' no error, they're just different
   PRINT "The files are different";
 END IF
 
+'$INCLUDE: 'FILECOMP.BAS'
 '$INCLUDE: 'PRO.BAS'
