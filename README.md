@@ -53,7 +53,7 @@ We also want to thank [Gene Buckle](https://github.com/geneb) for making this al
 |ISORTT.BAS  |         |   |KEYDOWN.BAS | EXE     |   |KEYS.BAS    | EXE     |
 |KEYSORT.BAS |         |   |KEYSTAT.BAS | EXE     |   |LINCOUNT.BAS| EXE     |
 |LOADEXEC.BAS|         |   |LOCKFILE.BAS|         |   |LONGSTR.BAS |         |
-|LTS2MENU.BAS| INCLUDE |   |LTSMENU.BAS | INCLUDE |   |MAINMENU.BAS|         |
+|LTS2MENU.BAS| INCLUDE |   |LTSMENU.BAS | INCLUDE |   |MAINMENU.BAS| INCLUDE |
 |MAKEQLB.BAS |         |   |MARQUEE.BAS | EXE     |   |MASKIN.BAS  | INCLUDE |
 |MIDSTRSR.BAS|         |   |MINMAX.BAS  | EXE     |   |MONITOR.BAS | EXE     |
 |MOUSE.BAS   | EXE     |   |MOUSECM.BAS | EXE     |   |MPREST.BAS  | EXE     |
