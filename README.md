@@ -29,7 +29,7 @@ We also want to thank [Gene Buckle](https://github.com/geneb) for making this al
 |DEMOMAIN.BAS| EXE     |   |DEMOMASK.BAS| EXE     |   |DEMOMENU.BAS| EXE     |
 |DEMOMGR.BAS | EXE     |   |DEMOPICK.BAS| EXE     |   |DEMOPLMS.BAS| EXE     |
 |DEMOPOP.BAS | EXE     |   |DEMOPULL.BAS| EXE     |   |DEMORK.BAS  | EXE     |
-|DEMOSCAN.BAS|         |   |DEMOSCRL.BAS| EXE     |   |DEMOSECT.BAS|         |
+|DEMOSCAN.BAS| EXE     |   |DEMOSCRL.BAS| EXE     |   |DEMOSECT.BAS|         |
 |DEMOSORT.BAS|         |   |DEMOSS.BAS  |         |   |DEMOSTR.BAS | EXE     |
 |DEMOTSRT.BAS|         |   |DEMOVERT.BAS| EXE     |   |DEMOVIEW.BAS| EXE     |
 |DEMOVRTT.BAS|         |   |DEMOXMS.BAS | N/A     |   |DIALOG.BAS  | INCLUDE |
@@ -69,7 +69,7 @@ We also want to thank [Gene Buckle](https://github.com/geneb) for making this al
 |READDIRS.BAS| EXE     |   |READDIRT.BAS|         |   |READFILE.BAS| EXE     |
 |READFILI.BAS|         |   |READFILT.BAS|         |   |READFILX.BAS|         |
 |READSECT.BAS|         |   |REPLACE.BAS | EXE     |   |RPTKEY.BAS  |         |
-|RWTEST.BAS  |         |   |SCANFILE.BAS|         |   |SCIFORM.BAS | EXE     |
+|RWTEST.BAS  |         |   |SCANFILE.BAS| INCLUDE |   |SCIFORM.BAS | EXE     |
 |SCRNDUMP.BAS|         |   |SCRNSR.BAS  | EXE     |   |SCROLL.BAS  | EXE     |
 |SCROLLIN.BAS| INCLUDE |   |SEARCH.BAS  | EXE     |   |SEQUENCE.BAS| EXE     |
 |SETATTR.BAS |         |   |SETCNF.BI   | INCLUDE |   |SHIFT.BAS   | EXE     |
