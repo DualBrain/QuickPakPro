@@ -1100,8 +1100,16 @@ END SUB
 ' however it accepts a segmented address thus allowing an entire 
 ' array to be loaded in one operation. FGetA will load up to 64k 
 ' bytes at a time. 
-SUB FGetA(handle, array(), element, numBytes)
-  GET #handle, , array()
+SUB FGetA(handle, block AS _MEM, numBytes)
+
+  DIM work(1 TO numBytes) AS _BYTE    ' prepare a byte array
+  GET # handle, , work()              ' read the number of bytes into memory
+  
+  DIM src AS _MEM                     ' copy the byte array to the memory block
+  src = _MEM(work())
+  _MEMCOPY src, src.OFFSET, src.SIZE TO block, block.OFFSET
+  _MEMFREE src
+
 END SUB
 
 SUB FGetAH(FileName$, Array$(), Start, ElSize, NumEls)
@@ -3467,11 +3475,11 @@ FUNCTION Compare(segAdr1 AS _MEM, segAdr2 AS _MEM, numBytes)
 END FUNCTION
 
 ' CompareT will compare any two TYPE variables, and report if they are the same. 
-FUNCTION CompareT(type1 AS _MEM, type2 AS _MEM, numBytes)
+FUNCTION CompareT(block1 AS _MEM, block2 AS _MEM, numBytes)
   s1$ = SPACE$(numBytes)
   s2$ = SPACE$(numBytes)
-  _MEMGET type1, type1.OFFSET, s1$
-  _MEMGET type2, type2.OFFSET, s2$
+  _MEMGET block1, block1.OFFSET, s1$
+  _MEMGET block2, block2.OFFSET, s2$
   CompareT = (s1$ = s2$)
 END FUNCTION
 

@@ -51,13 +51,15 @@ FUNCTION FileComp% (file1$, file2$, errCode)
         blockSize = 4096              ' otherwise, read a full 4096 bytes
       END IF
 
-      CALL FGetA(handle1, array(1), blockSize)  ' get from the first file
+      'CALL FGetA(handle1, array(1), blockSize) ' get from the first file
+      DIM block AS _MEM: block = _MEM(array(1)): CALL FGetA(handle1, block, blockSize): _MEMFREE block ' get from the first file
       IF DOSError% THEN                         ' an error occurred
         errCode = 1                             ' on the first file
         EXIT DO                                 ' get out
       END IF
       
-      CALL FGetA(handle2, array(2), blockSize)  ' get from the second file
+      'CALL FGetA(handle2, array(2), blockSize)  ' get from the second file
+      block = _MEM(array(2)): CALL FGetA(handle2, block, blockSize): _MEMFREE block  ' get from the second file
       IF DOSError% THEN                         ' an error occurred
         errCode = 2                             ' on the second file
         EXIT DO                                 ' get out
@@ -65,7 +67,12 @@ FUNCTION FileComp% (file1$, file2$, errCode)
 
       bytesLeft& = bytesLeft& - blockSize       ' show we did this many bytes
 
-      IF NOT CompareT%(array(1), array(2), blockSize) THEN   ' not the same
+      'IF NOT CompareT%(array(1), array(2), blockSize) THEN   ' not the same
+      DIM block1 AS _MEM: block1 = _MEM(array(1))
+      DIM block2 AS _MEM: block2 = _MEM(array(2))
+      result = CompareT%(block1, block2, blockSize)
+      _MEMFREE block2: _MEMFREE block1
+      IF NOT result THEN   ' not the same
         fileComp% = 0                 ' show that the compare failed
         EXIT DO                       ' and exit the loop
       END IF
