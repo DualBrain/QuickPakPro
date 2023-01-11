@@ -33,7 +33,7 @@ We also want to thank [Gene Buckle](https://github.com/geneb) for making this al
 |DEMOSORT.BAS|         |   |DEMOSS.BAS  |         |   |DEMOSTR.BAS | EXE     |
 |DEMOTSRT.BAS|         |   |DEMOVERT.BAS| EXE     |   |DEMOVIEW.BAS| EXE     |
 |DEMOVRTT.BAS|         |   |DEMOXMS.BAS | N/A     |   |DIALOG.BAS  | INCLUDE |
-|DIRTREE.BAS |         |   |DISKINFO.BAS|         |   |EDIT.BAS    | EXE     |
+|DIRTREE.BAS | EXE     |   |DISKINFO.BAS|         |   |EDIT.BAS    | EXE     |
 |EGABSAVE.BAS|         |   |EVALUATE.BAS| INCLUDE |   |EXENAME.BAS | EXE     |
 |EXIST.BAS   | EXE     |   |FAPPEND.BAS |         |   |FASTFILE.BAS| INCLUDE |
 |FGETAH.BAS  |         |   |FGETR.BAS   |         |   |FGETRT.BAS  |         |
