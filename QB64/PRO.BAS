@@ -1565,6 +1565,7 @@ SUB KillFile(FileName$)
 END SUB
 
 FUNCTION LastDrive
+  'LastDrive = 68 ' D (for now)
   ERROR 73 ' Feature Unavailable
 END FUNCTION
 
@@ -1700,7 +1701,7 @@ END FUNCTION
 
 ' ReadDir obtains a list of directory names from disk, and loads them 
 ' into a conventional (not fixed-length) string array in one operation. 
-SUB ReadDir(array$())
+SUB ReadDir(array$(), offset)
   ' array$(0) holds the search specification to indicate which directory 
   ' names are to be loaded, and subsequent array elements receive each 
   ' directory name. 
@@ -1728,7 +1729,7 @@ SUB ReadDir(array$())
           ELSEIF UCASE$(ffn) = "$RECYCLE.BIN" THEN
           ELSEIF INSTR(ffn, "System Volume Information") > 0 THEN
           ELSE
-            array$(index) = ffn
+            array$(offset + index - 1) = ffn
             index = index + 1
           END IF
         END IF
@@ -1844,7 +1845,7 @@ SUB ReadDirT(Spec$, Array())
   ERROR 73 ' Feature Unavailable
 END SUB
 
-SUB ReadFileI(Array$())
+SUB ReadFileI(array$(), offset)
   ' 1234567890123456789012345678901234567 
   ' namename.ext sizesize mm-dd-yy hh:rrm* <---- either "a" or "p" 
   ERROR 73 ' Feature Unavailable
@@ -2945,18 +2946,18 @@ FUNCTION KeyDown
   entr = _KEYDOWN(13)
   esc = _KEYDOWN(27) ' ESC
 
-  f1 = _KEYDOWN(15104) ' F1
-  f2 = _KEYDOWN(15360) ' F2
-  f3 = _KEYDOWN(15616) ' F3
-  f4 = _KEYDOWN(15872) ' F4
-  f5 = _KEYDOWN(16128) ' F5
-  f6 = _KEYDOWN(16384) ' F6
-  f7 = _KEYDOWN(16640) ' F7
-  f8 = _KEYDOWN(16896) ' F8
-  f9 = _KEYDOWN(17152) ' F9
-  f10 = _KEYDOWN(17408) ' F10
-  f11 = _KEYDOWN(34048) ' F11
-  f12 = _KEYDOWN(34304) ' F12
+  internalF1 = _KEYDOWN(15104) ' F1
+  internalF2 = _KEYDOWN(15360) ' F2
+  internalF3 = _KEYDOWN(15616) ' F3
+  internalF4 = _KEYDOWN(15872) ' F4
+  internalF5 = _KEYDOWN(16128) ' F5
+  internalF6 = _KEYDOWN(16384) ' F6
+  internalF7 = _KEYDOWN(16640) ' F7
+  internalF8 = _KEYDOWN(16896) ' F8
+  internalF9 = _KEYDOWN(17152) ' F9
+  internalF10 = _KEYDOWN(17408) ' F10
+  internalF11 = _KEYDOWN(34048) ' F11
+  internalF12 = _KEYDOWN(34304) ' F12
   ins = _KEYDOWN(20992) ' INS
   hm = _KEYDOWN(18176) ' HOME
   pgup = _KEYDOWN(18688) ' PGUP
@@ -2982,7 +2983,7 @@ FUNCTION KeyDown
   NEXT
 
   accum& = bksp + tb + entr + esc
-  accum& = accum& + f1 + f2 + f3 + f4 + f5 + f6 + f7 + f8 + f9 + f10 + f11 + f12
+  accum& = accum& + internalF1 + internalF2 + internalF3 + internalF4 + internalF5 + internalF6 + internalF7 + internalF8 + internalF9 + internalF10 + internalF11 + internalF12
   accum& = accum& + hm + pgup + del + ed + pgdn + up + dn + lt + rt
   accum& = accum& + num + caps + rshift + lshift + rctrl + lctrl + ralt + lalt
   accum& = accum& + atoz
@@ -4248,10 +4249,6 @@ END FUNCTION
 FUNCTION MonthName$(Month)
   ERROR 73 ' Feature Unavailable
 END FUNCTION
-
-SUB MsgBox(Message$, Wide, Cfn)
-  ERROR 73 ' Feature Unavailable
-END SUB
 
 FUNCTION Num2Date$ (days) STATIC
 

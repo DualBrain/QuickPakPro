@@ -1,6 +1,7 @@
 '****************************** QD.BAS **************************************
 '*               "QUICK DOS"  (C) 1988 Crescent Software
 '*                        by Donald R. Malin
+'*                  Modifications (c) 2023 Cory Smith
 '****************************************************************************
 '*
 '* Compile Syntax:
@@ -20,7 +21,28 @@
 '*      Uses 43 or 50 line screen modes if started in them.
 '****************************************************************************
 
+' **************************
+' * BOILER PLATE BEGIN
+' **************************
+$Resize:Stretch
+CHDIR _STARTDIR$ ' Moved this line above resize to (hopefully) give more init time to window
+IF _DesktopHeight => 2160 THEN mult = 4 ELSE IF _DesktopHeight => 1440 THEN mult = 2 ELSE mult = 1
+DO: LOOP UNTIL _SCREENEXISTS ' Not sure if necessary; however, there does seem to be some sort of timing issue around getting hwnd
+hwnd = _WindowHandle: x = 100: y = 100: w = 640 * mult: h = 480 * mult ' inlined _WindowHandle (next line) because 1 out of every 4 or 5 executions, would encounter an invalid window handle (1400)
+IF INSTR(_OS$, "[WINDOWS]") THEN success = MoveWindow(_WindowHandle, x, y, w, h, 1) ELSE success = -1 ' Now that _WindowHandle is inlined, invalid window handle (1400) issue has yet to be reproduced - will have to continue to test
+IF success = 0 THEN PRINT "FAILED TO RESIZE - "; GetLastError; " ("; hwnd; ")": CALL WaitKeyS
+_TITLE "QD" 'NOTE: Moving title above resize causes resize to fail (without an error???)
+'BUG: It would be nice specify the icon here, but... having to require full path or placing it in the qb64 folder is problematic. 
+'NOTE: The above boiler plate must be first in execution (top of file).
+'BUG:  Also appears to not work as an $INCLUDE; suggesting something might
+'      be wrong with the implementation of $INCLUDE.
+' **************************
+' * BOILER PLATE END
+' **************************
+
 DEFINT A-Z
+
+'$INCLUDE: 'PRO.BI'
 
 DECLARE SUB APrint0 (BYVAL Address, NumEls, StartChar, NumChars, Colr)
 DECLARE SUB Box0 (UlRow, UlCol, LRRow, LRCol, Char, Colr)
@@ -148,7 +170,7 @@ ScSize = Rows * 80                              'Calc size of screen buffers
 REDIM DosScr(ScSize + 1)                        'Dos Screen Buffer
 REDIM Array$(1)                                 'Directory/File Name array
 
-MScrnSave 1, 1, Rows, 80, DosScr(0)             'Save the Dos Screen
+MScrnSave 1, 1, Rows, 80, DosScr()             'Save the Dos Screen
 Row = CSRLIN                                    '  "   "  Cursor Row
 Col = POS(0)                                    '  "   "  Cursor Column
     
@@ -312,11 +334,11 @@ DO
                                                         'Get the file's Size
               Size& = QPValL&(MID$(Array$(Choice), 14, 8))
               IF Size& = 0 THEN Size& = 1
-              IF MID$(Array$(Choice), Wdth, 1) = "û" THEN  'Was File Marked?
+              IF MID$(Array$(Choice), Wdth, 1) = "ï¿½" THEN  'Was File Marked?
                  MID$(Array$(Choice), Wdth, 1) = " "    'UnMark file
                  Total& = Total& - Size&                'Remove from Total
               ELSE                                      'Otherwise,
-                 MID$(Array$(Choice), Wdth, 1) = "û"    'Mark file
+                 MID$(Array$(Choice), Wdth, 1) = "ï¿½"    'Mark file
                  Total& = Total& + Size&                'Add to Total
               END IF
               DispTotal = -1
@@ -428,12 +450,12 @@ DO
                    DiskInfo Drv$, BytesPerSector, SectorsPerCluster, AvailableClusters, TotalClusters
                    ClusterSize = BytesPerSector * SectorsPerCluster
 
-                   IF FRE("") > 32356 THEN
+                   'IF FRE("") > 32356 THEN
                       BuffLen = 32256
-                   ELSE
-                      BuffLen = FRE(0) - 612
-                      BuffLen = (BuffLen \ 512) * 512
-                   END IF
+                  '  ELSE
+                  '     BuffLen = FRE(0) - 612
+                  '     BuffLen = (BuffLen \ 512) * 512
+                  '  END IF
                    Buffer$ = SPACE$(BuffLen)
 
                    FOR N = DirCnt + 1 TO DirCnt + FilCnt
@@ -441,7 +463,7 @@ DO
                           Bs$ = INKEY$
                           EXIT FOR
                        END IF
-                       IF MID$(Array$(N), Wdth, 1) = "û" THEN
+                       IF MID$(Array$(N), Wdth, 1) = "ï¿½" THEN
                           Cpy$ = LEFT$(Array$(N), 12)
                           Size& = QPValL&(MID$(Array$(N), 14, 8))
                           FSize& = ((Size& \ ClusterSize) - (Size& MOD ClusterSize <> 0)) * ClusterSize
@@ -476,7 +498,7 @@ DO
                                        EXIT FOR
                                     CASE 70
                                        Message Dest$ + Cpy$ + " is a READ ONLY file!  Press any key.", 4, 10
-                                       WaitKey
+                                       WaitKeyS
                                     CASE 25, 57, 71, 72
                                        Message "Drive " + Drv$ + " Not Ready!  Press ``R'' to retry, any other key to quit.", 4, 10
                                        K$ = UCASE$(INPUT$(1))
@@ -534,7 +556,7 @@ DO
              FOR N = DirCnt + 1 TO FilCnt + DirCnt
                  K$ = INKEY$
                  IF K$ = CHR$(27) THEN EXIT FOR
-                 IF MID$(Array$(N), Wdth, 1) = "û" THEN
+                 IF MID$(Array$(N), Wdth, 1) = "ï¿½" THEN
                     DelFil$ = Path$ + LEFT$(Array$(N), 12)
                     Message "Deleting ``" + DelFil$ + "''", 4, 10
                     KillFile DelFil$
@@ -603,7 +625,7 @@ DO
                  MID$(Array$(N), Wdth, 1) = " "
                  DispTotal = -1
               ELSE
-                 MID$(Array$(N), Wdth, 1) = "û"
+                 MID$(Array$(N), Wdth, 1) = "ï¿½"
                  Total& = Total& + QPValL&(MID$(Array$(N), 14, 8))
               END IF
           NEXT
@@ -620,13 +642,13 @@ DO
              ELSE
                 FOpen Lst$, Handle
                 FOR N = DirCnt + 1 TO DirCnt + FilCnt
-                    IF MID$(Array$(N), Wdth, 1) = "û" THEN
+                    IF MID$(Array$(N), Wdth, 1) = "ï¿½" THEN
                        FPut Handle, Path$ + RTRIM$(LEFT$(Array$(N), 12)) + CrLf$
                     END IF
                 NEXT
                 FClose Handle
                 Message "File ``" + Lst$ + "'' Created.  Press any key to continue.", Rows, 10
-                WaitKey
+                WaitKeyS
                 Action = 1
                 IF FCount(FileSpec$) <> FilCnt THEN
                    DirFlag = -1
@@ -641,11 +663,12 @@ DO
           IF INSTR(RunTbl$, RIGHT$(FilName$, 4)) THEN
              IF Ky = AltS THEN
                 REDIM ProgScr(Rows * 80)          'Program Screen Buffer
-                MScrnSave 1, 1, Rows, 80, ProgScr(0)
+                MScrnSave 1, 1, Rows, 80, ProgScr()
                 HideCursor
                 CLS
-                IF FRE(-1) > 10000 THEN SHELL FilName$
-                MScrnRest 1, 1, Rows, 80, ProgScr(0)
+                'IF FRE(-1) > 10000 THEN SHELL FilName$
+                SHELL FilName$
+                MScrnRest 1, 1, Rows, 80, ProgScr()
                 ERASE ProgScr
                 ShowCursor
                 Action = 1
@@ -683,7 +706,7 @@ DO
 LOOP UNTIL Ky$ = CHR$(27)                   'Go back unless Escape pressed
 
 WIDTH , DosRows
-MScrnRest 1, 1, DosRows, 80, DosScr(0)          'Restore the DOS Screen
+MScrnRest 1, 1, DosRows, 80, DosScr()          'Restore the DOS Screen
 LOCATE Row, Col                                 'Re-locate the cursor
                                                 'Quit
 CALL HideCursor
@@ -761,14 +784,16 @@ SUB Directory (LastDrvLtr, FileSpec$, DirCnt, FilCnt) STATIC
     
     IF LEN(Path$) THEN
        DirAr$(1 + Drives) = DirSpec$
-       ReadDir BYVAL VARPTR(DirAr$(1 + Drives))
+       'ReadDir BYVAL VARPTR(DirAr$(1 + Drives))
+       ReadDir DirAr$(), 1 + Drives
        LSET DirAr$(1) = ".."
        SortStrings DirAr$(), 0, 2 + Drives, DirCnt
        PutIt = 2
     ELSE
        DirCnt = DirCnt - 1
        DirAr$(Drives) = DirSpec$
-       ReadDir BYVAL VARPTR(DirAr$(Drives))
+       'ReadDir BYVAL VARPTR(DirAr$(Drives))
+       ReadDir DirAr$(), Drives
        SortStrings DirAr$(), 0, Drives + 1, DirCnt
        PutIt = 1
     END IF
@@ -787,11 +812,12 @@ SUB Directory (LastDrvLtr, FileSpec$, DirCnt, FilCnt) STATIC
 
     FOR N = 1 TO FilCnt + DirCnt                   'make room for the names
         Array$(N) = SPACE$(40)
-        MID$(Array$(N), 39) = "³"
+        MID$(Array$(N), 39) = "ï¿½"
     NEXT
 
     Array$(DirCnt) = SrchSpec$
-    ReadFileI VARPTR(Array$(DirCnt))                'get the file names
+    'ReadFileI VARPTR(Array$(DirCnt))                'get the file names
+    ReadFileI Array$(), DirCnt                'get the file names
     Array$(DirCnt) = SPACE$(40)
 
     FOR N = DirCnt + 1 TO DirCnt + FilCnt
@@ -1179,5 +1205,9 @@ FUNCTION TestDrv (Path$, WriteFlg, Rows) STATIC
     LOOP UNTIL Ok OR Ky$ = CHR$(27)
 
     TestDrv = Ok
+
 END FUNCTION
 
+'$INCLUDE: 'VIEWFILE.BAS'
+'$INCLUDE: 'VERTMENU.BAS'
+'$INCLUDE: 'PRO.BAS'
