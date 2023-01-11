@@ -1,120 +1,149 @@
-'********* DIRTREE.BAS - returns an entire directory tree in a string array
+' ********* DIRTREE.BAS - returns an entire directory tree in a string array
 
-'Copyright (c) 1990 Crescent Software
-'written by Don Malin
+' Copyright (c) 1990 Crescent Software
+' written by Don Malin
+' Modified (c) 2023 Cory Smith
+
+' **************************
+' * BOILER PLATE BEGIN
+' **************************
+$Resize:Stretch
+CHDIR _STARTDIR$ ' Moved this line above resize to (hopefully) give more init time to window
+IF _DesktopHeight => 2160 THEN mult = 4 ELSE IF _DesktopHeight => 1440 THEN mult = 2 ELSE mult = 1
+DO: LOOP UNTIL _SCREENEXISTS ' Not sure if necessary; however, there does seem to be some sort of timing issue around getting hwnd
+hwnd = _WindowHandle: x = 100: y = 100: w = 640 * mult: h = 480 * mult ' inlined _WindowHandle (next line) because 1 out of every 4 or 5 executions, would encounter an invalid window handle (1400)
+IF INSTR(_OS$, "[WINDOWS]") THEN success = MoveWindow(_WindowHandle, x, y, w, h, 1) ELSE success = -1 ' Now that _WindowHandle is inlined, invalid window handle (1400) issue has yet to be reproduced - will have to continue to test
+IF success = 0 THEN PRINT "FAILED TO RESIZE - "; GetLastError; " ("; hwnd; ")": CALL WaitKeyS
+_TITLE "DIRTREE" 'NOTE: Moving title above resize causes resize to fail (without an error???)
+'BUG: It would be nice specify the icon here, but... having to require full path or placing it in the qb64 folder is problematic. 
+'NOTE: The above boiler plate must be first in execution (top of file).
+'BUG:  Also appears to not work as an $INCLUDE; suggesting something might
+'      be wrong with the implementation of $INCLUDE.
+' **************************
+' * BOILER PLATE END
+' **************************
 
 DEFINT A-Z
 
-TYPE Dirs
-  DName AS STRING * 12
-END TYPE
+'$INCLUDE: 'PRO.BI'
 
-DECLARE FUNCTION DCount% (DirSpec$)
-DECLARE FUNCTION NotInstr% (StPos%, Text$, Table$)
+' TYPE Dirs
+'   DName AS STRING * 12
+' END TYPE
 
-DECLARE SUB DirTree (Tree$(), FullPath$(), Ptr%)
-DECLARE SUB InsertStr (BYVAL Address, Ins$, NumEls)
-DECLARE SUB ReadDirT (Spec$, SEG Element AS Dirs)
+DECLARE FUNCTION DCount% (dirSpec$)
+DECLARE FUNCTION NotInstr% (stPos%, text$, table$)
 
-CONST MaxDirs = 250                     'this sets the maximum levels
+DECLARE SUB DirTree (tree$(), fullPath$(), ptr%)
+DECLARE SUB InsertStr (BYVAL address, Ins$, numEls)
+DECLARE SUB ReadDirT (spec$, SEG element AS Dirs)
 
-DIM Tree$(MaxDirs)
-DIM FullPath$(MaxDirs)
+CONST MAXDIRS = 250                     ' this sets the maximum levels
 
-Tree$(1) = "C:\"                        'you MUST seed the first element
-Levels = 1                              'and the number of directory levels
+DIM tree$(MAXDIRS)
+DIM fullPath$(MAXDIRS)
 
-DirTree Tree$(), FullPath$(), Levels    'DirTree returns the number of levels
+tree$(1) = "C:\bas\"                        ' you MUST seed the first element
+levels = 1                              ' and the number of directory levels
 
-FOR X = 1 TO Levels                     'print the directory tree
-  PRINT Tree$(X); TAB(40); FullPath$(X)'show both arrays DirTree returns
-  IF X MOD 23 = 0 THEN                  'if the screen is full
-     LOCATE 25, 1                       'prompt for more on the bottom
-     PRINT "Press a key to see more";   'and wait for a key press
-     WHILE INKEY$ = "": WEND
-     LOCATE CSRLIN - 1, 1               'nudge the cursor to where it was
+DirTree tree$(), fullPath$(), levels    ' DirTree returns the number of levels
+
+FOR x = 1 TO levels                     ' print the directory tree
+  PRINT tree$(X); TAB(40); fullPath$(x) ' show both arrays DirTree returns
+  IF x MOD 23 = 0 THEN                  ' if the screen is full
+    LOCATE 25, 1                        ' prompt for more on the bottom
+    PRINT "Press a key to see more";    ' and wait for a key press
+    WHILE INKEY$ = "": WEND
+    LOCATE CSRLIN - 1, 1                ' nudge the cursor to where it was
   END IF
 NEXT
 
-SUB DirTree (Tree$(), FullPath$(), Ptr)
+SUB DirTree (tree$(), fullPath$(), ptr)
    
-    STATIC Spec$, Pad$, Temp$, N, Last, Level, Segment
-   
-    IF LEN(Spec$) = 0 THEN              'if we haven't been here before
-       Level = 1                        'do some initializing
-       Last = MaxDirs
-       Pad$ = SPACE$(63)
-       Spec$ = SPACE$(65)
-       N = 1
-    ELSE
-       N = INSTR(Spec$, "*")
-       LSET Spec$ = LEFT$(Spec$, N - 1)
-    END IF
+  STATIC spec$, pad$, temp$, n, last, level, segment
+  
+  IF LEN(spec$) = 0 THEN                ' if we haven't been here before
+    level = 1                           ' do some initializing
+    last = MAXDIRS
+    pad$ = SPACE$(63)
+    spec$ = SPACE$(65)
+    n = 1
+  ELSE
+    n = INSTR(spec$, "*")
+    LSET spec$ = LEFT$(spec$, n - 1)
+  END IF
 
-    MID$(Spec$, N) = RTRIM$(MID$(Tree$(Ptr), NotInstr%(1, Tree$(Ptr), " ³ÃÀÄ")))
-    N = INSTR(Spec$, " ")
-    IF MID$(Spec$, N - 1, 1) <> "\" THEN
-       MID$(Spec$, N) = "\*.*"
-    ELSE
-       MID$(Spec$, N) = "*.*"
-    END IF
+  MID$(spec$, n) = RTRIM$(MID$(tree$(ptr), NotInstr%(1, tree$(ptr), " " + CHR$(179) + CHR$(195) + CHR$(192) + CHR$(196))))
+  n = INSTR(spec$, " ")
+  IF MID$(spec$, n - 1, 1) <> "\" THEN
+    MID$(spec$, n) = "\*.*"
+  ELSE
+    MID$(spec$, n) = "*.*"
+  END IF
 
-    PrevSpec$ = Spec$
+  prevSpec$ = spec$
 
-    DirCnt = DCount%(RTRIM$(Spec$))
+  dirCnt = DCount%(RTRIM$(spec$))
 
-    IF DirCnt THEN
-       REDIM DArray(1 TO DirCnt) AS Dirs
-       ReadDirT RTRIM$(Spec$), DArray(1)
+  IF dirCnt THEN
+    'REDIM dArray(1 TO dirCnt) AS Dirs
+    'ReadDirT RTRIM$(spec$), dArray(1)
 
-       Temp$ = LEFT$(Spec$, INSTR(Spec$, "*") - 1)
+    REDIM dArray$(0 TO dirCnt)
+    dArray$(0) = spec$
+    ReadDir dArray$(), 1
 
-       FOR N = 1 TO DirCnt
-          LSET Pad$ = ""
-          FOR Temp = 0 TO Level - 2
-             Temp2 = ASC(MID$(Tree$(Ptr + N - 1), Temp * 4 + 1, 1))
-             IF Temp2 = 179 OR Temp2 = 195 THEN
-                MID$(Pad$, Temp * 4 + 1) = "³"
-             END IF
-          NEXT
+    temp$ = LEFT$(spec$, INSTR(spec$, "*") - 1)
 
-          IF N = DirCnt THEN
-             MID$(Pad$, Temp * 4 + 1) = "ÀÄÄÄ"
-          ELSE
-             MID$(Pad$, Temp * 4 + 1) = "ÃÄÄÄ"
-          END IF
+    FOR n = 1 TO dirCnt
+      LSET pad$ = ""
+      FOR temp = 0 TO level - 2
+        temp2 = ASC(MID$(tree$(ptr + n - 1), temp * 4 + 1, 1))
+        IF temp2 = 179 OR temp2 = 195 THEN
+          MID$(pad$, temp * 4 + 1) = CHR$(179)
+        END IF
+      NEXT
 
-          MID$(Pad$, Level * 4 + 1) = DArray(N).DName
-          Ins$ = RTRIM$(Pad$)
-          InsertStr VARPTR(Tree$(Ptr + N)), Ins$, Last - N - Ptr
-          
-          LSET Pad$ = Temp$ + DArray(N).DName
-          Ins$ = RTRIM$(Pad$)
-          InsertStr VARPTR(FullPath$(Ptr + N)), Ins$, Last - N - Ptr
+      IF n = dirCnt THEN
+        MID$(pad$, temp * 4 + 1) = CHR$(192) + CHR$(196) + CHR$(196) + CHR$(196)
+      ELSE
+        MID$(pad$, temp * 4 + 1) = CHR$(195) + CHR$(196) + CHR$(196) + CHR$(196)
+      END IF
 
-       NEXT
+      MID$(pad$, level * 4 + 1) = dArray$(n) 'dArray(n).DName
+      ins$ = RTRIM$(pad$)
+      'InsertStr VARPTR(tree$(ptr + n)), ins$, last - n - ptr
+      InsertStr tree$(), ptr + n, ins$, last - n - ptr
+      
+      LSET pad$ = temp$ + dArray$(n) 'dArray(n).DName
+      ins$ = RTRIM$(pad$)
+      'InsertStr VARPTR(fullPath$(ptr + n)), ins$, last - n - ptr
+      InsertStr fullPath$(), ptr + n, ins$, last - n - ptr
 
-       ERASE DArray
-    
-       Temp = Ptr
-       DO
-          Level = Level + 1
-          LSET Spec$ = PrevSpec$
-          Ptr = Ptr + 1
-          Temp2 = Ptr
-          DirTree Tree$(), FullPath$(), Ptr
-          DirCnt = DirCnt + Ptr - Temp2
-       LOOP UNTIL Ptr > DirCnt + Temp - 1
+    NEXT
 
-    END IF
+    ERASE dArray$
 
-    Level = Level - 1
+    temp = ptr
+    DO
+      level = level + 1
+      LSET spec$ = prevSpec$
+      ptr = ptr + 1
+      temp2 = ptr
+      DirTree tree$(), fullPath$(), ptr
+      dirCnt = dirCnt + ptr - temp2
+    LOOP UNTIL ptr > dirCnt + temp - 1
 
-    IF Level = 0 THEN                   'if this is the highest level, free
-       Spec$ = ""                       'up the memory used by these strings
-       PrevSpec$ = ""
-       Pad$ = ""
-    END IF
+  END IF
+
+  level = level - 1
+
+  IF level = 0 THEN                   ' if this is the highest level, free
+    spec$ = ""                        ' up the memory used by these strings
+    prevSpec$ = ""
+    pad$ = ""
+  END IF
 
 END SUB
 
+'$INCLUDE: 'PRO.BAS'

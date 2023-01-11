@@ -1841,8 +1841,17 @@ SUB ReadFile(array$())
 
 END SUB
 
-SUB ReadDirT(Spec$, Array())
+' ReadDirT obtains a list of directory names from disk, and loads 
+' them into a fixed-length string array in one operation. 
+SUB ReadDirT(spec$, array(), offset)
+
+  ' Array$() has been dimensioned as a fixed-length string array, and 
+  ' Spec$ holds the search specification to tell which directory names 
+  ' are to be loaded. Subsequent array elements then receive each 
+  ' directory name. 
+
   ERROR 73 ' Feature Unavailable
+
 END SUB
 
 SUB ReadFileI(array$(), offset)
@@ -3580,10 +3589,6 @@ FUNCTION DayName$(day)
   END SELECT
 END FUNCTION
 
-SUB DirTree(Tree$(), FullPath$(), Levels)
-  ERROR 73 ' Feature Unavailable
-END SUB
-
 FUNCTION EDate2Num(Dat$)
   ERROR 73 ' Feature Unavailable
 END FUNCTION
@@ -4914,8 +4919,23 @@ SUB MidCharS(Work$, Postion, Char)
   ERROR 73 ' Feature Unavailable
 END SUB
 
-FUNCTION NotInstr(Start, Searched$, Table$)
-  ERROR 73 ' Feature Unavailable
+' Notlnstr reports the first location in one string that does not match 
+' any of the characters in another string. 
+FUNCTION NotInstr(start, searched$, table$)
+
+  ' Position receives the offset of the first character in Searched$ that 
+  ' doesn't match any of the characters in Table$. If all characters 
+  ' match, Position will be zero. 
+  
+  FOR index = start TO LEN(searched$)
+    ch$ = MID$(searched$, index, 1)
+    IF INSTR(table$, ch$) = 0 THEN
+      NotInstr = index: EXIT FUNCTION
+    END IF
+  NEXT
+
+  NotInstr = 0
+
 END FUNCTION
 
 ' Null will report if the specified string is either null, or is filled only 
