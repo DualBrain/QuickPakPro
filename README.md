@@ -35,7 +35,7 @@ We also want to thank [Gene Buckle](https://github.com/geneb) for making this al
 |DEMOVRTT.BAS|         |   |DEMOXMS.BAS | N/A     |   |DIALOG.BAS  | INCLUDE |
 |DIRTREE.BAS |         |   |DISKINFO.BAS|         |   |EDIT.BAS    | EXE     |
 |EGABSAVE.BAS|         |   |EVALUATE.BAS| INCLUDE |   |EXENAME.BAS | EXE     |
-|EXIST.BAS   |         |   |FAPPEND.BAS |         |   |FASTFILE.BAS| INCLUDE |
+|EXIST.BAS   | EXE     |   |FAPPEND.BAS |         |   |FASTFILE.BAS| INCLUDE |
 |FGETAH.BAS  |         |   |FGETR.BAS   |         |   |FGETRT.BAS  |         |
 |FILECOMP.BAS| INCLUDE |   |FILECOPY.BAS| INCLUDE |   |FILECRPT.BAS| INCLUDE |
 |FILEINFO.BAS| EXE     |   |FILESORT.BAS|         |   |FILEVIEW.BAS|         |
