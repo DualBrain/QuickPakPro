@@ -138,7 +138,7 @@ TYPE Rectangle
   bottom AS LONG
 END TYPE
 
-Declare Dynamic Library "kernel32"
+DECLARE DYNAMIC LIBRARY "kernel32"
   FUNCTION CreateFileA%& (BYVAL lpFileName AS _OFFSET, BYVAL dwDesiredAccess AS _UNSIGNED LONG, _
                           BYVAL dwShareMode AS _UNSIGNED LONG, BYVAL lpSecurityAttributes AS _OFFSET, _
                           BYVAL dwCreationDisposition AS _UNSIGNED LONG, BYVAL dwFlagsAndAttributes AS _UNSIGNED LONG, _
@@ -156,7 +156,19 @@ Declare Dynamic Library "kernel32"
   FUNCTION FindNextFile& ALIAS FindNextFileA (BYVAL hfind AS _UNSIGNED _OFFSET, BYVAL lpfindfiledata AS _OFFSET)
   FUNCTION FindClose& (BYVAL hfind AS _UNSIGNED _OFFSET)
   FUNCTION GetLastError& ()
-End Declare
+  FUNCTION GetLogicalDrives& ()
+
+  FUNCTION GetShortPathNameW& (lpszLongPath AS STRING, lpszShortPath AS STRING, BYVAL cchBuffer AS LONG)
+
+  'FUNCTION GetLogicalDriveStrings& (BYVAL nBufferLength AS LONG, lpBuffer AS STRING) ' untested
+
+  ' NOTES:
+  '   DWORD as a result translate to LONG (&)
+  '   DWORD as a param translate to LONG (&)
+  '   [out] LPWSTR lpBuffer param translate to lpBuffer AS STRING
+  '   [in]  LPCWSTR lpszLongPath param translate to BYVAL lpszLongPath AS STRING
+
+END DECLARE
 
 DECLARE LIBRARY
   FUNCTION GetFileAttributes& (f$)

@@ -334,11 +334,11 @@ DO
                                                         'Get the file's Size
               Size& = QPValL&(MID$(Array$(Choice), 14, 8))
               IF Size& = 0 THEN Size& = 1
-              IF MID$(Array$(Choice), Wdth, 1) = "�" THEN  'Was File Marked?
+              IF MID$(Array$(Choice), Wdth, 1) = CHR$(251) THEN  'Was File Marked?
                  MID$(Array$(Choice), Wdth, 1) = " "    'UnMark file
                  Total& = Total& - Size&                'Remove from Total
               ELSE                                      'Otherwise,
-                 MID$(Array$(Choice), Wdth, 1) = "�"    'Mark file
+                 MID$(Array$(Choice), Wdth, 1) = CHR$(251)    'Mark file
                  Total& = Total& + Size&                'Add to Total
               END IF
               DispTotal = -1
@@ -463,7 +463,7 @@ DO
                           Bs$ = INKEY$
                           EXIT FOR
                        END IF
-                       IF MID$(Array$(N), Wdth, 1) = "�" THEN
+                       IF MID$(Array$(N), Wdth, 1) = CHR$(251) THEN
                           Cpy$ = LEFT$(Array$(N), 12)
                           Size& = QPValL&(MID$(Array$(N), 14, 8))
                           FSize& = ((Size& \ ClusterSize) - (Size& MOD ClusterSize <> 0)) * ClusterSize
@@ -556,7 +556,7 @@ DO
              FOR N = DirCnt + 1 TO FilCnt + DirCnt
                  K$ = INKEY$
                  IF K$ = CHR$(27) THEN EXIT FOR
-                 IF MID$(Array$(N), Wdth, 1) = "�" THEN
+                 IF MID$(Array$(N), Wdth, 1) = CHR$(251) THEN
                     DelFil$ = Path$ + LEFT$(Array$(N), 12)
                     Message "Deleting ``" + DelFil$ + "''", 4, 10
                     KillFile DelFil$
@@ -625,7 +625,7 @@ DO
                  MID$(Array$(N), Wdth, 1) = " "
                  DispTotal = -1
               ELSE
-                 MID$(Array$(N), Wdth, 1) = "�"
+                 MID$(Array$(N), Wdth, 1) = CHR$(251)
                  Total& = Total& + QPValL&(MID$(Array$(N), 14, 8))
               END IF
           NEXT
@@ -642,8 +642,8 @@ DO
              ELSE
                 FOpen Lst$, Handle
                 FOR N = DirCnt + 1 TO DirCnt + FilCnt
-                    IF MID$(Array$(N), Wdth, 1) = "�" THEN
-                       FPut Handle, Path$ + RTRIM$(LEFT$(Array$(N), 12)) + CrLf$
+                    IF MID$(Array$(N), Wdth, 1) = CHR$(251) THEN
+                      FPut Handle, Path$ + RTRIM$(LEFT$(Array$(N), 12)) + CrLf$
                     END IF
                 NEXT
                 FClose Handle
@@ -812,7 +812,7 @@ SUB Directory (LastDrvLtr, FileSpec$, DirCnt, FilCnt) STATIC
 
     FOR N = 1 TO FilCnt + DirCnt                   'make room for the names
         Array$(N) = SPACE$(40)
-        MID$(Array$(N), 39) = "�"
+        MID$(Array$(N), 39) = CHR$(179)
     NEXT
 
     Array$(DirCnt) = SrchSpec$

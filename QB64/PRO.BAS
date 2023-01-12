@@ -1565,8 +1565,36 @@ SUB KillFile(FileName$)
 END SUB
 
 FUNCTION LastDrive
-  'LastDrive = 68 ' D (for now)
-  ERROR 73 ' Feature Unavailable
+  r = GetLogicalDrives&
+  list$ = ""
+  IF (r AND 1) = 1 THEN list$ = list$ + "A"
+  IF (r AND 2) = 2 THEN list$ = list$ + "B"
+  IF (r AND 4) = 4 THEN list$ = list$ + "C" 
+  IF (r AND 8) = 8 THEN list$ = list$ + "D" 
+  IF (r AND 16) = 16 THEN list$ = list$ + "E" 
+  IF (r AND 32) = 32 THEN list$ = list$ + "F"
+  IF (r AND 64) = 64 THEN list$ = list$ + "G"
+  IF (r AND 128) = 128 THEN list$ = list$ + "H" 
+  IF (r AND 256) = 256 THEN list$ = list$ + "I"
+  IF (r AND 512) = 512 THEN list$ = list$ + "J" 
+  IF (r AND 1024) = 1024 THEN list$ = list$ + "K" 
+  IF (r AND 2048) = 2048 THEN list$ = list$ + "L" 
+  IF (r AND 4096) = 4096 THEN list$ = list$ + "M"
+  IF (r AND 8192) = 8192 THEN list$ = list$ + "N"
+  IF (r AND 16384) = 16384 THEN list$ = list$ + "O"
+  IF (r AND 32768) = 32768 THEN list$ = list$ + "P"
+  IF (r AND 65536) = 65536 THEN list$ = list$ + "Q"
+  IF (r AND 131072) = 131072 THEN list$ = list$ + "R"
+  IF (r AND 262144) = 262144 THEN list$ = list$ + "S"
+  IF (r AND 524288) = 524288 THEN list$ = list$ + "T"
+  IF (r AND 1048576) = 1048576 THEN list$ = list$ + "U"
+  IF (r AND 2097152) = 2097152 THEN list$ = list$ + "V"
+  IF (r AND 4194304) = 4194304 THEN list$ = list$ + "W"
+  IF (r AND 8388608) = 8388608 THEN list$ = list$ + "X"
+  IF (r AND 16777216) = 16777216 THEN list$ = list$ + "Y"
+  IF (r AND 33554432) = 33554432 THEN list$ = list$ + "Z"
+  'PRINT list$: WaitKeyS
+  LastDrive = ASC(RIGHT$(list$, 1))
 END FUNCTION
 
 ' LineCount will quickly count all of the lines of text in a specified file.
@@ -1670,13 +1698,18 @@ FUNCTION DCount(dirSpec$)
     IF hFind <> INVALID_HANDLE_VALUE THEN
       DO
         IF (fd.dwfileattributes AND FILE_ATTRIBUTE_DIRECTORY) = FILE_ATTRIBUTE_DIRECTORY THEN
-          ffn = fd.cfilename
+          ffn = fd.calternatefilename 'cfilename
           p = INSTR(ffn, CHR$(0))
           IF p > 0 THEN ffn = LEFT$(ffn, p - 1)
+          IF LTRIM$(ffn) = "" THEN
+            ffn = fd.cfilename
+            p = INSTR(ffn, CHR$(0))
+            IF p > 0 THEN ffn = LEFT$(ffn, p - 1)
+          END IF
           IF ffn = "." THEN
           ELSEIF ffn = ".." THEN
-          ELSEIF UCASE$(ffn) = "$RECYCLE.BIN" THEN
-          ELSEIF INSTR(ffn, "System Volume Information") > 0 THEN
+          'ELSEIF UCASE$(ffn) = "$RECYCLE.BIN" THEN
+          'ELSEIF INSTR(ffn, "System Volume Information") > 0 THEN
           ELSE
             result = result + 1
           END IF
@@ -1715,19 +1748,25 @@ SUB ReadDir(array$(), offset)
     DIM ffn AS STRING
     DIM p AS INTEGER
 
-    pattern = array$(0) + CHR$(0)
+    'pattern = array$(0) + CHR$(0)
+    pattern = array$(offset) + CHR$(0)
     hFind = FindFirstFile(_OFFSET(pattern), _OFFSET(fd))
     IF hFind <> INVALID_HANDLE_VALUE THEN
       index = 1
       DO
         IF (fd.dwfileattributes AND FILE_ATTRIBUTE_DIRECTORY) = FILE_ATTRIBUTE_DIRECTORY THEN
-          ffn = fd.cfilename
+          ffn = fd.calternatefilename 'cfilename
           p = INSTR(ffn, CHR$(0))
           IF p > 0 THEN ffn = LEFT$(ffn, p - 1)
+          IF LTRIM$(ffn) = "" THEN
+            ffn = fd.cfilename
+            p = INSTR(ffn, CHR$(0))
+            IF p > 0 THEN ffn = LEFT$(ffn, p - 1)
+          END IF
           IF ffn = "." THEN
           ELSEIF ffn = ".." THEN
-          ELSEIF UCASE$(ffn) = "$RECYCLE.BIN" THEN
-          ELSEIF INSTR(ffn, "System Volume Information") > 0 THEN
+          'ELSEIF UCASE$(ffn) = "$RECYCLE.BIN" THEN
+          'ELSEIF INSTR(ffn, "System Volume Information") > 0 THEN
           ELSE
             array$(offset + index - 1) = ffn
             index = index + 1
@@ -1740,6 +1779,7 @@ SUB ReadDir(array$(), offset)
       IF lastError& = ERROR_ACCESS_DENIED THEN
         ERROR 70 ' Permission denied
       ELSE
+        'PRINT "{"; pattern; "}": WaitKeyS
         ERROR 75 ' Path/File access error
       END IF
     END IF
@@ -1814,11 +1854,14 @@ SUB ReadFile(array$())
       DO
         IF (fd.dwfileattributes AND FILE_ATTRIBUTE_DIRECTORY) = FILE_ATTRIBUTE_DIRECTORY THEN
         ELSE 
-          ffn = fd.cfilename
+          ffn = fd.calternatefilename 'cfilename
           p = INSTR(ffn, CHR$(0))
           IF p > 0 THEN ffn = LEFT$(ffn, p - 1)
-          'TODO: Adjusting to 12 characters for legacy purposes.
-          IF LEN(ffn) < 12 THEN ffn = LEFT$(ffn + SPACE$(12), 12)
+          IF LTRIM$(ffn) = "" THEN
+            ffn = fd.cfilename
+            p = INSTR(ffn, CHR$(0))
+            IF p > 0 THEN ffn = LEFT$(ffn, p - 1)
+          END IF
           array$(index) = ffn
           index = index + 1
         END IF
@@ -1854,10 +1897,85 @@ SUB ReadDirT(spec$, array(), offset)
 
 END SUB
 
+' ReadFileI obtains a list of file names, sizes, dates, and times from 
+' disk, and then formats and loads them into a conventional (not 
+' fixed-length) string array in one operation. 
 SUB ReadFileI(array$(), offset)
+  
+  ' Array$(0) holds the search specification to indicate which file 
+  ' names are to be retrieved, and subsequent array elements receive 
+  ' each file's name and related information.
+  
+  ' ReadFileI (Read File names with full Information) is similar to the 
+  ' QuickPak Professional ReadFile routine, except it also obtains the 
+  ' size, date, and time for each file. Before ReadFileI, the only way to 
+  ' do this was to call the ReadFile routine, and then call Fileinfo 
+  ' repeatedly for each file. Besides greatly simplifying the amount of 
+  ' work you must do to obtain this information, ReadFileI is also 
+  ' considerably faster. 
+
+  ' It is up to you to assign each string to a length of 37 characters 
+  ' before calling ReadFileI.
+
   ' 1234567890123456789012345678901234567 
-  ' namename.ext sizesize mm-dd-yy hh:rrm* <---- either "a" or "p" 
-  ERROR 73 ' Feature Unavailable
+  ' namename.ext sizesize mm-dd-yy hh:mm* <---- either "a" or "p" 
+  
+  ' - filename
+  ' - size
+  ' - modified date
+  ' - modified time
+
+  ' resultLength = GetShortPathNameW(fullPath$, shortPath$, 255)
+
+  IF INSTR(_OS$, "[WINDOWS]") THEN
+    
+    DIM pattern AS STRING
+    DIM fd AS Win32_Find_Data
+    DIM hFind AS _UNSIGNED _OFFSET
+    DIM junk AS LONG
+    DIM ffn AS STRING
+    DIM fsize AS LONG
+    DIM modDate AS STRING
+    DIM modTime AS STRING
+    DIM p AS INTEGER
+
+    pattern = array$(offset) + CHR$(0)
+    basePath$ = LEFT$(array$(offset), INSTR(array$(offset), "\"))
+    hFind = FindFirstFile(_OFFSET(pattern), _OFFSET(fd))
+    IF hFind <> INVALID_HANDLE_VALUE THEN
+      index = 1
+      DO
+        IF (fd.dwfileattributes AND FILE_ATTRIBUTE_DIRECTORY) = FILE_ATTRIBUTE_DIRECTORY THEN
+        ELSE 
+          ffn = fd.calternatefilename 'cfilename
+          p = INSTR(ffn, CHR$(0))
+          IF p > 0 THEN ffn = LEFT$(ffn, p - 1)
+          IF LTRIM$(ffn) = "" THEN
+            ffn = fd.cfilename
+            p = INSTR(ffn, CHR$(0))
+            IF p > 0 THEN ffn = LEFT$(ffn, p - 1)
+          END IF
+          fsize = (fd.nfilesizehigh * (&HFFFFFFFF + 1)) + fd.nfilesizelow
+          array$(index) = LEFT$(ffn + SPACE$(12), 12) + " " + RIGHT$(SPACE$(8) + STR$(fsize), 8) + " " + "01-01-80" + " " + "00:00a"
+          index = index + 1
+        END IF
+      LOOP UNTIL FindNextFile(hFind, _OFFSET(fd)) = 0
+      junk = FindClose(hFind)
+    ELSE
+      lastError& = GetLastError
+      IF lastError& = ERROR_FILE_NOT_FOUND THEN
+        ' no files available, result remains 0
+      ELSEIF lastError& = ERROR_ACCESS_DENIED THEN
+        ERROR 70 ' Permission denied
+      ELSE
+        PRINT lastError&
+        ERROR 75 ' Path/File access error
+      END IF
+    END IF
+  ELSE
+    ERROR 73 ' Advanced Feature / Feature Unavailable
+  END IF
+
 END SUB
 
 SUB ReadFileT(spec$, array() AS STRING * 12, first)
@@ -1877,7 +1995,7 @@ SUB ReadFileT(spec$, array() AS STRING * 12, first)
       DO
         IF (fd.dwfileattributes AND FILE_ATTRIBUTE_DIRECTORY) = FILE_ATTRIBUTE_DIRECTORY THEN
         ELSE 
-          ffn = fd.cfilename
+          ffn = fd.calternatefilename
           p = INSTR(ffn, CHR$(0))
           IF p > 0 THEN ffn = LEFT$(ffn, p - 1)
           'LSET array(index).S = ffn
