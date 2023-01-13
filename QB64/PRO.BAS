@@ -5051,8 +5051,20 @@ FUNCTION InstrTblB2(start, source$, table$)
   InstrTblB2 = -1
 END FUNCTION
 
-FUNCTION LongestStr(Array$())
-  ERROR 73 ' Feature Unavailable
+' LongestStr returns the length of the longest string in an entire array. 
+FUNCTION LongestStr(array$())
+
+  ' MaxLength receives the length of the longest string contained in Array$(). 
+
+  result = 0
+
+  FOR index = LBOUND(array$) TO UBOUND(array$)
+    l = LEN(array$(index))
+    IF l > result THEN result = l
+  NEXT
+
+  LongestStr = result
+
 END FUNCTION
 
 SUB LowASCII(X$)

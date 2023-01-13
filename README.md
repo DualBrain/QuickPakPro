@@ -52,7 +52,7 @@ We also want to thank [Gene Buckle](https://github.com/geneb) for making this al
 |ISORTI.BAS  |         |   |ISORTI2.BAS |         |   |ISORTSTR.BAS|         |
 |ISORTT.BAS  |         |   |KEYDOWN.BAS | EXE     |   |KEYS.BAS    | EXE     |
 |KEYSORT.BAS |         |   |KEYSTAT.BAS | EXE     |   |LINCOUNT.BAS| EXE     |
-|LOADEXEC.BAS|         |   |LOCKFILE.BAS|         |   |LONGSTR.BAS |         |
+|LOADEXEC.BAS|         |   |LOCKFILE.BAS|         |   |LONGSTR.BAS | EXE     |
 |LTS2MENU.BAS| INCLUDE |   |LTSMENU.BAS | INCLUDE |   |MAINMENU.BAS| INCLUDE |
 |MAKEQLB.BAS |         |   |MARQUEE.BAS | EXE     |   |MASKIN.BAS  | INCLUDE |
 |MIDSTRSR.BAS|         |   |MINMAX.BAS  | EXE     |   |MONITOR.BAS | EXE     |
