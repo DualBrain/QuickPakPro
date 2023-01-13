@@ -39,7 +39,7 @@ We also want to thank [Gene Buckle](https://github.com/geneb) for making this al
 |FGETAH.BAS  |         |   |FGETR.BAS   |         |   |FGETRT.BAS  |         |
 |FILECOMP.BAS| INCLUDE |   |FILECOPY.BAS| INCLUDE |   |FILECRPT.BAS| INCLUDE |
 |FILEINFO.BAS| EXE     |   |FILESORT.BAS|         |   |FILEVIEW.BAS|         |
-|FILL.BAS    |         |   |FILLSCRN.BAS| EXE     |   |FIND.BAS    | EXE     |
+|FILL.BAS    | EXE     |   |FILLSCRN.BAS| EXE     |   |FIND.BAS    | EXE     |
 |FINDLAST.BAS| EXE     |   |FINDT.BAS   |         |   |FLINPUT.BAS | EXE     |
 |FLUSH.BAS   |         |   |FNOTHER.BAS | EXE     |   |FNSPREAD.BAS| EXE     |
 |FORMAT.BAS  |         |   |FULLNAME.BAS| EXE     |   |GASGAUGE.BAS| INCLUDE |

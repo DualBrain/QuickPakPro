@@ -136,22 +136,22 @@ SUB FindExact(array$(), start, numEls, searchValue$)
   numEls = -1
 END SUB
 
-SUB FindT(array() AS FLen, Start, ElSize, NumEls, SearchValue$)
+SUB FindT(block AS _MEM, ElSize, NumEls, SearchValue$)
   NumEls = -1
   ERROR 73 ' Feature Unavailable
 END SUB
 
-SUB FindT2(Array() AS FLen, Start, ElSize, NumEls, SearchValue$)
+SUB FindT2(block AS _MEM, ElSize, NumEls, SearchValue$)
   NumEls = -1
   ERROR 73 ' Feature Unavailable
 END SUB
 
-SUB FindTB(Array() AS FLen, Start, ElSize, CurEl, SearchValue$)
+SUB FindTB(block AS _MEM, ElSize, CurEl, SearchValue$)
   CurEl = -1
   ERROR 73 ' Feature Unavailable
 END SUB
 
-SUB FindTB2(Array() AS FLen, Start, ElSize, CurEl, SearchValue$)
+SUB FindTB2(block AS _MEM, ElSize, CurEl, SearchValue$)
   CurEl = -1
   ERROR 73 ' Feature Unavailable
 END SUB
@@ -522,15 +522,15 @@ SUB ISortStr2(Array$(), Start, Ndx(), NumEls, Dir)
 
 END SUB
 
-SUB ISortT(Array() AS FLen, Start, Ndx(), NumEls, Dir, ElSize, MemberOffset, MemberSize)
+SUB ISortT(block AS _MEM, Ndx(), NumEls, Dir, ElSize, MemberOffset, MemberSize)
   ERROR 73 ' Feature Unavailable
 END SUB
 
-SUB ISortT2(Array() AS FLen, Start, Ndx(), NumEls, Dir, ElSize, MemberOffset, MemberSize)
+SUB ISortT2(block AS _MEM, Ndx(), NumEls, Dir, ElSize, MemberOffset, MemberSize)
   ERROR 73 ' Feature Unavailable
 END SUB
 
-SUB KeySort(Array() AS FLen, Start, ElSize, NumEls, Table(,), NumKey)
+SUB KeySort(block AS _MEM, ElSize, NumEls, Table(,), NumKey)
   ERROR 73 ' Feature Unavailable
 END SUB
 
@@ -674,11 +674,11 @@ SUB Search(array(), start, numEls, match, found, direction, matchCode, varType)
 
 END SUB
 
-SUB SearchT(Array() AS FLen, Start, NumEls, Match, Found, Dir, Code, StructSize, MemberOf, MemberSize)
+SUB SearchT(block AS _MEM, NumEls, Match, Found, Dir, Code, StructSize, MemberOf, MemberSize)
   ERROR 73 ' Feature Unavailable
 END SUB
 
-SUB SearchT2(Array() AS FLen, Start, NumEls, Match, Found, Dir, Code, StructSize, MemberOf, MemberSize)
+SUB SearchT2(block AS _MEM, NumEls, Match, Found, Dir, Code, StructSize, MemberOf, MemberSize)
   ERROR 73 ' Feature Unavailable
 END SUB
 
@@ -894,11 +894,11 @@ L4:
 
 END SUB
 
-SUB SortT(Array() AS FLen, Start, NumEls, Dir, ElSize, MemberOffset, MemberSize)
+SUB SortT(block AS _MEM, NumEls, Dir, ElSize, MemberOffset, MemberSize)
   ERROR 73 ' Feature Unavailable
 END SUB
 
-SUB SortT2(Array() AS FLen, Start, NumEls, Dir, ElSize, MemberOffset, MemberSize)
+SUB SortT2(block AS _MEM, NumEls, Dir, ElSize, MemberOffset, MemberSize)
   ERROR 73 ' Feature Unavailable
 END SUB
 
@@ -1154,15 +1154,15 @@ SUB FGetR(Handle, Destination$, RecNumber&)
   ERROR 73 ' Feature Unavailable
 END SUB
 
-SUB FGetRT(Handle, Destination AS FLen, RecNumber&, RecSize)
+SUB FGetRT(Handle, block AS _MEM, RecNumber&, RecSize)
   ERROR 73 ' Feature Unavailable
 END SUB
 
-SUB FGetRTA(Handle, Destination AS FLen, RecNumber&, RecSize)
+SUB FGetRTA(Handle, block AS _MEM, RecNumber&, RecSize)
   ERROR 73 ' Feature Unavailable
 END SUB
 
-SUB FGetT(Handle, Destination AS FLen, NumBytes)
+SUB FGetT(Handle, block AS _MEM, NumBytes)
   ERROR 73 ' Feature Unavailable
 END SUB
 
@@ -1442,15 +1442,15 @@ SUB FPutR(Handle, Source$, RecNumber&)
   ERROR 73 ' Feature Unavailable
 END SUB
 
-SUB FPutRT(Handle, Source AS FLen, RecNumber&, RecSize)
+SUB FPutRT(Handle, block AS _MEM, RecNumber&, RecSize)
   ERROR 73 ' Feature Unavailable
 END SUB
 
-SUB FPutRTA(Handle, Source AS FLen, RecNumber&, RecSize)
+SUB FPutRTA(Handle, block AS _MEM, RecNumber&, RecSize)
   ERROR 73 ' Feature Unavailable
 END SUB
 
-SUB FPutT(Handle, Source AS FLen, NumBytes)
+SUB FPutT(Handle, block AS _MEM, NumBytes)
   ERROR 73 ' Feature Unavailable
 END SUB
 
@@ -5602,8 +5602,8 @@ END SUB
 ' APrintT0 will quickly print any portion of a fixed-length string 
 ' array or the string component of a TYPE array, and contain the 
 ' display within a specified area of the screen. 
-SUB APrintT0(array() AS FLen, first, elSize, numEls, firstChar, numChars, colr)
-  CALL APrintT0(array(), first, elSize, numEls, firstChar, numChars, colr)
+SUB APrintT0(block AS _MEM, elSize, numEls, firstChar, numChars, colr)
+  ERROR 73 ' Feature Unavailable
 END SUB
 
 ' ArraySize will quickly calculate how many elements are needed in an
