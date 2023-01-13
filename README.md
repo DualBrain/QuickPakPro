@@ -47,7 +47,7 @@ We also want to thank [Gene Buckle](https://github.com/geneb) for making this al
 |GETCOLOR.BAS| EXE     |   |GETDIR.BAS  | EXE     |   |GETEQUIP.BAS| EXE     |
 |GETVMODE.BAS| EXE     |   |GRAFCURS.BAS|         |   |HAND2NAM.BAS|         |
 |HCOPY.BAS   |         |   |HUGE.BAS    |         |   |IMINMAX.BAS | EXE     |
-|INCOUNT.BAS | EXE     |   |INSERT.BAS  |         |   |INSERTT.BAS |         |
+|INCOUNT.BAS | EXE     |   |INSERT.BAS  | EXE     |   |INSERTT.BAS |         |
 |INSTALL.BAS |         |   |INSTAT.BAS  |         |   |INSTRTBL.BAS|         |
 |ISORTI.BAS  |         |   |ISORTI2.BAS |         |   |ISORTSTR.BAS|         |
 |ISORTT.BAS  |         |   |KEYDOWN.BAS | EXE     |   |KEYS.BAS    | EXE     |
