@@ -74,7 +74,7 @@ We also want to thank [Gene Buckle](https://github.com/geneb) for making this al
 |SCROLLIN.BAS| INCLUDE |   |SEARCH.BAS  | EXE     |   |SEQUENCE.BAS| EXE     |
 |SETATTR.BAS |         |   |SETCNF.BI   | INCLUDE |   |SHIFT.BAS   | EXE     |
 |SORTI.BAS   |         |   |SORTSTR.BAS | EXE     |   |SORTT.BAS   |         |
-|SOUNDEX.BAS |         |   |SPELLNUM.BAS| EXE     |   |SPLITNAM.BAS| EXE     |
+|SOUNDEX.BAS | EXE     |   |SPELLNUM.BAS| EXE     |   |SPLITNAM.BAS| EXE     |
 |SPREAD.BAS  |         |   |SRCHPATH.BAS| INCLUDE |   |STRREST.BAS | INCLUDE |
 |STUFFBUF.BAS|         |   |TEST.BAS    | EXE     |   |TEXTIN.BAS  | INCLUDE |
 |TEXTSORT.BAS|         |   |TIME.BAS    | EXE     |   |TRANSLAT.BAS| EXE     |

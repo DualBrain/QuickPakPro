@@ -4643,8 +4643,78 @@ SUB ShiftLR(intVar&, numBits)
   intVar& = _SHR(intVar&, numBits)
 END SUB
 
+' Soundex returns a value that corresponds to the sound of a word. 
 FUNCTION Soundex$(Word$)
-  ERROR 73 ' Feature Unavailable
+
+  ' Word$ is any single word or proper name, and Code$ receives a 
+  ' four-digit Soundex code such as "0122". 
+
+  ' This routine employs the standard Soundex algorithm to return a 
+  ' four-character string that loosely approximates how the string 
+  ' sounds. 
+  '   
+  ' Soundex is often used for searching a database of names, when the 
+  ' exact spelling is not known. To see if one string sounds like 
+  ' another, you would simply compare the results that Soundex returns: 
+  ' 
+  '   IF Soundex$(First$) = Soundex$(Second$) THEN 
+  '     PRINT "They sound alike" 
+  '   END IF 
+  ' 
+  ' When a string is being converted to its equivalent Soundex code, 
+  ' vowels are removed, and consonants that are similar are given the 
+  ' same value. Note that when the same sound occurs twice or more 
+  ' in succession, only one of them is counted. Also note that with 
+  ' long strings the conversion ceases when all four digits are filled. 
+  ' Likewise, short strings are padded with trailing "O" characters. 
+  ' 
+  ' The conversion codes are shown in the table below. 
+  ' 
+  ' Letters 
+  ' CodeNum 
+  ' B F P V C G J K Q S X Z D T L M N R 
+  ' 1 1 1 1 2 2 2 2 2 2 2 2 3 3 4 5 5 6 
+  ' 
+  ' Thus, the string "QuickPak" would be coded as "2212" ("QCPK"). 
+  ' The first consonant, "Q", is translated to "2", and the vowels "ui" 
+  ' are ignored. The "c" is then converted to "2", but the following 
+  ' "k" is ignored because it has the same code as the "c". The "P" is 
+  ' translated to "1 ", the vowel "a" is ignored, and the final "K" is 
+  ' converted to "2". 
+  ' 
+  ' It is important to understand that because of the many quirks in the 
+  ' English language, Soundex is not always reliable. 
+
+  result$ = ""
+
+  FOR index = 1 TO LEN(word$)
+    ch$ = MID$(word$, index, 1)
+    IF INSTR("AEIOUYaeiouy", ch$) THEN
+      ' skip
+    ELSEIF INSTR("BFPVbfpv", ch$) THEN
+      IF RIGHT$(result$, 1) <> "1" THEN result$ = result$ + "1"    
+    ELSEIF INSTR("CGJKQSXZcgjkqsxz", ch$) THEN
+      IF RIGHT$(result$, 1) <> "2" THEN result$ = result$ + "2"    
+    ELSEIF INSTR("DTdt", ch$) THEN
+      IF RIGHT$(result$, 1) <> "3" THEN result$ = result$ + "3"    
+    ELSEIF INSTR("Ll", ch$) THEN
+      IF RIGHT$(result$, 1) <> "4" THEN result$ = result$ + "4"    
+    ELSEIF INSTR("MNmn", ch$) THEN
+      IF RIGHT$(result$, 1) <> "5" THEN result$ = result$ + "5"    
+    ELSEIF INSTR("Rr", ch$) THEN
+      IF RIGHT$(result$, 1) <> "6" THEN result$ = result$ + "6"    
+    ELSE
+      '???? skip?
+    END IF
+    IF LEN(result$) = 4 THEN EXIT FOR 
+  NEXT
+
+  IF LEN(result$) < 4 THEN
+    result$ = LEFT$(result$ + "0000", 4)
+  END IF
+
+  Soundex$ = result$
+
 END FUNCTION
 
 SUB SysTime(T$)
