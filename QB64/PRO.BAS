@@ -136,24 +136,104 @@ SUB FindExact(array$(), start, numEls, searchValue$)
   numEls = -1
 END SUB
 
-SUB FindT(block AS _MEM, ElSize, NumEls, SearchValue$)
-  NumEls = -1
-  ERROR 73 ' Feature Unavailable
+SUB FindT(block AS _MEM, elSize, numEls, searchValue$)
+
+  DIM offset AS _OFFSET
+  DIM bytes(1 TO elSize) AS _BYTE
+  c = 0
+  result = -1
+  DIM sgmnt AS _MEM: sgmnt = _MEM(bytes(1))
+  FOR x = 1 TO numEls
+    offset = block.OFFSET + (c * elSize)
+    _MEMCOPY block, offset, elSize TO sgmnt, sgmnt.OFFSET
+    segment$ = ""
+    FOR chIndex = 1 TO UBOUND(bytes)
+      segment$ = segment$ + CHR$(bytes(chIndex))
+    NEXT
+    IF QInstr(1, segment$, searchValue$) THEN
+      result = c: EXIT FOR
+    END IF
+    c = c + 1
+  NEXT
+  _MEMFREE sgmnt
+  numEls = result
+
 END SUB
 
-SUB FindT2(block AS _MEM, ElSize, NumEls, SearchValue$)
-  NumEls = -1
-  ERROR 73 ' Feature Unavailable
+SUB FindT2(block AS _MEM, elSize, numEls, searchValue$)
+
+  DIM offset AS _OFFSET
+  DIM bytes(1 TO elSize) AS _BYTE
+  c = 0
+  result = -1
+  DIM sgmnt AS _MEM: sgmnt = _MEM(bytes(1))
+  FOR x = 1 TO numEls
+    offset = block.OFFSET + (c * elSize)
+    _MEMCOPY block, offset, elSize TO sgmnt, sgmnt.OFFSET
+    segment$ = ""
+    FOR chIndex = 1 TO UBOUND(bytes)
+      segment$ = segment$ + CHR$(bytes(chIndex))
+    NEXT
+    IF QInstr2(1, segment$, searchValue$) THEN
+      result = c: EXIT FOR
+    END IF
+    c = c + 1
+  NEXT
+  _MEMFREE sgmnt
+  numEls = result
+
 END SUB
 
-SUB FindTB(block AS _MEM, ElSize, CurEl, SearchValue$)
-  CurEl = -1
-  ERROR 73 ' Feature Unavailable
+SUB FindTB(block AS _MEM, elSize, numEls, searchValue$)
+
+  'NOTE: block needs to be the start of the whole array,
+  '      not the current "starting" location as original.
+  '      This is due to the limitation of _MEM.
+
+  DIM offset AS _OFFSET
+  DIM bytes(1 TO elSize) AS _BYTE
+  result = -1
+  DIM sgmnt AS _MEM: sgmnt = _MEM(bytes(1))
+  FOR x = numEls - 1 TO 0 STEP - 1
+    offset = block.OFFSET + (x * elSize)
+    _MEMCOPY block, offset, elSize TO sgmnt, sgmnt.OFFSET
+    segment$ = ""
+    FOR chIndex = 1 TO UBOUND(bytes)
+      segment$ = segment$ + CHR$(bytes(chIndex))
+    NEXT
+    IF QInstr(1, segment$, searchValue$) THEN
+      result = x: EXIT FOR
+    END IF
+  NEXT
+  _MEMFREE sgmnt
+  numEls = result
+
 END SUB
 
-SUB FindTB2(block AS _MEM, ElSize, CurEl, SearchValue$)
-  CurEl = -1
-  ERROR 73 ' Feature Unavailable
+SUB FindTB2(block AS _MEM, elSize, numEls, searchValue$)
+
+  'NOTE: block needs to be the start of the whole array,
+  '      not the current "starting" location as original.
+  '      This is due to the limitation of _MEM.
+
+  DIM offset AS _OFFSET
+  DIM bytes(1 TO elSize) AS _BYTE
+  result = -1
+  DIM sgmnt AS _MEM: sgmnt = _MEM(bytes(1))
+  FOR x = numEls - 1 TO 0 STEP - 1
+    offset = block.OFFSET + (x * elSize)
+    _MEMCOPY block, offset, elSize TO sgmnt, sgmnt.OFFSET
+    segment$ = ""
+    FOR chIndex = 1 TO UBOUND(bytes)
+      segment$ = segment$ + CHR$(bytes(chIndex))
+    NEXT
+    IF QInstr2(1, segment$, searchValue$) THEN
+      result = x: EXIT FOR
+    END IF
+  NEXT
+  _MEMFREE sgmnt
+  numEls = result
+
 END SUB
 
 ' FindLast scans a conventional (not fixed-length) string array 
