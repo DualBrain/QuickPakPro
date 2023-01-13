@@ -31,13 +31,30 @@ END SUB
 
 ' DeleteT removes an element from a fixed-length string, numeric, or 
 ' user-defined TYPE array. 
-SUB DeleteT(array() AS FLen, element, elSize, numEls)
-  'NOTE: elSize is currently ignored since we are working directly with an included type.
-  e = element + numEls
-  IF e => UBOUND(array) THEN e = UBOUND(array) - 1
-  FOR x = element TO e
-    SWAP array(x), array(x + 1) 
-  NEXT 
+SUB DeleteT(block AS _MEM, elSize, numEls)
+
+  SELECT CASE elSize
+    CASE -1 : size = 2 ' 2-byte integer 
+    CASE -2 : size = 4 ' 4-byte long integer
+    CASE -3 : size = 4 ' 4-byte single precision
+    CASE -4 : size = 8 ' 8-byte double precision
+    CASE IS > 0: size = elSize
+    CASE ELSE
+      EXIT SUB
+  END SELECT
+
+  DIM totalSize AS _OFFSET: totalSize = numEls * size
+  
+  DIM offset AS _OFFSET: offset = block.OFFSET + size
+  _MEMCOPY block, offset, totalSize TO block, block.OFFSET
+
+  ' 'NOTE: elSize is currently ignored since we are working directly with an included type.
+  ' e = element + numEls
+  ' IF e => UBOUND(array) THEN e = UBOUND(array) - 1
+  ' FOR x = element TO e
+  '   SWAP array(x), array(x + 1) 
+  ' NEXT 
+  
 END SUB
 
 ' Fill2 will quickly assign all of the elements in a specified portion of 
@@ -272,10 +289,27 @@ SUB InsertStr(array$(), startElement, insertValue$, numEls)
   SWAP array$(startElement), insertValue$ 
 END SUB
 
-SUB InsertT(array() AS FLen, startElement, elSize, numEls)
-  FOR x = startElement + numEls - 1 TO startElement + 1 STEP -1
-    array(x) = array(x - 1)
-  NEXT
+SUB InsertT(block AS _MEM, elSize, numEls)
+
+  SELECT CASE elSize
+    CASE -1 : size = 2 ' 2-byte integer 
+    CASE -2 : size = 4 ' 4-byte long integer
+    CASE -3 : size = 4 ' 4-byte single precision
+    CASE -4 : size = 8 ' 8-byte double precision
+    CASE IS > 0: size = elSize
+    CASE ELSE
+      EXIT SUB
+  END SELECT
+
+  DIM totalSize AS _OFFSET: totalSize = numEls * size
+  
+  DIM offset AS _OFFSET: offset = block.OFFSET + size
+  _MEMCOPY block, block.OFFSET, totalSize TO block, offset
+
+  ' FOR x = startElement + numEls - 1 TO startElement + 1 STEP -1
+  '   array(x) = array(x - 1)
+  ' NEXT
+
 END SUB
 
 SUB ISortD(array#(), start, ndx(), numEls, dir)

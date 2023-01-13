@@ -11,9 +11,9 @@ TYPE Area                                 ' Type definition for MouseRange
   RN AS INTEGER
 END TYPE
 
-TYPE FLen                                 ' "Hard-coded" TYPE for xxxxT methods.
-  S AS STRING * 30
-END TYPE
+' TYPE FLen                                 ' "Hard-coded" TYPE for xxxxT methods.
+'   S AS STRING * 30
+' END TYPE
 
 TYPE FInfo
   Year   AS INTEGER
