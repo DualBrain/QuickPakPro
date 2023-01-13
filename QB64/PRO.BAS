@@ -1675,8 +1675,68 @@ FUNCTION LineCount(fileName$, buffer$)
 
 END FUNCTION
 
-FUNCTION LoadExec(Program$, CmdLine$)
-  ERROR 73 ' Feature Unavailable
+' LoadExec is a SHELL replacement that lets you execute another 
+' program, and then retrieve its exit code (the DOS error level). 
+FUNCTION LoadExec(program$, cmdLine$)
+
+  ' Program$ is the full name of the program to be run, and CmdLine$ 
+  ' is an optional command line parameter that is passed to the program. 
+
+  ' LoadExec can be used to run .EXE and .COM programs only. You 
+  ' cannot run a batch file or other non-executable program directly 
+  ' (but see below). 
+  '   
+  ' Note that the DOS service that LoadExec uses does not honor the 
+  ' PATH setting. Therefore, you must state the complete drive and 
+  ' path if they are not the current default. See the SearchPath$ 
+  ' function elsewhere in this manual, which examines the PATH and 
+  ' returns the fully qualified name of an executable program. 
+  ' 
+  ' Normally, ExitCode will receive a value between O and 255, 
+  ' corresponding to the exit code returned by the program that was 
+  ' executed. However, it is also possible that the value may be higher 
+  ' if DOS intervened in the program's termination. Here's how you 
+  ' can determine how the program was ended, and isolate the two 
+  ' separate pieces of information:
+  ' 
+  '   IF ExitCode <= 255 THEN 
+  '     PRINT "Normal termination with an exit code of"; ExitCode 
+  '   ELSE 
+  '     DOSCode = ExitCode \ 256 
+  '     ExitCode = ExitCode AND 255 
+  '     PRINT "DOS intervened" 
+  '     SELECT CASE DOSCode 
+  '       CASE 1 
+  '         'isolate DOS's contribution 
+  '         'optionally retain the program's part 
+  '         PRINT "You pressed Ctrl-C or Ctrl-Break to end the program" 
+  '       CASE 2 
+  '         PRINT "A critical error occurred and you pressed A (Abort)" 
+  '       CASE 3 
+  '         PRINT "The program ended as a TSR -- reboot now!" 
+  '       CASE ELSE 
+  '     END SELECT 
+  '   END IF 
+  '
+  ' Due to a bug in DOS 2.x you should not use LoadExec with that 
+  ' version of DOS. You can prevent this by first querying the DOSVer 
+  ' function, and checking for a value of at least 300. Related to the 
+  ' DOS 2.x issue, some older programs (including CHKDSK and 
+  ' FORMAT) require a DOS 1.x style FCB structure to be present. 
+  ' To avoid adding a lot of code to accommodate what is clearly a 
+  ' waning method, LoadExec does not support those either. 
+  '
+  ' LOADEXEC.BAS shows how to use LoadExec with the 
+  ' SearchPath$ function, and also how to execute batch files. Besides 
+  ' interpreting return codes, it also shows how to detect DOS errors 
+  ' using WhichError.
+
+  IF cmdLine$ <> "" THEN
+    LoadExec = SHELL(program$ + " " + cmdLine$)
+  ELSE
+    LoadExec = SHELL(program$ + " " + cmdLine$)
+  END IF
+
 END FUNCTION
 
 SUB LockFile(Handle, Offset&, Length&)

@@ -52,7 +52,7 @@ We also want to thank [Gene Buckle](https://github.com/geneb) for making this al
 |ISORTI.BAS  |         |   |ISORTI2.BAS |         |   |ISORTSTR.BAS|         |
 |ISORTT.BAS  |         |   |KEYDOWN.BAS | EXE     |   |KEYS.BAS    | EXE     |
 |KEYSORT.BAS |         |   |KEYSTAT.BAS | EXE     |   |LINCOUNT.BAS| EXE     |
-|LOADEXEC.BAS|         |   |LOCKFILE.BAS|         |   |LONGSTR.BAS | EXE     |
+|LOADEXEC.BAS| EXE     |   |LOCKFILE.BAS|         |   |LONGSTR.BAS | EXE     |
 |LTS2MENU.BAS| INCLUDE |   |LTSMENU.BAS | INCLUDE |   |MAINMENU.BAS| INCLUDE |
 |MAKEQLB.BAS |         |   |MARQUEE.BAS | EXE     |   |MASKIN.BAS  | INCLUDE |
 |MIDSTRSR.BAS|         |   |MINMAX.BAS  | EXE     |   |MONITOR.BAS | EXE     |
@@ -70,7 +70,7 @@ We also want to thank [Gene Buckle](https://github.com/geneb) for making this al
 |READFILI.BAS|         |   |READFILT.BAS|         |   |READFILX.BAS|         |
 |READSECT.BAS|         |   |REPLACE.BAS | EXE     |   |RPTKEY.BAS  |         |
 |RWTEST.BAS  |         |   |SCANFILE.BAS| INCLUDE |   |SCIFORM.BAS | EXE     |
-|SCRNDUMP.BAS|         |   |SCRNSR.BAS  | EXE     |   |SCROLL.BAS  | EXE     |
+|SCRNDUMP.BAS| N/A     |   |SCRNSR.BAS  | EXE     |   |SCROLL.BAS  | EXE     |
 |SCROLLIN.BAS| INCLUDE |   |SEARCH.BAS  | EXE     |   |SEQUENCE.BAS| EXE     |
 |SETATTR.BAS |         |   |SETCNF.BI   | INCLUDE |   |SHIFT.BAS   | EXE     |
 |SORTI.BAS   |         |   |SORTSTR.BAS | EXE     |   |SORTT.BAS   |         |
