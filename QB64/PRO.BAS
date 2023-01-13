@@ -3953,15 +3953,38 @@ FUNCTION MaxLong& (Num1&, Num2&)
   END IF 
 END FUNCTION
 
-' MidStrRest is a specialized version of the string manager
-' routines StringRest, which are designed to save a MID$ 
-' portion of a string array. 
-SUB MidStrRest (buffer$, strNumber, storage())
+' MidStrRest is a specialized version of the string manager routine StringRest, 
+' which is designed to restore a MID$ portion of a string array. 
+SUB MidStrRest (buffer$, strNumber, storage(), offset)
   ERROR 73 ' Feature Unavailable
 END SUB
 
-SUB MidStrSave (array$(), element, numEls, FirstChar, numChars, storage())
+' MidStrSave is a specialized versions of the string manager routine 
+' StringSave, which is designed to save a MID$ portion of a string array. 
+SUB MidStrSave (array$(), element, numEls, firstChar, numChars, storage(), offset)
+
+  ' Where Storage%() is an integer array used to store the portion of the string
+  ' array, and Array$() is the string array from which the text is being captured. 
+  '
+  ' NumEls% is the number of string elements to save, FirstChar% 
+  ' indicates with which character to begin saving each element, and 
+  ' NumChars% is the number of subsequent characters to save. If a 
+  ' string contains too few characters when being saved, it is padded 
+  ' with blank spaces in the storage array. 
+  '
+  ' When restoring, strings are accessed one by one, and StrNumber% 
+  ' tells which one to retrieve.
+  '
+  ' These routines were designed specifically for use with the QEdit 
+  ' subprogram, to allow capturing and restoring text in columns. It is 
+  ' unlikely that you would need these in your own programs, and they 
+  ' are documented here solely for completeness. 
+  '
+  ' Note that the string portions being saved and restored must be less 
+  ' than 256 characters in length.
+
   ERROR 73 ' Feature Unavailable
+
 END SUB
 
 ' Returns the number of strings stored in an integer array. 
