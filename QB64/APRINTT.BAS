@@ -37,9 +37,9 @@ DEFINT A-Z
 ' APrintT below.  The alternative method using a fixed-length string array
 ' is shown in REMarks for comparison.
 
-' TYPE FLen
-'   S AS STRING * 30
-' END TYPE
+TYPE FLen
+  S AS STRING * 30
+END TYPE
 
 DECLARE SUB APrintT (SEG arrayElement AS FLen, elSize, numEls, midStart, numChars, colr, page)
 'DECLARE SUB APrintT (BYVAL segment, BYVAL address, elSize, numEls, midStart, numChars, colr, page)
