@@ -42,7 +42,7 @@ We also want to thank [Gene Buckle](https://github.com/geneb) for making this al
 |FILL.BAS    | EXE     |   |FILLSCRN.BAS| EXE     |   |FIND.BAS    | EXE     |
 |FINDLAST.BAS| EXE     |   |FINDT.BAS   | EXE     |   |FLINPUT.BAS | EXE     |
 |FLUSH.BAS   |         |   |FNOTHER.BAS | EXE     |   |FNSPREAD.BAS| EXE     |
-|FORMAT.BAS  |         |   |FULLNAME.BAS| EXE     |   |GASGAUGE.BAS| INCLUDE |
+|FORMAT.BAS  | N/A     |   |FULLNAME.BAS| EXE     |   |GASGAUGE.BAS| INCLUDE |
 |GET1STR.BAS | INCLUDE |   |GETATTR.BAS | EXE     |   |GETCMOS.BAS |         |
 |GETCOLOR.BAS| EXE     |   |GETDIR.BAS  | EXE     |   |GETEQUIP.BAS| EXE     |
 |GETVMODE.BAS| EXE     |   |GRAFCURS.BAS|         |   |HAND2NAM.BAS|         |
