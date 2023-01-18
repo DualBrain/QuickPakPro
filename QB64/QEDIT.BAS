@@ -2,7 +2,7 @@
 
 ' Copyright (c) 1988-1990 Crescent Software
 ' by Don Malin
-' Modifications (c) 2022 Cory Smith
+' Modifications (c) 2023 Cory Smith
 
 DEFINT A-Z
 
@@ -1520,7 +1520,8 @@ SUB QEdit (Array$(), X$, Action%, Ed AS EditInfo) STATIC
                  ELSE                           '  happens
                                                 'Save the block to far memory
                     REDIM ClipBd((CLNG(NumRows) * NumCols) \ 2 + 1)
-                    CALL MidStrSave(Array$(), Ed.UlCRow, NumRows, Ed.UlCCol, NumCols, ClipBd())
+                    'CALL MidStrSave(VARPTR(Array$(Ed.UlCRow)), NumRows, Ed.UlCCol, NumCols, ClipBd(0))
+                    CALL MidStrSave(Array$(), Ed.UlCRow, NumRows, Ed.UlCCol, NumCols, ClipBd(), 0)
                  END IF
               ELSE                              'Sentence block
                                                 'Save top and bottom lines
@@ -1630,7 +1631,8 @@ SUB QEdit (Array$(), X$, Action%, Ed AS EditInfo) STATIC
                               END IF
                            END IF
                        
-                           CALL MidStrRest(Temp$, N, ClipBd())
+                           'CALL MidStrRest(Temp$, N, ClipBd(0))
+                           CALL MidStrRest(Temp$, N, ClipBd(), 0)
 
                            IF 0 THEN 'FRE("") < 1280& THEN
                               BEEP
@@ -1656,7 +1658,8 @@ SUB QEdit (Array$(), X$, Action%, Ed AS EditInfo) STATIC
 
                  ELSE                           'Restore one line of text
                     IF Ed.CurCol > QPLen%(Array$(Ed.CurLine)) THEN Array$(Ed.CurLine) = Array$(Ed.CurLine) + SPACE$(Ed.CurCol - QPLen%(Array$(Ed.CurLine)) - 1)
-                    CALL MidStrRest(Temp$, 1, ClipBd())
+                    'CALL MidStrRest(Temp$, 1, ClipBd(0))
+                    CALL MidStrRest(Temp$, 1, ClipBd(), 0)
                     Array$(Ed.CurLine) = LEFT$(Array$(Ed.CurLine), Ed.CurCol - 1) + Temp$ + MID$(Array$(Ed.CurLine), Ed.CurCol)
                     Array$(Ed.CurLine) = RTRIM$(Array$(Ed.CurLine))
                                                 'Wrap words down
@@ -1681,7 +1684,8 @@ SUB QEdit (Array$(), X$, Action%, Ed AS EditInfo) STATIC
                     FOR N = 0 TO NumRows        'Compose middle lines of block
                         IF N THEN
                                                 'Make string to hold a line
-                           Temp$ = SPACE$(StrLength%(ClipBd(0), ClipBytes&, N))
+                           'Temp$ = SPACE$(StrLength%(ClipBd(0), ClipBytes&, N))
+                           Temp$ = SPACE$(StrLength%(ClipBd(), 0, ClipBytes&, N))
                                                 'Get the next string
                            Get1Str Temp$, ClipBd(), 0, N
                         ELSE
@@ -1728,7 +1732,8 @@ SUB QEdit (Array$(), X$, Action%, Ed AS EditInfo) STATIC
 
                            ELSE                 'For the body of the block,
                                                 '  get lines from far mem.
-                              Temp$ = SPACE$(StrLength%(ClipBd(0), ClipBytes&, N - 1))
+                              'Temp$ = SPACE$(StrLength%(ClipBd(0), ClipBytes&, N - 1))
+                              Temp$ = SPACE$(StrLength%(ClipBd(), 0, ClipBytes&, N - 1))
                               CALL Get1Str(Temp$, ClipBd(), 0, N - 1)
                            END IF
                            Temp$ = RTRIM$(Temp$)

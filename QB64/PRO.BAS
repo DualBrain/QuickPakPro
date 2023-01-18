@@ -4108,9 +4108,8 @@ FUNCTION MathChip
   MathChip = -1
 END FUNCTION
 
-' MaxInt compares two integer variables, and returns the value of the 
-' higher one. MaxLong is similar, but is intended for use with long 
-' integers. 
+' MaxInt compares two integer variables and returns 
+' the value of the higher one.
 FUNCTION MaxInt (num1, num2)
   IF num1 > num2 THEN 
     MaxInt = num1 
@@ -4119,6 +4118,8 @@ FUNCTION MaxInt (num1, num2)
   END IF 
 END FUNCTION
 
+' MaxLong compares two long integer variables and returns 
+' the value of the higher one.
 FUNCTION MaxLong& (Num1&, Num2&)
   IF Num1& > Num2& THEN 
     MaxLong& = Num1& 
@@ -4936,7 +4937,7 @@ FUNCTION Blanks(work$)
       SELECT CASE ASC(MID$(work$, index, 1))
         CASE 0, 32
         CASE ELSE
-          result = index: EXIT FOR
+          result = index - 1: EXIT FOR
       END SELECT
     NEXT
   END IF
@@ -5342,7 +5343,7 @@ FUNCTION Null(work$)
   IF work$ <> "" THEN
     FOR index = 1 TO LEN(work$)
       SELECT CASE ASC(MID$(work$, index, 1))
-        CASE 0, 32
+        CASE 0 ', 32
         CASE ELSE
           result = 0: EXIT FOR
       END SELECT

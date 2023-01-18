@@ -82,6 +82,7 @@ DECLARE SUB QEdit (array$(), ky$, action, ed AS EditInfo)
   REDIM array$(500)               ' holds the main editor string array
   FOR x = 1 TO 117                ' read some sample text into our array
     READ array$(x)
+    CALL ReplaceString(array$(x), "<p>", CHR$(20))    
   NEXT
 
   COLOR 6, 0                      ' fill the screen with a pattern to
@@ -172,7 +173,7 @@ DATA "Home and End move to the beginning and end of the line, the"
 DATA "PgUp and PgDn keys scroll the screen by pages, and Ctrl-PgUp"
 DATA "and Ctrl-PgDn move to the first and last lines respectively."
 DATA "The cursor may also be moved to the top or bottom of the edit"
-DATA "window with the Ctrl-Home and Ctrl-End keys."
+DATA "window with the Ctrl-Home and Ctrl-End keys.<p>"
 DATA ""
 DATA "Similar to the QuickBASIC editor, QEdit uses the Ctrl-Left"
 DATA "and Ctrl-Right arrow keys to move the cursor by words, and"
@@ -180,19 +181,19 @@ DATA "blocks are marked with any of the Shift-Cursor keys.  Notice"
 DATA "that blocks may also be marked using a combination of the"
 DATA "Shift AND Ctrl arrows to jump by whole words.  Beyond the"
 DATA "usual block operations, however, QEdit also supports block"
-DATA "operations on COLUMNS."
-DATA ""
+DATA "operations on COLUMNS.<p>"
+DATA "<p>"
 DATA "To mark a block in sentence mode, place the cursor at the"
 DATA "beginning of the block and press the Shift-Right arrow key."
 DATA "The marked block will be highlighted as the cursor travels"
 DATA "over the text.  Alternately, entire lines may be marked by"
 DATA "placing the cursor at the desired starting point and pressing"
-DATA "the Shift-Down arrow key."
-DATA ""
+DATA "the Shift-Down arrow key.<p>"
+DATA "<p>"
 DATA "To mark a column, place the cursor at the upper left corner"
 DATA "of the block and press the Shift-Right arrow key until the"
 DATA "highlight extends to the desired right edge.  Then, press"
-DATA "Shift-Down until the bottom of the block has been reached."
+DATA "Shift-Down until the bottom of the block has been reached.<p>"
 DATA ""
 DATA "Regardless of which marking mode is used, the block will be"
 DATA "captured as soon as any non-marking key has been pressed.  If"
@@ -284,4 +285,6 @@ DATA "there until Escape is pressed.  Likewise, setting Action to 5"
 DATA "clears the window and restores the original screen contents."
 
 '$INCLUDE: 'QEDIT.BAS'
+' '$INCLUDE: 'QEDIT7.BAS'
+' '$INCLUDE: 'QEDITS.BAS'
 '$INCLUDE: 'PRO.BAS'

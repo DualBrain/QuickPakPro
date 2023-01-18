@@ -1,12 +1,14 @@
-'**** QEDITS.BAS - This a smaller version of the QEDIT.BAS general purpose
-'**** text editor.  Block operations and the window frame are not supported.
+' **** QEDITS.BAS - This a smaller version of the QEDIT.BAS general purpose
+' ****              text editor.  Block operations and the window frame are 
+' ****              not supported.
 
-'by Don Malin
-'Copyright (c) 1988-1990 Crescent Software
+' by Don Malin
+' Copyright (c) 1988-1990 Crescent Software
+' Modifications (c) 2023 Cory Smith
 
 DEFINT A-Z
 
-'$INCLUDE: 'QEDITYPE.BI'
+' '$INCLUDE: 'QEDITYPE.BI'
 
 '----- assembler calls
 DECLARE SUB APrint0 (BYVAL X, NumEls, StartChar, NumChars, Colr)
@@ -45,7 +47,7 @@ DECLARE FUNCTION QPLen% (Text$)
 CONST SkipTbl$ = " ^*()[]-=+,.<>/\"             'Word delimiters
 
 
-'----- Returns the number of columns to advance at the end of a line
+' '----- Returns the number of columns to advance at the end of a line
 ' DEF FnSpaces2Pad% (Text$)
 '     STATIC Temp
 
@@ -124,6 +126,7 @@ SUB QEdit (Array$(), X$, Action%, Ed AS EditInfo) STATIC
 
        '----- Dim array to hold the underlying screen and save it.
        REDIM ScrBuf(1 TO (ScrRows * 80) + 2)
+       'CALL MScrnSave(1, 1, ScrRows, 80, ScrBuf(1))
        CALL MScrnSave(1, 1, ScrRows, 80, ScrBuf())
       
        IF Ed.LC <= 0 THEN Ed.LC = 1             'Set window column to 1
@@ -145,8 +148,9 @@ SUB QEdit (Array$(), X$, Action%, Ed AS EditInfo) STATIC
     IF Action < 3 OR Action = 4 THEN
 
        '----- Find the last element being used in the text array
-       arrayEnd = UBOUND(Array$)
-       Ed.LCount = FindLast%(array$(), arrayEnd)
+       ArrayEnd = UBOUND(Array$)
+       'Ed.LCount = FindLast%(VARPTR(Array$(ArrayEnd)), ArrayEnd)
+       Ed.LCount = FindLast%(Array$(), ArrayEnd, ArrayEnd)
 
 
        IF Ed.Wrap THEN     'If word wrap is on, use "" paragraph marker
@@ -203,7 +207,7 @@ SUB QEdit (Array$(), X$, Action%, Ed AS EditInfo) STATIC
               CASE IS >= CtrlP
                  X = QPLen%(Array$(Ed.CurLine)) 'See if line is long enough
                  IF X < 256 AND Ed.CurCol < 256 THEN
-                    IF Ed.CurLine < arrayEnd OR Insrt <> -1 OR Ed.Wrap = 0 OR X < Ed.Wrap THEN
+                    IF Ed.CurLine < ArrayEnd OR Insrt <> -1 OR Ed.Wrap = 0 OR X < Ed.Wrap THEN
                        IF Ed.CurCol > X THEN    'Make space for new character
                           Array$(Ed.CurLine) = Array$(Ed.CurLine) + SPACE$(Ed.CurCol - X)
                        END IF
@@ -287,13 +291,13 @@ SUB QEdit (Array$(), X$, Action%, Ed AS EditInfo) STATIC
                   
               '----- Enter
               CASE 13
-                 IF Ed.CurLine < arrayEnd THEN
+                 IF Ed.CurLine < ArrayEnd THEN
 
                     X = Blanks%(Array$(Ed.CurLine)) + 1
                                                 'If in Insert mode, insert a
                     IF Insrt = -1 THEN
                                                 '  new line below.
-                       IF Ed.LCount < arrayEnd THEN
+                       IF Ed.LCount < ArrayEnd THEN
                                                 'New line is right of cursor
                           Temp$ = SPACE$(MinInt%(X, Ed.CurCol) - 1) + RTRIM$(MID$(Array$(Ed.CurLine), Ed.CurCol))
                           Temp = Ed.CurLine + 1
@@ -306,7 +310,7 @@ SUB QEdit (Array$(), X$, Action%, Ed AS EditInfo) STATIC
                     END IF
                      
                     IF X > 1 OR QPLen%(Array$(Ed.CurLine)) THEN Ed.CurCol = X
-                    Ed.CurLine = MinInt%(Ed.CurLine + 1, arrayEnd)
+                    Ed.CurLine = MinInt%(Ed.CurLine + 1, ArrayEnd)
                     GOSUB WindowLimits
 
                     RePrint = -1                'Set flag to re-print window
@@ -392,11 +396,11 @@ SUB QEdit (Array$(), X$, Action%, Ed AS EditInfo) STATIC
 
            END SELECT
 
-           X& = 32768 'FRE(Array$(0))
-           IF X& < 1280 THEN
-              BEEP
-              Ed.MErr = 1                       'Set error flag
-           END IF
+          '  X& = FRE(Array$(0))
+          '  IF X& < 1280 THEN
+          '     BEEP
+          '     Ed.MErr = 1                       'Set error flag
+          '  END IF
 
 
         '----- Handle Extended (2 Char) key codes
@@ -551,9 +555,9 @@ SUB QEdit (Array$(), X$, Action%, Ed AS EditInfo) STATIC
 
               '----- PgDn
               CASE 81                           'almost at end, work backwards
-                 IF Ed.TL > arrayEnd - Ed.Rows * 2 THEN
+                 IF Ed.TL > ArrayEnd - Ed.Rows * 2 THEN
                     X = Ed.CurLine - Ed.TL      '  from end of array
-                    Ed.TL = arrayEnd - Ed.Rows + 1
+                    Ed.TL = ArrayEnd - Ed.Rows + 1
                     Ed.CurLine = Ed.TL + X      'Calc new current line
                     RePrint = -1                'Set flag to re-print window
                  ELSE
@@ -572,7 +576,7 @@ SUB QEdit (Array$(), X$, Action%, Ed AS EditInfo) STATIC
 
               '----- Ctrl PgDn
               CASE 118                          'we're already there - ignore
-                 IF Ed.TL <= arrayEnd - Ed.Rows THEN
+                 IF Ed.TL <= ArrayEnd - Ed.Rows THEN
                     IF Ed.LCount > 0 THEN       'empty file - go to the top
                                                 'Cursor past the end, but see
                        IF Ed.CurLine > Ed.LCount THEN '  exactly where we are
@@ -625,7 +629,7 @@ SUB QEdit (Array$(), X$, Action%, Ed AS EditInfo) STATIC
                     Array$(Ed.CurLine) = Array$(Ed.CurLine) + SPACE$(Ed.CurCol - QPLen%(Array$(Ed.CurLine)) - 1)
 
                     'if not on last line concatenate the next line to this one
-                    IF Ed.CurLine < arrayEnd THEN Array$(Ed.CurLine) = Array$(Ed.CurLine) + LTRIM$(Array$(Ed.CurLine + 1))
+                    IF Ed.CurLine < ArrayEnd THEN Array$(Ed.CurLine) = Array$(Ed.CurLine) + LTRIM$(Array$(Ed.CurLine + 1))
 
                     Temp = Ed.CurLine + 1
                     GOSUB DeleteLine
@@ -720,6 +724,7 @@ SUB QEdit (Array$(), X$, Action%, Ed AS EditInfo) STATIC
         IF RePrint THEN
            LOCATE Ed.TSRow, Ed.LSCol, 0         'APrint the screen
            CALL HideCursor                      'Turn Mouse cursor off
+           'CALL APrint0(VARPTR(Array$(Ed.TL)), Ed.Rows, Ed.LC, Ed.Wide, Ed.AColor)
            CALL APrint0(Array$(), Ed.TL, Ed.Rows, Ed.LC, Ed.Wide, Ed.AColor)
            CALL ShowCursor                      'Turn mouse cursor back on
            RePrint = 0                          'Turn Flag off
@@ -801,7 +806,7 @@ RETURN
 
 '----- Move the cursor down a line
 CursorDown:
-    IF Ed.CurLine >= arrayEnd THEN Ed.CurLine = arrayEnd
+    IF Ed.CurLine >= ArrayEnd THEN Ed.CurLine = ArrayEnd
                                      'if we're at the bottom of the screen
     Temp = (Ed.CurLine - Ed.TL + 1) - Ed.Rows
     IF Temp > 0 THEN
@@ -847,6 +852,7 @@ CursorLeft:
        CALL HideCursor
        CALL ScrollR(Ed.TSRow, Ed.LSCol, Ed.TSRow + Ed.Rows - 1, Ed.LSCol + Ed.Wide - 1, Temp, -1)
        LOCATE Ed.TSRow, Ed.LSCol
+       'CALL APrint0(VARPTR(Array$(Ed.TL)), Ed.Rows, Ed.LC, Temp, -1)
        CALL APrint0(Array$(), Ed.TL, Ed.Rows, Ed.LC, Temp, -1)
        CALL ShowCursor
     END IF
@@ -865,6 +871,7 @@ CursorRight:
        CALL HideCursor
        CALL ScrollL(Ed.TSRow, Ed.LSCol, Ed.TSRow + Ed.Rows - 1, Ed.LSCol + Ed.Wide - 1, Temp, -1)
        LOCATE Ed.TSRow, Ed.LSCol + Ed.Wide - Temp
+       'CALL APrint0(VARPTR(Array$(Ed.TL)), Ed.Rows, Ed.LC + Ed.Wide - Temp, Temp, -1)
        CALL APrint0(Array$(), Ed.TL, Ed.Rows, Ed.LC + Ed.Wide - Temp, Temp, -1)
        CALL ShowCursor
     END IF
@@ -915,7 +922,7 @@ WrapDown:
 
        IF B <= LinLen THEN                      'If we didn't go past the end,
           Lin = Lin + 1                         '  increment the line number
-          IF Lin > arrayEnd THEN                'Past end?  Bail out
+          IF Lin > ArrayEnd THEN                'Past end?  Bail out
              Lin = Lin - 1
              Ed.MErr = 2
              'IF Action = 0 THEN EXIT SUB
@@ -938,7 +945,7 @@ WrapDown:
              IF Ed.CurCol >= B THEN             '  within the wrapped words,
                 Ed.CurCol = Ed.CurCol - B + 1   '  move the cursor to the new
                 Ed.LC = ((Ed.CurCol \ Ed.Wide) * Ed.Wide) + 1'  line at the end of the
-                Ed.CurLine = MinInt%(Lin, arrayEnd)          '  wrapped words
+                Ed.CurLine = MinInt%(Lin, ArrayEnd)          '  wrapped words
                 Ed.TL = MaxInt%(Ed.TL, Ed.CurLine - Ed.Rows + 1)
              END IF
           END IF
@@ -950,7 +957,7 @@ WrapDown:
 
        ELSE                                     'Words weren't found past wrap
           Lin = Lin + 1                         'Increment the line number
-          IF Lin > arrayEnd THEN
+          IF Lin > ArrayEnd THEN
              Lin = Lin - 1
              Ed.MErr = 2
              'IF Action = 0 THEN EXIT SUB
@@ -1057,8 +1064,9 @@ RETURN
 '----- Insert an element into the text array at "Temp"
 InsertLine:
     IF Temp <= Ed.LCount THEN
-       Ed.LCount = MinInt%(Ed.LCount + 1, arrayEnd)
-       CALL InsertStr(array$(), temp, temp$, Ed.LCount - temp)
+       Ed.LCount = MinInt%(Ed.LCount + 1, ArrayEnd)
+       'CALL InsertStr(VARPTR(Array$(Temp)), Temp$, Ed.LCount - Temp)
+       CALL InsertStr(Array$(), Temp, Temp$, Ed.LCount - Temp)
     ELSE
        Ed.LCount = Temp
        Array$(Temp) = Temp$
@@ -1072,6 +1080,7 @@ RETURN
 DeleteLine:
     IF Temp <= Ed.LCount THEN
        IF Temp < Ed.LCount THEN
+          'CALL DeleteStr(VARPTR(Array$(Temp)), Ed.LCount - Temp)
           CALL DeleteStr(Array$(), Temp, Ed.LCount - Temp)
        END IF
        Array$(Ed.LCount) = ""
@@ -1084,6 +1093,7 @@ RETURN
 
 '----- Restore the screen and free up memory
 CleanUp:
+    'CALL MScrnRest(1, 1, ScrRows, 80, ScrBuf(1))'Restore the screen
     CALL MScrnRest(1, 1, ScrRows, 80, ScrBuf())'Restore the screen
     ERASE ScrBuf                                'Clean up memory
     LineBuf$ = ""
@@ -1096,7 +1106,6 @@ END SUB          'Thats all folks.  And you thought editing was easy?
 
 FUNCTION FnSpaces2Pad% (Text$)
     STATIC Temp
-
     SELECT CASE ASCII%(RIGHT$(Text$, 1))
        CASE 46, 33, 63          '".", "!", "?"
           Temp = 2
