@@ -63,7 +63,7 @@ We also want to thank [Gene Buckle](https://github.com/geneb) for making this al
 |PRO.BAS     | PRO.LIB |   |PRO.BI      | PRO.LIB |   |PRTSC.BAS   |         |
 |PULLDNMS.BAS| INCLUDE |   |PULLDOWN.BAS| INCLUDE |   |PUTVOL.BAS  |         |
 |QD.BAS      |         |   |QEDIT.BAS   | INCLUDE |   |QEDIT7.BAS  |         |
-|QEDITS.BAS  |         |   |QEDITYPE.BI | INCLUDE |   |QINSTR.BAS  | EXE     |
+|QEDITS.BAS  | INCLUDE |   |QEDITYPE.BI | INCLUDE |   |QINSTR.BAS  | EXE     |
 |QINSTRH.BAS |         |   |QPLEFT.BAS  | EXE     |   |QPSOLVER.BAS| EXE     |
 |QPSOUND.BAS | EXE     |   |QPTRIM.BAS  | EXE     |   |QSORT.BAS   | EXE     |
 |READDIRS.BAS| EXE     |   |READDIRT.BAS|         |   |READFILE.BAS| EXE     |

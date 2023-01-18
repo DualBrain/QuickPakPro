@@ -44,4 +44,3 @@ VIRTUAL
 VLONG
 WINDOW
 QEDIT7 (include)
-QEDITS (include)
