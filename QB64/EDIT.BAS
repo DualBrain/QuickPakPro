@@ -24,6 +24,20 @@ _TITLE "EDIT.EXE" 'NOTE: Moving title above resize causes resize to fail (withou
 DEFINT A-Z
 
 '$INCLUDE: 'PRO.BI'
+'$INCLUDE: 'QEDIT.BI'
+'$INCLUDE: 'QEDITYPE.BI'
+
+DIM SHARED edState AS EditInfo
+
+edState.AColor = 23      ' white on blue
+edState.Wrap = 0         ' word wrap at column 65 (use 0 for to disable word wrap)
+edState.Frame = 0       ' frame code (1 = show ruler line & scroll bars, 0 = don't)
+edState.Rows = 21        ' number of text lines to display on the screen (3 - 25)
+edState.Wide = 78        ' width of the active screen (10 - 80)
+edState.HTab = 2         ' set tab stops to 4 spaces
+
+REDIM SHARED array$(32767)               ' holds the main editor string array
+DIM SHARED qeditAction AS INTEGER
 
 CONST FALSE = 0
 CONST TRUE = NOT FALSE
@@ -116,49 +130,48 @@ action = 0                              ' Action 0 (no polling) is the easiest
                                         ' way to use PullDown.
 
 ' TODO: The Help menu should be on the right side of the line
-' TODO: Need to update the status bar with the help message as the items are highlighted.
 
 ' TODO: Need to add support for pressing F1 on a menu item to see specific associated help.
 
-' TODO: Need to add support for editing...
-
-' TODO: Need to update line/col (lower right) during cursor movement on the edit canvas.
-
 ' TODO: The following should only happen first time launching.
-'CALL ShowWelcomeAction
+CALL ShowWelcomeAction
 
-dr = 1
-dc = 1
+qeditAction = 1
+
+LOCATE 3, 2, 0
 
 DO
 
-  LOCATE 13, 41, 0
+  '----- call QEdit in polled mode
+  CALL QEdit(array$(), ky$, qeditAction, edState)
 
-  ky$ = INKEY$                          ' Get a key press from the buffer
-                                        ' See if it's a hot-key or mouse
-                                        ' pressed on menu bar.
+  ' ky$ = INKEY$                          ' Get a key press from the buffer
+  '                                       ' See if it's a hot-key or mouse
+  '                                       ' pressed on menu bar.
   menu = PullMenKey(ky$, menu$(), stat())
   
   IF menu > -1 THEN                     ' Yes
 
     ' using menu in "polling mode"
-    action = 1
+    menuAction = 1
     DO                                        
-      CALL PullDnMs (menu$(), stat(), menu, choice, ky$, action)
+      CALL PullDnMs (menu$(), stat(), menu, choice, ky$, menuAction)
       SELECT CASE menu
         CASE 0, 1, 2, 3, 4
-          'LOCATE 23, 2: PRINT "action="; action; ", menu="; menu; ", choice="; choice
-          CALL UpdateStatus(msg$(choice, menu), dr, dc)
+          'LOCATE 23, 2: PRINT "action="; menuAction; ", menu="; menu; ", choice="; choice
+          CALL UpdateStatus(msg$(choice, menu), edState.CurLine, edState.CurCol)
         CASE ELSE
       END SELECT
       SELECT CASE ky$
         CASE ELSE
           
       END SELECT
-    LOOP UNTIL action = 4
-    CALL PullDnMs (menu$(), stat(), menu, choice, ky$, 5) ' Reset menu
+    LOOP UNTIL menuAction = 4
+    CALL PullDnMs (menu$(), stat(), menuAction, choice, ky$, 5) ' Reset menu
 
-    IF action = 4 THEN
+    ky$ = ""
+
+    IF menuAction = 4 THEN
       SELECT CASE menu
         CASE 0 ' File
           SELECT CASE choice
@@ -183,17 +196,27 @@ DO
       END SELECT
     END IF
 
-    CALL UpdateStatus("", dr, dc)
+    CALL UpdateStatus("", edState.CurLine, edState.CurCol)
 
   END IF
 
+  loc$ = STRING$(5 - LEN(_TRIM$(STR$(edState.CurLine))), 48) + _TRIM$(STR$(edState.CurLine)) + ":" + STRING$(3 - LEN(_TRIM$(STR$(edState.CurCol))), 48) + _TRIM$(STR$(edState.CurCol))
+  IF prevLoc$ <> loc$ THEN
+    QPrintRC loc$, 25, 71, OneColor(0, 3) ' update cursor position.
+    prevLoc$ = loc$
+  END IF
+
 LOOP
+
+'----- call QEdit again with an Action flag of 5 to restore the screen
+CALL QEdit(array$(), ky$, 5, edState)
 
 HideCursor                              ' Turn the mouse cursor off
 
 SYSTEM 'END
 
 '$INCLUDE: 'PULLDNMS.BAS'
+'$INCLUDE: 'QEDIT.BAS'
 '$INCLUDE: 'PRO.BAS'
 
 SUB UpdateStatus(text$, r, c) STATIC
@@ -211,6 +234,10 @@ SUB UpdateStatus(text$, r, c) STATIC
 END SUB
 
 SUB NewAction
+  FOR i = LBOUND(array$) TO UBOUND(array$): array$(i) = "": NEXT
+  edState.CurLine = 1
+  edState.CurCol = 1
+  qeditAction = 2
 END SUB
 
 SUB OpenAction
