@@ -26,6 +26,7 @@ _TITLE "DEMOEDIT" 'NOTE: Moving title above resize causes resize to fail (withou
 DEFINT A-Z
 
 '$INCLUDE: 'PRO.BI'
+'$INCLUDE: 'QEDIT.BI'
 
 DECLARE SUB ClearEOL (colr%)    ' for the demo only
 DECLARE FUNCTION Monitor% ()    ' determines monitor type
