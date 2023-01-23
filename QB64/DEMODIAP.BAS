@@ -43,6 +43,7 @@ _TITLE "DEMODIAP" 'NOTE: Moving title above resize causes resize to fail (withou
 DEFINT A-Z
 
 '$INCLUDE: 'PRO.BI'
+'$INCLUDE: 'DIALOG.BI'
 
 DECLARE SUB DeinstallKeyDown ()
 DECLARE SUB Dialog (Choice, Text$(), Response$(), Menu$(), ScRow, Style, Clr, Action)
