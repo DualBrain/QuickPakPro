@@ -44,3 +44,10 @@ VIRTUAL
 VLONG
 WINDOW
 QEDIT7 (include)
+
+---
+
+EDIT.BAS
+
+* The cursor in a dialog box should match the edit cursor (currently a full size character).
+* After dialog is closed, cursor is being reset to full size cursor.

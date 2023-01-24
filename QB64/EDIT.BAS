@@ -26,12 +26,13 @@ DEFINT A-Z
 '$INCLUDE: 'PRO.BI'
 '$INCLUDE: 'QEDIT.BI'
 '$INCLUDE: 'QEDITYPE.BI'
+'$INCLUDE: 'DIALOG.BI'
 
 DIM SHARED edState AS EditInfo
 
 edState.AColor = 23      ' white on blue
 edState.Wrap = 0         ' word wrap at column 65 (use 0 for to disable word wrap)
-edState.Frame = 0       ' frame code (1 = show ruler line & scroll bars, 0 = don't)
+edState.Frame = 0        ' frame code (1 = show ruler line & scroll bars, 0 = don't)
 edState.Rows = 21        ' number of text lines to display on the screen (3 - 25)
 edState.Wide = 78        ' width of the active screen (10 - 80)
 edState.HTab = 2         ' set tab stops to 4 spaces
@@ -130,11 +131,10 @@ action = 0                              ' Action 0 (no polling) is the easiest
                                         ' way to use PullDown.
 
 ' TODO: The Help menu should be on the right side of the line
-
 ' TODO: Need to add support for pressing F1 on a menu item to see specific associated help.
 
 ' TODO: The following should only happen first time launching.
-CALL ShowWelcomeAction
+'CALL WelcomeAction
 
 qeditAction = 1
 
@@ -145,9 +145,6 @@ DO
   '----- call QEdit in polled mode
   CALL QEdit(array$(), ky$, qeditAction, edState)
 
-  ' ky$ = INKEY$                          ' Get a key press from the buffer
-  '                                       ' See if it's a hot-key or mouse
-  '                                       ' pressed on menu bar.
   menu = PullMenKey(ky$, menu$(), stat())
   
   IF menu > -1 THEN                     ' Yes
@@ -158,13 +155,11 @@ DO
       CALL PullDnMs (menu$(), stat(), menu, choice, ky$, menuAction)
       SELECT CASE menu
         CASE 0, 1, 2, 3, 4
-          'LOCATE 23, 2: PRINT "action="; menuAction; ", menu="; menu; ", choice="; choice
           CALL UpdateStatus(msg$(choice, menu), edState.CurLine, edState.CurCol)
         CASE ELSE
       END SELECT
       SELECT CASE ky$
         CASE ELSE
-          
       END SELECT
     LOOP UNTIL menuAction = 4
     CALL PullDnMs (menu$(), stat(), menuAction, choice, ky$, 5) ' Reset menu
@@ -184,13 +179,28 @@ DO
             CASE ELSE
           END SELECT
         CASE 1 ' Edit
+          SELECT case choice
+            CASE 1: CALL CutAction
+            CASE 2: CALL CopyAction
+            CASE 3: CALL PasteAction
+            CASE 4: CALL ClearAction
+          END SELECT
         CASE 2 ' Search
+          SELECT case choice
+            CASE 1: CALL FindAction
+            CASE 2: CALL RepeatLastFindAction
+            CASE 3: CALL ChangeAction
+          END SELECT
         CASE 3 ' Options
+          SELECT case choice
+            CASE 1: CALL DisplayAction
+            CASE 2: CALL HelpPathsAction
+          END SELECT
         CASE 4 ' Help
           SELECT case choice
-            CASE 1
-            CASE 2
-            CASE 4: CALL ShowAboutAction
+            CASE 1: CALL HelpGettingStartedAction
+            CASE 2: CALL HelpKeyboardAction
+            CASE 4: CALL HelpAboutAction
           END SELECT
         CASE ELSE
       END SELECT
@@ -200,7 +210,8 @@ DO
 
   END IF
 
-  loc$ = STRING$(5 - LEN(_TRIM$(STR$(edState.CurLine))), 48) + _TRIM$(STR$(edState.CurLine)) + ":" + STRING$(3 - LEN(_TRIM$(STR$(edState.CurCol))), 48) + _TRIM$(STR$(edState.CurCol))
+  loc$ = FUsing$(STR$(edState.CurLine), "#####") + ":" + FUsing$(STR$(edState.CurCol), "###")
+  CALL ReplaceString (loc$, " ", "0")
   IF prevLoc$ <> loc$ THEN
     QPrintRC loc$, 25, 71, OneColor(0, 3) ' update cursor position.
     prevLoc$ = loc$
@@ -216,8 +227,72 @@ HideCursor                              ' Turn the mouse cursor off
 SYSTEM 'END
 
 '$INCLUDE: 'PULLDNMS.BAS'
+'$INCLUDE: 'DIALOG.BAS'
 '$INCLUDE: 'QEDIT.BAS'
 '$INCLUDE: 'PRO.BAS'
+
+' ******************************************************************************
+' * Internal Methods
+' ******************************************************************************
+
+' MsgBox (prompt, [buttons,] [title,] [helpfile, context])
+SUB MsgBox(prompt$, buttons, title$) ', helpFile$, context)
+
+  ' prompt$
+  '   - the message in the dialog box. If the prompt$ consists of more 
+  '     than one line, you can separate the lines using a carriage return 
+  '     character (CHR$(13)), or linefeed character (Chr$(10)), or carriage
+  '     return - linefeed character combination (Chr$(13) & Chr$(10)) 
+  '     between each line.
+  ' buttons
+  '   - the number and type of buttons to display, the icon style to use, 
+  '     the identity of the default button, and the modality of the message 
+  '     box. Defaults to 0.
+  ' title$
+  '   - optional title bar of the dialog box.
+  ' helpFile$
+  '   - optional help file to use to provide context sensitive help for the dialog 
+  '     box. If provided, context is also required.
+  ' context
+  '   - optional help context number assigned to the appropriate help topic by the 
+  '     help author.
+
+  'TODO: Handle buttons value.
+
+  ' vbOKOnly = 0
+  ' vbOKCancel = 1
+  ' vbAbortRetryIgnore = 2
+  ' vbYesNoCancel = 3
+  ' vbYesNo = 4
+  ' vbRetryCancel = 5
+  ' vbCritical = 16
+  ' vbQuestion = 32
+  ' vbExclamation = 48
+  ' vbInformation = 64
+  ' vbDefaultButton1 = 0
+  ' vbDefaultButton2 = 256
+  ' vbDefaultButton3 = 512
+  ' vbDefaultButton4 = 768
+  ' vbApplicationModal = 0
+  ' vbSystemModal = 4096
+  ' vbMsgBoxHelpButton = 16384
+  ' vbMsgBoxSetForeground = 65536
+  ' vbMsgBoxRight = 524288
+  ' vbMsgBoxRtlReading = 1048576
+
+  REDIM menu$(0)
+  REDIM text$(4)
+  REDIM response$(0)
+  text$(1) = "< OK >"
+  text$(2) = " "
+  text$(3) = prompt$
+  text$(4) = " "
+  scrnRow = -1: choice = 1: clr = 112: style = 11
+
+  LOCATE 10
+  CALL Dialog(choice, text$(), response$(), menu$(), scrnRow, style, clr, action)
+
+END SUB
 
 SUB UpdateStatus(text$, r, c) STATIC
   IF text$ <> value$ OR text$ = "*" THEN
@@ -228,35 +303,169 @@ SUB UpdateStatus(text$, r, c) STATIC
     ELSE
       QPrintRC LEFT$(value$, 61) + SPACE$(61 - LEN(value$)), 25, 2, OneColor(15, 3)
       QPrintRC CHR$(179), 25, 63, OneColor(0, 3)  ' draw the black separator
-      QPrintRC STRING$(5 - LEN(_TRIM$(STR$(r))), 48) + _TRIM$(STR$(r)) + ":" + STRING$(3 - LEN(_TRIM$(STR$(c))), 48) + _TRIM$(STR$(c)), 25, 71, OneColor(0, 3) ' update cursor position.
+      loc$ = FUsing$(STR$(edState.CurLine), "#####") + ":" + FUsing$(STR$(edState.CurCol), "###")
+      CALL ReplaceString (loc$, " ", "0")
+      QPrintRC loc$, 25, 71, OneColor(0, 3) ' update cursor position.
     END IF
   END IF
 END SUB
 
+' ******************************************************************************
+' * ACTIONS
+' ******************************************************************************
+
 SUB NewAction
+
+  modified = -1
+
+  IF modified THEN
+
+    REDIM menu$(0)
+    REDIM text$(7)
+    REDIM response$(0)
+    text$(1) = "< Yes >"
+    text$(2) = "< No >"
+    text$(3) = "< Cancel >"
+    text$(4) = "< Help >"
+    text$(5) = " "
+    text$(6) = "Loaded file is not saved. Save it now?"
+    text$(7) = " "
+    scrnRow = -1: choice = 1: clr = 112: style = 11
+
+    LOCATE 10                   'Top of Dialog box is at line 5
+    CALL Dialog(choice, text$(), response$(), menu$(), scrnRow, style, clr, action)
+
+    SELECT CASE choice
+      CASE 1: ' Yes
+      CASE 2: ' No
+      CASE 3: ' Cancel
+        EXIT FUNCTION
+      CASE 4: ' Help
+        EXIT FUNCTION
+    END SELECT
+  
+  END IF
+
   FOR i = LBOUND(array$) TO UBOUND(array$): array$(i) = "": NEXT
   edState.CurLine = 1
   edState.CurCol = 1
   qeditAction = 2
+
 END SUB
 
 SUB OpenAction
+  CALL MsgBox("Not implemented.", 0, "")
 END SUB
 
 SUB SaveAction
+  CALL MsgBox("Not implemented.", 0, "")
 END SUB
 
 SUB SaveAsAction
+  CALL MsgBox("Not implemented.", 0, "")
 END SUB
 
 SUB PrintAction
+  CALL MsgBox("Not implemented.", 0, "")
 END SUB
 
 FUNCTION ExitAction ()
-  ExitAction = TRUE
+
+  modified = 0
+
+  IF modified THEN
+
+    REDIM menu$(0)
+    REDIM text$(7)
+    REDIM response$(0)
+    text$(1) = "< Yes >"
+    text$(2) = "< No >"
+    text$(3) = "< Cancel >"
+    text$(4) = "< Help >"
+    text$(5) = " "
+    text$(6) = "Loaded file is not saved. Save it now?"
+    text$(7) = " "
+    scrnRow = -1: choice = 1: clr = 112: style = 11
+
+    LOCATE 10                   'Top of Dialog box is at line 5
+    CALL Dialog(choice, text$(), response$(), menu$(), scrnRow, style, clr, action)
+
+    SELECT CASE choice
+      CASE 1: ExitAction = TRUE ' Yes
+      CASE 2: ExitAction = TRUE ' No
+      CASE 3: ' Cancel
+      CASE 4: ' Help
+    END SELECT
+  
+  ELSE
+    ExitAction = TRUE
+  END IF
+ 
 END FUNCTION
 
-SUB ShowWelcomeAction
+SUB CutAction
+  CALL MsgBox("Not implemented.", 0, "")
+END SUB
+            
+SUB CopyAction
+  CALL MsgBox("Not implemented.", 0, "")
+END SUB
+
+SUB PasteAction
+  CALL MsgBox("Not implemented.", 0, "")
+END SUB
+       
+SUB ClearAction
+  CALL MsgBox("Not implemented.", 0, "")
+END SUB
+
+SUB FindAction
+  CALL MsgBox("Not implemented.", 0, "")
+END SUB
+
+SUB RepeatLastFindAction
+  CALL MsgBox("Not implemented.", 0, "")
+END SUB
+
+SUB ChangeAction
+  CALL MsgBox("Not implemented.", 0, "")
+END SUB
+
+SUB DisplayAction
+  CALL MsgBox("Not implemented.", 0, "")
+END SUB
+            
+SUB HelpPathsAction
+  CALL MsgBox("Not implemented.", 0, "")
+END SUB
+
+SUB HelpGettingStartedAction
+  CALL MsgBox("Not implemented.", 0, "")
+END SUB
+
+SUB HelpKeyboardAction
+  CALL MsgBox("Not implemented.", 0, "")
+END SUB
+
+SUB HelpAboutAction
+
+  REDIM menu$(0)
+  REDIM text$(6)
+  REDIM response$(0)
+  text$(1) = "< OK >"
+  text$(2) = " "
+  text$(3) = "MS-DOS Editor"
+  text$(4) = "Version 1.0"
+  text$(5) = "Copyright (C) Microsoft Corporation, 1987-1991."
+  text$(6) = " "
+  scrnRow = -1: choice = 1: clr = 112: style = 11
+
+  LOCATE 9
+  CALL Dialog(choice, text$(), response$(), menu$(), scrnRow, style, clr, action)
+
+END SUB
+
+SUB WelcomeAction
 
   Box0 7, 14, 17, 66, 1, OneColor(0, 7)
   QPrintRC "                                                   ", 8, 15, OneColor(0, 7)
@@ -273,30 +482,5 @@ SUB ShowWelcomeAction
     IF ky$ = CHR$(27) THEN EXIT DO
   LOOP
   ClearScr0 7, 14, 17, 66, OneColor(0, 1)
-
-END SUB
-
-SUB ShowAboutAction
-
-  r = 9
-  c = 14
-  h = 8
-
-  Box0 r, c, r + h, 66, 1, OneColor(0, 7)
-
-  QPrintRC "                                                   ", r + 1, 15, OneColor(0, 7)
-  QPrintRC "                    MS-DOS Editor                  ", r + 2, 15, OneColor(0, 7)
-  QPrintRC "                     Version 1.0                   ", r + 3, 15, OneColor(0, 7)
-  QPrintRC "  Copyright (C) Microsoft Corporation, 1987-1991.  ", r + 4, 15, OneColor(0, 7)
-  QPrintRC "                                                   ", r + 5, 15, OneColor(0, 7)
-
-  QPrintRC CHR$(195) + STRING$(51, 196) + CHR$(180), r + 6, 14, OneColor(0, 7)
-  QPrintRC "                       < OK >                      ", r + 7, 15, OneColor(0, 7)
-
-  DO
-    ky$ = INKEY$
-    IF ky$ = CHR$(27) THEN EXIT DO
-  LOOP
-  ClearScr0 r, c, r + h, 66, OneColor(0, 1)
 
 END SUB

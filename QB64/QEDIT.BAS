@@ -1767,11 +1767,14 @@ SUB QEdit (Array$(), X$, Action%, Ed AS EditInfo) STATIC
 
 '----- Adjust the size depending on monitor type, and insert mode
 CsrSize:
-    IF Insrt = -1 THEN                          'If in insert mode,
-       LOCATE , , , BScan \ 2, BScan            '  make large size cursor
-    ELSE                                        'Overtype mode,
-       LOCATE , , , BScan - 1, BScan            '  use 2 scan line cursor.
-    END IF
+  ' The below has been modified to match behavior in EDIT.COM (MS-DOS).
+  IF Insrt = -1 THEN                          'If in insert mode,
+    'LOCATE , , , BScan \ 2, BScan            '  make large size cursor
+    LOCATE , , , BScan - 1, BScan            '  use 2 scan line cursor.
+  ELSE                                        'Overtype mode,
+    'LOCATE , , , BScan - 1, BScan            '  use 2 scan line cursor.
+    LOCATE , , , 0, BScan                     '  make large size cursor
+  END IF
 RETURN
 
 

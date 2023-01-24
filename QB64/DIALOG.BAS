@@ -257,7 +257,7 @@ SUB Dialog (choice1, text$(), response$(), menu$(), scrnRow, style, bClr, action
   LOCATE lrRow - 2, ulCol
   CALL QPrint0(divider$, bClr)
 
-  ' Draw "butttons" (along the bottom of the Dialog box)
+  ' Draw "buttons" (along the bottom of the Dialog box)
   IF oS THEN button$ = RIGHT$(button$, (LEN(button$) - 1))
   LOCATE lrRow - 1, ulCol + 1
   CALL QPrint0(button$, bClr)
