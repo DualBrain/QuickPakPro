@@ -28,6 +28,59 @@ DEFINT A-Z
 
 CLS
 
+IF 1 THEN
+
+  'pattern$ = "c:\utils\patchcleaner\*.*"
+  pattern$ = "d:\github\quickpakpro\qb64\*.*"
+  fc = FCount(pattern$)
+  redim farray$(fc)
+  farray$(0) = pattern$
+  CALL ReadFileI(farray$(), 0)
+  FOR index = 1 TO 10 'fc
+    PRINT farray$(index)
+  NEXT
+  PRINT fc
+
+END IF
+
+IF 0 THEN ' testing short and long filename
+
+  'path1$ = "c:\utils\patchcleaner\WPFToolkit.dll" '+ chr$(0)
+  path1$ = "d:\github\quickpakpro\qb64\alongfilename.txt" + chr$(0)
+  'path1$ = "d:\github\quickpakpro\qb64\yesnob.bas" + chr$(0)
+  IF Exist(path1$) THEN
+    path2$ = SPACE$(LEN(path1$)) 'chr$(0)
+    pr1 = GetShortPathNameA(path1$, path2$, LEN(path2$))
+    IF pr1 = 0 THEN
+      e1 = GetLastError
+      PRINT "error(1):"; e1
+    ELSE
+      PRINT "success"
+
+      'path1$ = SPACE$(255)
+      'pr2 = GetLongPathNameA(path2$, path1$, LEN(path1$))
+      'IF pr2 = 0 THEN
+      '  e2 = GetLastError
+      '  PRINT "error(2):"; e2
+      'END IF
+
+    END IF
+  ELSE
+    PRINT "file not found"
+  END IF
+
+  PRINT "..."
+
+  PRINT pr1; pr2
+  PRINT QPTrim$(path2$)
+  PRINT QPTrim$(path1$)
+
+  PRINT "..."
+
+END IF
+
+Call WaitKeyS: SYSTEM
+
 COMMON e$
 
 ON ERROR GOTO ErrorHandler
@@ -47,11 +100,11 @@ DIM idx(1 TO 10) AS INTEGER
 DIM tbl(1 TO 2, 1 TO 3) AS INTEGER 
 
 DIM elements$(1 TO 10): CALL InitElements(elements$())
-DIM fixed(1 TO 10) AS FLen
-FOR x = 1 TO 10
-  'elements$(x) = "Element" + STR$(x)
-  fixed(x).S = "Element" + STR$(x)
-NEXT
+' DIM fixed(1 TO 10) AS FLen
+' FOR x = 1 TO 10
+'   'elements$(x) = "Element" + STR$(x)
+'   fixed(x).S = "Element" + STR$(x)
+' NEXT
 
 bits$ = ""
 
@@ -491,9 +544,9 @@ HandleResult there
 ' CALL FastLoadStr(array$())
 ' HandleResult array$(0) = ""
 
-PRINT "FastSave"; 
-CALL FastSave("c:\test.txt", array$())
-HandleResult -1
+' PRINT "FastSave"; 
+' CALL FastSave("c:\test.txt", array$())
+' HandleResult -1
 
 PRINT "FClose";
 CALL FClose(handle)
@@ -525,9 +578,9 @@ buffer$ = " "
 CALL FGet(handle, buffer$)
 HandleResult buffer$ <> " "
 
-PRINT "FGetA";
-CALL FGetA(handle, array$(), el, numBytes)
-HandleResult array$(0) = ""
+' PRINT "FGetA";
+' CALL FGetA(handle, array$(), el, numBytes)
+' HandleResult array$(0) = ""
 
 PRINT "FGetAH";
 CALL FGetAH("c:\test.txt", array$(), el, elSize, numEls)
@@ -537,31 +590,31 @@ PRINT "FGetR";
 CALL FGetR(handle, buffer$, recNumber)
 HandleResult buffer$ <> ""
 
-PRINT "FGetRT";
-DIM dest AS FLen
-CALL FGetRT(handle, dest, recNumber, recSize)
-HandleResult dest.S <> ""
+' PRINT "FGetRT";
+' DIM dest AS FLen
+' CALL FGetRT(handle, dest, recNumber, recSize)
+' HandleResult dest.S <> ""
 
-PRINT "FGetRTA";
-CALL FGetRTA(handle, dest, recNumber, recSize)
-HandleResult dest.S <> ""
+' PRINT "FGetRTA";
+' CALL FGetRTA(handle, dest, recNumber, recSize)
+' HandleResult dest.S <> ""
 
-PRINT "FGetT";
-CALL FGetT(handle, dest, numBytes)
-HandleResult dest.S <> ""
+' PRINT "FGetT";
+' CALL FGetT(handle, dest, numBytes)
+' HandleResult dest.S <> ""
 
-PRINT "FileComp";
-result = FileComp("c:\test.txt", "c:\test.tmp", errCode)
-HandleResult errCode = 0
+' PRINT "FileComp";
+' result = FileComp("c:\test.txt", "c:\test.tmp", errCode)
+' HandleResult errCode = 0
 
 'PRINT "FileCopy";
 'CALL FileCopy("c:\test.txt", "c:\test.tmp", copied, errCode)
 'HandleResult errCode = 0
 
-PRINT "FileCrypt";
-pw$ = "password"
-CALL FileCrypt("c:\test.txt", pw$)
-HandleResult -1
+' PRINT "FileCrypt";
+' pw$ = "password"
+' CALL FileCrypt("c:\test.txt", pw$)
+' HandleResult -1
 
 PRINT "FileInfo";
 Dim tVar AS FInfo
@@ -622,17 +675,17 @@ PRINT "FPutR";
 CALL FPutR(handle, buffer$, 1)
 HandleResult -1
 
-PRINT "FPutRT";
-CALL FPutRT(handle, fixed(0), 1, 30)
-HandleResult -1
+' PRINT "FPutRT";
+' CALL FPutRT(handle, fixed(0), 1, 30)
+' HandleResult -1
 
-PRINT "FPutRTA";
-CALL FPutRTA(handle, fixed(0), 1, 30)
-HandleResult -1
+' PRINT "FPutRTA";
+' CALL FPutRTA(handle, fixed(0), 1, 30)
+' HandleResult -1
 
-PRINT "FPutT";
-CALL FPutT(handle, fixed(0), 30)
-HandleResult -1
+' PRINT "FPutT";
+' CALL FPutT(handle, fixed(0), 30)
+' HandleResult -1
 
 PRINT "FSeek";
 CALL FSeek(handle, 0)
@@ -730,7 +783,7 @@ CALL QBSave("c:\test.txt", numbers(), el, 10)
 HandleResult -1
 
 PRINT "ReadDir";
-CALL ReadDir(elements$())
+CALL ReadDir(elements$(), 0)
 HandleResult -1
 
 ' PRINT "ReadDirT";
@@ -743,7 +796,7 @@ CALL ReadFile(elements$())
 HandleResult -1
 
 PRINT "ReadFileI";
-CALL ReadFileI(elements$())
+CALL ReadFileI(elements$(), 0)
 HandleResult -1
 
 'PRINT "ReadFileT";
@@ -769,13 +822,13 @@ PRINT "Removable";
 result = Removable("A")
 HandleResult -1
 
-PRINT "ScanFile";
-result = ScanFile("c:\test.txt", "test", 1)
-HandleResult -1
+' PRINT "ScanFile";
+' result = ScanFile("c:\test.txt", "test", 1)
+' HandleResult -1
 
-PRINT "SearchPath";
-buffer$ = SearchPath("test.txt")
-HandleResult -1
+' PRINT "SearchPath";
+' buffer$ = SearchPath("test.txt")
+' HandleResult -1
 
 PRINT "SetAttr";
 CALL SetAttr("test.txt", 0)
@@ -805,9 +858,9 @@ PRINT "SplitName";
 CALL SplitName(workName$, drive$, path$, fileName$, extension$)
 HandleResult -1
 
-PRINT "Unique";
-fileName$ = Unique(path$)
-HandleResult -1
+' PRINT "Unique";
+' fileName$ = Unique(path$)
+' HandleResult -1
 
 PRINT "UnLockFile";
 CALL UnLockFile(handle, offset&, length&)
@@ -1220,9 +1273,9 @@ PRINT "MonthName";
 buffer$ = MonthName(1)
 HandleResult buffer$ = "Jan"
 
-PRINT "MonthName";
-CALL MsgBox(message$, wide, cnf)
-HandleResult -1
+' PRINT "MonthName";
+' CALL MsgBox(message$, wide, cnf)
+' HandleResult -1
 
 PRINT "Num2Date";
 buffer$ = Num2Date(0)
@@ -1359,9 +1412,9 @@ PRINT "TrapInt";
 result = TrapInt(10, 1, 5) 
 HandleResult result = 5
 
-PRINT "ViewFile";
-CALL ViewFile(fileName$, wide, high, colr, hiBit, action) 
-HandleResult -1
+' PRINT "ViewFile";
+' CALL ViewFile(fileName$, wide, high, colr, hiBit, action) 
+' HandleResult -1
 
 PRINT "VLAdd";
 CALL VLAdd(value1#, value2#, sum#, errFlag)

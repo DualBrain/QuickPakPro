@@ -218,6 +218,7 @@ DO
        Message "Loading Directory...", Rows, 10
                                                 'Count the matching files
                                                 'Load Array$() with Directory
+       
        Directory LastDrvLtr, FileSpec$, DirCnt, FilCnt
        FSpecBox Prompt$, FileSpec$
              
@@ -710,7 +711,7 @@ MScrnRest 1, 1, DosRows, 80, DosScr()          'Restore the DOS Screen
 LOCATE Row, Col                                 'Re-locate the cursor
                                                 'Quit
 CALL HideCursor
-END
+SYSTEM 'END
 
 SUB Directory (LastDrvLtr, FileSpec$, DirCnt, FilCnt) STATIC
 

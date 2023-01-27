@@ -2028,17 +2028,14 @@ SUB ReadFile(array$())
       DO
         IF (fd.dwfileattributes AND FILE_ATTRIBUTE_DIRECTORY) = FILE_ATTRIBUTE_DIRECTORY THEN
         ELSE 
-          ffn = fd.calternatefilename 'cfilename
-          p = INSTR(ffn, CHR$(0))
-          IF p > 0 THEN ffn = LEFT$(ffn, p - 1)
-          IF LTRIM$(ffn) = "" THEN
-            ffn = fd.cfilename
-            p = INSTR(ffn, CHR$(0))
-            IF p > 0 THEN ffn = LEFT$(ffn, p - 1)
-          END IF
+          ffn = QPTrim$(fd.calternatefilename) 'cfilename
+          IF ffn = "" THEN ffn = QPTrim$(fd.cfilename)
+          IF LEN(ffn$) > 12 THEN ffn$ = LEFT$(ffn$, 9) + "..."
           array$(index) = ffn
           index = index + 1
         END IF
+        fd.cfilename = SPACE$(MAX_PATH) ' clear the path for the next usage
+        fd.calternatefilename = SPACE$(14)
       LOOP UNTIL FindNextFile(hFind, _OFFSET(fd)) = 0
       junk = FindClose(hFind)
     ELSE
@@ -2107,32 +2104,31 @@ SUB ReadFileI(array$(), offset)
     DIM fd AS Win32_Find_Data
     DIM hFind AS _UNSIGNED _OFFSET
     DIM junk AS LONG
-    DIM ffn AS STRING
+    'DIM ffn AS STRING
     DIM fsize AS LONG
     DIM modDate AS STRING
     DIM modTime AS STRING
     DIM p AS INTEGER
 
     pattern = array$(offset) + CHR$(0)
-    basePath$ = LEFT$(array$(offset), INSTR(array$(offset), "\"))
+    IF INSTR(pattern, "/") = 0 AND INSTR(pattern, "\") = 0 THEN
+      pattern = _CWD$ + "/" + pattern
+    END IF
     hFind = FindFirstFile(_OFFSET(pattern), _OFFSET(fd))
     IF hFind <> INVALID_HANDLE_VALUE THEN
-      index = 1
+      index = offset + 1
       DO
         IF (fd.dwfileattributes AND FILE_ATTRIBUTE_DIRECTORY) = FILE_ATTRIBUTE_DIRECTORY THEN
         ELSE 
-          ffn = fd.calternatefilename 'cfilename
-          p = INSTR(ffn, CHR$(0))
-          IF p > 0 THEN ffn = LEFT$(ffn, p - 1)
-          IF LTRIM$(ffn) = "" THEN
-            ffn = fd.cfilename
-            p = INSTR(ffn, CHR$(0))
-            IF p > 0 THEN ffn = LEFT$(ffn, p - 1)
-          END IF
+          ffn$ = QPTrim$(fd.calternatefilename)
+          IF ffn$ = "" THEN ffn$ = QPTrim$(fd.cfilename)
+          IF LEN(ffn$) > 12 THEN ffn$ = LEFT$(ffn$, 9) + "..."
           fsize = (fd.nfilesizehigh * (&HFFFFFFFF + 1)) + fd.nfilesizelow
-          array$(index) = LEFT$(ffn + SPACE$(12), 12) + " " + RIGHT$(SPACE$(8) + STR$(fsize), 8) + " " + "01-01-80" + " " + "00:00a"
+          array$(index) = LEFT$(ffn$ + SPACE$(12), 12) + " " + RIGHT$(SPACE$(8) + STR$(fsize), 8) + " " + "01-01-80" + " " + "00:00a"
           index = index + 1
         END IF
+        fd.cfilename = SPACE$(MAX_PATH) ' clear the path for the next usage
+        fd.calternatefilename = SPACE$(14)
       LOOP UNTIL FindNextFile(hFind, _OFFSET(fd)) = 0
       junk = FindClose(hFind)
     ELSE
@@ -2169,13 +2165,14 @@ SUB ReadFileT(spec$, array() AS STRING * 12, first)
       DO
         IF (fd.dwfileattributes AND FILE_ATTRIBUTE_DIRECTORY) = FILE_ATTRIBUTE_DIRECTORY THEN
         ELSE 
-          ffn = fd.calternatefilename
-          p = INSTR(ffn, CHR$(0))
-          IF p > 0 THEN ffn = LEFT$(ffn, p - 1)
-          'LSET array(index).S = ffn
+          ffn = QPTrim$(fd.calternatefilename)
+          IF ffn = "" THEN ffn = QPTrim$(fd.cfilename)
+          IF LEN(ffn$) > 12 THEN ffn$ = LEFT$(ffn$, 9) + "..."
           LSET array(index) = ffn
           index = index + 1
         END IF
+        fd.cfilename = SPACE$(MAX_PATH) ' clear the path for the next usage
+        fd.calternatefilename = SPACE$(14)
       LOOP UNTIL FindNextFile(hFind, _OFFSET(fd)) = 0
       junk = FindClose(hFind)
     ELSE

@@ -158,7 +158,8 @@ DECLARE DYNAMIC LIBRARY "kernel32"
   FUNCTION GetLastError& ()
   FUNCTION GetLogicalDrives& ()
 
-  FUNCTION GetShortPathNameW& (lpszLongPath AS STRING, lpszShortPath AS STRING, BYVAL cchBuffer AS LONG)
+  FUNCTION GetShortPathNameA& (lpszLongPath AS STRING, lpszShortPath AS STRING, BYVAL cchBuffer AS LONG)
+  FUNCTION GetLongPathNameA& (lpszLongPath AS STRING, lpszShortPath AS STRING, BYVAL cchBuffer AS LONG)
 
   'FUNCTION GetLogicalDriveStrings& (BYVAL nBufferLength AS LONG, lpBuffer AS STRING) ' untested
 
