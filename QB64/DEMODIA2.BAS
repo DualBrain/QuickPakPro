@@ -101,7 +101,7 @@ Text$(10) = "( ) Include"                 ' Ditto
 Text$(11) = "( ) Document"                ' Ditto
 
 response$(4) = fileName$                  ' Place current file name Response$(4)
-response$(9) = "*" 'CHR$(7)                    ' Must assign a "dot" to an option field
+response$(9) = CHR$(7)                    ' Must assign a "dot" to an option field
 
 style = 1                                 ' Single line border
 clr = 112                                 ' Black text, white background

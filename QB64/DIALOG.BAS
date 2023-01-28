@@ -68,7 +68,7 @@ SUB Dialog (choice1, text$(), response$(), menu$(), scrnRow, style, bClr, action
   menuCols = 1                            ' Default number of menu columns
   mCount = UBOUND(menu$, 1)
   startItem = 1                           ' Place item one at top of menu
-  dot$ = "*" 'CHR$(7)                          ' Ascii character for option buttons
+  dot$ = CHR$(7)                          ' Ascii character for option buttons
 
   ' ----Hilite color will be Bright White unless foreground color is Bright White
   fFg = 15

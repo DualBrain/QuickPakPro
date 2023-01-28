@@ -171,7 +171,7 @@ Text$(6) = "|305| Files:"      'The || indicate a list box. The right two
                                ' columns, add the number of columns * 100.
 Text$(7) = Buff$
 Text$(8) = " "
-Text$(9) = "�� Load as: ��        "   'Plain text
+Text$(9) = "** Load as: **        "   'Plain text
 Text$(10) = "( ) Module"       'The ( ) indicate option buttons. There may be
 Text$(11) = "( ) Include"      ' only one grouping of option buttons, but
 Text$(12) = "( ) Document"     ' is no limit to the number of option buttons.
@@ -296,11 +296,11 @@ Text$(7) = " "
 Text$(8) = "[ ] Match Upper/Lowercase"  'The [ ] indicates a check box. Check
 Text$(9) = "[ ] Whole Word"             ' boxes may appear at any line and
                                         ' need not be consecutive
-Text$(10) = "                        ���������������������������Ŀ"
-Text$(11) = "( ) Active Window       �  ** CRESCENT SOFTWARE **  �"
-Text$(12) = "( ) Current Module      � Dialog Box by Phil Cramer �"
-Text$(13) = "( ) All Modules         �    Copyright (c) 1990     �"
-Text$(14) = "                        �����������������������������"
+Text$(10) = "                        *****************************"
+Text$(11) = "( ) Active Window       *  ** CRESCENT SOFTWARE **  *"
+Text$(12) = "( ) Current Module      * Dialog Box by Phil Cramer *"
+Text$(13) = "( ) All Modules         *    Copyright (c) 1990     *"
+Text$(14) = "                        *****************************"
 Response$(8) = "X"                      'Place an "X" in the first check box
                                         ' (Not mandatory)
 Response$(11) = CHR$(7)

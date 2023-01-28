@@ -2031,7 +2031,7 @@ SUB ReadFile(array$())
           ffn = QPTrim$(fd.calternatefilename) 'cfilename
           IF ffn = "" THEN ffn = QPTrim$(fd.cfilename)
           IF LEN(ffn$) > 12 THEN ffn$ = LEFT$(ffn$, 9) + "..."
-          array$(index) = ffn
+          array$(index) = LEFT$(ffn + SPACE$(12), 12)
           index = index + 1
         END IF
         fd.cfilename = SPACE$(MAX_PATH) ' clear the path for the next usage

@@ -283,11 +283,12 @@ SUB VbMsgBox(prompt$, buttons, title$) ', helpFile$, context)
   REDIM menu$(0)
   REDIM text$(4)
   REDIM response$(0)
+  text$(0) = title$
   text$(1) = "< OK >"
   text$(2) = " "
   text$(3) = prompt$
   text$(4) = " "
-  scrnRow = 0: choice = 1: clr = 112: style = 11
+  action = 0: scrnRow = 0: choice = 1: clr = 112: style = 11
 
   CALL Dialog(choice, text$(), response$(), menu$(), scrnRow, style, clr, action)
 
