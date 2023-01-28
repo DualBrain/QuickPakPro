@@ -236,7 +236,7 @@ SYSTEM 'END
 ' ******************************************************************************
 
 ' MsgBox (prompt, [buttons,] [title,] [helpfile, context])
-SUB MsgBox(prompt$, buttons, title$) ', helpFile$, context)
+SUB VbMsgBox(prompt$, buttons, title$) ', helpFile$, context)
 
   ' prompt$
   '   - the message in the dialog box. If the prompt$ consists of more 
@@ -287,9 +287,8 @@ SUB MsgBox(prompt$, buttons, title$) ', helpFile$, context)
   text$(2) = " "
   text$(3) = prompt$
   text$(4) = " "
-  scrnRow = -1: choice = 1: clr = 112: style = 11
+  scrnRow = 0: choice = 1: clr = 112: style = 11
 
-  LOCATE 10
   CALL Dialog(choice, text$(), response$(), menu$(), scrnRow, style, clr, action)
 
 END SUB
@@ -354,19 +353,19 @@ SUB NewAction
 END SUB
 
 SUB OpenAction
-  CALL MsgBox("Not implemented.", 0, "")
+  CALL VbMsgBox("Not implemented.", 0, "")
 END SUB
 
 SUB SaveAction
-  CALL MsgBox("Not implemented.", 0, "")
+  CALL VbMsgBox("Not implemented.", 0, "")
 END SUB
 
 SUB SaveAsAction
-  CALL MsgBox("Not implemented.", 0, "")
+  CALL VbMsgBox("Not implemented.", 0, "")
 END SUB
 
 SUB PrintAction
-  CALL MsgBox("Not implemented.", 0, "")
+  CALL VbMsgBox("Not implemented.", 0, "")
 END SUB
 
 FUNCTION ExitAction ()
@@ -404,47 +403,47 @@ FUNCTION ExitAction ()
 END FUNCTION
 
 SUB CutAction
-  CALL MsgBox("Not implemented.", 0, "")
+  CALL VbMsgBox("Not implemented.", 0, "")
 END SUB
             
 SUB CopyAction
-  CALL MsgBox("Not implemented.", 0, "")
+  CALL VbMsgBox("Not implemented.", 0, "")
 END SUB
 
 SUB PasteAction
-  CALL MsgBox("Not implemented.", 0, "")
+  CALL VbMsgBox("Not implemented.", 0, "")
 END SUB
        
 SUB ClearAction
-  CALL MsgBox("Not implemented.", 0, "")
+  CALL VbMsgBox("Not implemented.", 0, "")
 END SUB
 
 SUB FindAction
-  CALL MsgBox("Not implemented.", 0, "")
+  CALL VbMsgBox("Not implemented.", 0, "")
 END SUB
 
 SUB RepeatLastFindAction
-  CALL MsgBox("Not implemented.", 0, "")
+  CALL VbMsgBox("Not implemented.", 0, "")
 END SUB
 
 SUB ChangeAction
-  CALL MsgBox("Not implemented.", 0, "")
+  CALL VbMsgBox("Not implemented.", 0, "")
 END SUB
 
 SUB DisplayAction
-  CALL MsgBox("Not implemented.", 0, "")
+  CALL VbMsgBox("Not implemented.", 0, "")
 END SUB
             
 SUB HelpPathsAction
-  CALL MsgBox("Not implemented.", 0, "")
+  CALL VbMsgBox("Not implemented.", 0, "")
 END SUB
 
 SUB HelpGettingStartedAction
-  CALL MsgBox("Not implemented.", 0, "")
+  CALL VbMsgBox("Not implemented.", 0, "")
 END SUB
 
 SUB HelpKeyboardAction
-  CALL MsgBox("Not implemented.", 0, "")
+  CALL VbMsgBox("Not implemented.", 0, "")
 END SUB
 
 SUB HelpAboutAction
