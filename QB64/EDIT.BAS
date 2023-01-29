@@ -354,19 +354,153 @@ SUB NewAction
 END SUB
 
 SUB OpenAction
+
   CALL VbMsgBox("Not implemented.", 0, "")
+  EXIT SUB
+
+  'NOTE: Current Dialog implementation (from old QPP) is not able to 
+  '      handle the design requirements/layout for the Open dialog in
+  '      the original MS-DOS EDIT program.
+  'TODO: Need to implement the Open dialog.
+
+  spec$ = "*.*"                  ' Read some files names for the first demo
+  count = FCount%(spec$)         ' Count the files
+
+  IF count = 0 THEN count = 1    ' In case there are no matching files
+  REDIM menu$(count)             ' Make an array to hold them
+  FOR i = 1 TO count             ' Allocate space for each name
+    menu$(i) = SPACE$(12)
+  NEXT
+
+  menu$(0) = spec$               ' Read the names
+  'CALL ReadFile(BYVAL VARPTR(menu$(0)))
+  CALL ReadFile(menu$())
+
+  REDIM text$(7)
+  REDIM response$(7)
+  text$(0) = " Open "            ' Dialog Box title (if any) goes in element 0
+  text$(1) = "< OK >"            ' Command buttons MUST start at element 1 and
+  text$(2) = "< Cancel >"        '   MUST be contiguous. You may have as many
+  text$(3) = "< Help >"          '   buttons as will fit on the screen or as few
+                                 '   as one
+  text$(4) = "{25} File Name:"   ' The {} indicate a text input box. The number
+                                 '   within the brackets indicate the max length of
+                                 '   text to be entered. Adding 100 to this number
+                                 '   will force numbers only to be entered
+  text$(5) = "|305| Files"       ' The || indicate a list box. The right two
+                                 '   digits between these two characters indicate
+                                 '   the number of menu lines to display, however,
+                                 '   this number may be overridden if the Dialog
+                                 '   box-8 height is geater. To display multiple
+                                 '   columns, add the number of columns * 100.
+  'text$(6) = "|105| Dirs/Drives"
+  text$(6) = "C:\"
+  text$(7) = " "                 ' Blank line
+  response$(4) = spec$           ' Make "File Name: text box display Spec$
+  response$(6) = text$(6)
+  temp$ = response$(4)           ' Keep a copy of Spec$ for later
+  style = 11                     ' Single line all around with a drop shadow
+  clr = 112                      ' Black text on white background
+  scrnRow = 0                    ' Center the Dialog box vertically
+  action = 0                     ' Not re-entrant
+  choice = 1                     ' Must initialize Choice to 1
+
+  CALL Dialog(choice, text$(), response$(), menu$(), scrnRow, style, clr, action)
+
 END SUB
 
 SUB SaveAction
-  CALL VbMsgBox("Not implemented.", 0, "")
+
+  IF filename$ = "" THEN
+    CALL SaveAsAction
+  ELSE
+    ' Save and update status
+  END IF
+
 END SUB
 
 SUB SaveAsAction
-  CALL VbMsgBox("Not implemented.", 0, "")
+
+  'NOTE: Current Dialog implementation (from old QPP) is not able to 
+  '      handle the design requirements/layout for the Save dialog in
+  '      the original MS-DOS EDIT program.
+  'TODO: Need to implement the Save dialog.
+
+  '      Changes needed:
+  '      
+  '      - The "File Name:" label needs to be on the same line as the field.
+  '      - The current path location needs to be left justified.
+  '      - The Dirs/Drives label and list needs to be below the label.
+  '      - Need to implement scrollbar functionality on the list.
+
+  spec$ = "*.*"                  ' Read some directory names
+  count = DCount%(spec$)         ' Count the directories
+
+  IF count = 0 THEN count = 1    ' In case there are no matching directories
+  REDIM menu$(count)             ' Make an array to hold them
+  FOR i = 1 TO count             ' Allocate space for each name
+    menu$(i) = SPACE$(12)
+  NEXT
+
+  menu$(0) = spec$               ' Read the names
+  menu$(1) = spec$               ' Read the names
+  CALL ReadDir(menu$(), 1)
+  menu$(1) = "..          "
+
+  REDIM text$(6)
+  REDIM response$(6)
+  'TODO: Need to handle whether to show " Save " or " Save As " depending on current state.
+  text$(0) = " Save "            ' Dialog Box title (if any) goes in element 0
+  text$(1) = "< OK >"            ' Command buttons MUST start at element 1 and
+  text$(2) = "< Cancel >"        '   MUST be contiguous. You may have as many
+  text$(3) = "< Help >"          '   buttons as will fit on the screen or as few
+                                 '   as one
+  text$(4) = "{25} File Name:"   ' The {} indicate a text input box. The number
+                                 '   within the brackets indicate the max length of
+                                 '   text to be entered. Adding 100 to this number
+                                 '   will force numbers only to be entered
+  text$(5) = _CWD$
+  text$(6) = "|107| Dirs/Drives" ' The || indicate a list box. The right two
+                                 '   digits between these two characters indicate
+                                 '   the number of menu lines to display, however,
+                                 '   this number may be overridden if the Dialog
+                                 '   box-8 height is geater. To display multiple
+                                 '   columns, add the number of columns * 100.
+  response$(4) = ""              ' Make "File Name: text box display spec$
+  response$(5) = text$(5)
+  temp$ = response$(5)           ' Keep a copy of spec$ for later
+  style = 11                     ' Single line all around with a drop shadow
+  clr = 112                      ' Black text on white background
+  scrnRow = 0                    ' Center the Dialog box vertically
+  action = 0                     ' Not re-entrant
+  choice = 1                     ' Must initialize Choice to 1
+
+  CALL Dialog(choice, text$(), response$(), menu$(), scrnRow, style, clr, action)
+
 END SUB
 
 SUB PrintAction
-  CALL VbMsgBox("Not implemented.", 0, "")
+
+  REDIM menu$(0)
+  REDIM text$(8)
+  REDIM response$(8)
+  text$(0) = " Print "
+  text$(1) = "< OK >"
+  text$(2) = "< Cancel >"
+  text$(3) = "< Help >"
+  text$(4) = " "
+  text$(5) = "( ) Selected Text Only"
+  text$(6) = "( ) Complete Document"
+  text$(7) = " "
+  text$(8) = " "
+  response$(6) = CHR$(7)
+  scrnRow = 0
+  clr = 112
+  style = 11
+  choice = 1
+
+  CALL Dialog(choice, text$(), response$(), menu$(), scrnRow, style, clr, action)
+
 END SUB
 
 FUNCTION ExitAction ()
@@ -420,7 +554,29 @@ SUB ClearAction
 END SUB
 
 SUB FindAction
-  CALL VbMsgBox("Not implemented.", 0, "")
+
+  REDIM menu$(0)
+  REDIM text$(9)
+  REDIM response$(9)
+  text$(0) = " Find "
+  text$(1) = "< OK >"
+  text$(2) = "< Cancel >"
+  text$(3) = "< Help >"
+  text$(4) = "{51} Find What:"
+  text$(5) = " "
+  text$(6) = " "
+  text$(7) = "[ ] Match Upper/Lowercase"
+  text$(8) = "[ ] Whole Word"
+  text$(9) = " "
+  response$(7) = ""
+  response$(8) = ""
+  scrnRow = 0
+  clr = 112
+  style = 11
+  choice = 1
+
+  CALL Dialog(choice, text$(), response$(), menu$(), scrnRow, style, clr, action)
+
 END SUB
 
 SUB RepeatLastFindAction
@@ -428,7 +584,30 @@ SUB RepeatLastFindAction
 END SUB
 
 SUB ChangeAction
-  CALL VbMsgBox("Not implemented.", 0, "")
+
+  REDIM menu$(0)
+  REDIM text$(10)
+  REDIM response$(10)
+  text$(0) = " Change "
+  text$(1) = "< Find And Verify >"
+  text$(2) = "< Change All >"
+  text$(3) = "< Cancel >"
+  text$(4) = "< Help >"
+  text$(5) = "{51} Find What:"
+  text$(6) = "{51} Change To:"
+  text$(7) = " "
+  text$(8) = "[ ] Match Upper/Lowercase"
+  text$(9) = "[ ] Whole Word"
+  text$(10) = " "
+  response$(8) = ""
+  response$(9) = ""
+  scrnRow = 0
+  clr = 112
+  style = 11
+  choice = 1
+
+  CALL Dialog(choice, text$(), response$(), menu$(), scrnRow, style, clr, action)
+
 END SUB
 
 SUB DisplayAction
@@ -436,7 +615,23 @@ SUB DisplayAction
 END SUB
             
 SUB HelpPathsAction
-  CALL VbMsgBox("Not implemented.", 0, "")
+
+  REDIM menu$(0)
+  REDIM text$(5)
+  REDIM response$(5)
+  text$(0) = " Help Path "
+  text$(1) = "< OK >"
+  text$(2) = "< Cancel >"
+  text$(3) = "< Help >"
+  text$(4) = " "
+  text$(5) = "{51} Location (path) of EDIT.HLP file:"
+  scrnRow = 0
+  clr = 112
+  style = 11
+  choice = 1
+
+  CALL Dialog(choice, text$(), response$(), menu$(), scrnRow, style, clr, action)
+
 END SUB
 
 SUB HelpGettingStartedAction
