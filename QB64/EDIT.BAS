@@ -357,7 +357,7 @@ SUB OpenAction
 
   ulRow = 3
   ulCol = 7
-  lrRow = 23
+  lrRow = 22 ' for QB, use 23
   lrCol = 73
   bClr = OneColor(0, 7)
 
@@ -378,9 +378,8 @@ SUB OpenAction
   CALL PaintBox0(lrRow + 1, ulCol + 3, lrRow + 1, lrCol + 1, 8)
   CALL PaintBox0(ulRow + 1, lrCol + 1, lrRow + 1, lrCol + 2, 8)
   ' - Caption
-  caption$ = " " + "Open" + " "
-  c = ulCol + ((lrCol - ulCol) \ 2) - (LEN(caption$) \ 2)
-  QPrintRC caption$, 3, c, bClr
+  caption$ = "Open" ' For QB, use "Open Program"
+  QPrintRCenter " " + caption$ + " ", 3, ulCol, lrCol, bClr
 
   '***** Filename *****
 
@@ -393,37 +392,26 @@ SUB OpenAction
 
   ' Label
   QPrintRC "C:\", ulRow + 5, ulCol + 2, bClr
-  ' Label - extra effort in order to center over HListBox
-  label$ = "Files": lc = ulCol + 2: rc = lrCol - 20
-  c = lc + ((rc - lc) \ 2) - (LEN(label$) \ 2)
-  QPrintRC label$, ulRow + 6, c, bClr
+  ' Label
+  QPrintRCenter "Files", ulRow + 6, ulCol + 2, lrCol - 20, bClr
   ' HListBox
-  Box0 ulRow + 7, lc, lrRow - 3, rc, 1, bClr
-  ' HScrollBar
-  QPrintRC CHR$(27) + STRING$((rc - lc) - 3, 177) + CHR$(26), lrRow - 3, lc + 1, bClr
-  QPrintRC CHR$(219), lrRow - 3, lc + 2, bClr ' Current position
+  Box0 ulRow + 7, ulCol + 2, lrRow - 3, lrCol - 20, 1, bClr
+  HScrollBarDraw lrRow - 3, ulCol + 3, lrCol - 21, 0, bClr
 
   '***** Folders (VListBox) *****
 
-  ' Label - extra effort in order to center over VListBox
-  label$ = "Dirs/Drives": lc = lrCol - 17: rc = lrCol - 2
-  c = lc + ((rc - lc) \ 2) - (LEN(label$) \ 2)
-  QPrintRC label$, ulRow + 6, c, bClr
+  ' Label
+  QPrintRCenter "Dirs/Drives", ulRow + 6, lrCol - 17, lrCol - 2, bClr
   ' VListBox
-  Box0 ulRow + 7, lc, lrRow - 3, rc, 1, bClr
+  Box0 ulRow + 7, lrCol - 17, lrRow - 3, lrCol - 2, 1, bClr
   ' VScrollBar
-  QPrintRC CHR$(24), ulRow + 8, lrCol - 2, bClr
-  FOR r = ulRow + 9 TO lrRow - 5
-    QPrintRC CHR$(177), r, lrCol - 2, bClr
-  NEXT
-  QPrintRC CHR$(25), lrRow - 4, lrCol - 2, bClr
-  QPrintRC CHR$(219), ulRow + 9, lrCol - 2, bClr ' Current position
+  VScrollBarDraw ulRow + 8, lrRow - 4, lrCol - 2, 0, bClr
 
   '***** Buttons *****
 
-  QPrintRC "< OK >", lrRow - 1, 16, bClr
-  QPrintRC "< Cancel >", lrRow - 1, 35, bClr
-  QPrintRC "< Help >", lrRow - 1, 55, bClr
+  ButtonDraw "OK", lrRow - 1, 16, bClr
+  ButtonDraw "Cancel", lrRow - 1, 35, bClr
+  ButtonDraw "Help", lrRow - 1, 55, bClr
 
   CALL WaitKeyS
 
@@ -483,6 +471,31 @@ SUB OpenAction
 
   CALL Dialog(choice, text$(), response$(), menu$(), scrnRow, style, clr, action)
 
+END SUB
+
+SUB QPrintRCenter (text$, row, col1, col2, clr)
+  c = col1 + ((col2 - col1) \ 2) - (LEN(text$) \ 2)
+  CALL QPrintRC(text$, row, c, clr)
+END SUB
+
+SUB HScrollBarDraw (row, col1, col2, pct, clr)
+  QPrintRC CHR$(27) + STRING$((col2 - col1) - 1, 177) + CHR$(26), row, col1, clr
+  QPrintRC CHR$(219), row, col1 + 1, clr ' Current position
+END SUB
+
+SUB VScrollBarDraw (row1, row2, col, pct, clr)
+  QPrintRC CHR$(24), row1, col, clr
+  FOR r = row1 + 1 TO row2 - 1
+    QPrintRC CHR$(177), r, col, clr
+  NEXT
+  QPrintRC CHR$(25), row2, col, clr
+  QPrintRC CHR$(219), row1 + 1, col, clr ' Current position
+END SUB
+
+SUB ButtonDraw (caption$, row, col, clr)
+  ' TODO: Need to determine if printing in regular color or white?
+  QPrintRC "< " + SPACE$(LEN(caption$)) + " >", row, col, clr
+  QPrintRC caption$, row, col + 2, clr
 END SUB
 
 SUB SaveAction
