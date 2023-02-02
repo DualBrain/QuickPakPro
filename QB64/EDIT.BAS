@@ -355,7 +355,81 @@ END SUB
 
 SUB OpenAction
 
-  CALL VbMsgBox("Not implemented.", 0, "")
+  ulRow = 3
+  ulCol = 7
+  lrRow = 23
+  lrCol = 73
+  bClr = OneColor(0, 7)
+
+  ' Save
+  sz = ArraySize(ulRow, ulCol, lrRow + 1, lrCol + 2)
+  REDIM scrn(sz)
+  CALL MScrnSave(ulRow, ulCol, lrRow + 1, lrCol + 2, scrn())
+
+  '***** Form *****
+
+  ' - Background
+  CALL ClearScr0(ulRow, ulCol, lrRow, lrCol, bClr)
+  ' - Border
+  Box0 ulRow, ulCol, lrRow, lrCol, 1, bClr
+  ' - Button Splitter
+  QPrintRC CHR$(195) + STRING$((lrCol - ulCol) - 1, 196) + CHR$(180), lrRow - 2, ulCol, bClr
+  ' - Drop shadow
+  CALL PaintBox0(lrRow + 1, ulCol + 3, lrRow + 1, lrCol + 1, 8)
+  CALL PaintBox0(ulRow + 1, lrCol + 1, lrRow + 1, lrCol + 2, 8)
+  ' - Caption
+  caption$ = " " + "Open" + " "
+  c = ulCol + ((lrCol - ulCol) \ 2) - (LEN(caption$) \ 2)
+  QPrintRC caption$, 3, c, bClr
+
+  '***** Filename *****
+
+  ' Label
+  QPrintRC "File Name:", ulRow + 2, ulCol + 2, bClr
+  ' TextBox
+  Box0 ulRow + 1, ulCol + 13, ulRow + 3, lrCol - 2, 1, bClr
+
+  '***** Files (HListBox) *****
+
+  ' Label
+  QPrintRC "C:\", ulRow + 5, ulCol + 2, bClr
+  ' Label - extra effort in order to center over HListBox
+  label$ = "Files": lc = ulCol + 2: rc = lrCol - 20
+  c = lc + ((rc - lc) \ 2) - (LEN(label$) \ 2)
+  QPrintRC label$, ulRow + 6, c, bClr
+  ' HListBox
+  Box0 ulRow + 7, lc, lrRow - 3, rc, 1, bClr
+  ' HScrollBar
+  QPrintRC CHR$(27) + STRING$((rc - lc) - 3, 177) + CHR$(26), lrRow - 3, lc + 1, bClr
+  QPrintRC CHR$(219), lrRow - 3, lc + 2, bClr ' Current position
+
+  '***** Folders (VListBox) *****
+
+  ' Label - extra effort in order to center over VListBox
+  label$ = "Dirs/Drives": lc = lrCol - 17: rc = lrCol - 2
+  c = lc + ((rc - lc) \ 2) - (LEN(label$) \ 2)
+  QPrintRC label$, ulRow + 6, c, bClr
+  ' VListBox
+  Box0 ulRow + 7, lc, lrRow - 3, rc, 1, bClr
+  ' VScrollBar
+  QPrintRC CHR$(24), ulRow + 8, lrCol - 2, bClr
+  FOR r = ulRow + 9 TO lrRow - 5
+    QPrintRC CHR$(177), r, lrCol - 2, bClr
+  NEXT
+  QPrintRC CHR$(25), lrRow - 4, lrCol - 2, bClr
+  QPrintRC CHR$(219), ulRow + 9, lrCol - 2, bClr ' Current position
+
+  '***** Buttons *****
+
+  QPrintRC "< OK >", lrRow - 1, 16, bClr
+  QPrintRC "< Cancel >", lrRow - 1, 35, bClr
+  QPrintRC "< Help >", lrRow - 1, 55, bClr
+
+  CALL WaitKeyS
+
+  ' Restore
+  CALL MScrnRest(ulRow, ulCol, lrRow + 1, lrCol + 2, scrn())
+
   EXIT SUB
 
   'NOTE: Current Dialog implementation (from old QPP) is not able to 
@@ -375,6 +449,8 @@ SUB OpenAction
   menu$(0) = spec$               ' Read the names
   'CALL ReadFile(BYVAL VARPTR(menu$(0)))
   CALL ReadFile(menu$())
+
+
 
   REDIM text$(7)
   REDIM response$(7)
@@ -661,6 +737,7 @@ SUB HelpAboutAction
 END SUB
 
 SUB WelcomeAction
+
 
   Box0 7, 14, 17, 66, 1, OneColor(0, 7)
   QPrintRC "                                                   ", 8, 15, OneColor(0, 7)
