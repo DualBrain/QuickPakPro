@@ -361,6 +361,19 @@ SUB OpenAction
   lrCol = 73
   bClr = OneColor(0, 7)
 
+  upperBound = 7
+  numButtons = 3
+
+  ' ----Hilite color will be Bright White unless foreground color is Bright White
+  fFg = 15
+  CALL SplitColor(bClr, fg, bg)
+  IF fg = 15 THEN fFg = 0                 ' If foreground color is Bright White, make hilite Black
+  hiLite = OneColor%(fFg, bg)
+  hiClr = hiLite
+
+  REDIM dial(6) AS DLog
+  REDIM mouseBox(6) AS Area ' buttons
+
   ' Save
   sz = ArraySize(ulRow, ulCol, lrRow + 1, lrCol + 2)
   REDIM scrn(sz)
@@ -387,16 +400,34 @@ SUB OpenAction
   QPrintRC "File Name:", ulRow + 2, ulCol + 2, bClr
   ' TextBox
   Box0 ulRow + 1, ulCol + 13, ulRow + 3, lrCol - 2, 1, bClr
+  dial(4).DType = 4 ' Text
+  dial(4).NumFlag = 0 ' Alpha/Numeric
+  mouseBox(4).Y1 = ulRow + 2
+  mouseBox(4).Y2 = mouseBox(4).Y1
+  mouseBox(4).X1 = ulCol + 14
+  mouseBox(4).X2 = lrCol - 3
+  mouseBox(4).RN = 4
+  dial(4).Row = mouseBox(4).Y1
+  dial(4).Col = mouseBox(4).X1
 
   '***** Files (HListBox) *****
 
   ' Label
   QPrintRC "C:\", ulRow + 5, ulCol + 2, bClr
+  dial(5).DType = 0 ' Label
   ' Label
   QPrintRCenter "Files", ulRow + 6, ulCol + 2, lrCol - 20, bClr
   ' HListBox
   Box0 ulRow + 7, ulCol + 2, lrRow - 3, lrCol - 20, 1, bClr
   HScrollBarDraw lrRow - 3, ulCol + 3, lrCol - 21, 0, bClr
+  dial(5).DType = 10 ' File
+  mouseBox(5).Y1 = ulRow + 8
+  mouseBox(5).Y2 = lrRow - 4
+  mouseBox(5).X1 = ulCol + 3
+  mouseBox(5).X2 = lrCol - 21
+  mouseBox(5).RN = 5
+  dial(5).Row = mouseBox(5).Y1
+  dial(5).Col = mouseBox(5).X1
 
   '***** Folders (VListBox) *****
 
@@ -406,19 +437,167 @@ SUB OpenAction
   Box0 ulRow + 7, lrCol - 17, lrRow - 3, lrCol - 2, 1, bClr
   ' VScrollBar
   VScrollBarDraw ulRow + 8, lrRow - 4, lrCol - 2, 0, bClr
+  dial(6).DType = 11 ' Folder
+  mouseBox(6).Y1 = ulRow + 8
+  mouseBox(6).Y2 = lrRow - 4
+  mouseBox(6).X1 = lrCol - 16
+  mouseBox(6).X2 = lrCol - 3
+  mouseBox(6).RN = 7
+  dial(6).Row = mouseBox(6).Y1
+  dial(6).Col = mouseBox(6).X1
 
   '***** Buttons *****
 
   ButtonDraw "OK", lrRow - 1, 16, bClr
+  dial(1).DType = 1 ' Button
+  mouseBox(1).Y1 = lrRow - 1
+  mouseBox(1).Y2 = mouseBox(1).X1
+  mouseBox(1).X1 = 16
+  mouseBox(1).X2 = mouseBox(1).X1 + 2 + 3
+  mouseBox(1).RN = 1
+  dial(1).Row = mouseBox(1).Y1
+  dial(1).Col = mouseBox(1).X1 + 2
   ButtonDraw "Cancel", lrRow - 1, 35, bClr
+  dial(2).DType = 1 ' Button
+  mouseBox(2).Y1 = lrRow - 1
+  mouseBox(2).Y2 = mouseBox(2).X1
+  mouseBox(2).X1 = 35
+  mouseBox(2).X2 = mouseBox(1).X1 + 6 + 3
+  mouseBox(2).RN = 2
+  dial(2).Row = mouseBox(2).Y1
+  dial(2).Col = mouseBox(2).X1 + 2
   ButtonDraw "Help", lrRow - 1, 55, bClr
+  dial(3).DType = 1 ' Button
+  mouseBox(3).Y1 = lrRow - 1
+  mouseBox(3).Y2 = mouseBox(3).X1
+  mouseBox(3).X1 = 55
+  mouseBox(3).X2 = mouseBox(1).X1 + 4 + 3
+  mouseBox(3).RN = 3
+  dial(3).Row = mouseBox(3).Y1
+  dial(3).Col = mouseBox(3).X1 + 2
 
-  CALL WaitKeyS
+  choice = 1
+  LOCATE dial(choice).Row, dial(choice).Col, 1
+  
+  DO
+    DO
+      ky$ = INKEY$
+      IF LEN(ky$) THEN mFlag = 0
+      CALL MouseRange(mouseBox(), 1, numChoices, mRow, mCol, mButton, rangeNum)
+      IF mButton > 0 AND rangeNum THEN    ' If mouse down and its in a valid range
+        IF rangeNum <> el THEN            ' If we havent already turned off hilite,
+          hiLite = bClr                   '   turn off old HiLite
+          GOSUB HiLite
+        END IF
+        el = rangeNum
+        IF el <= numButtons THEN          ' If we've clicked on a button
+          choice = el                     '   choice = button selected
+          buttonDown = -1                 ' Remember that mouse button was pressed
+          CALL PaintBox0(lrRow - 1, mouseBox(choice).X1 + 1, lrRow - 1, MouseBox(choice).X2 - 1, 15)
+        END IF
+        mFlag = -1                        ' Set Mouse flag
+        choice = rangeNum
+        ky$ = CHR$(154)                   ' Dummy key to exit INKEY$ loop
+      END IF
+      ' If we've clicked on a button, wait until mouse button is up
+      IF rangeNum <= numButtons AND mButton = 0 AND buttonDown THEN
+        buttonDown = 0
+        CALL PaintBox0(lrRow - 1, MouseBox(choice).X1 + 1, lrRow - 1, MouseBox(choice).X2 - 1, bClr)
+        EXIT SUB 'GOTO Done                         ' Exit Dialog box
+      END IF
+    LOOP UNTIL LEN(ky$) OR pressed
+    
+    IF NOT pressed THEN                   ' If a keystroke and not a mouse click
+      IF LEN(ky$) < 2 THEN
+        ky = ASC(ky$)
+      ELSE
+        ky = -ASC(RIGHT$(ky$, 1))
+      END IF
+    END IF
+
+    'TODO: Need to decide how I want to handle "sub components".
+
+    SELECT CASE dial(choice).DType
+      CASE 0 ' Label
+        ' What can be done with a label; well, nothing.
+      CASE 1 ' Button
+      CASE 2 ' 
+      CASE 3 ' 
+      CASE 4 ' TextBox
+      CASE 5 ' 
+      CASE 10 ' File ListBox
+      CASE 11 ' Folder ListBox
+      CASE ELSE
+    END SELECT
+
+    SELECT CASE ky
+      CASE 9 ' Tab
+        IF choice <= numButtons THEN hiLite = bClr: GOSUB HiLite
+        choice = choice + 1
+        IF choice > UBOUND(dial) THEN choice = 1
+      CASE -15 ' Shift Tab      
+        IF choice <= numButtons THEN hiLite = bClr: GOSUB HiLite
+        choice = choice - 1
+        IF choice < 1 THEN choice = UBOUND(dial)
+      CASE -72, -77                       ' Up, Right arrows
+        IF dial(choice).DType = 3 AND found THEN ' If we're on an Option button
+          LOCATE dial(choice).Row, dial(choice).Col
+          response$(choice) = ""
+          CALL QPrint0(" ", bClr)         ' Clear the last Dot
+          choice = choice - 1
+          IF choice <= lastXBox - numXBoxes THEN choice = lastXBox
+          dotEl = choice                      ' Remember where the new Dot is
+          LOCATE dial(choice).Row, dial(choice).Col
+          CALL QPrint0(dot$, bClr)        ' Print the new Dot
+          response$(choice) = dot$
+          found = 0
+        END IF
+      CASE -75, -80                       ' Left, Down arrows
+        IF dial(choice).DType = 3 AND found THEN ' If we're on an Option button
+          LOCATE dial(choice).Row, dial(choice).Col
+          response$(choice) = ""
+          CALL QPrint0(" ", bClr)         ' Clear the last Dot
+          choice = choice + 1
+          IF choice > lastXBox THEN choice = lastXBox - numXBoxes + 1
+          dotEl = choice                      ' Remember where the new Dot is
+          LOCATE dial(choice).Row, dial(choice).Col
+          CALL QPrint0(dot$, bClr)        ' Print the new Dot
+          response$(choice) = dot$
+          found = 0
+        END IF
+      CASE 32 ' SpaceBar
+        IF dial(choice).DType = 2 THEN              ' If we're in a check box
+          LOCATE dial(choice).Row, dial(choice).Col
+          IF response$(choice) <> check$ THEN       ' If its not checked,
+            CALL QPrint0(check$, bClr)              '   check it
+            Response$(choice) = check$
+          ELSE                                      ' If its checked,
+            CALL QPrint0(" ", bClr)                 '   clear it
+            response$(choice) = ""
+          END IF
+        ELSE
+          EXIT DO 'GOTO Done
+        END IF
+      CASE 27                             ' Escape
+        EXIT DO 'GOTO Escape
+      CASE 13                             ' Enter
+        EXIT DO 'GOTO Done
+      CASE ELSE
+    END SELECT
+
+    LOCATE dial(el).Row, dial(el).Col
+
+  LOOP
 
   ' Restore
   CALL MScrnRest(ulRow, ulCol, lrRow + 1, lrCol + 2, scrn())
 
   EXIT SUB
+
+HiLite:                                   ' Hilites the currently active button
+  CALL PaintBox0(lrRow - 1, mouseBox(choice).X1, lrRow - 1, mouseBox(choice).X1, hiLite)
+  CALL PaintBox0(lrRow - 1, mouseBox(choice).X2, lrRow - 1, mouseBox(choice).X2, hiLite)
+RETURN
 
   'NOTE: Current Dialog implementation (from old QPP) is not able to 
   '      handle the design requirements/layout for the Open dialog in
