@@ -2684,8 +2684,8 @@ SUB ColorPick(colr, boxColor, exitCode)
       NEXT
     NEXT
 
-    CALL SplitColor(boxColor, fg, bg)
-    arrowColr = OneColor(0, bg)    
+    CALL SplitColor(boxColor, fg%, bg%)
+    arrowColr = OneColor(0, bg%)    
 
     FOR c = 1 TO 8
       FOR r = 1 TO 16
@@ -6061,8 +6061,8 @@ SUB MQPrint (txt$, colr)
     ' Maintain existing color...
   ELSE
      ofg = _DEFAULTCOLOR: obg = _BACKGROUNDCOLOR
-     SplitColor colr, fg, bg
-     COLOR fg, bg
+     SplitColor colr, fg%, bg%
+     COLOR QBColor(fg%), QBColor(bg%)
   END IF
   pr = CSRLIN
   pc = POS(0)
@@ -6090,7 +6090,9 @@ SUB MScrnSave (ulRow, ulCol, lrRow, lrCol, element())
 END SUB
 
 FUNCTION OneColor (fg, bg)
-  OneColor = (fg AND 16) * 8 + ((bg AND 7) * 16) + (fg AND 15)
+  f% = fg
+  b% = bg
+  OneColor = (f% AND 16) * 8 + ((b% AND 7) * 16) + (f% AND 15)
 END FUNCTION
 
 ' PaintBox will paint any rectangular area of the screen, without 
@@ -6098,12 +6100,16 @@ END FUNCTION
 SUB PaintBox (ulRow, ulCol, lrRow, lrCol, colr, page)
   ' NOTE: page isn't currently used.
   ' If page = -1 then current active screen should be used.
-  FOR r = ulRow TO lrRow
-    FOR c = ulCol TO lrCol
-      ch = SCREEN(r, c)
-      QPrintRC CHR$(ch), r, c, colr
+  IF _PIXELSIZE = 0 THEN
+    FOR r = ulRow TO lrRow
+      FOR c = ulCol TO lrCol
+        ch = SCREEN(r, c)
+        QPrintRC CHR$(ch), r, c, colr
+      NEXT
     NEXT
-  NEXT
+  ELSE  
+    ERROR 73 ' Feature Unavailable
+  END IF
 END SUB
 
 ' PaintBox0 will paint any rectangular area of the screen, without 
@@ -6135,8 +6141,8 @@ SUB QPrint (text$, colr, page)
     ' Maintain existing color...
   ELSE
     ofg = _DEFAULTCOLOR: obg = _BACKGROUNDCOLOR
-    SplitColor colr, fg, bg
-    COLOR fg, bg
+    SplitColor colr, fg%, bg%
+    COLOR QBColor(fg%), QBColor(bg%)
   END IF
   pr = CSRLIN
   pc = POS(0)
@@ -6150,14 +6156,41 @@ SUB QPrint (text$, colr, page)
   END IF
 END SUB
 
+FUNCTION QBColor& (colr)
+  result& = colr
+  IF _PIXELSIZE = 0 THEN
+  ELSE
+    SELECT CASE colr
+      CASE 0: result& = Black
+      CASE 1: result& = _RGB32(170, 0, 0) '  1 red
+      CASE 2: result& = _RGB32(0, 170, 0) '  2 green
+      CASE 3: result& = _RGB32(170, 85, 0) '  3 yellow (not really yellow; oh well)
+      CASE 4: result& = _RGB32(0, 0, 170) '  4 blue
+      CASE 5: result& = _RGB32(170, 0, 170) '  5 magenta
+      CASE 6: result& = _RGB32(0, 170, 170) '  6 cyan
+      CASE 7: result& = DarkGray ' white (well VGA defines this as (170, 170, 170); darkgray is (169, 169, 169); so we are super close)
+      CASE 8: result& = _RGB32(85, 85, 85) '  8 grey
+      CASE 9: result& = _RGB32(255, 85, 85) '  9 bright red
+      CASE 10: result& = _RGB32(85, 255, 85) ' 10 bright green
+      CASE 11: result& = _RGB32(255, 255, 85) ' 11 bright yellow
+      CASE 12: result& = _RGB32(85, 85, 255) ' 12 bright blue
+      CASE 13: result& = _RGB32(255, 85, 255) ' 13 bright magenta
+      CASE 14: result& = _RGB32(85, 255, 255) ' 14 bright cFsyan
+      CASE 15: result& = White ' exact match
+      CASE ELSE
+    END SELECT
+  END IF
+  QBColor& = result&
+END FUNCTION
+
 SUB QPrint0 (text$, colr)
   ofg = -1: obg = -1
   IF colr = -1 THEN
     ' Maintain existing color...
   ELSE
      ofg = _DEFAULTCOLOR: obg = _BACKGROUNDCOLOR
-     SplitColor colr, fg, bg
-     COLOR fg, bg
+     SplitColor colr, fg%, bg%
+     COLOR QBColor(fg%), QBColor(bg%)
   END IF
   pr = CSRLIN
   pc = POS(0)
@@ -6183,8 +6216,8 @@ SUB QPrintAny (txt$, clr, monCode, row, column)
     ' Maintain existing color...
   ELSE
      ofg = _DEFAULTCOLOR: obg = _BACKGROUNDCOLOR
-     SplitColor clr, fg, bg
-     COLOR fg, bg
+     SplitColor clr, fg%, bg%
+     COLOR QBColor(fg%), QBColor(bg%)
   END IF
   pr = CSRLIN
   pc = POS(0)
@@ -6206,8 +6239,8 @@ SUB QPrintRC (txt$, r, c, clr)
     ' Maintain existing color...
   ELSE
      ofg = _DEFAULTCOLOR: obg = _BACKGROUNDCOLOR
-     SplitColor clr, fg, bg
-     COLOR fg, bg
+     SplitColor clr, fg%, bg%
+     COLOR QBColor(fg%), QBColor(bg%)
   END IF
   pr = CSRLIN
   pc = POS(0)
@@ -6248,18 +6281,22 @@ END SUB
 ' ScrnSave or ScrnSave0. 
 SUB ScrnRest (ulRow, ulCol, lrRow, lrCol, element(), page)
   ' NOTE: page is currently not implemented
-  rows = (lrRow - ulRow) + 1
-  cols = (lrCol - ulCol) + 1
-  FOR r = 0 TO rows - 1
-    FOR c = 0 TO cols - 1
-      index = LBOUND(element) + ((r * cols) + c)
-      ' clr = element(index) AND &H00FF ' split color
-      ' ch = ((element(index) AND &HFF00) \ 256) AND &H00FF ' split character
-      ch = element(index) AND &H00FF ' split color
-      clr = ((element(index) AND &HFF00) \ 256) AND &H00FF ' split character
-      QPrintRC CHR$(ch), ulRow + r, ulCol + c, clr
+  IF _PIXELSIZE = 0 THEN
+    rows = (lrRow - ulRow) + 1
+    cols = (lrCol - ulCol) + 1
+    FOR r = 0 TO rows - 1
+      FOR c = 0 TO cols - 1
+        index = LBOUND(element) + ((r * cols) + c)
+        ' clr = element(index) AND &H00FF ' split color
+        ' ch = ((element(index) AND &HFF00) \ 256) AND &H00FF ' split character
+        ch = element(index) AND &H00FF ' split color
+        clr = ((element(index) AND &HFF00) \ 256) AND &H00FF ' split character
+        QPrintRC CHR$(ch), ulRow + r, ulCol + c, clr
+      NEXT
     NEXT
-  NEXT
+  ELSE
+    ERROR 73 ' Feature Unavailable
+  END IF
 END SUB
 
 ' ScrnRest0 will restore a screen that had previously been saved with 
@@ -6272,18 +6309,22 @@ END SUB
 ' to allow restoring it again at a later time. 
 SUB ScrnSave (ulRow, ulCol, lrRow, lrCol, element(), page)
   ' NOTE: page is currently not implemented
-  rows = (lrRow - ulRow) + 1
-  cols = (lrCol - ulCol) + 1
-  FOR r = 0 TO rows - 1
-    FOR c = 0 TO cols - 1
-      index = LBOUND(element) + ((r * cols) + c)
-      ' ch = SCREEN(ulRow + r, ulCol + c, 0)
-      ' clr = SCREEN(ulRow + r, ulCol + c, 1)
-      clr = SCREEN(ulRow + r, ulCol + c, 0)
-      ch = SCREEN(ulRow + r, ulCol + c, 1)
-      element(index) = (ch * 256) + clr ' combine
+  IF _PIXELSIZE = 0 THEN
+    rows = (lrRow - ulRow) + 1
+    cols = (lrCol - ulCol) + 1
+    FOR r = 0 TO rows - 1
+      FOR c = 0 TO cols - 1
+        index = LBOUND(element) + ((r * cols) + c)
+        ' ch = SCREEN(ulRow + r, ulCol + c, 0)
+        ' clr = SCREEN(ulRow + r, ulCol + c, 1)
+        clr = SCREEN(ulRow + r, ulCol + c, 0)
+        ch = SCREEN(ulRow + r, ulCol + c, 1)
+        element(index) = (ch * 256) + clr ' combine
+      NEXT
     NEXT
-  NEXT
+  ELSE
+    ERROR 73 ' Feature Unavailable
+  END IF
 END SUB
 
 ' ScrnSave will save all or part of a text screen into an integer array, 
@@ -6372,9 +6413,9 @@ SUB ScrollU(ulRow, ulCol, lrRow, lrCol, lines, page)
 
 END SUB
 
-SUB SplitColor (colr, fg, bg)
-  fg = (colr AND 128) \ 8 + (colr AND 15) 
-  bg = (colr AND 112) \ 16 
+SUB SplitColor (colr%, fg%, bg%)
+  fg% = (colr% AND 128) \ 8 + (colr% AND 15) 
+  bg% = (colr% AND 112) \ 16 
 END SUB
 
 ' Chapter Next

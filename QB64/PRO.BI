@@ -138,6 +138,16 @@ TYPE Rectangle
   bottom AS LONG
 END TYPE
 
+$IF WIN THEN
+  DECLARE LIBRARY
+    FUNCTION __DEBUG& ALIAS MessageBox (BYVAL ignore&, message$, title$, BYVAL type&)
+  END DECLARE
+$ELSE
+  DECLARE LIBRARY ""
+    FUNCTION __DEBUG& ALIAS MessageBox (BYVAL ignore&, message$, title$, BYVAL type&)
+  END DECLARE
+$END IF
+
 DECLARE DYNAMIC LIBRARY "kernel32"
   FUNCTION CreateFileA%& (BYVAL lpFileName AS _OFFSET, BYVAL dwDesiredAccess AS _UNSIGNED LONG, _
                           BYVAL dwShareMode AS _UNSIGNED LONG, BYVAL lpSecurityAttributes AS _OFFSET, _

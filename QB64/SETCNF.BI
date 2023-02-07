@@ -1,4 +1,4 @@
-DIM cnf AS Config
+DIM SHARED cnf AS Config
 
 CALL InitMouse(cnf.Mouse)
 
