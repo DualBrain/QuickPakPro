@@ -53,17 +53,17 @@ SUB WordWrap (x$, wide%)
   ' scan a block of eighty characters backwards, looking for a blank
   ' stop at the first blank, or if we reached the end of the string
   DO
-      FOR x% = pointer% + wide% TO pointer% STEP -1
-         IF MID$(x$, x%, 1) = " " OR x% = length% + 1 THEN
-            PRINT MID$(x$, pointer%, x% - pointer%);
-            pointer% = x% + 1
-            WHILE MID$(x$, pointer%, 1) = " "
-               Pointer% = pointer% + 1    ' swallow extra blanks to the next word
-            WEND
-            IF POS(0) > 1 THEN PRINT      ' if the cursor didn't wrap next line
-            EXIT FOR                      ' done with this block
-         END IF
-      NEXT
+    FOR x% = pointer% + wide% TO pointer% STEP -1
+      IF MID$(x$, x%, 1) = " " OR x% = length% + 1 THEN
+        PRINT MID$(x$, pointer%, x% - pointer%);
+        pointer% = x% + 1
+        WHILE MID$(x$, pointer%, 1) = " "
+          Pointer% = pointer% + 1         ' swallow extra blanks to the next word
+        WEND
+        IF POS(0) > 1 THEN PRINT          ' if the cursor didn't wrap next line
+        EXIT FOR                          ' done with this block
+      END IF
+    NEXT
   LOOP WHILE pointer% < length%           ' loop until done
 
 END SUB
