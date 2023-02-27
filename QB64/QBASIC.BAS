@@ -1,4 +1,4 @@
-' ********** EDIT.BAS - a clone of MS-DOS 5.0 EDIT.EXE
+' ********** QBASIC.BAS - a clone of MS-DOS 5.0 QBASIC.EXE
 
 ' Copyright (c) 2023 Cory Smith
 
@@ -12,7 +12,7 @@ DO: LOOP UNTIL _SCREENEXISTS ' Not sure if necessary; however, there does seem t
 hwnd = _WindowHandle: x = 100: y = 100: w = 640 * mult: h = 480 * mult ' inlined _WindowHandle (next line) because 1 out of every 4 or 5 executions, would encounter an invalid window handle (1400)
 IF INSTR(_OS$, "[WINDOWS]") THEN success = MoveWindow(_WindowHandle, x, y, w, h, 1) ELSE success = -1 ' Now that _WindowHandle is inlined, invalid window handle (1400) issue has yet to be reproduced - will have to continue to test
 IF success = 0 THEN PRINT "FAILED TO RESIZE - "; GetLastError; " ("; hwnd; ")": CALL WaitKeyS
-_TITLE "EDIT.EXE" 'NOTE: Moving title above resize causes resize to fail (without an error???)
+_TITLE "QBASIC.EXE" 'NOTE: Moving title above resize causes resize to fail (without an error???)
 'BUG: It would be nice specify the icon here, but... having to require full path or placing it in the qb64 folder is problematic. 
 'NOTE: The above boiler plate must be first in execution (top of file).
 'BUG:  Also appears to not work as an $INCLUDE; suggesting something might
@@ -33,7 +33,7 @@ DIM SHARED edState AS EditInfo
 edState.AColor = 23      ' white on blue
 edState.Wrap = 0         ' word wrap at column 65 (use 0 for to disable word wrap)
 edState.Frame = 0        ' frame code (1 = show ruler line & scroll bars, 0 = don't)
-edState.Rows = 21        ' number of text lines to display on the screen (3 - 25)
+edState.Rows = 18        ' number of text lines to display on the screen (3 - 25)
 edState.Wide = 78        ' width of the active screen (10 - 80)
 edState.HTab = 2         ' set tab stops to 4 spaces
 
@@ -52,34 +52,87 @@ ShowCursor                              ' Turn it on
 
 'PRINT OneColor(0, 1): END
 
-LOCATE 2: MQPrint STRING$(23 * 80, CHR$(32)), OneColor(7, 1)  ' Make a background for the demo
-Box0 2, 1, 24, 80, 1, OneColor(7, 1)
+' "Paint" the screen background blue.
+LOCATE 2: MQPrint STRING$(23 * 80, CHR$(32)), OneColor(7, 1)
 
+'TODO: Need to figure out how to handle the 4 different
+'      'windows' (Help, Main, Split and Immediate).
+'      Each window is *resizable* in that the title bar
+'      between each can be moved. Additionally, the ESC key
+'      when focused in help will close the Help window and 
+'      restore the window sizes to what they were previously.
+'      The "up arrow" is a "maximize" window toggle.
+'      F6 will change focus between visible windows and will
+'      cycle through currently active "maximize" windows.
+'      Main is the only window that can't be closed (hidden).
+'
+' windowHelpVisible = 1
+' windowHelpSpan = 20
+' windowMainVisible = 1
+' windowMainSpan = 20
+' windowSplitVisible = 0
+' windowImmediateVisible = 1
+' windowImmediateSpan = 3 ' title line plus content.
+' activeWindow = 2
+
+' IF windowHelpVisible THEN
+'   ' Draw a box.
+'   Box0 2, 1, 2 + windowHelpSpan, 80, 1, OneColor(7, 0)
+'   QPrintRC " Help ", 2, 37, OneColor(7, 0)
+' ELSE
+'   ' Draw a box.
+'   Box0 2, 1, 2 + windowMainSpan, 80, 1, OneColor(7, 1)
+'   'TODO: Need to utilize "center".
+'   ' The title of the document.
+'   QPrintRC " Untitled ", 2, 35, OneColor(1, 7)
+' END IF
+
+Box0 2, 1, 25, 80, 1, OneColor(7, 1)
+'TODO: Need to utilize "center".
+' The title of the document.
 QPrintRC " Untitled ", 2, 35, OneColor(1, 7)
 
+' Draw the status bar.
 CALL UpdateStatus ("*", 0, 0)
 
-QPrintRC CHR$(179), 24, 1, OneColor(7, 1)
-QPrintRC CHR$(27), 24, 2, OneColor(0, 7)
+' Upper right window (document) control.
+QPrintRC CHR$(180) + CHR$(24) + CHR$(195), 2, 76, OneColor(7, 1)
+QPrintRC CHR$(24), 2, 77, OneColor(1, 7)
+
+' Splitter for the "Immediate" window.
+splitter = 22
+QPrintRC CHR$(195), splitter, 1, OneColor(7, 1)
+QPrintRC STRING$(78, 196), splitter, 2, OneColor(7, 1)
+QPrintRC " Immediate ", splitter, 35, OneColor(7, 1)
+QPrintRC CHR$(180), splitter, 80, OneColor(7, 1)
+
+' Draw the horizontal scroll bar.
+br = splitter - 1 '24
+QPrintRC CHR$(179), br, 1, OneColor(7, 1)
+QPrintRC CHR$(27), br, 2, OneColor(0, 7)
 FOR c = 3 TO 78
-  QPrintRC CHR$(177), 24, c, OneColor(0, 7)
+  QPrintRC CHR$(177), br, c, OneColor(0, 7)
 NEXT
-QPrintRC CHR$(26), 24, 79, OneColor(0, 7)
-QPrintRC CHR$(179), 24, 80, OneColor(7, 1)
+QPrintRC CHR$(26), br, 79, OneColor(0, 7)
+QPrintRC CHR$(32), br, 3, OneColor(0, 0) ' current position
+
+' Draw the vertical scroll bar.
+QPrintRC CHR$(179), br, 80, OneColor(7, 1)
 QPrintRC CHR$(24), 3, 80, OneColor(0, 7)
-FOR r = 4 TO 22
+FOR r = 4 TO br-2 '22
   QPrintRC CHR$(177), r, 80, OneColor(0, 7)
 NEXT
-QPrintRC CHR$(25), 23, 80, OneColor(0, 7)
+QPrintRC CHR$(25), br-1, 80, OneColor(0, 7)
+QPrintRC CHR$(32), 4, 80, OneColor(0, 0) ' current position
 
-LOCATE 13, 41, 1
+'LOCATE 13, 41, 1
 
 ' ----- Main Menu
 
-REDIM menu$(15, 4)                      ' Allocate space for the Menu Choices
-REDIM stat(15, 4)                       ' Define the choice status array
-REDIM msg$(15, 4)                       ' The help message for each menu item
-REDIM help$(15, 4)                      ' The detailed help (F1) for each menu item
+REDIM menu$(15, 7)                      ' Allocate space for the Menu Choices
+REDIM stat(15, 7)                       ' Define the choice status array
+REDIM msg$(15, 7)                       ' The help message for each menu item
+REDIM help$(15, 7)                      ' The detailed help (F1) for each menu item
 
 prefix$ = "F1=Help " + CHR$(179) + " "
 
@@ -87,7 +140,7 @@ menu$(0, 0) = "File"
 menu$(1, 0) = "New" : msg$(1, 0) = prefix$ + "Removes currently loaded file from memory"
 menu$(2, 0) = "Open...": msg$(2, 0) = prefix$ + "Loads new file into memory"
 menu$(3, 0) = "Save" : msg$(3, 0) = prefix$ + "Saves current file"
- stat(3, 0) = 1
+' stat(3, 0) = 1
 menu$(4, 0) = "Save As..." : msg$(4, 0) = prefix$ + "Saves current file with specified name"
  stat(4, 0) = 5 * 256
 menu$(5, 0) = "-"
@@ -105,24 +158,57 @@ menu$(3, 1) = "Paste      Shift+Ins" : msg$(3, 1) = prefix$ + "Inserts buffer co
  stat(3, 1) = 1
 menu$(4, 1) = "Clear            Del" : msg$(4, 1) = prefix$ + "Deletes selected text without copying it to buffer"
  stat(4, 1) = 2 * 256 + 1
+menu$(5, 1) = "-"
+menu$(6, 1) = "New SUB..." : msg$(6, 1) = prefix$ + "Opens a window for a new subprogram"
+ stat(6, 1) = 4 * 256
+menu$(7, 1) = "New FUNCTION...": msg$(7, 1) = prefix$ + "Opens a window for a new FUNCTION procedure"
+ stat(7, 1) = 4 * 256
 
-menu$(0, 2) = "Search"
-menu$(1, 2) = "Find..." : msg$(1, 2) = prefix$ + "Finds specified text"
-menu$(2, 2) = "Repeat Last Find      F3" : msg$(2, 2) = prefix$ + "Finds the next occurence of text specified in previous search"
-menu$(3, 2) = "Change..." : msg$(3, 2) = prefix$ + "Finds and changes specified text"
+menu$(0, 2) = "View"
+menu$(1, 2) = "SUBs...               F2" : msg$(1, 2) = prefix$ + "Displays a loaded SUB or FUNCTION"
+menu$(2, 2) = "Split" : msg$(2, 2) = prefix$ + "Divides screen into two View windows"
+ stat(2, 2) = 1 * 256
+menu$(3, 2) = "Output Screen         F4" : msg$(3, 2) = prefix$ + "Displays output screen"
 
-menu$(0, 3) = "Options"
-menu$(1, 3) = "Display..." : msg$(1, 3) = prefix$ + "Changes display attributes"
-menu$(2, 3) = "Help Paths..." : msg$(2, 3) = prefix$ + "Sets search path for Help files"
+menu$(0, 3) = "Search"
+menu$(1, 3) = "Find..." : msg$(1, 3) = prefix$ + "Finds specified text"
+menu$(2, 3) = "Repeat Last Find      F3" : msg$(2, 3) = prefix$ + "Finds the next occurence of text specified in previous search"
+menu$(3, 3) = "Change..." : msg$(3, 3) = prefix$ + "Finds and changes specified text"
 
-menu$(0, 4) = "Help"
- 'stat(0, 4) = 42 ' this will "push over" (pad) the Help menu as desired,
+menu$(0, 4) = "Run"
+menu$(1, 4) = "Start           Shift+F5" : msg$(1, 4) = prefix$ + "Runs current program"
+menu$(2, 4) = "Restart" : msg$(2, 4) = prefix$ + "Clears variables in preparation for restarting single stepping"
+menu$(3, 4) = "Continue              F5" : msg$(3, 4) = prefix$ + "Continues execution after a break"
+
+menu$(0, 5) = "Debug"
+menu$(1, 5) = "Step                  F8" : msg$(1, 5) = prefix$ + "Executes next program statement"
+menu$(2, 5) = "Procedure Step       F10" : msg$(2, 5) = prefix$ + "Executes next program statement, tracing over procedure calls"
+menu$(3, 5) = "-"
+menu$(4, 5) = "Trace On" : msg$(4, 5) = prefix$ + "Highlights statement currently executing"
+menu$(5, 5) = "-"
+menu$(6, 5) = "Toggle Breakpoint     F9" : msg$(6, 5) = prefix$ + "Sets/clears breakpoint at cursor location"
+ stat(6, 5) = 7 * 256
+menu$(7, 5) = "Clear All Breakpoints" : msg$(7, 5) = prefix$ + "Removes all breakpoints"
+menu$(8, 5) = "Set Next Statement" : msg$(8, 5) = prefix$ + "Makes the statement at the cursor the next statement to execute"
+ stat(8, 5) = 4 * 256 + 1
+
+menu$(0, 6) = "Options"
+menu$(1, 6) = "Display..." : msg$(1, 6) = prefix$ + "Changes display attributes"
+menu$(2, 6) = "Help Path..." : msg$(2, 6) = prefix$ + "Sets search path for Help files"
+ stat(2, 6) = 5 * 256
+menu$(3, 6) = "Syntax Checking" : msg$(3, 6) = prefix$ + "Turns editor's syntax checking on or off."
+
+menu$(0, 7) = "Help"
+ stat(0, 7) = 24  ' this will "push over" (pad) the Help menu as desired,
                   ' however, the actual pull down menu logic doesn't handle
                   ' being "past" the right side of the screen (crashes).
-menu$(1, 4) = "Getting Started...": msg$(1, 4) = prefix$ + "Displays information on loading and using the MS-DOS Editor"
-menu$(2, 4) = "Keyboard": msg$(2, 4) = prefix$ + "Displays navigation and editing keystrokes"
-menu$(3, 4) = "-"
-menu$(4, 4) = "About...": msg$(4, 4) = prefix$ + "Displays product version and copyright information"
+menu$(1, 7) = "Index": msg$(1, 7) = prefix$ + "Displays help index"
+menu$(2, 7) = "Contents": msg$(2, 7) = prefix$ + "Displays help table of contents"
+menu$(3, 7) = "Topic:                F1": msg$(3, 7) = prefix$ + "Displays information about the Basic keyword the cursor is on"
+ stat(3, 7) = 1
+menu$(4, 7) = "Using Help      Shift+F1": msg$(4, 7) = prefix$ + "Displays information about how to use online Help"
+menu$(5, 7) = "-"
+menu$(6, 7) = "About...": msg$(6, 7) = prefix$ + "Displays product version and copyright information"
 
 CALL BarPrint (menu$(), stat())         ' Display the menu bar and build a
                                         ' table of Hot Keys for menu bar.
@@ -133,12 +219,13 @@ action = 0                              ' Action 0 (no polling) is the easiest
 ' TODO: The Help menu should be on the right side of the line
 ' TODO: Need to add support for pressing F1 on a menu item to see specific associated help.
 
+LOCATE 3, 2, 0
+
 ' TODO: The following should only happen first time launching.
-'CALL WelcomeAction
+CALL WelcomeAction
+CALL UpdateStatus("<Shift+F1=Help> <F6=Window> <F2=Subs> <F5=Run> <F8=Step>", edState.CurLine, edState.CurCol)
 
 qeditAction = 1
-
-LOCATE 3, 2, 0
 
 DO
 
@@ -154,7 +241,7 @@ DO
     DO                                        
       CALL PullDnMs (menu$(), stat(), menu, choice, ky$, menuAction)
       SELECT CASE menu
-        CASE 0, 1, 2, 3, 4
+        CASE 0, 1, 2, 3, 4, 5, 6, 7
           CALL UpdateStatus(msg$(choice, menu), edState.CurLine, edState.CurCol)
         CASE ELSE
       END SELECT
@@ -179,34 +266,61 @@ DO
             CASE ELSE
           END SELECT
         CASE 1 ' Edit
-          SELECT case choice
+          SELECT CASE choice
             CASE 1: CALL CutAction
             CASE 2: CALL CopyAction
             CASE 3: CALL PasteAction
             CASE 4: CALL ClearAction
+            CASE 6: CALL NewSubAction
+            CASE 7: CALL NewFunctionAction
           END SELECT
-        CASE 2 ' Search
+        CASE 2 ' View
+          SELECT CASE choice
+            CASE 1: CALL ViewSubsAction
+            CASE 2: CALL ViewSplitAction
+            CASE 3: CALL ViewOutputScreenAction
+          END SELECT
+        CASE 3 ' Search
           SELECT case choice
             CASE 1: CALL FindAction
             CASE 2: CALL RepeatLastFindAction
             CASE 3: CALL ChangeAction
           END SELECT
-        CASE 3 ' Options
+        CASE 4 ' Run
+          SELECT CASE choice
+            CASE 1: CALL StartAction
+            CASE 2: CALL RestartAction
+            CASE 3: CALL ContinueAction
+          END SELECT
+        CASE 5 ' Debug
+          SELECT CASE choice
+            CASE 1: CALL StepAction
+            CASE 2: CALL ProcedureStepAction
+            CASE 4: CALL ToggleTraceAction
+            CASE 6: CALL ToggleBreakpointAction
+            CASE 7: CALL ClearAllBreakpointsAction
+            CASE 8: CALL SetNextStatementAction
+          END SELECT
+        CASE 6 ' Options
           SELECT case choice
             CASE 1: CALL DisplayAction
-            CASE 2: CALL HelpPathsAction
+            CASE 2: CALL HelpPathAction
+            CASE 3: CALL ToggleSyntaxCheckingAction
           END SELECT
-        CASE 4 ' Help
+        CASE 7 ' Help
           SELECT case choice
-            CASE 1: CALL HelpGettingStartedAction
-            CASE 2: CALL HelpKeyboardAction
-            CASE 4: CALL HelpAboutAction
+            CASE 1: CALL HelpIndexAction
+            CASE 2: CALL HelpContentsAction
+            CASE 3: CALL HelpTopicAction
+            CASE 4: CALL HelpUsingHelpAction
+            CASE 6: CALL HelpAboutAction
           END SELECT
         CASE ELSE
       END SELECT
     END IF
 
-    CALL UpdateStatus("", edState.CurLine, edState.CurCol)
+    'CALL UpdateStatus("", edState.CurLine, edState.CurCol)
+    CALL UpdateStatus("<Shift+F1=Help> <F6=Window> <F2=Subs> <F5=Run> <F8=Step>", edState.CurLine, edState.CurCol)
 
   END IF
 
@@ -806,19 +920,39 @@ FUNCTION ExitAction ()
 END FUNCTION
 
 SUB CutAction
-  CALL VbMsgBox("Not implemented.", 0, "")
+  CALL VbMsgBox("'Cut' Not implemented.", 0, "")
 END SUB
             
 SUB CopyAction
-  CALL VbMsgBox("Not implemented.", 0, "")
+  CALL VbMsgBox("'Copy' Not implemented.", 0, "")
 END SUB
 
 SUB PasteAction
-  CALL VbMsgBox("Not implemented.", 0, "")
+  CALL VbMsgBox("'Paste' Not implemented.", 0, "")
 END SUB
        
 SUB ClearAction
-  CALL VbMsgBox("Not implemented.", 0, "")
+  CALL VbMsgBox("'Clear' Not implemented.", 0, "")
+END SUB
+
+SUB NewSubAction
+  CALL VbMsgBox("'New SUB' Not implemented.", 0, "")
+END SUB
+
+SUB NewFunctionAction
+  CALL VbMsgBox("'New FUNCTION' Not implemented.", 0, "")
+END SUB
+
+SUB ViewSubsAction
+  CALL VbMsgBox("'View->SUBs...' Not implemented.", 0, "")
+END SUB
+
+SUB ViewSplitAction
+  CALL VbMsgBox("'View->Split' Not implemented.", 0, "")
+END SUB
+
+SUB ViewOutputScreenAction
+  CALL VbMsgBox("'View->Output Screen' Not implemented.", 0, "")
 END SUB
 
 SUB FindAction
@@ -848,7 +982,7 @@ SUB FindAction
 END SUB
 
 SUB RepeatLastFindAction
-  CALL VbMsgBox("Not implemented.", 0, "")
+  CALL VbMsgBox("'Repeat Last Find' Not implemented.", 0, "")
 END SUB
 
 SUB ChangeAction
@@ -878,11 +1012,47 @@ SUB ChangeAction
 
 END SUB
 
+SUB StartAction
+  CALL VbMsgBox("'Run->Start' Not implemented.", 0, "")
+END SUB
+
+SUB RestartAction
+  CALL VbMsgBox("'Run->Restart' Not implemented.", 0, "")
+END SUB
+
+SUB ContinueAction
+  CALL VbMsgBox("'Run->Continue' Not implemented.", 0, "")
+END SUB
+
+SUB StepAction
+  CALL VbMsgBox("'Debug->Step' Not implemented.", 0, "")
+END SUB
+
+SUB ProcedureStepAction
+  CALL VbMsgBox("'Debug->Procedure Step' Not implemented.", 0, "")
+END SUB
+
+SUB ToggleTraceAction
+  CALL VbMsgBox("'Debug->Trace On' Not implemented.", 0, "")
+END SUB
+
+SUB ToggleBreakpointAction
+  CALL VbMsgBox("'Debug->Toggle Breakpoint' Not implemented.", 0, "")
+END SUB
+
+SUB ClearAllBreakpointsAction
+  CALL VbMsgBox("'Debug->Clear All Breakpoints' Not implemented.", 0, "")
+END SUB
+
+SUB SetNextStatementAction
+  CALL VbMsgBox("'Debug->Set Next Statement' Not implemented.", 0, "")
+END SUB
+
 SUB DisplayAction
-  CALL VbMsgBox("Not implemented.", 0, "")
+  CALL VbMsgBox("'Options->Display...' Not implemented.", 0, "")
 END SUB
             
-SUB HelpPathsAction
+SUB HelpPathAction
 
   REDIM menu$(0)
   REDIM text$(5)
@@ -902,22 +1072,36 @@ SUB HelpPathsAction
 
 END SUB
 
-SUB HelpGettingStartedAction
-  CALL VbMsgBox("Not implemented.", 0, "")
+SUB ToggleSyntaxCheckingAction
+  CALL VbMsgBox("'Options->Syntax Checking' Not implemented.", 0, "")
 END SUB
 
-SUB HelpKeyboardAction
-  CALL VbMsgBox("Not implemented.", 0, "")
+SUB HelpIndexAction
+  CALL VbMsgBox("'Help->Index' Not implemented.", 0, "")
+END SUB
+
+SUB HelpContentsAction
+  CALL VbMsgBox("'Help->Contents' Not implemented.", 0, "")
+END SUB
+
+SUB HelpTopicAction
+  CALL VbMsgBox("'Help->Topic' Not implemented.", 0, "")
+END SUB
+
+SUB HelpUsingHelpAction
+  CALL VbMsgBox("'Help->Using Help' Not implemented.", 0, "")
 END SUB
 
 SUB HelpAboutAction
+
+  CALL UpdateStatus("F1=Help   Enter=Execute   Esc=Cancel   Tab=Next Field   Arrow=Next Item", edState.CurLine, edState.CurCol)
 
   REDIM menu$(0)
   REDIM text$(6)
   REDIM response$(0)
   text$(1) = "< OK >"
   text$(2) = " "
-  text$(3) = "MS-DOS Editor"
+  text$(3) = "MS-DOS QBasic"
   text$(4) = "Version 1.0"
   text$(5) = "Copyright (C) Microsoft Corporation, 1987-1991."
   text$(6) = " "
@@ -930,10 +1114,14 @@ END SUB
 
 SUB WelcomeAction
 
+  REDIM scrn(2000)
+  CALL MScrnSave(1, 1, 25, 80, scrn())
+
+  CALL UpdateStatus("F1=Help   Enter=Execute   Esc=Cancel   Tab=Next Field   Arrow=Next Item", edState.CurLine, edState.CurCol)
 
   Box0 7, 14, 17, 66, 1, OneColor(0, 7)
   QPrintRC "                                                   ", 8, 15, OneColor(0, 7)
-  QPrintRC "            Welcome to the MS-DOS Editor           ", 9, 15, OneColor(0, 7)
+  QPrintRC "            Welcome to the MS-DOS QBasic           ", 9, 15, OneColor(0, 7)
   QPrintRC "                                                   ", 10, 15, OneColor(0, 7)
   QPrintRC "  Copyright (C) Microsoft Corporation, 1987-1991.  ", 11, 15, OneColor(0, 7)
   QPrintRC "                All rights reserved.               ", 12, 15, OneColor(0, 7)
@@ -945,6 +1133,6 @@ SUB WelcomeAction
     ky$ = INKEY$
     IF ky$ = CHR$(27) THEN EXIT DO
   LOOP
-  ClearScr0 7, 14, 17, 66, OneColor(0, 1)
+  CALL MScrnRest(1, 1, 25, 80, scrn())
 
 END SUB
