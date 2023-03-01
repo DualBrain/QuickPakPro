@@ -2899,6 +2899,7 @@ SUB MAMenu(array$(), first, selection, start, count, scanCode, normColor, hiLite
       NEXT
     NEXT
     IF scanCode = 9999 THEN EXIT SUB     'TODO: For testing...
+    IF scanCode = 9998 THEN passthrough = -1
     WHILE INKEY$ <> "": WEND              ' not sure needed.
     DO
       scanCode = MGetKey(row, column) ' scanCode might be returned to caller.
@@ -2907,26 +2908,26 @@ SUB MAMenu(array$(), first, selection, start, count, scanCode, normColor, hiLite
           IF selection > 1 THEN          ' if current more than min,
             selection = selection - 1   ' decrement.
           END IF
-          EXIT DO
+          IF passthrough THEN EXIT SUB ELSE EXIT DO
         CASE -80 ' Down
           IF selection < UBOUND(array$) THEN  ' if current less than max,
             selection = selection + 1        ' increment.
           END IF
-          EXIT DO
+          IF passthrough THEN EXIT SUB ELSE EXIT DO
         CASE -75 ' Left
           IF selection - numRows > 0 THEN    ' more columns to the left?
             selection = selection - numRows ' shift columns right.
           ELSEIF selection > 1 THEN           ' if not shifted (above),
             selection = 1                     ' set current item to first.
           END IF
-          EXIT DO
+          IF passthrough THEN EXIT SUB ELSE EXIT DO
         CASE -77 ' Right
           IF selection + numRows <= UBOUND(array$) THEN ' more columns to the right?
             selection = selection + numRows            ' shift columns left.
           ELSEIF selection < UBOUND(array$) THEN         ' if not shifted (above),
             selection = UBOUND(array$)                   ' set current item to last.
           END IF
-          EXIT DO
+          IF passthrough THEN EXIT SUB ELSE EXIT DO
         CASE ELSE                         ' any other key,
           EXIT SUB                        ' return to caller.
       END SELECT

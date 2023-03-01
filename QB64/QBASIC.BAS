@@ -471,7 +471,7 @@ SUB OpenAction
 
   ulRow = 3
   ulCol = 7
-  lrRow = 22 ' for QB, use 23
+  lrRow = 23 ' for QB, use 23
   lrCol = 73
   bClr = OneColor(0, 7)
 
@@ -505,7 +505,7 @@ SUB OpenAction
   CALL PaintBox0(lrRow + 1, ulCol + 3, lrRow + 1, lrCol + 1, 8)
   CALL PaintBox0(ulRow + 1, lrCol + 1, lrRow + 1, lrCol + 2, 8)
   ' - Caption
-  caption$ = "Open" ' For QB, use "Open Program"
+  caption$ = "Open Program"
   QPrintRCenter " " + caption$ + " ", 3, ulCol, lrCol, bClr
 
   '***** Filename *****
@@ -526,14 +526,43 @@ SUB OpenAction
 
   '***** Files (HListBox) *****
 
+  path$ = "C:\bas\"
+  fspec$ = path$ + "*.*"
+
   ' Label
-  QPrintRC "C:\", ulRow + 5, ulCol + 2, bClr
+  QPrintRC path$, ulRow + 5, ulCol + 2, bClr
   dial(5).DType = 0 ' Label
   ' Label
   QPrintRCenter "Files", ulRow + 6, ulCol + 2, lrCol - 20, bClr
   ' HListBox
   Box0 ulRow + 7, ulCol + 2, lrRow - 3, lrCol - 20, 1, bClr
   HScrollBarDraw lrRow - 3, ulCol + 3, lrCol - 21, 0, bClr
+
+  count = FCount%(fspec$)         ' first count the number of matching files
+  IF count = 0 THEN END          ' spec must have been invalid
+  n = count                      ' save the count in N for later
+  DIM file$(count)               ' dim a string array to hold the file names
+  file$(0) = fspec$               ' put the file spec into element zero
+
+  FOR x = 1 TO count             ' make room for the names
+    file$(x) = SPACE$(12)
+  NEXT
+  CALL ReadFile(file$())         ' get the file names
+
+  startItem = 1
+  selection = 1
+  scanCode = 9999
+  CALL MAMenu (file$(), 1, selection, startItem, count, scanCode, 112, OneColor(7,0), 9, 3, 3, ulRow + 8, ulCol + 3)
+  '                                                                ^    ^   ^  ^  ^  ^  ^
+  '                                                                |    |   |  |  |  |  |
+  '     File Color ------------------------------------------------     |   |  |  |  |  |
+  '     HiLite Color ---------------------------------------------------    |  |  |  |  |
+  '     Number of Rows in table --------------------------------------------   |  |  |  |
+  '     Number of Columns in table --------------------------------------------   |  |  |
+  '     Number of spaces between columns -----------------------------------------   |  |
+  '     Upper left row of display        --------------------------------------------   |
+  '     Upper left column of display     -----------------------------------------------
+
   dial(5).DType = 10 ' File
   mouseBox(5).Y1 = ulRow + 8
   mouseBox(5).Y2 = lrRow - 4
@@ -594,6 +623,9 @@ SUB OpenAction
   LOCATE dial(choice).Row, dial(choice).Col, 1
   
   DO
+
+    IF dial(choice).DType <> 10 THEN
+
     DO
       ky$ = INKEY$
       IF LEN(ky$) THEN mFlag = 0
@@ -620,7 +652,9 @@ SUB OpenAction
         EXIT SUB 'GOTO Done                         ' Exit Dialog box
       END IF
     LOOP UNTIL LEN(ky$) OR pressed
-    
+
+    END IF
+
     IF NOT pressed THEN                   ' If a keystroke and not a mouse click
       IF LEN(ky$) < 2 THEN
         ky = ASC(ky$)
@@ -640,6 +674,14 @@ SUB OpenAction
       CASE 4 ' TextBox
       CASE 5 ' 
       CASE 10 ' File ListBox
+        ky = 9998 ' passthrough
+        CALL MAMenu (file$(), 1, selection, startItem, count, ky, 112, OneColor(7,0), 9, 3, 3, ulRow + 8, ulCol + 3)
+        SELECT CASE scanCode
+          CASE -72, -80, -75, -77  ' Up, Down, Left, Right
+            'TODO: Update File Name: field with currently selected filename.
+            ky = 0
+          CASE ELSE
+        END SELECT
       CASE 11 ' Folder ListBox
       CASE ELSE
     END SELECT
@@ -699,7 +741,7 @@ SUB OpenAction
       CASE ELSE
     END SELECT
 
-    LOCATE dial(el).Row, dial(el).Col
+    LOCATE dial(choice).Row, dial(choice).Col
 
   LOOP
 
