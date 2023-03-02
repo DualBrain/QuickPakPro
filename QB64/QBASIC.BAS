@@ -30,7 +30,7 @@ DEFINT A-Z
 
 '-------
 
-CONST TRUE = -1, FALSE = NOT TRUE
+CONST FALSE = 0: CONST TRUE = NOT FALSE
 
 TYPE VarType
   Name AS STRING * 40
@@ -96,9 +96,6 @@ edState.HTab = 2         ' set tab stops to 4 spaces
 
 REDIM SHARED array$(32767)               ' holds the main editor string array
 DIM SHARED qeditAction AS INTEGER
-
-CONST FALSE = 0
-CONST TRUE = NOT FALSE
 
 CLS
 
@@ -279,7 +276,7 @@ action = 0                              ' Action 0 (no polling) is the easiest
 LOCATE 3, 2, 0
 
 ' TODO: The following should only happen first time launching.
-CALL WelcomeAction
+'CALL WelcomeAction
 CALL UpdateStatus("<Shift+F1=Help> <F6=Window> <F2=Subs> <F5=Run> <F8=Step>", edState.CurLine, edState.CurCol)
 
 qeditAction = 1
@@ -376,8 +373,23 @@ DO
       END SELECT
     END IF
 
-    'CALL UpdateStatus("", edState.CurLine, edState.CurCol)
     CALL UpdateStatus("<Shift+F1=Help> <F6=Window> <F2=Subs> <F5=Run> <F8=Step>", edState.CurLine, edState.CurCol)
+
+  ELSEIF ky$ <> "" THEN
+
+    k = 0
+    IF LEN(ky$) = 1 THEN 
+      k = ASC(ky$)
+    ELSEIF LEN(ky$) = 2 THEN
+      k = -ASC(RIGHT$(ky$, 1))
+    END IF
+
+    SELECT CASE k
+      CASE -63: CALL ContinueAction ' F5
+      CASE -88: CALL StartAction    ' Shift+F5
+      CASE ELSE
+        'QPrintRC STR$(k), 1, 1, 7
+    END SELECT
 
   END IF
 
@@ -1116,19 +1128,20 @@ SUB StartAction
   REDIM scrn(2000)
   CALL MScrnSave(1, 1, 25, 80, scrn())
   CLS
-  program$ = "print " + chr$(34) + "HELLO WORLD!" + chr$(34)
-  Runner program$
+  Runner array$()
   CALL WaitKeyS
+  'TODO: Need to capture the output for possible display using F4.
+  SCREEN 0: WIDTH 80
   CALL MScrnRest(1, 1, 25, 80, scrn())
 
 END SUB
 
 SUB RestartAction
-  CALL VbMsgBox("'Run->Restart' Not implemented.", 0, "")
+  CALL StartAction
 END SUB
 
 SUB ContinueAction
-  CALL VbMsgBox("'Run->Continue' Not implemented.", 0, "")
+  CALL StartAction
 END SUB
 
 SUB StepAction
@@ -1246,7 +1259,7 @@ END SUB
 
 '-----
 
-SUB Runner(content$)
+SUB Runner(program() AS STRING)
 
   DIM running AS INTEGER '_BYTE
 
@@ -1264,17 +1277,17 @@ SUB Runner(content$)
   DIM Comma1 AS INTEGER
   DIM Comma2 AS INTEGER
   DIM Comma3 AS INTEGER
-  REDIM program(0) AS STRING
-  program(0) = ""
+  ' REDIM program(0) AS STRING
+  ' program(0) = ""
 
-  IF content$ <> "" THEN
-    delim$ = CHR$(10)
-    x = Delimit%(content$, delim$) + 1    ' see how many matching 
-                                          ' delimiters there are 
-    REDIM _PRESERVE program(x) AS STRING  ' +1 is needed to account 
-                                          ' for the last item 
-    Parse content$, delim$, program() 
-  END IF
+  ' IF content$ <> "" THEN
+  '   delim$ = CHR$(10)
+  '   x = Delimit%(content$, delim$) + 1    ' see how many matching 
+  '                                         ' delimiters there are 
+  '   REDIM _PRESERVE program(x) AS STRING  ' +1 is needed to account 
+  '                                         ' for the last item 
+  '   Parse content$, delim$, program() 
+  ' END IF
 
   InitVar
 
