@@ -294,460 +294,494 @@ FUNCTION GetBit(array As String, element As Short) As Short
   END IF
 END FUNCTION
 
-' made it to page 148
+' IMaxD will search through an entire double precision array, and 
+' return the element number of the largest value.
+FUNCTION IMaxD(address As Double Ptr, numEls As Short) As Short
+  Var c = 0
+  Var current = *(address)
+  Var found = 0
+  For x As Short = 0 to numEls - 1
+    If *(address + x) > current Then
+      current = *(address + x): found = c
+    End If
+    c += 1
+  Next
+  IMaxD = found
+END FUNCTION
 
-' FUNCTION IMaxD(array#(), start, numEls)
-'   max# = array#(start): entry = start
-'   FOR x = start + 1 TO start + numEls - 1
-'     IF array#(x) > max# THEN max# = array#(x): entry = x
-'   NEXT
-'   IMaxD = entry - start
-' END FUNCTION
+' IMaxI will search through an entire short array, and 
+' return the element number of the largest value.
+FUNCTION IMaxI(address As Short Ptr, numEls As Short) As Short
+  Var c = 0
+  Var current = *(address)
+  Var found = 0
+  For x As Short = 0 to numEls - 1
+    If *(address + x) > current Then
+      current = *(address + x): found = c
+    End If
+    c += 1
+  Next
+  IMaxI = found
+END FUNCTION
 
-' FUNCTION IMaxI(array(), start, numEls)
-'   max = array(start): entry = start
-'   FOR x = start + 1 TO start + numEls - 1
-'     IF array(x) > max THEN max = array(x): entry = x
-'   NEXT
-'   IMaxI = entry - start
-' END FUNCTION
+' IMaxL will search through an entire long array, and 
+' return the element number of the largest value.
+FUNCTION IMaxL(address As Long Ptr, numEls As Short) As Short
+  Var c = 0
+  Var current = *(address)
+  Var found = 0
+  For x As Short = 0 to numEls - 1
+    If *(address + x) > current Then
+      current = *(address + x): found = c
+    End If
+    c += 1
+  Next
+  IMaxL = found
+END FUNCTION
 
-' FUNCTION IMaxL(array&(), start, numEls)
-'   max& = array&(start): entry = start
-'   FOR x = start + 1 TO start + numEls - 1
-'     IF array&(x) > max& THEN max& = array&(x): entry = x
-'   NEXT
-'   IMaxL = entry - start
-' END FUNCTION
+' IMaxS will search through an entire single precision array, and 
+' return the element number of the largest value.
+FUNCTION IMaxS(address As Single Ptr, numEls As Short) As Short
+  Var c = 0
+  Var current = *(address)
+  Var found = 0
+  For x As Short = 0 to numEls - 1
+    If *(address + x) > current Then
+      current = *(address + x): found = c
+    End If
+    c += 1
+  Next
+  IMaxS = found
+END FUNCTION
 
-' FUNCTION IMaxS(array!(), start, numEls)
-'   max! = array!(start): entry = start
-'   FOR x = start + 1 TO start + numEls - 1
-'     IF array!(x) > max! THEN max! = array!(x): entry = x
-'   NEXT
-'   IMaxS = entry - start
-' END FUNCTION
+' IMaxC will search through an entire double precision array, and 
+' return the element number of the largest value.
+FUNCTION IMaxC(address As Double Ptr, numEls As Short) As Short
+  Var c = 0
+  Var current = *(address)
+  Var found = 0
+  For x As Short = 0 to numEls - 1
+    If *(address + x) > current Then
+      current = *(address + x): found = c
+    End If
+    c += 1
+  Next
+  IMaxC = found
+END FUNCTION
 
-' FUNCTION IMaxC(array!(), start, numEls)
-'   max! = array!(start): entry = start
-'   FOR x = start + 1 TO start + numEls - 1
-'     IF array!(x) > max! THEN max! = array!(x): entry = x
-'   NEXT
-'   IMaxC = entry - start
-' END FUNCTION
+' IMinD will search through an entire double precision array, and 
+' return the element number of the smallest value. 
+FUNCTION IMinD(address As Double Ptr, numEls As Short) As Short
+  Var c = 0
+  Var current = *(address)
+  Var found = 0
+  For x As Short = 0 to numEls - 1
+    If *(address + x) < current Then
+      current = *(address + x): found = c
+    End If
+    c += 1
+  Next
+  IMinD = found
+END FUNCTION
 
-' FUNCTION IMinD(array#(), start, numEls)
-'   min# = array#(start): entry = start
-'   FOR x = start + 1 TO start + numEls - 1
-'     IF array#(x) < min# THEN min# = array#(x): entry = x
-'   NEXT
-'   IMinD = entry - start
-' END FUNCTION
+' IMinI will search through an entire short array, and 
+' return the element number of the smallest value. 
+FUNCTION IMinI(address As Short Ptr, numEls As Short) As Short
+  Var c = 0
+  Var current = *(address)
+  Var found = 0
+  For x As Short = 0 to numEls - 1
+    If *(address + x) < current Then
+      current = *(address + x): found = c
+    End If
+    c += 1
+  Next
+  IMinI = found
+END FUNCTION
 
-' FUNCTION IMinI(array(), start, numEls)
-'   min = array(start): entry = start
-'   FOR x = start + 1 TO start + numEls - 1
-'     IF array(x) < min THEN min = array(x): entry = x
-'   NEXT
-'   IMinI = entry - start
-' END FUNCTION
+' IMinL will search through an entire long array, and 
+' return the element number of the smallest value. 
+FUNCTION IMinL(address As Long Ptr, numEls As Short) As Short
+  Var c = 0
+  Var current = *(address)
+  Var found = 0
+  For x As Short = 0 to numEls - 1
+    If *(address + x) < current Then
+      current = *(address + x): found = c
+    End If
+    c += 1
+  Next
+  IMinL = found
+END FUNCTION
 
-' FUNCTION IMinL(array&(), start, numEls)
-'   min& = array&(start): entry = start
-'   FOR x = start + 1 TO start + numEls - 1
-'     IF array&(x) < min& THEN min& = array&(x): entry = x
-'   NEXT
-'   IMinL = entry - start
-' END FUNCTION
+' IMinS will search through an entire single precision array, and 
+' return the element number of the smallest value. 
+FUNCTION IMinS(address As Single Ptr, numEls As Short) As Short
+  Var c = 0
+  Var current = *(address)
+  Var found = 0
+  For x As Short = 0 to numEls - 1
+    If *(address + x) < current Then
+      current = *(address + x): found = c
+    End If
+    c += 1
+  Next
+  IMinS = found
+END FUNCTION
 
-' FUNCTION IMinS(array!(), start, numEls)
-'   min! = array!(start): entry = start
-'   FOR x = start + 1 TO start + numEls - 1
-'     IF array!(x) < min! THEN min! = array!(x): entry = x
-'   NEXT
-'   IMinS = entry - start
-' END FUNCTION
+' IMinC will search through an entire double precision array, and 
+' return the element number of the smallest value. 
+FUNCTION IMinC(address As Double Ptr, numEls As Short) As Short
+  Var c = 0
+  Var current = *(address)
+  Var found = 0
+  For x As Short = 0 to numEls - 1
+    If *(address + x) < current Then
+      current = *(address + x): found = c
+    End If
+    c += 1
+  Next
+  IMinC = found
+END FUNCTION
 
-' FUNCTION IMinC(array!(), start, numEls)
-'   min! = array!(start): entry = start
-'   FOR x = start + 1 TO start + numEls - 1
-'     IF array!(x) < min! THEN min! = array!(x): entry = x
-'   NEXT
-'   IMinC = entry - start
-' END FUNCTION
+' InitInt will quickly initialize all or a specified portion of an integer 
+' array with increasing values. 
+SUB InitInt(address As Short Ptr, value As Short, numEls As Short)
+  Var v = value
+  FOR x As Short = 0 TO numEls - 1
+    *(address + x) = v
+    v += 1
+  NEXT
+END SUB
 
-' SUB InitInt(array(), start, value, numEls)
-'   v = value
-'   FOR x = start TO start + numEls - 1
-'     array(x) = v: v = v + 1
-'   NEXT
-' END SUB
+' InsertStr will insert an element at any point into a conventional (not 
+' fixed-length) string array. 
+SUB InsertStr(address As String Ptr, value As String, numEls As Short)
+  FOR x As Short = numEls TO 1 STEP -1 
+    SWAP *(address + x), *(address + (x - 1))
+  NEXT 
+  SWAP *address, value 
+END SUB
 
-' ' InsertStr will insert an element at any point into a conventional (not 
-' ' fixed-length) string array. 
-' SUB InsertStr(array$(), startElement, insertValue$, numEls)
-'   FOR x = startElement + numEls - 1 TO startElement + 1 STEP -1 
-'     SWAP array$(x), array$(x - 1) 
-'   NEXT 
-'   SWAP array$(startElement), insertValue$ 
-' END SUB
+' InsertT inserts an element into a fixed-length string, numeric, or 
+' user-defined TYPE array. 
+SUB InsertT(address As Any Ptr, elSize As Short, numEls As Short)
 
-' SUB InsertT(block AS _MEM, elSize, numEls)
+  Dim size As Short
+  SELECT CASE elSize
+    CASE -1 : size = 2 ' 2-byte integer 
+    CASE -2 : size = 4 ' 4-byte long integer
+    CASE -3 : size = 4 ' 4-byte single precision
+    CASE -4 : size = 8 ' 8-byte double precision
+    CASE IS > 0: size = elSize
+    CASE ELSE
+      EXIT SUB
+  END SELECT
 
-'   SELECT CASE elSize
-'     CASE -1 : size = 2 ' 2-byte integer 
-'     CASE -2 : size = 4 ' 4-byte long integer
-'     CASE -3 : size = 4 ' 4-byte single precision
-'     CASE -4 : size = 8 ' 8-byte double precision
-'     CASE IS > 0: size = elSize
-'     CASE ELSE
-'       EXIT SUB
-'   END SELECT
+  DIM bytes AS ULong: bytes = numEls * size
+  DIM dest AS Any Ptr: dest = address + size
+  Var startAddress = FB_MEMMOVE (Byval dest, Byval address, bytes)
 
-'   DIM totalSize AS _OFFSET: totalSize = numEls * size
+END SUB
+
+' The ISortD routine are Quick Sorts for ordering all or a portion of a numeric
+' array into a parallel INDEX array into either ascending or descending order. 
+SUB ISortD(array As Double Ptr, ndx As Short Ptr, numEls As Short, direction As Short)
   
-'   DIM offset AS _OFFSET: offset = block.OFFSET + size
-'   _MEMCOPY block, block.OFFSET, totalSize TO block, offset
+  InitInt(ndx, 0, numEls)
 
-'   ' FOR x = startElement + numEls - 1 TO startElement + 1 STEP -1
-'   '   array(x) = array(x - 1)
-'   ' NEXT
+  ' Sort the ndx using array values
+  Var min = 0
+  Var max = numEls - 1
+  For i As Short = 1 To max
+    For j As Short = min To max - i 
+      Var l = *(array + *(ndx + j))
+      Var r = *(array + *(ndx + (j + 1)))
+      IF direction THEN ' descending
+        IF l < r THEN SWAP *(ndx + j), *(ndx + (j + 1))
+      ELSE ' ascending
+        IF l > r THEN SWAP *(ndx + j), *(ndx + (j + 1))
+      END IF
+    NEXT
+  NEXT
 
-' END SUB
+END SUB
 
-' SUB ISortD(array#(), start, ndx(), numEls, dir)
+' The ISortI routine are Quick Sorts for ordering all or a portion of a numeric
+' array into a parallel INDEX array into either ascending or descending order. 
+SUB ISortI(array As Short Ptr, ndx As Short Ptr, numEls As Short, direction As Short)
   
-'   ' Determine range of elements
-
-'   min = start
-'   max = start + numEls - 1
-
-'   ' Initialize the ndx() array
-'   FOR i = min TO max
-'     ndx(i) = i
-'   NEXT
-
-'   ' Sort the ndx using array# values
-
-'   FOR i = min TO max
-'     FOR j = min TO max - i 
-'       IF dir THEN ' descending
-'         IF array#(ndx(j)) < array#(ndx(j + 1)) THEN 
-'           SWAP ndx(j), ndx(j + 1) 
-'         END IF
-'       ELSE ' ascending
-'         IF array#(ndx(j)) > array#(ndx(j + 1)) THEN 
-'           SWAP ndx(j), ndx(j + 1) 
-'         END IF
-'       END IF
-'     NEXT
-'   NEXT
-
-' END SUB
-
-' SUB ISortI(array(), start, ndx(), numEls, dir)
-
-'   ' Determine range of elements
-
-'   min = start
-'   max = start + numEls - 1
-
-'   ' Initialize the ndx() array
-'   FOR i = min TO max
-'     ndx(i) = i
-'   NEXT
-
-'   ' Sort the ndx using array values
-
-'   FOR i = min TO max
-'     FOR j = min TO max - i 
-'       IF dir THEN ' descending
-'         IF array(ndx(j)) < array(ndx(j + 1)) THEN 
-'           SWAP ndx(j), ndx(j + 1) 
-'         END IF
-'       ELSE ' ascending
-'         IF array(ndx(j)) > array(ndx(j + 1)) THEN 
-'           SWAP ndx(j), ndx(j + 1) 
-'         END IF
-'       END IF
-'     NEXT
-'   NEXT
-
-' END SUB
-
-' SUB ISortL(array&(), start, ndx(), numEls, dir)
-
-'   ' Determine range of elements
-
-'   min = start
-'   max = start + numEls - 1
-
-'   ' Initialize the ndx() array
-'   FOR i = min TO max
-'     ndx(i) = i
-'   NEXT
-
-'   ' Sort the ndx using array& values
-
-'   FOR i = min TO max
-'     FOR j = min TO max - i 
-'       IF dir THEN ' descending
-'         IF array&(ndx(j)) < array&(ndx(j + 1)) THEN 
-'           SWAP ndx(j), ndx(j + 1) 
-'         END IF
-'       ELSE ' ascending
-'         IF array&(ndx(j)) > array&(ndx(j + 1)) THEN 
-'           SWAP ndx(j), ndx(j + 1) 
-'         END IF
-'       END IF
-'     NEXT
-'   NEXT
-
-' END SUB
-
-' SUB ISortS(array!(), start, ndx(), numEls, dir)
-
-'   ' Determine range of elements
-
-'   min = start
-'   max = start + numEls - 1
-
-'   ' Initialize the ndx() array
-'   FOR i = min TO max
-'     ndx(i) = i
-'   NEXT
-
-'   ' Sort the ndx using array! values
-
-'   FOR i = min TO max
-'     FOR j = min TO max - i 
-'       IF dir THEN ' descending
-'         IF array!(ndx(j)) < array!(ndx(j + 1)) THEN 
-'           SWAP ndx(j), ndx(j + 1) 
-'         END IF
-'       ELSE ' ascending
-'         IF array!(ndx(j)) > array!(ndx(j + 1)) THEN 
-'           SWAP ndx(j), ndx(j + 1) 
-'         END IF
-'       END IF
-'     NEXT
-'   NEXT
-
-' END SUB
-
-' SUB ISortC(array!(), start, ndx(), numEls, dir)
-
-'   ' Determine range of elements
-
-'   min = start
-'   max = start + numEls - 1
-
-'   ' Initialize the ndx() array
-'   FOR i = min TO max
-'     ndx(i) = i
-'   NEXT
-
-'   ' Sort the ndx using array! values
-
-'   FOR i = min TO max
-'     FOR j = min TO max - i 
-'       IF dir THEN ' descending
-'         IF array!(ndx(j)) < array!(ndx(j + 1)) THEN 
-'           SWAP ndx(j), ndx(j + 1) 
-'         END IF
-'       ELSE ' ascending
-'         IF array!(ndx(j)) > array!(ndx(j + 1)) THEN 
-'           SWAP ndx(j), ndx(j + 1) 
-'         END IF
-'       END IF
-'     NEXT
-'   NEXT
-
-' END SUB
-
-' SUB ISortStr(array$(), start, ndx(), numEls, dir)
-
-'   ' Determine range of elements
-
-'   min = start
-'   max = start + numEls - 1
-
-'   ' Initialize the ndx() array
-'   FOR i = min TO max
-'     ndx(i) = i
-'   NEXT
-
-'   ' Sort the ndx using array! values
-
-'   FOR i = min TO max
-'     FOR j = min TO max - i 
-'       IF dir THEN ' descending
-'         IF array$(ndx(j)) < array$(ndx(j + 1)) THEN 
-'           SWAP ndx(j), ndx(j + 1) 
-'         END IF
-'       ELSE ' ascending
-'         IF array$(ndx(j)) > array$(ndx(j + 1)) THEN 
-'           SWAP ndx(j), ndx(j + 1) 
-'         END IF
-'       END IF
-'     NEXT
-'   NEXT
-
-' END SUB
-
-' SUB ISortStr2(Array$(), Start, Ndx(), NumEls, Dir)
-
-'   ' Determine range of elements
-
-'   min = start
-'   max = start + numEls - 1
-
-'   ' Initialize the ndx() array
-'   FOR i = min TO max
-'     ndx(i) = i
-'   NEXT
-
-'   ' Sort the ndx using array! values
-
-'   FOR i = min TO max
-'     FOR j = min TO max - i 
-'       IF dir THEN ' descending
-'         IF LCASE$(array$(ndx(j))) < LCASE$(array$(ndx(j + 1))) THEN 
-'           SWAP ndx(j), ndx(j + 1) 
-'         END IF
-'       ELSE ' ascending
-'         IF LCASE$(array$(ndx(j))) > LCASE$(array$(ndx(j + 1))) THEN 
-'           SWAP ndx(j), ndx(j + 1) 
-'         END IF
-'       END IF
-'     NEXT
-'   NEXT
-
-' END SUB
-
-' SUB ISortT(block AS _MEM, Ndx(), NumEls, Dir, ElSize, MemberOffset, MemberSize)
-'   ERROR 73 ' Feature Unavailable
-' END SUB
-
-' SUB ISortT2(block AS _MEM, Ndx(), NumEls, Dir, ElSize, MemberOffset, MemberSize)
-'   ERROR 73 ' Feature Unavailable
-' END SUB
-
-' SUB KeySort(block AS _MEM, ElSize, NumEls, Table(,), NumKey)
-'   ERROR 73 ' Feature Unavailable
-' END SUB
-
-' FUNCTION MaxD#(array#(), start, numEls)
-'   max# = array#(start)
-'   FOR x = start + 1 TO numEls
-'     IF array#(x) > max# THEN max# = array#(x)
-'   NEXT
-'   MaxD# = max#
-' END FUNCTION
-
-' FUNCTION MaxI(array(), start, numEls)
-'   max = array(start)
-'   FOR x = start + 1 TO numEls
-'     IF array(x) > max THEN max = array(x)
-'   NEXT
-'   MaxI = max
-' END FUNCTION
-
-' FUNCTION MaxL&(array&(), start, numEls)
-'   max& = array&(start)
-'   FOR x = start + 1 TO numEls
-'     IF array&(x) > max& THEN max& = array&(x)
-'   NEXT
-'   MaxL& = max&
-' END FUNCTION
-
-' FUNCTION MaxS!(array!(), start, numEls)
-'   max! = array!(start)
-'   FOR x = start + 1 TO numEls
-'     IF array!(x) > max! THEN max! = array!(x)
-'   NEXT
-'   MaxS! = max!
-' END FUNCTION
-
-' FUNCTION MaxC!(array!(), start, numEls)
-'   max! = array!(start)
-'   FOR x = start + 1 TO numEls
-'     IF array!(x) > max! THEN max! = array!(x)
-'   NEXT
-'   MaxC! = max!
-' END FUNCTION
-
-' FUNCTION MinD#(array#(), start, numEls)
-'   min# = array#(start)
-'   FOR x = start + 1 TO numEls
-'     IF array#(x) < min# THEN min# = array#(x)
-'   NEXT
-'   MinD# = min#
-' END FUNCTION
-
-' FUNCTION MinI(array(), start, numEls)
-'   min = array(start)
-'   FOR x = start + 1 TO numEls
-'     IF array(x) < min THEN min = array(x)
-'   NEXT
-'   MinI = min
-' END FUNCTION
-
-' FUNCTION MinL&(array&(), start, numEls)
-'   min& = array&(start)
-'   FOR x = start + 1 TO numEls
-'     IF array&(x) < min& THEN min& = array&(x)
-'   NEXT
-'   MinL& = min&
-' END FUNCTION
-
-' FUNCTION MinS!(array!(), start, numEls)
-'   min! = array!(start)
-'   FOR x = start + 1 TO numEls
-'     IF array!(x) < min! THEN min! = array!(x)
-'   NEXT
-'   MinS! = min!
-' END FUNCTION
-
-' FUNCTION MinC!(array!(), start, numEls)
-'   min! = array!(Start)
-'   FOR x = start + 1 TO numEls
-'     IF array!(x) < min! THEN min! = array!(x)
-'   NEXT
-'   MinC! = min!
-' END FUNCTION
-
-' SUB SearchD(array#(), start, numEls, match, found, direction, matchCode, varType)
-
-'   c = 0
-
-'   min = start
-'   max = start + numEls - 1
-'   IF NOT direction THEN inc = 1 ELSE inc = -1: SWAP min, max
-
-'   SELECT CASE matchCode
-'     CASE 0 ' find an exact match only
-'       FOR i = min TO max STEP inc
-'         c = c + 1
-'         IF array#(i) = match THEN found = c: EXIT SUB
-'       NEXT
-'     CASE 1 ' match if the element is greater or equal
-'       FOR i = min TO max STEP inc
-'         c = c + 1
-'         IF array#(i) => match THEN found = c: EXIT SUB
-'       NEXT
-'     CASE -1 ' match if the element is less or equal 
-'       FOR i = min TO max STEP inc
-'         c = c + 1
-'         IF array#(i) =< match THEN found = c: EXIT SUB
-'       NEXT
-'     CASE ELSE
-'       found = 0
-'   END SELECT
-
-' END SUB
-
-' SUB Search(array(), start, numEls, match, found, direction, matchCode, varType)
+  InitInt(ndx, 0, numEls)
+
+  ' Sort the ndx using array values
+  Var min = 0
+  Var max = numEls - 1
+  For i As Short = 1 To max
+    For j As Short = min To max - i 
+      Var l = *(array + *(ndx + j))
+      Var r = *(array + *(ndx + (j + 1)))
+      IF direction THEN ' descending
+        IF l < r THEN SWAP *(ndx + j), *(ndx + (j + 1))
+      ELSE ' ascending
+        IF l > r THEN SWAP *(ndx + j), *(ndx + (j + 1))
+      END IF
+    NEXT
+  NEXT
+
+END SUB
+
+' The ISortL routine are Quick Sorts for ordering all or a portion of a numeric
+' array into a parallel INDEX array into either ascending or descending order. 
+SUB ISortL(array As Long Ptr, ndx As Short Ptr, numEls As Short, direction As Short)
+  
+  InitInt(ndx, 0, numEls)
+
+  ' Sort the ndx using array values
+  Var min = 0
+  Var max = numEls - 1
+  For i As Short = 1 To max
+    For j As Short = min To max - i 
+      Var l = *(array + *(ndx + j))
+      Var r = *(array + *(ndx + (j + 1)))
+      IF direction THEN ' descending
+        IF l < r THEN SWAP *(ndx + j), *(ndx + (j + 1))
+      ELSE ' ascending
+        IF l > r THEN SWAP *(ndx + j), *(ndx + (j + 1))
+      END IF
+    NEXT
+  NEXT
+
+END SUB
+
+' The ISortS routine are Quick Sorts for ordering all or a portion of a numeric
+' array into a parallel INDEX array into either ascending or descending order. 
+SUB ISortS(array As Single Ptr, ndx As Short Ptr, numEls As Short, direction As Short)
+  
+  InitInt(ndx, 0, numEls)
+
+  ' Sort the ndx using array values
+  Var min = 0
+  Var max = numEls - 1
+  For i As Short = 1 To max
+    For j As Short = min To max - i 
+      Var l = *(array + *(ndx + j))
+      Var r = *(array + *(ndx + (j + 1)))
+      IF direction THEN ' descending
+        IF l < r THEN SWAP *(ndx + j), *(ndx + (j + 1))
+      ELSE ' ascending
+        IF l > r THEN SWAP *(ndx + j), *(ndx + (j + 1))
+      END IF
+    NEXT
+  NEXT
+
+END SUB
+
+' The ISortC routine are Quick Sorts for ordering all or a portion of a numeric
+' array into a parallel INDEX array into either ascending or descending order. 
+SUB ISortC(array As Double Ptr, ndx As Short Ptr, numEls As Short, direction As Short)
+  
+  InitInt(ndx, 0, numEls)
+
+  ' Sort the ndx using array values
+  Var min = 0
+  Var max = numEls - 1
+  For i As Short = 1 To max
+    For j As Short = min To max - i 
+      Var l = *(array + *(ndx + j))
+      Var r = *(array + *(ndx + (j + 1)))
+      IF direction THEN ' descending
+        IF l < r THEN SWAP *(ndx + j), *(ndx + (j + 1))
+      ELSE ' ascending
+        IF l > r THEN SWAP *(ndx + j), *(ndx + (j + 1))
+      END IF
+    NEXT
+  NEXT
+
+END SUB
+
+' ISortStr will sort (case-sensitive) all or part of a conventional 
+' (not fixed-length) string array into either ascending or descending 
+' order by manipulating elements in a parallel integer index array.
+SUB ISortStr(array As String Ptr, ndx As Short Ptr, numEls As Short, direction As Short)
+  
+  InitInt(ndx, 0, numEls)
+
+  ' Sort the ndx using array values
+  Var min = 0
+  Var max = numEls - 1
+  For i As Short = 1 To max
+    For j As Short = min To max - i 
+      Var l = *(array + *(ndx + j))
+      Var r = *(array + *(ndx + (j + 1)))
+      IF direction THEN ' descending
+        IF l < r THEN SWAP *(ndx + j), *(ndx + (j + 1))
+      ELSE ' ascending
+        IF l > r THEN SWAP *(ndx + j), *(ndx + (j + 1))
+      END IF
+    NEXT
+  NEXT
+
+END SUB
+
+' ISortStr2 will sort (case-insensitive) all or part of a conventional 
+' (not fixed-length) string array into either ascending or descending 
+' order by manipulating elements in a parallel integer index array.
+SUB ISortStr2(array As String Ptr, ndx As Short Ptr, numEls As Short, direction As Short)
+  
+  InitInt(ndx, 0, numEls)
+
+  ' Sort the ndx using array values
+  Var min = 0
+  Var max = numEls - 1
+  For i As Short = 1 To max
+    For j As Short = min To max - i 
+      Var l = UCASE$(*(array + *(ndx + j)))
+      Var r = UCASE$(*(array + *(ndx + (j + 1))))
+      IF direction THEN ' descending
+        IF l < r THEN SWAP *(ndx + j), *(ndx + (j + 1))
+      ELSE ' ascending
+        IF l > r THEN SWAP *(ndx + j), *(ndx + (j + 1))
+      END IF
+    NEXT
+  NEXT
+
+END SUB
+
+SUB ISortT(array As Any Ptr, ndx As Short Ptr, numEls As Short, direction As Short, elSize As Short, memberOffset As Short, memberSize As Short)
+  ERROR 73 ' Feature Unavailable
+END SUB
+
+SUB ISortT2(array As Any Ptr, ndx As Short Ptr, numEls As Short, direction As Short, elSize As Short, memberOffset As Short, memberSize As Short)
+  ERROR 73 ' Feature Unavailable
+END SUB
+
+SUB KeySort(array As Any Ptr, elSize As Short, numEls As Short, table As Any Ptr, numKeys As Short)
+  ERROR 73 ' Feature Unavailable
+END SUB
+
+' MaxD will return the largest value in a 
+' specified portion of a numeric array.
+FUNCTION MaxD(address As Double Ptr, numEls As Short) As Double
+  Var current = *(address)
+  For x As Short = 0 to numEls - 1
+    If *(address + x) > current Then
+      current = *(address + x)
+    End If
+  Next
+  MaxD = current
+END FUNCTION
+
+' MaxI will return the largest value in a 
+' specified portion of a numeric array.
+FUNCTION MaxI(address As Short Ptr, numEls As Short) As Short
+  Var current = *(address)
+  For x As Short = 0 to numEls - 1
+    If *(address + x) > current Then
+      current = *(address + x)
+    End If
+  Next
+  MaxI = current
+END FUNCTION
+
+' MaxL will return the largest value in a 
+' specified portion of a numeric array.
+FUNCTION MaxL(address As Long Ptr, numEls As Short) As Long
+  Var current = *(address)
+  For x As Short = 0 to numEls - 1
+    If *(address + x) > current Then
+      current = *(address + x)
+    End If
+  Next
+  MaxL = current
+END FUNCTION
+
+' MaxS will return the largest value in a 
+' specified portion of a numeric array.
+FUNCTION MaxS(address As Single Ptr, numEls As Short) As Single
+  Var current = *(address)
+  For x As Short = 0 to numEls - 1
+    If *(address + x) > current Then
+      current = *(address + x)
+    End If
+  Next
+  MaxS = current
+END FUNCTION
+
+' MaxC will return the largest value in a 
+' specified portion of a numeric array.
+FUNCTION MaxC(address As Double Ptr, numEls As Short) As Double
+  Var current = *(address)
+  For x As Short = 0 to numEls - 1
+    If *(address + x) > current Then
+      current = *(address + x)
+    End If
+  Next
+  MaxC = current
+END FUNCTION
+
+' MinD will return the smallest value in a 
+' specified portion of a numeric array.
+FUNCTION MinD(address As Double Ptr, numEls As Short) As Double
+  Var current = *(address)
+  For x As Short = 0 to numEls - 1
+    If *(address + x) < current Then
+      current = *(address + x)
+    End If
+  Next
+  MinD = current
+END FUNCTION
+
+' MinI will return the smallest value in a 
+' specified portion of a numeric array.
+FUNCTION MinI(address As Short Ptr, numEls As Short) As Short
+  Var current = *(address)
+  For x As Short = 0 to numEls - 1
+    If *(address + x) < current Then
+      current = *(address + x)
+    End If
+  Next
+  MinI = current
+END FUNCTION
+
+' MinL will return the smallest value in a 
+' specified portion of a numeric array.
+FUNCTION MinL(address As Long Ptr, numEls As Short) As Long
+  Var current = *(address)
+  For x As Short = 0 to numEls - 1
+    If *(address + x) < current Then
+      current = *(address + x)
+    End If
+  Next
+  MinL = current
+END FUNCTION
+
+' MinS will return the smallest value in a 
+' specified portion of a numeric array.
+FUNCTION MinS(address As Single Ptr, numEls As Short) As Single
+  Var current = *(address)
+  For x As Short = 0 to numEls - 1
+    If *(address + x) < current Then
+      current = *(address + x)
+    End If
+  Next
+  MinS = current
+END FUNCTION
+
+' MinC will return the smallest value in a 
+' specified portion of a numeric array.
+FUNCTION MinC(address As Double Ptr, numEls As Short) As Double
+  Var current = *(address)
+  For x As Short = 0 to numEls - 1
+    If *(address + x) < current Then
+      current = *(address + x)
+    End If
+  Next
+  MinC = current
+END FUNCTION
+
+SUB Search(address As Any Ptr, numEls As Short, match As Any Ptr, Byref found As Short, direction As Short, matchCode As Short, varType As Short)
+
+  ERROR 73 ' Feature Unavailable
 
 '   c = 0
 
@@ -775,15 +809,15 @@ END FUNCTION
 '       found = 0
 '   END SELECT
 
-' END SUB
+END SUB
 
-' SUB SearchT(block AS _MEM, NumEls, Match, Found, Dir, Code, StructSize, MemberOf, MemberSize)
-'   ERROR 73 ' Feature Unavailable
-' END SUB
+SUB SearchT(address As Any Ptr, numEls As Short, match As Any Ptr, Byref found As Short, direction As Short, code As Short, structSize As Short, memberOff As Short, memberSize As Short)
+  ERROR 73 ' Feature Unavailable
+END SUB
 
-' SUB SearchT2(block AS _MEM, NumEls, Match, Found, Dir, Code, StructSize, MemberOf, MemberSize)
-'   ERROR 73 ' Feature Unavailable
-' END SUB
+SUB SearchT2(address As Any Ptr, numEls As Short, match As Any Ptr, Byref found As Short, direction As Short, code As Short, structSize As Short, memberOff As Short, memberSize As Short)
+  ERROR 73 ' Feature Unavailable
+END SUB
 
 ' SetBit will set an element in a QuickPak Professional Bit array to 
 ' either one or zero (true or false). 
@@ -797,10 +831,12 @@ SUB SetBit(Byref array As String, element As Short, value As Short)
   ELSE 
     Var byt = byt AND NOT (2 ^ bit1)
   END IF
-  MID$(array$, entry, 1) = CHR$(byt)
+  MID$(array, entry, 1) = CHR$(byt)
 END SUB
 
-' SUB SortD(array#(), start, numEls, dir)
+SUB SortD(address As Double Ptr, numEls As Short, direction As Short)
+
+  ERROR 73 ' Feature Unavailable
 
 '   min = start
 '   max = start + numEls - 1
@@ -819,95 +855,28 @@ END SUB
 '     NEXT
 '   NEXT
 
-' END SUB
+END SUB
 
-' SUB SortI(array(), start, numEls, dir)
+SUB SortI(address As Short Ptr, numEls As Short, direction As Short)
+  ERROR 73 ' Feature Unavailable
+END SUB
 
-'   min = start
-'   max = start + numEls - 1
+SUB SortL(address As Long Ptr, numEls As Short, direction As Short)
+  ERROR 73 ' Feature Unavailable
+END SUB
 
-'   FOR i = min TO max
-'     FOR j = min TO max - i 
-'       IF dir THEN ' descending
-'         IF array(j) < array(j + 1) THEN 
-'           SWAP array(j), array(j + 1) 
-'         END IF
-'       ELSE ' ascending
-'         IF array(j) > array(j + 1) THEN 
-'           SWAP array(j), array(j + 1) 
-'         END IF
-'       END IF
-'     NEXT
-'   NEXT
+SUB SortS(address As Single Ptr, numEls As Short, direction As Short)
+  ERROR 73 ' Feature Unavailable
+END SUB
 
-' END SUB
+SUB SortC(address As Double Ptr, numEls As Short, direction As Short)
+  ERROR 73 ' Feature Unavailable
+END SUB
 
-' SUB SortL(array&(), start, numEls, dir)
-
-'   min = start
-'   max = start + numEls - 1
-
-'   FOR i = min TO max
-'     FOR j = min TO max - i 
-'       IF dir THEN ' descending
-'         IF array&(j) < array&(j + 1) THEN 
-'           SWAP array&(j), array&(j + 1) 
-'         END IF
-'       ELSE ' ascending
-'         IF array&(j) > array&(j + 1) THEN 
-'           SWAP array&(j), array&(j + 1) 
-'         END IF
-'       END IF
-'     NEXT
-'   NEXT
-
-' END SUB
-
-' SUB SortS(array!(), start, numEls, dir)
-
-'   min = start
-'   max = start + numEls - 1
-
-'   FOR i = min TO max
-'     FOR j = min TO max - i 
-'       IF dir THEN ' descending
-'         IF array!(j) < array!(j + 1) THEN 
-'           SWAP array!(j), array!(j + 1) 
-'         END IF
-'       ELSE ' ascending
-'         IF array!(j) > array!(j + 1) THEN 
-'           SWAP array!(j), array!(j + 1) 
-'         END IF
-'       END IF
-'     NEXT
-'   NEXT
-
-' END SUB
-
-' SUB SortC(array!(), start, numEls, dir)
-
-'   min = start
-'   max = start + numEls - 1
-
-'   FOR i = min TO max
-'     FOR j = min TO max - i 
-'       IF dir THEN ' descending
-'         IF array!(j) < array!(j + 1) THEN 
-'           SWAP array!(j), array!(j + 1) 
-'         END IF
-'       ELSE ' ascending
-'         IF array!(j) > array!(j + 1) THEN 
-'           SWAP array!(j), array!(j + 1) 
-'         END IF
-'       END IF
-'     NEXT
-'   NEXT
-
-' END SUB
-
-' ' SortStr will sort (case-sensitive) all or just a portion of a conventional (not 
-' ' fixed-length) string array into either ascending or descending order. 
-' SUB SortStr(array$(), startElement, numOfElements, dir)
+' SortStr will sort (case-sensitive) all or just a portion of a conventional (not 
+' fixed-length) string array into either ascending or descending order. 
+SUB SortStr(address As String Ptr, numEls As Short, direction As Short)
+  ERROR 73 ' Feature Unavailable
 '   ' start is the first element to be included in the sort, 
 '   ' numEls is the number of elements to consider, and dir 
 '   ' indicates the sort direction. If dir is set to zero, then the sorting 
@@ -962,11 +931,12 @@ END SUB
 ' L4:
 '   ERASE qStack                ' delete the temporary stack array
 
-' END SUB
+END SUB
 
-' ' SortStr2 will sort (case-insensitive) all or just a portion of a conventional (not 
-' ' fixed-length) string array into either ascending or descending order. 
-' SUB SortStr2(array$(), startElement, numOfElements, dir)
+' SortStr2 will sort (case-insensitive) all or just a portion of a conventional (not 
+' fixed-length) string array into either ascending or descending order. 
+SUB SortStr2(address As String Ptr, numEls As Short, direction As Short)
+  ERROR 73 ' Feature Unavailable
 
 '   REDIM qStack(500)     ' create stack
 
@@ -1010,19 +980,19 @@ END SUB
 ' L4:
 '   ERASE qStack                ' delete the temporary stack array
 
-' END SUB
+END SUB
 
-' SUB SortT(block AS _MEM, NumEls, Dir, ElSize, MemberOffset, MemberSize)
-'   ERROR 73 ' Feature Unavailable
-' END SUB
+SUB SortT(address As Any Ptr, numEls As Short, direction As Short, elSize As Short, memberOffset As Short, memberSize As Short)
+  ERROR 73 ' Feature Unavailable
+END SUB
 
-' SUB SortT2(block AS _MEM, NumEls, Dir, ElSize, MemberOffset, MemberSize)
-'   ERROR 73 ' Feature Unavailable
-' END SUB
+SUB SortT2(address As Any Ptr, numEls As Short, direction As Short, elSize As Short, memberOffset As Short, memberSize As Short)
+  ERROR 73 ' Feature Unavailable
+END SUB
 
-' ' ****************************************
-' ' Chapter 3 - DOS Services
-' ' ****************************************
+' ****************************************
+' Chapter 3 - DOS Services
+' ****************************************
 
 ' SUB CDir(NewDir$)
 '   CHDIR NewDir$

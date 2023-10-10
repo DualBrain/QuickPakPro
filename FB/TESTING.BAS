@@ -2,6 +2,11 @@
 
 CLS
 
+Type Thing
+  A As Short
+  B As Short
+End Type
+
 ' AddInt
 IF False Then
   Dim a(100) As Short
@@ -28,11 +33,6 @@ End If
 
 ' DeleteT
 IF False Then
-
-  Type Thing
-    A As Short
-    B As Short
-  End Type
 
   Dim ta(10) AS Thing
 
@@ -175,4 +175,97 @@ End If
 ' GetBit/SetBit
 If False Then
   ' TODO
+End If
+
+' IMaxX/IMinX
+If False Then
+  ' TODO
+End If
+
+' InitInt
+If false Then
+
+  Dim ndx(10) As Short
+  InitInt @ndx(0), 0, 11
+
+  FOR i As Short = 0 To 10
+    PRINT ndx(i)
+  Next
+
+End If
+
+' InsertStr
+If False Then
+
+  Dim a(10) As String
+  For x As Short = 0 To 10
+    a(x) = "Element " + STR$(x)
+  Next
+
+  InsertStr @a(5), "Testing", 5
+
+  For x As Short = 0 To 10
+    PRINT a(x)
+  Next
+
+End If
+
+' InsertT
+If False Then
+
+  Dim a(10) As Thing
+
+  For i As Short = 0 To 10
+    a(i).a = i
+    a(i).b = i
+  Next
+
+  InsertT @a(5), 4, 5
+
+  For i As Short = 0 To 10
+    PRINT i; a(i).a; a(i).b
+  Next
+
+End If
+
+' ISortD/I/L/S/C
+IF false Then
+
+  Dim a(3) As Double
+  a(0) = 100
+  a(1) = 10
+  a(2) = 30
+  a(3) = 5
+  'a(4) = 1000
+  'a(5) = 2
+
+  Dim ndx(UBOUND(a)) As Short
+
+  ISortD @a(lbound(a)), @ndx(lbound(ndx)), ubound(a) + 1, 1
+  
+  For i As Short = 0 To ubound(a)
+    PRINT i; ndx(i); a(ndx(i))
+  Next
+
+End If
+
+' ISortStr/2
+IF false Then
+
+  Dim a(3) As String
+  a(0) = "a 100"
+  a(1) = "10"
+  a(2) = "b 30"
+  a(3) = "B 5"
+  'a(4) = "b 1000"
+  'a(5) = "a 35"
+
+  Dim ndx(UBOUND(a)) As Short
+
+  ISortStr2 @a(lbound(a)), @ndx(lbound(ndx)), ubound(a) + 1, 0
+  
+  For i As Short = 0 To ubound(a)
+    PRINT i; ndx(i); " "; a(ndx(i))
+  Next
+
 End If

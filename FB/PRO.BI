@@ -19,10 +19,61 @@ DECLARE SUB FindTB(address As Any Ptr, elSize As Short, Byref curEl As Short, se
 DECLARE SUB FindTB2(address As Any Ptr, elSize As Short, Byref curEl As Short, searchValue As String)
 DECLARE FUNCTION FindLast (address As String Ptr, numEls As Short) As Short
 DECLARE FUNCTION GetBit(array As String, element As Short) As Short
+DECLARE FUNCTION IMaxD(address As Double Ptr, numEls As Short) As Short
+DECLARE FUNCTION IMaxI(address As Short Ptr, numEls As Short) As Short
+DECLARE FUNCTION IMaxL(address As Long Ptr, numEls As Short) As Short
+DECLARE FUNCTION IMaxS(address As Single Ptr, numEls As Short) As Short
+DECLARE FUNCTION IMaxC(address As Double Ptr, numEls As Short) As Short
+DECLARE FUNCTION IMinD(address As Double Ptr, numEls As Short) As Short
+DECLARE FUNCTION IMinI(address As Short Ptr, numEls As Short) As Short
+DECLARE FUNCTION IMinL(address As Long Ptr, numEls As Short) As Short
+DECLARE FUNCTION IMinS(address As Single Ptr, numEls As Short) As Short
+DECLARE FUNCTION IMinC(address As Double Ptr, numEls As Short) As Short
+DECLARE SUB InitInt(address As Short Ptr, value As Short, numEls As Short)
+DECLARE SUB InsertStr(address As String Ptr, value As String, numEls As Short)
+DECLARE SUB InsertT(address As Any Ptr, elSize As Short, numEls As Short)
+DECLARE SUB ISortD(array As Double Ptr, ndx As Short Ptr, numEls As Short, direction As Short)
+DECLARE SUB ISortI(array As Short Ptr, ndx As Short Ptr, numEls As Short, direction As Short)
+DECLARE SUB ISortL(array As Long Ptr, ndx As Short Ptr, numEls As Short, direction As Short)
+DECLARE SUB ISortS(array As Single Ptr, ndx As Short Ptr, numEls As Short, direction As Short)
+DECLARE SUB ISortC(array As Double Ptr, ndx As Short Ptr, numEls As Short, direction As Short)
+DECLARE SUB ISortStr(array As String Ptr, ndx As Short Ptr, numEls As Short, direction As Short)
+DECLARE SUB ISortStr2(array As String Ptr, ndx As Short Ptr, numEls As Short, direction As Short)
+DECLARE SUB ISortT(array As Any Ptr, ndx As Short Ptr, numEls As Short, direction As Short, elSize As Short, memberOffset As Short, memberSize As Short)
+DECLARE SUB ISortT2(array As Any Ptr, ndx As Short Ptr, numEls As Short, direction As Short, elSize As Short, memberOffset As Short, memberSize As Short)
+DECLARE SUB KeySort(array As Any Ptr, elSize As Short, numEls As Short, table As Any Ptr, numKeys As Short)
+DECLARE FUNCTION MaxD(address As Double Ptr, numEls As Short) As Double
+DECLARE FUNCTION MaxI(address As Short Ptr, numEls As Short) As Short
+DECLARE FUNCTION MaxL(address As Long Ptr, numEls As Short) As Long
+DECLARE FUNCTION MaxS(address As Single Ptr, numEls As Short) As Single
+DECLARE FUNCTION MaxC(address As Double Ptr, numEls As Short) As Double
+DECLARE FUNCTION MinD(address As Double Ptr, numEls As Short) As Double
+DECLARE FUNCTION MinI(address As Short Ptr, numEls As Short) As Short
+DECLARE FUNCTION MinL(address As Long Ptr, numEls As Short) As Long
+DECLARE FUNCTION MinS(address As Single Ptr, numEls As Short) As Single
+DECLARE FUNCTION MinC(address As Double Ptr, numEls As Short) As Double
+DECLARE SUB Search(address As Any Ptr, numEls As Short, match As Any Ptr, Byref found As Short, direction As Short, matchCode As Short, varType As Short)
+DECLARE SUB SearchT(address As Any Ptr, numEls As Short, match As Any Ptr, Byref found As Short, direction As Short, code As Short, structSize As Short, memberOff As Short, memberSize As Short)
+DECLARE SUB SearchT2(address As Any Ptr, numEls As Short, match As Any Ptr, Byref found As Short, direction As Short, code As Short, structSize As Short, memberOff As Short, memberSize As Short)
+DECLARE SUB SetBit(Byref array As String, element As Short, value As Short)
+DECLARE SUB SortD(address As Double Ptr, numEls As Short, direction As Short)
+DECLARE SUB SortI(address As Short Ptr, numEls As Short, direction As Short)
+DECLARE SUB SortL(address As Long Ptr, numEls As Short, direction As Short)
+DECLARE SUB SortS(address As Single Ptr, numEls As Short, direction As Short)
+DECLARE SUB SortC(address As Double Ptr, numEls As Short, direction As Short)
+DECLARE SUB SortStr(address As String Ptr, numEls As Short, direction As Short)
+DECLARE SUB SortStr2(address As String Ptr, numEls As Short, direction As Short)
+DECLARE SUB SortT(address As Any Ptr, numEls As Short, direction As Short, elSize As Short, memberOffset As Short, memberSize As Short)
+DECLARE SUB SortT2(address As Any Ptr, numEls As Short, direction As Short, elSize As Short, memberOffset As Short, memberSize As Short)
 
 ' ****************************************
+' Chapter 3 - DOS Services
+' ****************************************
 
-DECLARE SUB SetBit(Byref array As String, element As Short, value As Short)
+
+
+
+' ****************************************
 
 DECLARE SUB QPrint (text As String, colr As Short, page As Short)
 'DECLARE FUNCTION QBColor (colr As Short) As ULong
