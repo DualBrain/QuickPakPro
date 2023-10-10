@@ -1,0 +1,6514 @@
+' *********** PRO.BAS - added value functionality for QB64
+'                       inspired by QuickPak Professional 
+'                       for QB45/PDS71/VBDOS10
+
+' Copyright (c) 2023 Cory Smith
+
+#INCLUDE ONCE "PRO.BI"
+
+REM DEFINT A-Z
+
+' ****************************************
+' Chapter 2 - Array Routines 
+' ****************************************
+
+' AddInt adds a constant value to all of the elements in 
+' a specified portion of an integer array.
+SUB AddInt(address As Short Ptr, value As Short, numEls As Short)
+  FOR x As Short = 0 TO numEls - 1
+    *(address + x) = *(address + x) + value
+  NEXT
+END SUB
+
+' DeleteStr removes an element from a normal (not 
+' fixed-length) string array.
+SUB DeleteStr(address As String Ptr, numEls As Short)
+  For x As Short = 0 To numEls - 1
+    SWAP *(address + x), *(address + (x + 1))
+  Next
+END SUB
+
+' DeleteT removes an element from a fixed-length string, numeric, or 
+' user-defined TYPE array. 
+SUB DeleteT(address As Any Ptr, elSize As Short, numEls As Short)
+
+  Dim size As Short
+  SELECT CASE elSize
+    CASE -1 : size = 2 ' 2-byte integer 
+    CASE -2 : size = 4 ' 4-byte long integer
+    CASE -3 : size = 4 ' 4-byte single precision
+    CASE -4 : size = 8 ' 8-byte double precision
+    CASE IS > 0: size = elSize
+    CASE ELSE
+      EXIT SUB
+  END SELECT
+
+  DIM bytes AS ULong: bytes = numEls * size
+  DIM source AS Any Ptr: source = address + size
+  'TODO: If content doesn't overlap, consider using MEMCOPY...
+  'Var startAddress = FB_MEMCOPY (address, source, bytes)
+  ' Otherwise, use MEMMOVE...
+  Var startAddress = FB_MEMMOVE (Byval address, Byval source, bytes)
+
+END SUB
+
+' DimBits - See BITS.BAS.
+
+' Fill2 will quickly assign all of the elements in a specified portion of 
+' an integer array to any value. 
+SUB Fill2(address As Short Ptr, value As Short, numEls As Short)
+  FOR x As Short = 0 TO numEls - 1
+    *(address + x) = value
+  NEXT
+END SUB
+
+' Fill4 will quickly assign all of the elements in a specified portion of 
+' an single array to any value. 
+SUB Fill4(address As Long Ptr, value As Long, numEls As Short)
+  FOR x As Short = 0 TO numEls - 1
+    *(address + x) = value
+  NEXT
+END SUB
+
+' Fill8 will quickly assign all of the elements in a specified portion of 
+' an double array to any value. 
+SUB Fill8(address As Double Ptr, value As Double, numEls As Short)
+  FOR x As Short = 0 TO numEls - 1
+    *(address + x) = value
+  NEXT
+END SUB
+
+' Find will search all or part of a conventional (not fixed-length) 
+' string array forward looking for the first occurrence of a given 
+' string or sub-string. 
+SUB Find(address As String Ptr, Byref numEls As Short, searchValue As String)
+  Var c = 0
+  FOR x As Short = 0 TO numEls - 1
+    IF QInstr(1, *(address + x), searchValue) THEN
+      numEls = c: EXIT SUB
+    END IF
+    c = c + 1
+  NEXT
+  numEls = -1
+END SUB
+
+' Find will search all or part of a conventional (not fixed-length) 
+' string array forward looking for the first occurrence of a given 
+' string or sub-string. 
+SUB Find2(address As String Ptr, Byref numEls As Short, searchValue As String)
+  Var c = 0
+  FOR x As Short = 0 TO numEls - 1
+    IF QInstr2(1, *(address + x), searchValue) THEN
+      numEls = c: EXIT SUB
+    END IF
+    c = c + 1
+  NEXT
+  numEls = -1
+END SUB
+
+' FindB will search all or part of a conventional (not fixed-length) 
+' string array for a string or sub-string. Like Find, FindB also accepts 
+' wild cards and is the case-sensitive version. However, FindB search 
+' the string array backwards. 
+SUB FindB(address As String Ptr, Byref curEl As Short, searchValue As String)
+  FOR x As Short = 0 To curEl ' This assumes a base-0 array.
+    IF QInstr(1, *(address - x), searchValue) THEN
+      curEl = curEl - x: EXIT SUB
+    END IF
+  NEXT
+  curEl = -1
+END SUB
+
+' FindB2 will search all or part of a conventional (not fixed-length) 
+' string array for a string or sub-string. Like Find2, FindB2 also accepts 
+' wild cards and is the case-insensitive versions. However, FindB2 search 
+' the string array backwards. 
+SUB FindB2(address As String Ptr, Byref curEl As Short, searchValue As String)
+  FOR x As Short = 0 To curEl ' This assumes a base-0 array.
+    IF QInstr2(1, *(address - x), searchValue) THEN
+      curEl = curEl - x: EXIT SUB
+    END IF
+  NEXT
+  curEl = -1
+END SUB
+
+' FindExact searches an entire conventional (not fixed-length) string 
+' array for an exact match. 
+SUB FindExact(address As String Ptr, Byref numEls As Short, searchValue As String)
+  Var c = 0
+  FOR x As Short = 0 TO numEls - 1
+    IF INSTR(1, *(address + x), searchValue) THEN
+      numEls = c: EXIT SUB
+    END IF
+    c = c + 1
+  NEXT
+  numEls = -1
+END SUB
+
+' FindT will search all or part of a fixed-length string array for any 
+' string or sub-string. 
+SUB FindT(address As Any Ptr, elSize As Short, Byref numEls As Short, searchValue As String)
+
+  Dim size As Short
+  SELECT CASE elSize
+    CASE IS > 0: size = elSize
+    CASE ELSE
+      numEls = -1: EXIT SUB
+  END SELECT
+
+  Var c = 0
+  For x As Short = 0 To numEls - 1
+    Var offset = address + (x * elSize)
+    Dim bytes(elSize) As Byte
+    Var dest = @bytes(0)
+    Var startAddress = FB_MEMCOPY (Byval dest, Byval offset, elSize)
+    Var test = ""
+    FOR ch As Short = 0 TO elSize - 1
+      test = test + CHR(bytes(ch))
+    NEXT
+    IF QInstr(1, test, searchValue) THEN
+      NumEls = c: EXIT SUB
+    END IF
+    c = c + 1
+  Next
+
+  NumEls = -1
+
+END SUB
+
+' FindT will search all or part of a fixed-length string array for any 
+' string or sub-string. 
+SUB FindT2(address As Any Ptr, elSize As Short, Byref numEls As Short, searchValue As String)
+
+  Dim size As Short
+  SELECT CASE elSize
+    CASE IS > 0: size = elSize
+    CASE ELSE
+      numEls = -1: EXIT SUB
+  END SELECT
+
+  Var c = 0
+  For x As Short = 0 To numEls - 1
+    Var offset = address + (x * elSize)
+    Dim bytes(elSize) As Byte
+    Var dest = @bytes(0)
+    Var startAddress = FB_MEMCOPY (Byval dest, Byval offset, elSize)
+    Var test = ""
+    FOR ch As Short = 0 TO elSize - 1
+      test = test + CHR(bytes(ch))
+    NEXT
+    IF QInstr2(1, test, searchValue) THEN
+      NumEls = c: EXIT SUB
+    END IF
+    c = c + 1
+  Next
+
+  NumEls = -1
+
+END SUB
+
+' FindTB will search all or part of a fixed-length string array for a 
+' string or sub-string. Like FindT, FindTB also accepts wild cards 
+' and is the case-sensitive version. However, FindTB search the string
+' array backwards. 
+SUB FindTB(address As Any Ptr, elSize As Short, Byref curEl As Short, searchValue As String)
+
+  Dim size As Short
+  SELECT CASE elSize
+    CASE IS > 0: size = elSize
+    CASE ELSE
+      curEl = -1: EXIT SUB
+  END SELECT
+
+  FOR x As Short = 0 To curEl ' This assumes a base-0 array.
+    Var offset = address - (x * elSize) - x
+    Dim bytes(elSize - 1) As Byte
+    Var dest = @bytes(0)
+    Var startAddress = FB_MEMCOPY (Byval dest, Byval offset, elSize)
+    Var test = ""
+    FOR ch As Short = 0 TO elSize - 1
+      test = test + CHR$(bytes(ch))
+    NEXT
+    IF QInstr(1, test, searchValue) THEN
+      curEl = curEl - x: EXIT SUB
+    END IF
+  NEXT
+  curEl = -1
+
+END SUB
+
+' FindTB2 will search all or part of a fixed-length string array for a 
+' string or sub-string. Like FindT, FindTB2 also accepts wild cards 
+' and is the case-insensitive version. However, FindTB2 search the string
+' array backwards. 
+SUB FindTB2(address As Any Ptr, elSize As Short, Byref curEl As Short, searchValue As String)
+
+  Dim size As Short
+  SELECT CASE elSize
+    CASE IS > 0: size = elSize
+    CASE ELSE
+      curEl = -1: EXIT SUB
+  END SELECT
+
+  FOR x As Short = 0 To curEl ' This assumes a base-0 array.
+    Var adjust = (x * elSize) - x
+    Var offset = address - adjust
+    Dim bytes(elSize - 1) As Byte
+    Var dest = @bytes(0)
+    Var startAddress = FB_MEMCOPY (Byval dest, Byval offset, elSize)
+    Var test = ""
+    FOR ch As Short = 0 TO elSize - 1
+      test = test + CHR$(bytes(ch))
+    NEXT
+    IF QInstr2(1, test, searchValue) THEN
+      curEl = curEl - x: EXIT SUB
+    END IF
+  NEXT
+  curEl = -1
+
+END SUB
+
+' FindLast scans a conventional (not fixed-length) string array 
+' backwards looking for the last non-blank element. 
+FUNCTION FindLast (address As String Ptr, numEls As Short) As Short
+  FOR x As Short = 0 To numEls ' This assumes a base-0 array.
+    IF *(address - x) <> "" THEN
+      FindLast = numEls - x: EXIT FUNCTION
+    END IF
+  NEXT
+  FindLast = -1
+END FUNCTION
+
+' GetBit will report the status (on or off) of an element in a QuickPak 
+' Professional Bit array.
+FUNCTION GetBit(array As String, element As Short) As Short
+  ' NOTE: Not sure if this matches the original QPPro implementation.
+  Var entry = (element \ 8) + 1
+  Var bit1 = element MOD 8
+  Var byt = ASC(MID$(array, entry, 1))
+  Var test = 2 ^ bit1
+  IF (byt AND test) = test THEN
+    GetBit = -1
+  ELSE 
+    GetBit = 0
+  END IF
+END FUNCTION
+
+' made it to page 148
+
+' FUNCTION IMaxD(array#(), start, numEls)
+'   max# = array#(start): entry = start
+'   FOR x = start + 1 TO start + numEls - 1
+'     IF array#(x) > max# THEN max# = array#(x): entry = x
+'   NEXT
+'   IMaxD = entry - start
+' END FUNCTION
+
+' FUNCTION IMaxI(array(), start, numEls)
+'   max = array(start): entry = start
+'   FOR x = start + 1 TO start + numEls - 1
+'     IF array(x) > max THEN max = array(x): entry = x
+'   NEXT
+'   IMaxI = entry - start
+' END FUNCTION
+
+' FUNCTION IMaxL(array&(), start, numEls)
+'   max& = array&(start): entry = start
+'   FOR x = start + 1 TO start + numEls - 1
+'     IF array&(x) > max& THEN max& = array&(x): entry = x
+'   NEXT
+'   IMaxL = entry - start
+' END FUNCTION
+
+' FUNCTION IMaxS(array!(), start, numEls)
+'   max! = array!(start): entry = start
+'   FOR x = start + 1 TO start + numEls - 1
+'     IF array!(x) > max! THEN max! = array!(x): entry = x
+'   NEXT
+'   IMaxS = entry - start
+' END FUNCTION
+
+' FUNCTION IMaxC(array!(), start, numEls)
+'   max! = array!(start): entry = start
+'   FOR x = start + 1 TO start + numEls - 1
+'     IF array!(x) > max! THEN max! = array!(x): entry = x
+'   NEXT
+'   IMaxC = entry - start
+' END FUNCTION
+
+' FUNCTION IMinD(array#(), start, numEls)
+'   min# = array#(start): entry = start
+'   FOR x = start + 1 TO start + numEls - 1
+'     IF array#(x) < min# THEN min# = array#(x): entry = x
+'   NEXT
+'   IMinD = entry - start
+' END FUNCTION
+
+' FUNCTION IMinI(array(), start, numEls)
+'   min = array(start): entry = start
+'   FOR x = start + 1 TO start + numEls - 1
+'     IF array(x) < min THEN min = array(x): entry = x
+'   NEXT
+'   IMinI = entry - start
+' END FUNCTION
+
+' FUNCTION IMinL(array&(), start, numEls)
+'   min& = array&(start): entry = start
+'   FOR x = start + 1 TO start + numEls - 1
+'     IF array&(x) < min& THEN min& = array&(x): entry = x
+'   NEXT
+'   IMinL = entry - start
+' END FUNCTION
+
+' FUNCTION IMinS(array!(), start, numEls)
+'   min! = array!(start): entry = start
+'   FOR x = start + 1 TO start + numEls - 1
+'     IF array!(x) < min! THEN min! = array!(x): entry = x
+'   NEXT
+'   IMinS = entry - start
+' END FUNCTION
+
+' FUNCTION IMinC(array!(), start, numEls)
+'   min! = array!(start): entry = start
+'   FOR x = start + 1 TO start + numEls - 1
+'     IF array!(x) < min! THEN min! = array!(x): entry = x
+'   NEXT
+'   IMinC = entry - start
+' END FUNCTION
+
+' SUB InitInt(array(), start, value, numEls)
+'   v = value
+'   FOR x = start TO start + numEls - 1
+'     array(x) = v: v = v + 1
+'   NEXT
+' END SUB
+
+' ' InsertStr will insert an element at any point into a conventional (not 
+' ' fixed-length) string array. 
+' SUB InsertStr(array$(), startElement, insertValue$, numEls)
+'   FOR x = startElement + numEls - 1 TO startElement + 1 STEP -1 
+'     SWAP array$(x), array$(x - 1) 
+'   NEXT 
+'   SWAP array$(startElement), insertValue$ 
+' END SUB
+
+' SUB InsertT(block AS _MEM, elSize, numEls)
+
+'   SELECT CASE elSize
+'     CASE -1 : size = 2 ' 2-byte integer 
+'     CASE -2 : size = 4 ' 4-byte long integer
+'     CASE -3 : size = 4 ' 4-byte single precision
+'     CASE -4 : size = 8 ' 8-byte double precision
+'     CASE IS > 0: size = elSize
+'     CASE ELSE
+'       EXIT SUB
+'   END SELECT
+
+'   DIM totalSize AS _OFFSET: totalSize = numEls * size
+  
+'   DIM offset AS _OFFSET: offset = block.OFFSET + size
+'   _MEMCOPY block, block.OFFSET, totalSize TO block, offset
+
+'   ' FOR x = startElement + numEls - 1 TO startElement + 1 STEP -1
+'   '   array(x) = array(x - 1)
+'   ' NEXT
+
+' END SUB
+
+' SUB ISortD(array#(), start, ndx(), numEls, dir)
+  
+'   ' Determine range of elements
+
+'   min = start
+'   max = start + numEls - 1
+
+'   ' Initialize the ndx() array
+'   FOR i = min TO max
+'     ndx(i) = i
+'   NEXT
+
+'   ' Sort the ndx using array# values
+
+'   FOR i = min TO max
+'     FOR j = min TO max - i 
+'       IF dir THEN ' descending
+'         IF array#(ndx(j)) < array#(ndx(j + 1)) THEN 
+'           SWAP ndx(j), ndx(j + 1) 
+'         END IF
+'       ELSE ' ascending
+'         IF array#(ndx(j)) > array#(ndx(j + 1)) THEN 
+'           SWAP ndx(j), ndx(j + 1) 
+'         END IF
+'       END IF
+'     NEXT
+'   NEXT
+
+' END SUB
+
+' SUB ISortI(array(), start, ndx(), numEls, dir)
+
+'   ' Determine range of elements
+
+'   min = start
+'   max = start + numEls - 1
+
+'   ' Initialize the ndx() array
+'   FOR i = min TO max
+'     ndx(i) = i
+'   NEXT
+
+'   ' Sort the ndx using array values
+
+'   FOR i = min TO max
+'     FOR j = min TO max - i 
+'       IF dir THEN ' descending
+'         IF array(ndx(j)) < array(ndx(j + 1)) THEN 
+'           SWAP ndx(j), ndx(j + 1) 
+'         END IF
+'       ELSE ' ascending
+'         IF array(ndx(j)) > array(ndx(j + 1)) THEN 
+'           SWAP ndx(j), ndx(j + 1) 
+'         END IF
+'       END IF
+'     NEXT
+'   NEXT
+
+' END SUB
+
+' SUB ISortL(array&(), start, ndx(), numEls, dir)
+
+'   ' Determine range of elements
+
+'   min = start
+'   max = start + numEls - 1
+
+'   ' Initialize the ndx() array
+'   FOR i = min TO max
+'     ndx(i) = i
+'   NEXT
+
+'   ' Sort the ndx using array& values
+
+'   FOR i = min TO max
+'     FOR j = min TO max - i 
+'       IF dir THEN ' descending
+'         IF array&(ndx(j)) < array&(ndx(j + 1)) THEN 
+'           SWAP ndx(j), ndx(j + 1) 
+'         END IF
+'       ELSE ' ascending
+'         IF array&(ndx(j)) > array&(ndx(j + 1)) THEN 
+'           SWAP ndx(j), ndx(j + 1) 
+'         END IF
+'       END IF
+'     NEXT
+'   NEXT
+
+' END SUB
+
+' SUB ISortS(array!(), start, ndx(), numEls, dir)
+
+'   ' Determine range of elements
+
+'   min = start
+'   max = start + numEls - 1
+
+'   ' Initialize the ndx() array
+'   FOR i = min TO max
+'     ndx(i) = i
+'   NEXT
+
+'   ' Sort the ndx using array! values
+
+'   FOR i = min TO max
+'     FOR j = min TO max - i 
+'       IF dir THEN ' descending
+'         IF array!(ndx(j)) < array!(ndx(j + 1)) THEN 
+'           SWAP ndx(j), ndx(j + 1) 
+'         END IF
+'       ELSE ' ascending
+'         IF array!(ndx(j)) > array!(ndx(j + 1)) THEN 
+'           SWAP ndx(j), ndx(j + 1) 
+'         END IF
+'       END IF
+'     NEXT
+'   NEXT
+
+' END SUB
+
+' SUB ISortC(array!(), start, ndx(), numEls, dir)
+
+'   ' Determine range of elements
+
+'   min = start
+'   max = start + numEls - 1
+
+'   ' Initialize the ndx() array
+'   FOR i = min TO max
+'     ndx(i) = i
+'   NEXT
+
+'   ' Sort the ndx using array! values
+
+'   FOR i = min TO max
+'     FOR j = min TO max - i 
+'       IF dir THEN ' descending
+'         IF array!(ndx(j)) < array!(ndx(j + 1)) THEN 
+'           SWAP ndx(j), ndx(j + 1) 
+'         END IF
+'       ELSE ' ascending
+'         IF array!(ndx(j)) > array!(ndx(j + 1)) THEN 
+'           SWAP ndx(j), ndx(j + 1) 
+'         END IF
+'       END IF
+'     NEXT
+'   NEXT
+
+' END SUB
+
+' SUB ISortStr(array$(), start, ndx(), numEls, dir)
+
+'   ' Determine range of elements
+
+'   min = start
+'   max = start + numEls - 1
+
+'   ' Initialize the ndx() array
+'   FOR i = min TO max
+'     ndx(i) = i
+'   NEXT
+
+'   ' Sort the ndx using array! values
+
+'   FOR i = min TO max
+'     FOR j = min TO max - i 
+'       IF dir THEN ' descending
+'         IF array$(ndx(j)) < array$(ndx(j + 1)) THEN 
+'           SWAP ndx(j), ndx(j + 1) 
+'         END IF
+'       ELSE ' ascending
+'         IF array$(ndx(j)) > array$(ndx(j + 1)) THEN 
+'           SWAP ndx(j), ndx(j + 1) 
+'         END IF
+'       END IF
+'     NEXT
+'   NEXT
+
+' END SUB
+
+' SUB ISortStr2(Array$(), Start, Ndx(), NumEls, Dir)
+
+'   ' Determine range of elements
+
+'   min = start
+'   max = start + numEls - 1
+
+'   ' Initialize the ndx() array
+'   FOR i = min TO max
+'     ndx(i) = i
+'   NEXT
+
+'   ' Sort the ndx using array! values
+
+'   FOR i = min TO max
+'     FOR j = min TO max - i 
+'       IF dir THEN ' descending
+'         IF LCASE$(array$(ndx(j))) < LCASE$(array$(ndx(j + 1))) THEN 
+'           SWAP ndx(j), ndx(j + 1) 
+'         END IF
+'       ELSE ' ascending
+'         IF LCASE$(array$(ndx(j))) > LCASE$(array$(ndx(j + 1))) THEN 
+'           SWAP ndx(j), ndx(j + 1) 
+'         END IF
+'       END IF
+'     NEXT
+'   NEXT
+
+' END SUB
+
+' SUB ISortT(block AS _MEM, Ndx(), NumEls, Dir, ElSize, MemberOffset, MemberSize)
+'   ERROR 73 ' Feature Unavailable
+' END SUB
+
+' SUB ISortT2(block AS _MEM, Ndx(), NumEls, Dir, ElSize, MemberOffset, MemberSize)
+'   ERROR 73 ' Feature Unavailable
+' END SUB
+
+' SUB KeySort(block AS _MEM, ElSize, NumEls, Table(,), NumKey)
+'   ERROR 73 ' Feature Unavailable
+' END SUB
+
+' FUNCTION MaxD#(array#(), start, numEls)
+'   max# = array#(start)
+'   FOR x = start + 1 TO numEls
+'     IF array#(x) > max# THEN max# = array#(x)
+'   NEXT
+'   MaxD# = max#
+' END FUNCTION
+
+' FUNCTION MaxI(array(), start, numEls)
+'   max = array(start)
+'   FOR x = start + 1 TO numEls
+'     IF array(x) > max THEN max = array(x)
+'   NEXT
+'   MaxI = max
+' END FUNCTION
+
+' FUNCTION MaxL&(array&(), start, numEls)
+'   max& = array&(start)
+'   FOR x = start + 1 TO numEls
+'     IF array&(x) > max& THEN max& = array&(x)
+'   NEXT
+'   MaxL& = max&
+' END FUNCTION
+
+' FUNCTION MaxS!(array!(), start, numEls)
+'   max! = array!(start)
+'   FOR x = start + 1 TO numEls
+'     IF array!(x) > max! THEN max! = array!(x)
+'   NEXT
+'   MaxS! = max!
+' END FUNCTION
+
+' FUNCTION MaxC!(array!(), start, numEls)
+'   max! = array!(start)
+'   FOR x = start + 1 TO numEls
+'     IF array!(x) > max! THEN max! = array!(x)
+'   NEXT
+'   MaxC! = max!
+' END FUNCTION
+
+' FUNCTION MinD#(array#(), start, numEls)
+'   min# = array#(start)
+'   FOR x = start + 1 TO numEls
+'     IF array#(x) < min# THEN min# = array#(x)
+'   NEXT
+'   MinD# = min#
+' END FUNCTION
+
+' FUNCTION MinI(array(), start, numEls)
+'   min = array(start)
+'   FOR x = start + 1 TO numEls
+'     IF array(x) < min THEN min = array(x)
+'   NEXT
+'   MinI = min
+' END FUNCTION
+
+' FUNCTION MinL&(array&(), start, numEls)
+'   min& = array&(start)
+'   FOR x = start + 1 TO numEls
+'     IF array&(x) < min& THEN min& = array&(x)
+'   NEXT
+'   MinL& = min&
+' END FUNCTION
+
+' FUNCTION MinS!(array!(), start, numEls)
+'   min! = array!(start)
+'   FOR x = start + 1 TO numEls
+'     IF array!(x) < min! THEN min! = array!(x)
+'   NEXT
+'   MinS! = min!
+' END FUNCTION
+
+' FUNCTION MinC!(array!(), start, numEls)
+'   min! = array!(Start)
+'   FOR x = start + 1 TO numEls
+'     IF array!(x) < min! THEN min! = array!(x)
+'   NEXT
+'   MinC! = min!
+' END FUNCTION
+
+' SUB SearchD(array#(), start, numEls, match, found, direction, matchCode, varType)
+
+'   c = 0
+
+'   min = start
+'   max = start + numEls - 1
+'   IF NOT direction THEN inc = 1 ELSE inc = -1: SWAP min, max
+
+'   SELECT CASE matchCode
+'     CASE 0 ' find an exact match only
+'       FOR i = min TO max STEP inc
+'         c = c + 1
+'         IF array#(i) = match THEN found = c: EXIT SUB
+'       NEXT
+'     CASE 1 ' match if the element is greater or equal
+'       FOR i = min TO max STEP inc
+'         c = c + 1
+'         IF array#(i) => match THEN found = c: EXIT SUB
+'       NEXT
+'     CASE -1 ' match if the element is less or equal 
+'       FOR i = min TO max STEP inc
+'         c = c + 1
+'         IF array#(i) =< match THEN found = c: EXIT SUB
+'       NEXT
+'     CASE ELSE
+'       found = 0
+'   END SELECT
+
+' END SUB
+
+' SUB Search(array(), start, numEls, match, found, direction, matchCode, varType)
+
+'   c = 0
+
+'   min = start
+'   max = start + numEls - 1
+'   IF NOT direction THEN inc = 1 ELSE inc = -1: SWAP min, max
+
+'   SELECT CASE matchCode
+'     CASE 0 ' find an exact match only
+'       FOR i = min TO max STEP inc
+'         c = c + 1
+'         IF array(i) = match THEN found = c: EXIT SUB
+'       NEXT
+'     CASE 1 ' match if the element is greater or equal
+'       FOR i = min TO max STEP inc
+'         c = c + 1
+'         IF array(i) => match THEN found = c: EXIT SUB
+'       NEXT
+'     CASE -1 ' match if the element is less or equal 
+'       FOR i = min TO max STEP inc
+'         c = c + 1
+'         IF array(i) =< match THEN found = c: EXIT SUB
+'       NEXT
+'     CASE ELSE
+'       found = 0
+'   END SELECT
+
+' END SUB
+
+' SUB SearchT(block AS _MEM, NumEls, Match, Found, Dir, Code, StructSize, MemberOf, MemberSize)
+'   ERROR 73 ' Feature Unavailable
+' END SUB
+
+' SUB SearchT2(block AS _MEM, NumEls, Match, Found, Dir, Code, StructSize, MemberOf, MemberSize)
+'   ERROR 73 ' Feature Unavailable
+' END SUB
+
+' SetBit will set an element in a QuickPak Professional Bit array to 
+' either one or zero (true or false). 
+SUB SetBit(Byref array As String, element As Short, value As Short)
+  ' NOTE: Not sure if this matches the original QPPro implementation.
+  Var entry = (element \ 8) + 1
+  Var bit1 = element MOD 8
+  Var byt = ASC(MID$(array, entry, 1))
+  IF value THEN
+    Var byt = byt XOR (2 ^ bit1)
+  ELSE 
+    Var byt = byt AND NOT (2 ^ bit1)
+  END IF
+  MID$(array$, entry, 1) = CHR$(byt)
+END SUB
+
+' SUB SortD(array#(), start, numEls, dir)
+
+'   min = start
+'   max = start + numEls - 1
+
+'   FOR i = min TO max
+'     FOR j = min TO max - i 
+'       IF dir THEN ' descending
+'         IF array#(j) < array#(j + 1) THEN 
+'           SWAP array#(j), array#(j + 1) 
+'         END IF
+'       ELSE ' ascending
+'         IF array#(j) > array#(j + 1) THEN 
+'           SWAP array#(j), array#(j + 1) 
+'         END IF
+'       END IF
+'     NEXT
+'   NEXT
+
+' END SUB
+
+' SUB SortI(array(), start, numEls, dir)
+
+'   min = start
+'   max = start + numEls - 1
+
+'   FOR i = min TO max
+'     FOR j = min TO max - i 
+'       IF dir THEN ' descending
+'         IF array(j) < array(j + 1) THEN 
+'           SWAP array(j), array(j + 1) 
+'         END IF
+'       ELSE ' ascending
+'         IF array(j) > array(j + 1) THEN 
+'           SWAP array(j), array(j + 1) 
+'         END IF
+'       END IF
+'     NEXT
+'   NEXT
+
+' END SUB
+
+' SUB SortL(array&(), start, numEls, dir)
+
+'   min = start
+'   max = start + numEls - 1
+
+'   FOR i = min TO max
+'     FOR j = min TO max - i 
+'       IF dir THEN ' descending
+'         IF array&(j) < array&(j + 1) THEN 
+'           SWAP array&(j), array&(j + 1) 
+'         END IF
+'       ELSE ' ascending
+'         IF array&(j) > array&(j + 1) THEN 
+'           SWAP array&(j), array&(j + 1) 
+'         END IF
+'       END IF
+'     NEXT
+'   NEXT
+
+' END SUB
+
+' SUB SortS(array!(), start, numEls, dir)
+
+'   min = start
+'   max = start + numEls - 1
+
+'   FOR i = min TO max
+'     FOR j = min TO max - i 
+'       IF dir THEN ' descending
+'         IF array!(j) < array!(j + 1) THEN 
+'           SWAP array!(j), array!(j + 1) 
+'         END IF
+'       ELSE ' ascending
+'         IF array!(j) > array!(j + 1) THEN 
+'           SWAP array!(j), array!(j + 1) 
+'         END IF
+'       END IF
+'     NEXT
+'   NEXT
+
+' END SUB
+
+' SUB SortC(array!(), start, numEls, dir)
+
+'   min = start
+'   max = start + numEls - 1
+
+'   FOR i = min TO max
+'     FOR j = min TO max - i 
+'       IF dir THEN ' descending
+'         IF array!(j) < array!(j + 1) THEN 
+'           SWAP array!(j), array!(j + 1) 
+'         END IF
+'       ELSE ' ascending
+'         IF array!(j) > array!(j + 1) THEN 
+'           SWAP array!(j), array!(j + 1) 
+'         END IF
+'       END IF
+'     NEXT
+'   NEXT
+
+' END SUB
+
+' ' SortStr will sort (case-sensitive) all or just a portion of a conventional (not 
+' ' fixed-length) string array into either ascending or descending order. 
+' SUB SortStr(array$(), startElement, numOfElements, dir)
+'   ' start is the first element to be included in the sort, 
+'   ' numEls is the number of elements to consider, and dir 
+'   ' indicates the sort direction. If dir is set to zero, then the sorting 
+'   ' will be forward (ascending). Any other value will cause sorting to 
+'   ' be performed backward (descending). 
+
+'   REDIM qStack(500)    ' create stack
+
+'   s = 1                ' initialize work variables
+'   f = startElement
+'   max = startElement + numOfElements - 1
+'   l = max
+
+' L1:
+'   temp$ = array$((l + f) \ 2)         ' seek midpoint
+'   i = f
+'   j = l
+
+' L2:
+'   IF dir = 0 THEN
+'     WHILE array$(i) < temp$: i = i + 1: WEND ' use > for descending
+'     WHILE array$(j) > temp$: j = j - 1: WEND ' use < for descending
+'   ELSE
+'     WHILE array$(i) > temp$: i = i + 1: WEND
+'     WHILE array$(j) < temp$: j = j - 1: WEND
+'   END IF
+'   IF i > j GOTO L3
+'   IF i < j THEN 
+'     'PRINT "swap"
+'     SWAP array$(i), array$(j)
+'   END IF
+'   i = i + 1: j = j - 1
+'   IF i <= j GOTO L2
+
+' L3:
+'   IF i < l THEN
+'     'PRINT "push"
+'     qStack(s) = i             ' Push I, L
+'     qStack(s + 1) = l
+'     s = s + 2
+'   END IF
+
+'   l = j
+'   IF f < l GOTO L1
+'   IF s = 1 GOTO L4
+'   'PRINT "pop"
+'   s = s - 2                   ' Pop L, F
+'   f = qStack(s)
+'   l = qStack(s + 1)
+'   GOTO L1
+
+' L4:
+'   ERASE qStack                ' delete the temporary stack array
+
+' END SUB
+
+' ' SortStr2 will sort (case-insensitive) all or just a portion of a conventional (not 
+' ' fixed-length) string array into either ascending or descending order. 
+' SUB SortStr2(array$(), startElement, numOfElements, dir)
+
+'   REDIM qStack(500)     ' create stack
+
+'   s = 1                ' initialize work variables
+'   f = startElement
+'   l = startElement + numOfElements - 1
+
+' L1:
+'   temp$ = UCASE$(array$((l + f) \ 2))         ' seek midpoint
+'   i = f
+'   j = l
+
+' L2:
+'   IF dir = 0 THEN
+'     WHILE UCASE$(array$(i)) < temp$: i = i + 1: WEND    ' use > for descending
+'     WHILE UCASE$(array$(j)) > temp$: j = j - 1: WEND    ' use < for descending
+'   ELSE
+'     WHILE UCASE$(array$(i)) > temp$: i = i + 1: WEND    ' use > for descending
+'     WHILE UCASE$(array$(j)) < temp$: j = j - 1: WEND    ' use < for descending
+'   END IF
+'   IF i > j GOTO L3
+'   IF i < j THEN SWAP array$(i), array$(j)
+'   i = i + 1: j = j - 1
+'   IF i <= j GOTO L2
+
+' L3:
+'   IF i < l THEN
+'     qStack(s) = i             ' Push I, L
+'     qStack(s + 1) = l
+'     s = s + 2
+'   END IF
+
+'   l = j
+'   IF f < l GOTO L1
+'   IF s = 1 GOTO L4
+'   s = s - 2                   ' Pop L, F
+'   f = qStack(s)
+'   l = qStack(s + 1)
+'   GOTO L1
+
+' L4:
+'   ERASE qStack                ' delete the temporary stack array
+
+' END SUB
+
+' SUB SortT(block AS _MEM, NumEls, Dir, ElSize, MemberOffset, MemberSize)
+'   ERROR 73 ' Feature Unavailable
+' END SUB
+
+' SUB SortT2(block AS _MEM, NumEls, Dir, ElSize, MemberOffset, MemberSize)
+'   ERROR 73 ' Feature Unavailable
+' END SUB
+
+' ' ****************************************
+' ' Chapter 3 - DOS Services
+' ' ****************************************
+
+' SUB CDir(NewDir$)
+'   CHDIR NewDir$
+' END SUB
+
+' SUB ClipFile(FileName$, NewLength&)
+'   ERROR 73 ' Feature Unavailable
+' END SUB
+
+' ' Disklnfo calls on DOS to examine a disk, and reports its 
+' ' sector and cluster makeup. 
+' SUB DiskInfo(drive$, bytes, sectors, freeClusters&, totalClusters&)
+'  ' Drive$ contains the letter of the drive to examine, and Bytes% returns 
+'  ' how many bytes each sector holds. Sectors% contains the number of sectors 
+'  ' in each disk cluster, FreeClusters& tells how many of them are available, 
+'  ' and Total Clusters& indicates the total disk capacity. 
+'   path$ = drive$
+'   IF INSTR(_OS$, "[WINDOWS]") THEN
+'     IF LEN(path$) = 1 THEN path$ = path$ + ":\"
+'     result& = GetDiskFreeSpace(_OFFSET(path$), _OFFSET(bytes), _OFFSET(sectors), _OFFSET(freeClusters&), _OFFSET(totalClusters&))
+'     IF result& = 0 THEN ' Failed
+'       bytes = 0
+'       sectors = 0
+'       freeClusters& = 0
+'       totalClusters& = 0
+'       'TODO: Need to set DOSError.
+
+'       ' A note regarding how to calculate the total free bytes...
+'       ' freeBytes& = sectors * bytes * freeClusters&
+
+'     ELSE 
+'       'NOTE: Appears to not be working due to (guessing)
+'       '      lack of "very large" drive support in GetDiskFreeSpaceA;
+'       '      may have to switch to use GetDiskFreeSpaceExA possibly
+'       '      combined with GetDiskFreeSpaceA???
+'     END IF
+'   ELSE
+'     ERROR 73 ' Feature Unavailable
+'   END IF
+' END SUB
+
+' ' DiskRoom returns the number of bytes that are 
+' ' currently available on a specified disk drive. 
+' FUNCTION DiskRoom&(Drive$)
+'   ' Drive$ contains either an upper or lower case letter for the disk 
+'   ' drive being examined, or is null to indicate the default drive. Room 
+'   ' is assigned the number of available bytes. 
+'   ERROR 73 ' Feature Unavailable
+' END FUNCTION
+
+' ' DiskSize returns the total capacity in bytes of a specified disk drive. 
+' FUNCTION DiskSize&(Drive$)
+'   ' Drive$ contains an upper or lower case letter for the disk drive 
+'   ' being examined, or is null to indicate the default drive. Size is 
+'   ' assigned the total number of bytes the disk can hold.
+'   ERROR 73 ' Feature Unavailable
+' END FUNCTION
+
+' ' DOSError reports if an error occurred during the last call to a 
+' ' QuickPak Professional DOS routine.
+' FUNCTION DosError
+'   ' DOSError% returns O if there was no error, or -1 if there was. 
+'   DosError = Pro_Internal_DosError
+' END FUNCTION
+
+' ' DOSVer returns the version of DOS that is presently 
+' ' running on the host PC. 
+' FUNCTION DOSVer
+'   DOSVer = 611 ' Fixed as DOS 6.11
+' END FUNCTION
+
+' ' ErrorMsg returns an appropriate message given 
+' ' any of the BASIC error numbers for a DOS service. 
+' FUNCTION ErrorMsg$(ErrorNumber)
+'   SELECT CASE ErrorNumber
+'     CASE 1: ErrorMsg$ = "NEXT without FOR"
+'     CASE 2: ErrorMsg$ = "Syntax error"
+'     CASE 3: ErrorMsg$ = "RETURN without GOSUB"
+'     CASE 4: ErrorMsg$ = "Out of DATA"
+'     CASE 5: ErrorMsg$ = "Illegal function call"
+'     CASE 6: ErrorMsg$ = "Overflow"
+'     CASE 7: ErrorMsg$ = "Out of memory"
+'     CASE 8: ErrorMsg$ = "Label not defined"
+'     CASE 9: ErrorMsg$ = "Subscript out of range"
+'     CASE 10: ErrorMsg$ = "Duplicate definition"
+'     CASE 11: ErrorMsg$ = "Division by zero"
+'     CASE 12: ErrorMsg$ = "Illegal in direct mode"
+'     CASE 13: ErrorMsg$ = "Type mismatch"
+'     CASE 14: ErrorMsg$ = "Out of string space"
+'     CASE 16: ErrorMsg$ = "String formula too complex"
+'     CASE 17: ErrorMsg$ = "Cannot continue"
+'     CASE 18: ErrorMsg$ = "Function not defined"
+'     CASE 19: ErrorMsg$ = "No RESUME"
+'     CASE 20: ErrorMsg$ = "RESUME without error"
+'     CASE 24: ErrorMsg$ = "Device timeout"
+'     CASE 25: ErrorMsg$ = "Device fault"
+'     CASE 26: ErrorMsg$ = "FOR without NEXT"
+'     CASE 27: ErrorMsg$ = "Out of paper"
+'     CASE 29: ErrorMsg$ = "WHILE without WEND"
+'     CASE 30: ErrorMsg$ = "WEND without WHILE"
+'     CASE 33: ErrorMsg$ = "Duplicate label"
+'     CASE 35: ErrorMsg$ = "Subprogram not defined"
+'     CASE 37: ErrorMsg$ = "Argument-count mismatch"
+'     CASE 38: ErrorMsg$ = "Array not defined"
+'     CASE 40: ErrorMsg$ = "Variable required"
+'     CASE 50: ErrorMsg$ = "FIELD overflow"
+'     CASE 51: ErrorMsg$ = "Internal error"
+'     CASE 52: ErrorMsg$ = "Bad file name or number"
+'     CASE 53: ErrorMsg$ = "File not found"
+'     CASE 54: ErrorMsg$ = "Bad file mode"
+'     CASE 55: ErrorMsg$ = "File already open"
+'     CASE 56: ErrorMsg$ = "FIELD statement active"
+'     CASE 57: ErrorMsg$ = "Device I/O error"
+'     CASE 58: ErrorMsg$ = "File already exists"
+'     CASE 59: ErrorMsg$ = "Bad record length"
+'     CASE 61: ErrorMsg$ = "Disk full"
+'     CASE 62: ErrorMsg$ = "Input past end of file"
+'     CASE 63: ErrorMsg$ = "Bad record number"
+'     CASE 64: ErrorMsg$ = "Bad file name"
+'     CASE 67: ErrorMsg$ = "Too many files"
+'     CASE 68: ErrorMsg$ = "Device unavailable"
+'     CASE 69: ErrorMsg$ = "Communication-buffer overflow"
+'     CASE 70: ErrorMsg$ = "Permission denied"
+'     CASE 71: ErrorMsg$ = "Disk not ready"
+'     CASE 72: ErrorMsg$ = "Disk-media error"
+'     CASE 73: ErrorMsg$ = "Feature unavailable"
+'     CASE 74: ErrorMsg$ = "Rename across disks"
+'     CASE 75: ErrorMsg$ = "Path/File access error"
+'     CASE 76: ErrorMsg$ = "Path not found"
+'     CASE ELSE
+'        ErrorMsg$ = "Unknown"
+'   END SELECT
+' END FUNCTION
+
+' ' ExeName returns the full name of the currently executing program, 
+' ' including the drive, path, and file name. ExeName requires DOS 
+' ' 3.0 or higher, and returns a null string when run under DOS 2. 
+' FUNCTION ExeName$
+'   ' NOTE: Considered UCASE$, but an existing sample suggests that this shouldn't be done here.
+'   ExeName$ = COMMAND$(0)
+' END FUNCTION
+
+' ' Exist will quickly determine the presence of a file. 
+' FUNCTION Exist(fileName$)
+'   ' FileName$ is the file or file specification whose presence is being 
+'   ' determined, and There is assigned either to -1 if the file exists, or 0 
+'   ' if it does not. 
+'   ' The FileName$ parameter may optionally contain a drive letter, a 
+'   ' directory path, and either of the DOS wild cards. For example, 
+'   ' "B:\STUFF\*.BAS" would tell if any BASIC program files are 
+'   ' present on drive B in the \STUFF directory.
+'   IF INSTR(fileName$, "*") > 0 OR INSTR(fileName$, "?") > 0 THEN
+'     Exist = FCount(fileName$) > 0
+'   ELSE
+'     Exist = _FileExists(fileName$)
+'   END IF
+' END FUNCTION
+
+' ' FClose will close a file that had been previously opened with the 
+' ' QuickPak Professional FOpen command. 
+' SUB FClose(handle)
+'   CLOSE #handle
+' END SUB
+
+' ' FCopy will copy a file from within a BASIC program without 
+' ' requiring the use of SHELL. 
+' SUB FCopy(source$, dest$, buffer$, errCode)
+
+'   ' TODO: Consider if there is a way to leverage LOF/EOF and buffer$
+'   ' NOTE: This is currently (most likely) very "slow" given it is 
+'   '       working one byte at a time - see the TODO: above.
+
+'   errCode = 0
+
+'   IF Exist(source$) THEN
+
+'     ' TODO: Check destination folder exists.
+'     ' TODO: Protect against trying to overwrite (same source and dest path).
+
+'     DIM value AS _BYTE
+
+'     CALL FOpen(source$, src)
+'     CALL FOpen(dest$, dest)
+
+'     DO
+'       GET #src, , value
+'       IF FEof(src) THEN EXIT DO
+'       PUT #dest, , value
+'     LOOP
+
+'     CALL FClose(dest): CALL FClose(source)
+
+'   ELSE
+'     errCode = 2 ' problem with the source file
+'   END IF
+
+' END SUB
+
+' ' FCreate is used to create a file in preparation for writing to it with 
+' ' the QuickPak Professional file handling routines. 
+' SUB FCreate(fileName$)
+'   ff = FREEFILE
+'   OPEN fileName$ FOR OUTPUT AS #ff
+'   CLOSE #ff
+' END SUB
+
+' ' FEof will report if the current DOS Seek location is at the end of 
+' ' the specified file. 
+' FUNCTION FEof(handle)
+'   FEof = EOF(handle)
+' END FUNCTION
+
+' ' FFlush will flush a file's data buffers to disk without requiring the 
+' ' file to be closed. 
+' SUB FFlush(Handle)
+'   ERROR 73 ' Feature Unavailable
+' END SUB
+
+' ' FGet reads data from a disk file in a manner similar to BASIC's 
+' ' binary GET command, but it returns an error code rather than 
+' ' requiring the use of ON ERROR. 
+' SUB FGet(handle, destination$)
+'   GET #handle, , destination$
+' END SUB
+
+' ' FGetA is similar to the QuickPak Professional FGetT routine, 
+' ' however it accepts a segmented address thus allowing an entire 
+' ' array to be loaded in one operation. FGetA will load up to 64k 
+' ' bytes at a time. 
+' SUB FGetA(handle, block AS _MEM, numBytes)
+
+'   DIM work(1 TO numBytes) AS _BYTE    ' prepare a byte array
+'   GET # handle, , work()              ' read the number of bytes into memory
+  
+'   DIM src AS _MEM                     ' copy the byte array to the memory block
+'   src = _MEM(work())
+'   _MEMCOPY src, src.OFFSET, src.SIZE TO block, block.OFFSET
+'   _MEMFREE src
+
+' END SUB
+
+' SUB FGetAH(FileName$, Array$(), Start, ElSize, NumEls)
+'   ERROR 73 ' Feature Unavailable
+' END SUB
+
+' SUB FGetR(Handle, Destination$, RecNumber&)
+'   ERROR 73 ' Feature Unavailable
+' END SUB
+
+' SUB FGetRT(Handle, block AS _MEM, RecNumber&, RecSize)
+'   ERROR 73 ' Feature Unavailable
+' END SUB
+
+' SUB FGetRTA(Handle, block AS _MEM, RecNumber&, RecSize)
+'   ERROR 73 ' Feature Unavailable
+' END SUB
+
+' SUB FGetT(Handle, block AS _MEM, NumBytes)
+'   ERROR 73 ' Feature Unavailable
+' END SUB
+
+' ' ' FileComp will report if any two disk files are the same. 
+' ' FUNCTION FileComp(file1$, file2$, errCode)
+
+' '   ' File1$ and File2$ are the two files being compared, and Same 
+' '   ' receives either -1 if they are the same, or O if they are not. 
+' '   '
+' '   ' If a DOS error occurs (file not found, drive door open, etc.), then 
+' '   ' ErrCode% will tell which file the error relates to. An ErrCode% of 
+' '   ' 1 means the problem was with File1$, and 2 means it was with File2$.
+' '   '
+' '   ' Besides returning a true or false condition based on a comparison of 
+' '   ' the two files, FileComp also uses the DOSError and WhichError 
+' '   ' services to report disk errors. This is illustrated in the 
+' '   ' DEMOCOMP .BAS example program.
+
+' '   IF NOT Exist(file1$) THEN errCode = 1: EXIT FUNCTION
+' '   IF NOT Exist(file2$) THEN errCode = 2: EXIT FUNCTION
+  
+' '   s1& = FileSize&(file1$)
+' '   s2& = FileSize&(file2$)
+
+' '   IF s1& <> s2& THEN FileComp = 0: EXIT FUNCTION
+
+' '   result = 1 ' assume files match
+
+' '   DIM value1 AS _BYTE
+' '   DIM value2 AS _BYTE
+
+' '   CALL FOpen(file1$, f1)
+' '   CALL FOpen(file2$, f2)
+
+' '   DO
+' '     GET #f1, , value1
+' '     GET #f2, , value2
+' '     IF value1 <> value2 THEN result = 0: EXIT DO ' unless they don't
+' '   LOOP UNTIL FEof(f1)
+
+' '   CALL FClose(f2): CALL FClose(f1)
+
+' '   FileComp = result
+
+' ' END FUNCTION
+
+' SUB FileInfo(fileName$, tVar AS FInfo)
+
+'   f$ = fileName$
+
+'   IF RIGHT$(f$, 1) <> CHR$(0) THEN f$ = f$ + CHR$(0)
+
+'   DIM createDate AS FILETIME
+'   DIM modifyDate AS FILETIME
+'   DIM accessDate AS FILETIME
+'   DIM systime1 AS SYSTEMTIME
+'   DIM fileHandle AS _OFFSET
+
+'   fileHandle = CreateFileA%&(_OFFSET(f$), GENERIC_READ, FILE_SHARE_READ OR FILE_SHARE_WRITE, 0, OPEN_EXISTING, 0, 0)
+'   IF fileHandle <> INVALID_HANDLE_VALUE THEN
+'     IF GetFileTime&(fileHandle, _OFFSET(createDate), _OFFSET(modifyDate), _OFFSET(accessDate)) THEN
+'       'PRINT HEX$(createDate.dwLowDateTime) + HEX$(createDate.dwHighDateTime)
+'       'PRINT HEX$(modifyDate.dwLowDateTime) + HEX$(modifyDate.dwHighDateTime)
+'       'PRINT HEX$(accessDate.dwLowDateTime) + HEX$(accessDate.dwHighDateTime)
+'       IF FileTimeToSystemTime&(_OFFSET(createDate), _OFFSET(systime1)) THEN
+'         tVar.Year = systime1.wYear
+'         tVar.Month = systime1.wMonth
+'         tVar.Day = systime1.wDay
+'         tVar.Hour = systime1.wHour
+'         tVar.Minute = systime1.wMinute
+'         tVar.Second = systime1.wSecond
+'       ELSE
+'         'PRINT "FileTimeToSystemTime failed. Error: 0x" + LCASE$(HEX$(GetLastError&))
+'       END IF
+'     ELSE
+'       'PRINT "GetFileTime failed. Error: 0x" + LCASE$(HEX$(GetLastError&))
+'     END IF
+'     IF CloseHandle&(fileHandle) = 0 THEN
+'       'PRINT "CloseHandle failed. Error: 0x" + LCASE$(HEX$(GetLastError&))
+'     END IF
+'   ELSE
+'     'PRINT "CreateFileA failed. Error: 0x" + LCASE$(HEX$(GetLastError&))
+'   END IF
+
+'   tVar.Size = FileSize(fileName$)
+'   tVar.Attrib = GetFileAttributes(f$)
+
+' END SUB
+
+' ' FileSize will quickly return the length of a named file. 
+' FUNCTION FileSize&(fileName$)
+
+'   ' fileName$ is the name of the file, and size is assigned its length in 
+'   ' bytes. If the file does not exist size is instead assigned a value of -1. 
+
+'   result& = 0
+
+'   IF NOT _FileExists(fileName$) THEN
+'     result& = -1
+'   ELSE
+
+'     IF INSTR(_OS$, "[WINDOWS]") THEN
+'       DIM pattern AS STRING
+'       DIM fd AS Win32_Find_Data
+'       DIM hFind AS _UNSIGNED _OFFSET
+'       DIM junk AS LONG
+'       pattern = fileName$ + CHR$(0)
+'       hFind = FindFirstFile(_OFFSET(pattern), _OFFSET(fd))
+'       IF hFind <> INVALID_HANDLE_VALUE THEN
+'         result& = fd.nfilesizelow
+'         junk = FindClose(hFind)
+'       ELSE
+'         lastError& = GetLastError
+'         IF lastError& = ERROR_ACCESS_DENIED THEN
+'           ERROR 70 ' Permission denied
+'         ELSE
+'           ERROR 75 ' Path/File access error
+'         END IF
+'       END IF
+'     ELSE
+'       ERROR 73 ' Advanced Feature / Feature Unavailable
+'     END IF
+
+'   END IF
+
+'   FileSize& = result&
+
+' END FUNCTION
+
+' SUB FileSort(DataFile$, IndexFile$, First&, Last&, Table(), RecLength)
+'   ERROR 73 ' Feature Unavailable
+' END SUB
+
+' ' FLinput will read a line of input from a file that has been opened 
+' ' using the QuickPak Professional FOpen routine. 
+' FUNCTION FLInput$(handle, buffer$)
+  
+'   ' Handle% is the file handle that was assigned when the file was first 
+'   ' opened, and Buffer$ is a temporary work string needed by FLinput 
+'   ' as it reads the file contents. 
+'   '
+'   ' Unlike the other QuickPak Professional binary input routines that 
+'   ' read a specified number of bytes, words, or elements from a file, 
+'   ' FLinput reads until it encounters the CHR$(13) that marks the end 
+'   ' of a line, or the CHR$(26) that indicates the end of a file. For files 
+'   ' that do not contain an end of file marker, FLinput stops reading at 
+'   ' the physical end of the file. 
+'   '
+'   ' The only errors that are likely when using FLinput are "Input Past 
+'   ' End" (number 62) or "Buffer Too Small" (number 83). It is up to 
+'   ' the calling program to provide a temporary work buffer for 
+'   ' FLinput. If that buff er is too small to read an entire line, you 
+'   ' should invoke FLinput again to obtain the remainder. This is 
+'   ' illustrated in the FLINPUT.BAS example program.
+
+'   SetError 0
+
+'   result$ = ""
+
+'   cp = LOC(handle)
+'   lf = LOF(handle)
+'   lb = LEN(buffer$)
+
+'   IF (cp - 1) + lb => lf THEN
+'     lb = lf - cp
+'   END IF
+
+'   IF lb > 0 THEN
+
+'     CALL FGet(handle, buffer$)
+
+'     cr = INSTR(buffer$, CHR$(13))
+'     feed = INSTR(buffer$, CHR$(10))
+'     ef = INSTR(buffer$, CHR$(26))
+
+'     IF cr > 0 THEN
+'       result$ = LEFT$(buffer$, cr - 1)
+'       IF cr + 1 = feed THEN
+'         IF cp + feed + 1 < lf THEN
+'           SEEK handle, cp + feed + 1
+'         END IF
+'       ELSE
+'         IF cp + cr < lf THEN
+'           SEEK handle, cp + cr
+'         END IF
+'       END IF
+'     ELSEIF ef > 0 THEN
+'       result$ = LEFT$(buffer$, ef - 1)
+'       SEEK handle, cp + ef
+'       SetError 62 ' End of File
+'     ELSE
+'       result$ = buffer$
+'       SetError 83 ' Buffer too small
+'     END IF
+
+'   ELSE
+'     SetError 62 ' End of File
+'   END IF
+
+'   FLInput$ = result$
+
+' END FUNCTION
+
+' FUNCTION FLoc&(Handle)
+'   FLoc& = LOC(Handle)
+' END FUNCTION
+
+' FUNCTION FLof&(handle)
+'   FLof& = LOF(handle)
+' END FUNCTION
+
+' ' FOpen is used to open a disk file in preparation for reading or 
+' ' writing using the QuickPak Professional file access routines. 
+' SUB FOpen(fileName$, handle)
+'   handle = FREEFILE
+'   OPEN fileName$ FOR BINARY ACCESS READ WRITE AS #handle
+' END SUB
+
+' ' FOpenS is used to open for Shared (network access) a disk file in 
+' ' preparation for reading or writing using the QuickPak Professional 
+' ' file access routines.
+' SUB FOpenS(fileName$, handle)
+'   handle = FREEFILE
+'   OPEN fileName$ FOR BINARY ACCESS READ WRITE SHARED AS #handle
+' END SUB
+
+' SUB FOpenAll(FileName$, AccessMode, ShareMode, Handle)
+'   ERROR 73 ' Feature Unavailable
+' END SUB
+
+' FUNCTION FormatDiskette(DriveNumber, Capacity, BufArray())
+'   ERROR 73 ' Feature Unavailable
+' END FUNCTION
+
+' SUB FPut(handle, source$)
+'   PUT #handle, , source$
+' END SUB
+
+' ' FPutA is similar to the QuickPak Professional FPut routine, 
+' ' however it accepts a segmented address thus allowing an entire 
+' ' array to be saved in one operation. FPutA will write up to 64k 
+' ' bytes at a time. 
+' SUB FPutA(handle, array(), start, numBytes)
+
+'   'ORIGINAL: CALL FPutA(Handle%, SEG Array(Start), NumBytes%)
+
+'   ' Handle% is the DOS file handle that was assigned when the file was 
+'   ' opened, and Array(Start) is any array (except a conventional string 
+'   ' array) that is to be saved. 
+'   ' 
+'   ' NumBytes% indicates the number of bytes to be written. If the 
+'   ' number of bytes exceeds 32767, then you must instead use a long 
+'   ' integer variable or number. 
+
+'   written = 0
+'   FOR element = start TO UBOUND(array)
+'     IF written + 2 > numBytes THEN
+'       IF written + 1 <= numBytes THEN
+'         byt = 0 'TODO: Need to determine the byte to be written.
+'         ch$ = CHR$(byt)
+'         PUT #handle, , ch$
+'         written = written + 1
+'       END IF
+'       EXIT FOR
+'     END IF
+'     PUT #handle, , array(element)
+'     written = written + 2
+'   NEXT
+
+' END SUB
+
+' SUB FPutAH(Handle, Array(), start, ElSize, NumEls)
+'   ERROR 73 ' Feature Unavailable
+' END SUB
+
+' SUB FPutR(Handle, Source$, RecNumber&)
+'   ERROR 73 ' Feature Unavailable
+' END SUB
+
+' SUB FPutRT(Handle, block AS _MEM, RecNumber&, RecSize)
+'   ERROR 73 ' Feature Unavailable
+' END SUB
+
+' SUB FPutRTA(Handle, block AS _MEM, RecNumber&, RecSize)
+'   ERROR 73 ' Feature Unavailable
+' END SUB
+
+' SUB FPutT(Handle, block AS _MEM, NumBytes)
+'   ERROR 73 ' Feature Unavailable
+' END SUB
+
+' SUB FSeek(handle, location&)
+'   SEEK handle, location& + 1
+' END SUB
+
+' SUB FStamp(FileName$, NewTime$, NewDate$)
+'   ERROR 73 ' Feature Unavailable
+' END SUB
+
+' FUNCTION FullName$(partName$)
+'   s = 1
+'   DO
+'     p = InstrTbl(s, partName$, "\/")
+'     section$ = MID$(partName$, s, p - s)
+'     IF section$ = ".." THEN 
+'       c = c + 1
+'     ELSE
+'       s = s - 1 ' walk one character back.
+'       EXIT DO
+'     END IF
+'     IF p = -1 THEN EXIT DO
+'     s = p + 1
+'   LOOP
+'   section$ = MID$(partName$, s)
+'   cwd$ = _CWD$
+'   FOR x = 1 TO c
+'     p = InstrTblB(LEN(cwd$), cwd$, "\/")
+'     IF p > 0 THEN
+'       cwd$ = LEFT$(cwd$, p - 1)
+'     ELSE
+'       EXIT FOR ' error?
+'     END IF
+'   NEXT
+'   IF InstrTblB(LEN(cwd$), cwd$, "\/") <> LEN(cwd$) AND _
+'     InstrTbl(1, section$, "\/") <> 1 THEN
+'     IF InstrTbl(1, cwd$, "\") > 0 THEN
+'       cwd$ = cwd$ + "\"
+'     ELSE
+'       cwd$ = cwd$ + "/"
+'     END IF
+'   END IF
+'   FullName$ = cwd$ + section$
+' END FUNCTION
+
+' FUNCTION GetAttr(fileName$)
+'   IF Exist(fileName$) THEN
+'     IF INSTR(_OS$, "[WINDOWS]") THEN
+'       f$ = fileName$
+'       IF RIGHT$(f$, 1) <> CHR$(0) THEN f$ = f$ + CHR$(0)
+'       GetAttr = GetFileAttributes(f$)
+'     ELSE
+'       ERROR 73 ' Feature Unavailable
+'     END IF
+'   ELSE
+'     GetAttr = -1
+'   END IF
+' END FUNCTION
+
+' ' GetDir will return the current directory for either a specified drive 
+' ' or the default drive. 
+' FUNCTION GetDir$(drive$)
+ 
+'   ' Parameter may be given as either upper or lower case, and only the first character is considered
+'   ' Returns the complete directory name, minus the drive letter and colon.
+
+'   ' _CWD$ (function) returns the current working directory as a STRING value.
+'   ' _STARTDIR$ (function) returns the user's program calling path as a STRING.
+
+'   ch$ = MID$(_CWD$, 1, 1)
+'   a = ASC(UCASE$(ch$))
+'   SELECT CASE a
+'     CASE ASC("A") TO ASC("Z")
+'       GetDir$ = MID$(_CWD$, 3)
+'     CASE ELSE
+'       GetDir$ = _CWD$
+'   END SELECT
+
+' END FUNCTION
+
+' FUNCTION GetDisketteType(DriveNumber)
+'   ' Use GetDriveType?
+'   ERROR 73 ' Feature Unavailable
+' END FUNCTION
+
+' ' GetDrive returns the current default disk drive. 
+' FUNCTION GetDrive
+'   ' Drive$ is assigned to a value representing an ASCII character that 
+'   ' holds the current default drive. GetDrive actually returns an integer 
+'   ' result, which can be easily turned into a string as shown above.
+
+'   ' GetDrive returns a value that represents an upper case ASCII drive 
+'   ' letter. For example, if the current default drive is A, then GetDrive 
+'   ' will return the value 65. Likewise, if the current drive is C, 
+'   ' GetDrive would return 67.
+
+'   ' _CWD$ (function) returns the current working directory as a STRING value.
+'   ' _STARTDIR$ (function) returns the user's program calling path as a STRING.
+
+'   IF INSTR(_OS$, "[WINDOWS]") THEN
+'     ch$ = MID$(_CWD$, 1, 1)
+'     a = ASC(UCASE$(ch$))
+'     SELECT CASE a
+'       CASE 65 TO 90 ' A to Z
+'         GetDrive = a
+'       CASE ELSE
+'         GetDrive = 0
+'     END SELECT
+'   ELSE
+'     ERROR 73 ' Feature Unavailable
+'   END IF
+
+' END FUNCTION
+
+' FUNCTION GetVol$(Drive$)
+'   ERROR 73 ' Feature Unavailable
+' END FUNCTION
+
+' ' GoodDrive will quickly determine whether a 
+' ' specified drive letter is valid. 
+' FUNCTION GoodDrive(drive$)
+'   ' Drive$ is either an upper or lower case letter that represents the 
+'   ' drive to check, and Okay receives either -1 if the drive is valid, 
+'   ' or 0 if it is not. 
+'   ' Possibly use GetLogicalDrives or GetLogicalDriveStringsW
+'   ' along with GetDriveType and/or GetDiskFreeSpace/GetDiskFreeSpaceEx.
+'   CALL DiskInfo(drive$, bytes, sectors, freeClusters&, totalClusters&)
+'   IF bytes = 0 THEN
+'     GoodDrive = 0 ' Not good
+'   ELSE
+'     GoodDrive = -1 ' Good
+'   END IF
+' END FUNCTION
+
+' SUB Handle2Name(Handle, FilName AS NameType)
+'   ERROR 73 ' Feature Unavailable
+' END SUB
+
+' SUB KillDir(DirName$)
+'   RMDIR DirName$
+' END SUB
+
+' SUB KillFile(FileName$)
+'   KILL FileName$
+' END SUB
+
+' FUNCTION LastDrive
+'   r = GetLogicalDrives&
+'   list$ = ""
+'   IF (r AND 1) = 1 THEN list$ = list$ + "A"
+'   IF (r AND 2) = 2 THEN list$ = list$ + "B"
+'   IF (r AND 4) = 4 THEN list$ = list$ + "C" 
+'   IF (r AND 8) = 8 THEN list$ = list$ + "D" 
+'   IF (r AND 16) = 16 THEN list$ = list$ + "E" 
+'   IF (r AND 32) = 32 THEN list$ = list$ + "F"
+'   IF (r AND 64) = 64 THEN list$ = list$ + "G"
+'   IF (r AND 128) = 128 THEN list$ = list$ + "H" 
+'   IF (r AND 256) = 256 THEN list$ = list$ + "I"
+'   IF (r AND 512) = 512 THEN list$ = list$ + "J" 
+'   IF (r AND 1024) = 1024 THEN list$ = list$ + "K" 
+'   IF (r AND 2048) = 2048 THEN list$ = list$ + "L" 
+'   IF (r AND 4096) = 4096 THEN list$ = list$ + "M"
+'   IF (r AND 8192) = 8192 THEN list$ = list$ + "N"
+'   IF (r AND 16384) = 16384 THEN list$ = list$ + "O"
+'   IF (r AND 32768) = 32768 THEN list$ = list$ + "P"
+'   IF (r AND 65536) = 65536 THEN list$ = list$ + "Q"
+'   IF (r AND 131072) = 131072 THEN list$ = list$ + "R"
+'   IF (r AND 262144) = 262144 THEN list$ = list$ + "S"
+'   IF (r AND 524288) = 524288 THEN list$ = list$ + "T"
+'   IF (r AND 1048576) = 1048576 THEN list$ = list$ + "U"
+'   IF (r AND 2097152) = 2097152 THEN list$ = list$ + "V"
+'   IF (r AND 4194304) = 4194304 THEN list$ = list$ + "W"
+'   IF (r AND 8388608) = 8388608 THEN list$ = list$ + "X"
+'   IF (r AND 16777216) = 16777216 THEN list$ = list$ + "Y"
+'   IF (r AND 33554432) = 33554432 THEN list$ = list$ + "Z"
+'   'PRINT list$: WaitKeyS
+'   LastDrive = ASC(RIGHT$(list$, 1))
+' END FUNCTION
+
+' ' LineCount will quickly count all of the lines of text in a specified file.
+' FUNCTION LineCount(fileName$, buffer$)
+
+'   ' The main purpose of LineCount is to report the number of lines in a 
+'   ' text file, in preparation for dimensioning an array to hold them. 
+'   ' When a program will be reading a text file into an array, knowing 
+'   ' this ahead of time can be a big help. The only other possibilities 
+'   ' would be to read through the entire file once just to count the lines, 
+'   ' or guess at how large to dimension the array to. 
+
+'   ' One important caveat you should be aware of when using 
+'   ' LineCount is that it merely counts the number of CHR$(13) 
+'   ' carriage returns in the file. Line feeds are not considered at all. 
+
+'   ' fileName$ is the name of the file to examine, and may contain an 
+'   ' optional drive letter or path name. buffer$ is a temporary work area 
+'   ' needed by LineCount to hold the file, and count receives the 
+'   ' number of lines of text. 
+
+'   ' If there are more than 32767 lines in the file (very unlikely if you 
+'   ' think about it), LineCount will return a negative number. Simply 
+'   ' add 65536 to that number to get the actual count. 
+
+'   ' If the file doesn't exist or some other error occurs, LineCount will 
+'   ' instead receive -1. 
+
+'   result = 0
+
+'   IF _FileExists(fileName$) THEN
+'     ff = FREEFILE
+'     OPEN fileName$ FOR INPUT AS #ff
+'     DO UNTIL EOF(1)
+'       LINE INPUT #ff, buffer$
+'       result = result + 1
+'     LOOP
+'     CLOSE #ff
+'   ELSE
+'     result = -1
+'   END IF
+
+'   LineCount = result
+
+' END FUNCTION
+
+' ' LoadExec is a SHELL replacement that lets you execute another 
+' ' program, and then retrieve its exit code (the DOS error level). 
+' FUNCTION LoadExec(program$, cmdLine$)
+
+'   ' Program$ is the full name of the program to be run, and CmdLine$ 
+'   ' is an optional command line parameter that is passed to the program. 
+
+'   ' LoadExec can be used to run .EXE and .COM programs only. You 
+'   ' cannot run a batch file or other non-executable program directly 
+'   ' (but see below). 
+'   '   
+'   ' Note that the DOS service that LoadExec uses does not honor the 
+'   ' PATH setting. Therefore, you must state the complete drive and 
+'   ' path if they are not the current default. See the SearchPath$ 
+'   ' function elsewhere in this manual, which examines the PATH and 
+'   ' returns the fully qualified name of an executable program. 
+'   ' 
+'   ' Normally, ExitCode will receive a value between O and 255, 
+'   ' corresponding to the exit code returned by the program that was 
+'   ' executed. However, it is also possible that the value may be higher 
+'   ' if DOS intervened in the program's termination. Here's how you 
+'   ' can determine how the program was ended, and isolate the two 
+'   ' separate pieces of information:
+'   ' 
+'   '   IF ExitCode <= 255 THEN 
+'   '     PRINT "Normal termination with an exit code of"; ExitCode 
+'   '   ELSE 
+'   '     DOSCode = ExitCode \ 256 
+'   '     ExitCode = ExitCode AND 255 
+'   '     PRINT "DOS intervened" 
+'   '     SELECT CASE DOSCode 
+'   '       CASE 1 
+'   '         'isolate DOS's contribution 
+'   '         'optionally retain the program's part 
+'   '         PRINT "You pressed Ctrl-C or Ctrl-Break to end the program" 
+'   '       CASE 2 
+'   '         PRINT "A critical error occurred and you pressed A (Abort)" 
+'   '       CASE 3 
+'   '         PRINT "The program ended as a TSR -- reboot now!" 
+'   '       CASE ELSE 
+'   '     END SELECT 
+'   '   END IF 
+'   '
+'   ' Due to a bug in DOS 2.x you should not use LoadExec with that 
+'   ' version of DOS. You can prevent this by first querying the DOSVer 
+'   ' function, and checking for a value of at least 300. Related to the 
+'   ' DOS 2.x issue, some older programs (including CHKDSK and 
+'   ' FORMAT) require a DOS 1.x style FCB structure to be present. 
+'   ' To avoid adding a lot of code to accommodate what is clearly a 
+'   ' waning method, LoadExec does not support those either. 
+'   '
+'   ' LOADEXEC.BAS shows how to use LoadExec with the 
+'   ' SearchPath$ function, and also how to execute batch files. Besides 
+'   ' interpreting return codes, it also shows how to detect DOS errors 
+'   ' using WhichError.
+
+'   IF cmdLine$ <> "" THEN
+'     LoadExec = SHELL(program$ + " " + cmdLine$)
+'   ELSE
+'     LoadExec = SHELL(program$ + " " + cmdLine$)
+'   END IF
+
+' END FUNCTION
+
+' SUB LockFile(Handle, Offset&, Length&)
+'   ERROR 73 ' Feature Unavailable
+' END SUB
+
+' SUB MakeDir(DirName$)
+'   MKDIR DirName$
+' END SUB
+
+' SUB NameDir(OldName$, NewName$)
+'   NAME OldName$ AS NewName$
+' END SUB
+
+' SUB NameFile(OldName$, NewName$)
+'   NAME OldName$ AS NewName$
+' END SUB
+
+' FUNCTION NetDrive(Drive$)
+'   ERROR 73 ' Feature Unavailable
+' END FUNCTION
+
+' SUB PutVol(Drive$, Label$)
+'   ERROR 73 ' Feature Unavailable
+' END SUB
+
+' SUB QBLoad(FileName$, Array(), Element)
+'   'DEF SEG = VARSEG(Array(0))
+'     BLOAD FileName$, VARPTR(Array(LBOUND(Array)))
+'   'END SEG
+' END SUB
+
+' SUB QBSave(FileName$, Array(), Element, NumBytes)
+'   ERROR 73 ' Feature Unavailable
+' END SUB
+
+' ' DCount reports the number of directories that match a particular specification. 
+' FUNCTION DCount(dirSpec$)
+'   ' dirSpec$ holds a DOS directory name specification, and Count 
+'   ' receives the number of matching directories.
+
+'   result = 0
+
+'   IF INSTR(_OS$, "[WINDOWS]") THEN
+'     DIM pattern AS STRING
+'     DIM fd AS Win32_Find_Data
+'     DIM hFind AS _UNSIGNED _OFFSET
+'     DIM junk AS LONG
+'     DIM ffn AS STRING
+'     DIM p As Short
+'     pattern = dirSpec$ + CHR$(0)
+'     hFind = FindFirstFile(_OFFSET(pattern), _OFFSET(fd))
+'     IF hFind <> INVALID_HANDLE_VALUE THEN
+'       DO
+'         IF (fd.dwfileattributes AND FILE_ATTRIBUTE_DIRECTORY) = FILE_ATTRIBUTE_DIRECTORY THEN
+'           ffn = fd.calternatefilename 'cfilename
+'           p = INSTR(ffn, CHR$(0))
+'           IF p > 0 THEN ffn = LEFT$(ffn, p - 1)
+'           IF LTRIM$(ffn) = "" THEN
+'             ffn = fd.cfilename
+'             p = INSTR(ffn, CHR$(0))
+'             IF p > 0 THEN ffn = LEFT$(ffn, p - 1)
+'           END IF
+'           IF ffn = "." THEN
+'           ELSEIF ffn = ".." THEN
+'           'ELSEIF UCASE$(ffn) = "$RECYCLE.BIN" THEN
+'           'ELSEIF INSTR(ffn, "System Volume Information") > 0 THEN
+'           ELSE
+'             result = result + 1
+'           END IF
+'         END IF
+'       LOOP UNTIL FindNextFile(hFind, _OFFSET(fd)) = 0
+'       junk = FindClose(hFind)
+'     ELSE
+'       lastError& = GetLastError
+'       IF lastError& = ERROR_ACCESS_DENIED THEN
+'         ERROR 70 ' Permission denied
+'       ELSE
+'         ERROR 75 ' Path/File access error
+'       END IF
+'     END IF
+'   ELSE
+'     ERROR 73 ' Advanced Feature / Feature Unavailable
+'   END IF
+
+'   DCount = result
+
+' END FUNCTION
+
+' ' ReadDir obtains a list of directory names from disk, and loads them 
+' ' into a conventional (not fixed-length) string array in one operation. 
+' SUB ReadDir(array$(), offset)
+'   ' array$(0) holds the search specification to indicate which directory 
+'   ' names are to be loaded, and subsequent array elements receive each 
+'   ' directory name. 
+
+'   IF INSTR(_OS$, "[WINDOWS]") THEN
+    
+'     DIM pattern AS STRING
+'     DIM fd AS Win32_Find_Data
+'     DIM hFind AS _UNSIGNED _OFFSET
+'     DIM junk AS LONG
+'     DIM ffn AS STRING
+'     DIM p As Short
+
+'     'pattern = array$(0) + CHR$(0)
+'     pattern = array$(offset) + CHR$(0)
+'     hFind = FindFirstFile(_OFFSET(pattern), _OFFSET(fd))
+'     IF hFind <> INVALID_HANDLE_VALUE THEN
+'       index = 1
+'       DO
+'         IF (fd.dwfileattributes AND FILE_ATTRIBUTE_DIRECTORY) = FILE_ATTRIBUTE_DIRECTORY THEN
+'           ffn = fd.calternatefilename 'cfilename
+'           p = INSTR(ffn, CHR$(0))
+'           IF p > 0 THEN ffn = LEFT$(ffn, p - 1)
+'           IF LTRIM$(ffn) = "" THEN
+'             ffn = fd.cfilename
+'             p = INSTR(ffn, CHR$(0))
+'             IF p > 0 THEN ffn = LEFT$(ffn, p - 1)
+'           END IF
+'           IF ffn = "." THEN
+'           ELSEIF ffn = ".." THEN
+'           'ELSEIF UCASE$(ffn) = "$RECYCLE.BIN" THEN
+'           'ELSEIF INSTR(ffn, "System Volume Information") > 0 THEN
+'           ELSE
+'             array$(offset + index - 1) = ffn
+'             index = index + 1
+'           END IF
+'         END IF
+'       LOOP UNTIL FindNextFile(hFind, _OFFSET(fd)) = 0
+'       junk = FindClose(hFind)
+'     ELSE
+'       lastError& = GetLastError
+'       IF lastError& = ERROR_ACCESS_DENIED THEN
+'         ERROR 70 ' Permission denied
+'       ELSE
+'         'PRINT "{"; pattern; "}": WaitKeyS
+'         ERROR 75 ' Path/File access error
+'       END IF
+'     END IF
+'   ELSE
+'     ERROR 73 ' Advanced Feature / Feature Unavailable
+'   END IF
+
+' END SUB
+
+' ' FCount will report the number of file names that match a particular specification. 
+' FUNCTION FCount(fileSpec$)
+
+'   ' fileSpec$ holds a DOS file name or specification, and Count 
+'   ' receives the number of matching entries. 
+
+'   result = 0
+
+'   IF INSTR(_OS$, "[WINDOWS]") THEN
+'     DIM pattern AS STRING
+'     DIM fd AS Win32_Find_Data
+'     DIM hFind AS _UNSIGNED _OFFSET
+'     DIM junk AS LONG
+'     pattern = fileSpec$ + CHR$(0)
+'     hFind = FindFirstFile(_OFFSET(pattern), _OFFSET(fd))
+'     IF hFind <> INVALID_HANDLE_VALUE THEN
+'       DO
+'         IF (fd.dwfileattributes AND FILE_ATTRIBUTE_DIRECTORY) = FILE_ATTRIBUTE_DIRECTORY THEN
+'         ELSE 
+'           result = result + 1
+'         END IF
+'       LOOP UNTIL FindNextFile(hFind, _OFFSET(fd)) = 0
+'       junk = FindClose(hFind)
+'     ELSE
+'       lastError& = GetLastError
+'       IF lastError& = ERROR_FILE_NOT_FOUND THEN
+'         ' no files available, result remains 0
+'       ELSEIF lastError& = ERROR_ACCESS_DENIED THEN
+'         ERROR 70 ' Permission denied
+'       ELSE
+'         PRINT lastError&
+'         ERROR 75 ' Path/File access error
+'       END IF
+'     END IF
+'   ELSE
+'     ERROR 73 ' Advanced Feature / Feature Unavailable
+'   END IF
+
+'   FCount = result
+
+' END FUNCTION
+
+' ' ReadFile obtains a list of file names from disk, and loads them into 
+' ' a conventional (not fixed-length) string array in one operation. 
+' SUB ReadFile(array$())
+
+'   ' array$(0) holds the search specification to indicate which file names
+'   ' are to be loaded, and subsequent array elements receive each name.
+
+'   IF INSTR(_OS$, "[WINDOWS]") THEN
+    
+'     DIM pattern AS STRING
+'     DIM fd AS Win32_Find_Data
+'     DIM hFind AS _UNSIGNED _OFFSET
+'     DIM junk AS LONG
+'     DIM ffn AS STRING
+'     DIM p As Short
+
+'     pattern = array$(0) + CHR$(0)
+'     hFind = FindFirstFile(_OFFSET(pattern), _OFFSET(fd))
+'     IF hFind <> INVALID_HANDLE_VALUE THEN
+'       index = 1
+'       DO
+'         IF (fd.dwfileattributes AND FILE_ATTRIBUTE_DIRECTORY) = FILE_ATTRIBUTE_DIRECTORY THEN
+'         ELSE 
+'           ffn = QPTrim$(fd.calternatefilename) 'cfilename
+'           IF ffn = "" THEN ffn = QPTrim$(fd.cfilename)
+'           IF LEN(ffn$) > 12 THEN ffn$ = LEFT$(ffn$, 9) + "..."
+'           array$(index) = LEFT$(ffn + SPACE$(12), 12)
+'           index = index + 1
+'         END IF
+'         fd.cfilename = SPACE$(MAX_PATH) ' clear the path for the next usage
+'         fd.calternatefilename = SPACE$(14)
+'       LOOP UNTIL FindNextFile(hFind, _OFFSET(fd)) = 0
+'       junk = FindClose(hFind)
+'     ELSE
+'       lastError& = GetLastError
+'       IF lastError& = ERROR_FILE_NOT_FOUND THEN
+'         ' no files available, result remains 0
+'       ELSEIF lastError& = ERROR_ACCESS_DENIED THEN
+'         ERROR 70 ' Permission denied
+'       ELSE
+'         PRINT lastError&
+'         ERROR 75 ' Path/File access error
+'       END IF
+'     END IF
+'   ELSE
+'     ERROR 73 ' Advanced Feature / Feature Unavailable
+'   END IF
+
+' END SUB
+
+' ' ReadDirT obtains a list of directory names from disk, and loads 
+' ' them into a fixed-length string array in one operation. 
+' SUB ReadDirT(spec$, array(), offset)
+
+'   ' Array$() has been dimensioned as a fixed-length string array, and 
+'   ' Spec$ holds the search specification to tell which directory names 
+'   ' are to be loaded. Subsequent array elements then receive each 
+'   ' directory name. 
+
+'   ERROR 73 ' Feature Unavailable
+
+' END SUB
+
+' ' ReadFileI obtains a list of file names, sizes, dates, and times from 
+' ' disk, and then formats and loads them into a conventional (not 
+' ' fixed-length) string array in one operation. 
+' SUB ReadFileI(array$(), offset)
+  
+'   ' Array$(0) holds the search specification to indicate which file 
+'   ' names are to be retrieved, and subsequent array elements receive 
+'   ' each file's name and related information.
+  
+'   ' ReadFileI (Read File names with full Information) is similar to the 
+'   ' QuickPak Professional ReadFile routine, except it also obtains the 
+'   ' size, date, and time for each file. Before ReadFileI, the only way to 
+'   ' do this was to call the ReadFile routine, and then call Fileinfo 
+'   ' repeatedly for each file. Besides greatly simplifying the amount of 
+'   ' work you must do to obtain this information, ReadFileI is also 
+'   ' considerably faster. 
+
+'   ' It is up to you to assign each string to a length of 37 characters 
+'   ' before calling ReadFileI.
+
+'   ' 1234567890123456789012345678901234567 
+'   ' namename.ext sizesize mm-dd-yy hh:mm* <---- either "a" or "p" 
+  
+'   ' - filename
+'   ' - size
+'   ' - modified date
+'   ' - modified time
+
+'   ' resultLength = GetShortPathNameW(fullPath$, shortPath$, 255)
+
+'   IF INSTR(_OS$, "[WINDOWS]") THEN
+    
+'     DIM pattern AS STRING
+'     DIM fd AS Win32_Find_Data
+'     DIM hFind AS _UNSIGNED _OFFSET
+'     DIM junk AS LONG
+'     'DIM ffn AS STRING
+'     DIM fsize AS LONG
+'     DIM modDate AS STRING
+'     DIM modTime AS STRING
+'     DIM p As Short
+
+'     pattern = array$(offset) + CHR$(0)
+'     IF INSTR(pattern, "/") = 0 AND INSTR(pattern, "\") = 0 THEN
+'       pattern = _CWD$ + "/" + pattern
+'     END IF
+'     hFind = FindFirstFile(_OFFSET(pattern), _OFFSET(fd))
+'     IF hFind <> INVALID_HANDLE_VALUE THEN
+'       index = offset + 1
+'       DO
+'         IF (fd.dwfileattributes AND FILE_ATTRIBUTE_DIRECTORY) = FILE_ATTRIBUTE_DIRECTORY THEN
+'         ELSE 
+'           ffn$ = QPTrim$(fd.calternatefilename)
+'           IF ffn$ = "" THEN ffn$ = QPTrim$(fd.cfilename)
+'           IF LEN(ffn$) > 12 THEN ffn$ = LEFT$(ffn$, 9) + "..."
+'           fsize = (fd.nfilesizehigh * (&HFFFFFFFF + 1)) + fd.nfilesizelow
+'           array$(index) = LEFT$(ffn$ + SPACE$(12), 12) + " " + RIGHT$(SPACE$(8) + STR$(fsize), 8) + " " + "01-01-80" + " " + "00:00a"
+'           index = index + 1
+'         END IF
+'         fd.cfilename = SPACE$(MAX_PATH) ' clear the path for the next usage
+'         fd.calternatefilename = SPACE$(14)
+'       LOOP UNTIL FindNextFile(hFind, _OFFSET(fd)) = 0
+'       junk = FindClose(hFind)
+'     ELSE
+'       lastError& = GetLastError
+'       IF lastError& = ERROR_FILE_NOT_FOUND THEN
+'         ' no files available, result remains 0
+'       ELSEIF lastError& = ERROR_ACCESS_DENIED THEN
+'         ERROR 70 ' Permission denied
+'       ELSE
+'         PRINT lastError&
+'         ERROR 75 ' Path/File access error
+'       END IF
+'     END IF
+'   ELSE
+'     ERROR 73 ' Advanced Feature / Feature Unavailable
+'   END IF
+
+' END SUB
+
+' SUB ReadFileT(spec$, array() AS STRING * 12, first)
+'   IF INSTR(_OS$, "[WINDOWS]") THEN
+    
+'     DIM pattern AS STRING
+'     DIM fd AS Win32_Find_Data
+'     DIM hFind AS _UNSIGNED _OFFSET
+'     DIM junk AS LONG
+'     DIM ffn AS STRING
+'     DIM p As Short
+
+'     pattern = spec$ 'array$(0) + CHR$(0)
+'     hFind = FindFirstFile(_OFFSET(pattern), _OFFSET(fd))
+'     IF hFind <> INVALID_HANDLE_VALUE THEN
+'       index = first ' 1
+'       DO
+'         IF (fd.dwfileattributes AND FILE_ATTRIBUTE_DIRECTORY) = FILE_ATTRIBUTE_DIRECTORY THEN
+'         ELSE 
+'           ffn = QPTrim$(fd.calternatefilename)
+'           IF ffn = "" THEN ffn = QPTrim$(fd.cfilename)
+'           IF LEN(ffn$) > 12 THEN ffn$ = LEFT$(ffn$, 9) + "..."
+'           LSET array(index) = ffn
+'           index = index + 1
+'         END IF
+'         fd.cfilename = SPACE$(MAX_PATH) ' clear the path for the next usage
+'         fd.calternatefilename = SPACE$(14)
+'       LOOP UNTIL FindNextFile(hFind, _OFFSET(fd)) = 0
+'       junk = FindClose(hFind)
+'     ELSE
+'       lastError& = GetLastError
+'       IF lastError& = ERROR_FILE_NOT_FOUND THEN
+'         ' no files available, result remains 0
+'       ELSEIF lastError& = ERROR_ACCESS_DENIED THEN
+'         ERROR 70 ' Permission denied
+'       ELSE
+'         PRINT lastError&
+'         ERROR 75 ' Path/File access error
+'       END IF
+'     END IF
+'   ELSE
+'     ERROR 73 ' Advanced Feature / Feature Unavailable
+'   END IF
+' END SUB
+
+' SUB ReadFileX(Spec$, DirSize&, Array() AS FullInfo, first)
+'   ERROR 73 ' Feature Unavailable
+' END SUB
+
+' SUB ReadSect(Drive$, Info$, Sector)
+'   ERROR 73 ' Feature Unavailable
+' END SUB
+
+' FUNCTION ReadTest(Drive$)
+'   ERROR 73 ' Feature Unavailable
+' END FUNCTION
+
+' FUNCTION Removable(Drive$)
+'   ERROR 73 ' Feature Unavailable
+' END FUNCTION
+
+' SUB SetAttr(FileName$, Attribute)
+'   ERROR 73 ' Feature Unavailable
+' END SUB
+
+' SUB SetCmd(NewCommand$)
+'   ERROR 73 ' Feature Unavailable
+' END SUB
+
+' ' SetDrive allows changing the current default drive. 
+' SUB SetDrive(drive$)
+'   ' drive$ is either an upper or lower case letter of the drive to be 
+'   ' made the current default. 
+'   d$ = UCASE$(LEFT$(drive$, 1))
+'   IF ASC(d$) >= 65 AND ASC(d$) <= 90 THEN
+'     CHDIR d$ + ":"
+'   ELSE
+'     ERROR 5 ' Illegal Function Call
+'   END IF
+' END SUB
+
+' ' SetError allows a BASIC program to set or clear the DOSError and 
+' ' WhichError functions. 
+' SUB SetError(errNum)
+
+'   ' ErrCode % is either zero to clear DOSError and WhichError, or an 
+'   ' error value to place into WhichError. If ErrCode% is not zero, then 
+'   ' DOSError will be set to -1.
+
+'   IF errNum = 0 THEN
+'     Pro_Internal_DosError = 0
+'     Pro_Internal_WhichError = 0
+'   ELSE
+'     Pro_Internal_DosError = -1
+'     Pro_Internal_WhichError = errNum
+'   END IF
+
+' END SUB
+
+' SUB SetLevel(ErrValue)
+'   ERROR 73 ' Feature Unavailable
+' END SUB
+
+' FUNCTION ShareThere
+'   ERROR 73 ' Feature Unavailable
+' END FUNCTION
+
+' SUB SplitName (workName$, drive$, path$, fileName$, ext$) STATIC
+
+'   drive$ = ""                                    ' clear out any old junk
+'   path$ = ""
+'   fileName$ = ""
+'   ext$ = ""
+
+'   IF LEN(workName$) = 0 THEN EXIT SUB            ' there's nothing to do, exit
+'   fileName$ = workName$                          ' assume there's a name only
+
+'   FOR x = LEN(workName$) TO 1 STEP -1           ' walk backwards
+'     thisChar = ASC(MID$(workName$, x))         ' isolate this character
+'     IF thisChar = 58 OR thisChar = 92 THEN       '   ":" or "\"
+'       path$ = LEFT$(workName$, X)               ' separate the path
+'       fileName$ = MID$(workName$, x + 1)        '    from the name
+'       EXIT FOR
+'     END IF
+'   NEXT
+
+'   IF MID$(path$, 2, 1) = ":" THEN                ' if there's a drive letter
+'     drive$ = LEFT$(path$, 1)                     ' isolate the drive
+'     path$ = MID$(path$, 3)                       ' and the path
+'   END IF
+
+'   dot = INSTR(fileName$, ".")                   ' see if there's an extension
+'   IF dot THEN                                   ' there is
+'     ext$ = MID$(fileName$, dot)                 ' and the extension
+'     fileName$ = LEFT$(fileName$, dot - 1)       ' separate the name
+'   END IF
+
+'   IF LEN(drive$) = 0 THEN                        ' if no drive use the default
+'     drive$ = CHR$(GetDrive)
+'   END IF
+
+'   IF LEN(path$) = 0 THEN                         ' if no path use the default
+'     path$ = GetDir$(drive$)
+'     IF path$ <> "\" THEN path$ = path$ + "\"
+'   END IF
+
+'   drive$ = drive$ + ":"                          ' add a trailing colon
+
+' END SUB
+
+' SUB UnLockFile(Handle, Offset&, Length&)
+'   ERROR 73 ' Feature Unavailable
+' END SUB
+
+' ' Valid examines a string to see if it could be a valid file name. 
+' FUNCTION Valid(fileName$)
+
+'   ' fileName$ contains the name of a file, and may optionally include a 
+'   ' drive letter and colon, as well as a path name. If the name is legal 
+'   ' according to the rules of DOS, Okay will receive -1. Otherwise 
+'   ' Okay will be set to zero. 
+
+'   IF LEFT$(fileName$, 1) = " " THEN Valid = 0: EXIT FUNCTION
+'   IF RIGHT$(fileName$, 1) = " " THEN Valid = 0: EXIT FUNCTION
+
+'   index = 1
+'   character$ = "1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_$!%-@'^~#&{}`()."
+'   slashCount = 0
+'   DO
+'     ch$ = MID$(fileName$, index, 1)
+'     IF ch$ = "\" OR ch$ = "/" THEN
+'       slashCount = slashCount + 1
+'       IF index = 1 THEN
+'         ' OK
+'       ELSEIF index = 2 AND slashCount = 2 THEN
+'         ' OK
+'       ELSEIF slashCount = 1 THEN
+'         ' OK
+'       ELSE
+'         Valid = 0: EXIT FUNCTION
+'       END IF
+'     ELSEIF ch$ = ":" THEN
+'       IF index = 2 THEN
+'         IF slashCount > 0 THEN Valid = 0: EXIT FUNCTION 
+'       ELSE
+'         Valid = 0: EXIT FUNCTION
+'       END IF
+'       slashCount = 0
+'     ELSEIF INSTR(character$, ch$) > 0 THEN
+'       ' OK
+'       slashCount = 0
+'     ELSE
+'       Valid = 0: EXIT FUNCTION
+'     END IF
+'     index = index + 1
+'     IF index > LEN(fileName$) THEN EXIT DO
+'   LOOP
+
+'   Valid = -1 ' Valid
+
+' END FUNCTION
+
+' ' WhichError reports which error if any occurred during the last call 
+' ' to a QuickPak: Professional DOS routine.
+' FUNCTION WhichError
+  
+'   ' WhichError returns O if there was no error, or an error code if 
+'   ' there was. 
+
+'   ' All of the QuickPak Professional routines assign a value to the 
+'   ' DOSError and WhichError functions to indicate their success or 
+'   ' failure. Rather than requiring you to set up a separate error 
+'   ' handling procedure and use ON ERROR, you can simply query 
+'   ' these functions after performing any QuickPak Professional DOS 
+'   ' operation. WhichError is discussed in the section entitled 
+'   ' "Eliminating ON ERROR". 
+  
+'   ' The table on the following page shows all of the possible DOS 
+'   ' errors and the corresponding numbers that WhichError returns. 
+  
+'   ' Also see the complimentary function DOSError
+
+'   WhichError = Pro_Internal_WhichError 
+
+' END FUNCTION
+
+' SUB WriteSect(Drive$, Info$, Sector)
+'   ERROR 73 ' Feature Unavailable
+' END SUB
+
+' SUB WriteSect2(Drive$, Info$, Sector)
+'   ERROR 73 ' Feature Unavailable
+' END SUB
+
+' FUNCTION WriteTest(Drive$)
+'   ERROR 73 ' Feature Unavailable
+' END FUNCTION
+
+' ' ****************************************
+' ' Chapter 4 - Functions
+' ' ****************************************
+
+' FUNCTION Bin2Num(binary$)
+'   b$ = RIGHT$("0000000000000000" + binary$, 16)
+'   result& = VAL(MID$(b$, 16, 1))
+'   FOR x = LEN(b$) - 1 TO 2 STEP - 1
+'     v = VAL(MID$(b$, x, 1))
+'     IF v > 0 THEN
+'       v = 16 - x
+'       result& = result& + (2 ^ v)
+'     END IF
+'   NEXT
+'   'IF INSTR(b$, "0") = 0 THEN
+'   '  result& = -1
+'   'ELSE
+'   IF MID$(b$, 1, 1) = "1" THEN
+'     result& = -(32768 - result&) 
+'   END IF
+'   Bin2Num = CINT(result&)
+' END FUNCTION
+
+' ' Num2Bin will convert a number into an equivalent binary string with 
+' ' a fixed length of 16 digits. 
+' FUNCTION Num2Bin$(number)
+'   n& = number
+'   IF n& < O THEN n& = n& + 65536 
+'   IF n& = 0 THEN
+'     Num2Bin$ = "0000000000000000"
+'   ELSEIF n& > 0 THEN
+'     result$ = ""
+'     i# = 2 ^ CLNG(LOG(n&) / LOG(2) + 0.1)
+'     DO WHILE i# >= 1
+'       c& = FIX(n& / i#)
+'       result$ = result$ + LTRIM$(STR$(c&))
+'       n& = n& - i# * c&
+'       i# = i# / 2
+'     LOOP
+'     Num2Bin$ = RIGHT$("0000000000000000" + result$, 16)
+'   END IF
+' END FUNCTION
+
+' ' Num2Bin2 will convert a number into an equivalent binary string with 
+' ' only as many digits as required to represent the number. 
+' FUNCTION Num2Bin2$(number)
+'   n& = number
+'   IF n& < O THEN n& = n& + 65536 
+'   IF n& = 0 THEN
+'     Num2Bin2$ = "0"
+'   ELSEIF n& > 0 THEN
+'     result$ = ""
+'     i# = 2 ^ CLNG(LOG(n&) / LOG(2) + 0.1)
+'     DO WHILE i# >= 1
+'       c& = FIX(n& / i#)
+'       result$ = result$ + LTRIM$(STR$(c&))
+'       n& = n& - i# * c&
+'       i# = i# / 2
+'     LOOP
+'     Num2Bin2$ = result$
+'   END IF
+' END FUNCTION
+
+' FUNCTION QPHex$(Value, NumDigits)
+'   ERROR 73 ' Feature Unavailable
+' END FUNCTION
+
+' ' ****************************************
+' ' Chapter 5 - Menu/Input Routines
+' ' ****************************************
+
+SUB AMenu (address As String Ptr, start As Short, count As Short, scanCode As Short, fileColr As Short, hiLiteColr As Short, rows As Short, columns As Short, spacing As Short, row As Short, column As Short)
+
+  ' IF Start > 0 THEN
+  '   PRINT *(Address - 1)
+  ' END IF
+  ' PRINT *Address
+  ' IF Start < Count - 1 THEN
+  '   PRINT *(Address + 1)
+  ' END IF
+
+END SUB
+
+' SUB AMenu(array$(), first, item, count, scanCode, normColor, hiLiteColor, numRows, numCols, gap, ulRow, ulCol)
+'   'TODO: Fix "tagging" functionality - see DEMOCM.BAS for example of functionality.
+'   w = LEN(array$(first))                ' width of each column.
+'   IF scanCode <> 3 THEN
+'     DO
+'       IF item > first + ((numRows * numCols) - 1) THEN
+'         first = first + (numRows * numCols)
+'       ELSE
+'         EXIT DO
+'       END IF
+'     LOOP
+'   END IF
+'   DO
+'     DO
+'       IF item < first THEN                ' current item before the display range?
+'         first = first - numRows          ' scroll display to the left.
+'       ELSEIF item > first + ((numRows * numCols) - 1) THEN ' current item beyond the display range?
+'         first = first + numRows          ' scroll display to the right.
+'       ELSE
+'         EXIT DO
+'       END IF
+'     LOOP
+'     FOR rr = 0 TO numRows - 1         ' for each display row,
+'       FOR cc = 0 TO numCols - 1       ' for each display column,
+'         index = first + rr + (cc * numRows) ' determine element index,
+'         IF index = item THEN clr = hiLiteColor ELSE clr = normColor ' determine color,
+'         IF index <= UBOUND(array$) THEN text$ = array$(index) ELSE text$ = SPACE$(w) ' determine text (can be blank),
+'         QPrintRC text$, ulRow + rr, ulCol + (cc * (w + gap)), clr ' render text.
+'       NEXT
+'     NEXT
+'     IF scanCode = 9999 THEN EXIT SUB 'TODO: For testing...
+'     WHILE inkey$ <> "": WEND              ' not sure needed.
+'     DO
+'       scanCode = MGetKey(row, col)     ' scanCode might be returned to caller.
+'       SELECT CASE scanCode
+'         CASE -72 ' Up
+'           IF item > 1 THEN               ' if current more than min,
+'             item = item - 1             ' decrement.
+'           END IF
+'           EXIT DO
+'         CASE -80 ' Down
+'           IF item < UBOUND(array$) THEN  ' if current less than max,
+'             item = item + 1             ' increment.
+'           END IF
+'           EXIT DO
+'         CASE -75 ' Left
+'           IF item - numRows > 0 THEN    ' more columns to the left?
+'             item = item - numRows      ' shift columns right.
+'           ELSEIF item > 1 THEN           ' if not shifted (above),
+'             item = 1                     ' set current item to first.
+'           END IF
+'           EXIT DO
+'         CASE -77 ' Right
+'           IF item + numRows <= UBOUND(array$) THEN ' more columns to the right?
+'             item = item + numRows                 ' shift columns left.
+'           ELSEIF item < UBOUND(array$) THEN         ' if not shifted (above),
+'             item = UBOUND(array$)                   ' set current item to last.
+'           END IF
+'           EXIT DO
+'         CASE ELSE                         ' any other key,
+'           count = item                  ' set count on exit to be the currently highlighted item,
+'           EXIT SUB                        ' return to caller.
+'       END SELECT
+'     LOOP
+'   LOOP
+' END SUB
+
+' SUB AMenuT(array() AS STRING * 12, first, item, length, count, scanCode, normColor, hiLiteColor, numRows, numCols, gap, ulRow, ulCol)
+'   w = length 'LEN(array$(first))                ' width of each column.
+'   IF scanCode <> 3 THEN
+'     DO
+'       IF item > first + ((numRows * numCols) - 1) THEN
+'         first = first + (numRows * numCols)
+'       ELSE
+'         EXIT DO
+'       END IF
+'     LOOP
+'   END IF
+'   DO
+'     DO
+'       IF item < first THEN                ' current item before the display range?
+'         first = first - numRows          ' scroll display to the left.
+'       ELSEIF item > first + ((numRows * numCols) - 1) THEN ' current item beyond the display range?
+'         first = first + numRows          ' scroll display to the right.
+'       ELSE
+'         EXIT DO
+'       END IF
+'     LOOP
+'     FOR rr = 0 TO numRows - 1         ' for each display row,
+'       FOR cc = 0 TO numCols - 1       ' for each display column,
+'         index = first + rr + (cc * numRows) ' determine element index,
+'         IF index = item THEN clr = hiLiteColor ELSE clr = normColor ' determine color,
+'         IF index <= UBOUND(array$) THEN text$ = array$(index) ELSE text$ = SPACE$(w) ' determine text (can be blank),
+'         QPrintRC text$, ulRow + rr, ulCol + (cc * (w + gap)), clr ' render text.
+'       NEXT
+'     NEXT
+'     IF scanCode = 9999 THEN EXIT SUB 'TODO: For testing...
+'     WHILE inkey$ <> "": WEND              ' not sure needed.
+'     DO
+'       scanCode = MGetKey(row, col)     ' scanCode might be returned to caller.
+'       SELECT CASE scanCode
+'         CASE -72 ' Up
+'           IF item > 1 THEN               ' if current more than min,
+'             item = item - 1             ' decrement.
+'           END IF
+'           EXIT DO
+'         CASE -80 ' Down
+'           IF item < UBOUND(array$) THEN  ' if current less than max,
+'             item = item + 1             ' increment.
+'           END IF
+'           EXIT DO
+'         CASE -75 ' Left
+'           IF item - numRows > 0 THEN    ' more columns to the left?
+'             item = item - numRows      ' shift columns right.
+'           ELSEIF item > 1 THEN           ' if not shifted (above),
+'             item = 1                     ' set current item to first.
+'           END IF
+'           EXIT DO
+'         CASE -77 ' Right
+'           IF item + numRows <= UBOUND(array$) THEN ' more columns to the right?
+'             item = item + numRows                 ' shift columns left.
+'           ELSEIF item < UBOUND(array$) THEN         ' if not shifted (above),
+'             item = UBOUND(array$)                   ' set current item to last.
+'           END IF
+'           EXIT DO
+'         CASE ELSE                         ' any other key,
+'           count = item                  ' set count on exit to be the currently highlighted item,
+'           EXIT SUB                        ' return to caller.
+'       END SELECT
+'     LOOP
+'   LOOP
+' END SUB
+
+' SUB ASCIIPick(char, color1, color2, exitCode)
+
+'   prevChar = char
+
+'   ulRow = CSRLIN
+'   ulCol = POS(0)
+'   lrRow = ulRow + 17
+'   lrCol = ulCol + 34
+'   CALL Box0(ulRow, ulCol, lrRow, lrCol, 2, color1)
+
+'   DO
+
+'     d$ = RIGHT$("00" + LTRIM$(STR$(char)), 2)
+'     h$ = RIGHT$("0" + HEX$(char), 2)
+'     CALL QPrintRC(CHR$(181) + " ASCII Code: Dec  " + d$ + "  Hex  " + h$ + " " + CHR$(198), ulRow + 17, ulCol + 1, color1)
+
+'     'prevControlChr = _CONTROLCHR ' <----------- QB64 definately get's this wrong...
+'     'IF NOT prevControlChr THEN _CONTROLCHR OFF
+'     FOR r = 1 TO 16
+'       FOR c = 1 TO 16
+'         ch = ((r - 1) * 16) + (c - 1)
+'         ch$ = CHR$(ch)
+'         IF char = ch THEN clr = color2 ELSE clr = color1
+'         CALL QPrintRC(ch$, ulRow + r, ulCol + (c * 2), clr)
+'       NEXT
+'     NEXT
+'     'IF NOT prevControlChr THEN _CONTROLCHR ON
+
+'     IF exitCode = -1 THEN EXIT SUB
+
+'     DO
+
+'       scanCode = MGetKey(row, col) ' scanCode might be returned to caller.
+    
+'       SELECT CASE scanCode
+'         CASE -72 ' Up
+'           char = char - 16: EXIT DO
+'         CASE -80 ' Down
+'           char = char + 16: EXIT DO
+'         CASE -75 ' Left
+'           char = char - 1: EXIT DO
+'         CASE -77 ' Right
+'           char = char + 1: EXIT DO
+'         CASE -71 ' Home ' Diagonal UL
+'           char = char - 17: EXIT DO
+'         CASE -79 ' End  ' Diagonal DL
+'           char = char + 15: EXIT DO
+'         CASE -73 ' PgUp ' Diagonal UR
+'           char = char - 15: EXIT DO
+'         CASE -81 ' PgDn ' Diagonal DR
+'           char = char + 17: EXIT DO
+'         CASE 8, 9, 32 TO 126
+'           char = scanCode: EXIT DO
+'         CASE 13 ' Enter
+'           exitCode = 0: EXIT SUB
+'         CASE 1000 ' Mouse click
+'           r = row - (ulRow + 1): c = (col - ulCol) \ 2
+'           char = ((r * 16) + c) - 1
+'           exitCode = 2: EXIT SUB
+'         CASE 27
+'           char = prevChar: exitCode = 2: EXIT SUB
+'         CASE ELSE                         ' any other key,
+'       END SELECT
+'     LOOP
+
+'     IF char < 0 THEN char = char + 256
+'     IF char > 255 THEN char = char - 256
+
+'   LOOP
+
+' END SUB
+
+' SUB MASCIIPick(char, color1, color2, exitCode)
+'   CALL ASCIIPick(char, color1, color2, exitCode)
+' END SUB
+
+' SUB ColorPick(colr, boxColor, exitCode)
+
+'   prevClr = colr
+
+'   ulRow = CSRLIN
+'   ulCol = POS(0)
+'   lrRow = ulRow + 17
+'   lrCol = ulCol + 33
+
+'   CALL MPaintBox (ulRow, ulCol, lrRow, lrCol, boxColor)
+'   CALL Box0 (ulRow, ulCol, lrRow, lrCol, 2, boxColor)
+
+'   DO
+
+'     FOR r = 1 TO 16
+'       FOR c = 1 TO 8
+'         CALL QPrintRC (CHR$(177), ulRow + r, ulCol + (c * 4), boxColor)
+'       NEXT
+'     NEXT
+
+'     CALL SplitColor(boxColor, fg%, bg%)
+'     arrowColr = OneColor(0, bg%)    
+
+'     FOR c = 1 TO 8
+'       FOR r = 1 TO 16
+'         temp = (((c - 1) * 16) + r) - 1
+'         CALL QPrintRC (RIGHT$("  " + STR$(temp), 3), ulRow + r, ulCol + (c * 4) - 3, temp)
+'         IF temp = colr THEN
+'           CALL QPrintRC (RIGHT$("  " + STR$(temp), 3), ulRow + r, ulCol + (c * 4) - 3, temp + 128)
+'           CALL QPrintRC (CHR$(17), ulRow + r, ulCol + (c * 4), arrowColr)
+'         END IF
+'       NEXT
+'     NEXT
+
+'     WHILE INKEY$ <> "": WEND              ' not sure needed.
+'     DO
+
+'       scanCode = MGetKey(row, column) ' scanCode might be returned to caller.
+
+'       SELECT CASE scanCode
+'         CASE -72 ' Up
+'           colr = colr - 1: EXIT DO
+'         CASE -80 ' Down
+'           colr = colr + 1: EXIT DO
+'         CASE -75 ' Left
+'           colr = colr - 16: EXIT DO
+'         CASE -77 ' Right
+'           colr = colr + 16: EXIT DO
+'         CASE -71 ' Home
+'           colr = 0: EXIT DO
+'         CASE -79 ' End
+'           colr = 127: EXIT DO
+'         CASE -73 ' PgUp
+'           colr = colr - (colr MOD 16): EXIT DO
+'         CASE -81 ' PgDn
+'           colr = colr - (colr MOD 16) + 15: EXIT DO
+'         CASE 13 ' Enter
+'           exitCode = 0: EXIT SUB
+'         ' CASE 1000 ' Mouse click
+'         '   r = row - (ulRow + 1): c = (col - ulCol) \ 2
+'         '   colr = ((r * 16) + c) - 1
+'         '   exitCode = 2: EXIT SUB
+'         CASE 27
+'           colr = prevClr: exitCode = 2: EXIT SUB
+'         CASE ELSE                         ' any other key,
+'       END SELECT
+
+'     LOOP
+
+'     IF colr < 0 THEN colr = colr + 128
+'     IF colr > 127 THEN colr = colr - 128
+
+'   LOOP
+
+' END SUB
+
+' SUB MColorPick(colr, boxColor, exitCode)
+'   CALL ColorPick(colr, boxColor, exitCode)
+' END SUB
+
+' SUB DirFile(array$(), first, count, scanCode, msgColor, fileColor, hiLiteColor, boxColor)
+
+'   'TODO: Take functionality in AMenu and embed it within this method.
+'   'TODO: Once embeded AMenu functionality done, need to update the currently selected filename "label".
+
+'   startItem = first
+
+'   CALL QPrintRC (STR$(count) +  " file(s) found", 8, 6, msgColor)
+
+'   ulRow = 10
+'   ulCol = 6
+'   lrRow = 18
+'   lrCol = 77
+'   CALL MPaintBox (ulRow, ulCol, lrRow, lrCol, fileColor)
+'   CALL Box0 (ulRow, ulCol, lrRow, lrCol, 1, boxColor)
+
+'   CALL QPrintRC ("Filename : " + "*UNKNOWN*", 20, 7, msgColor)
+'   CALL QPrintRC ("Use cursor keys to select file then press <ENTER>", 24, 4, msgColor)
+
+'   ulRow = ulRow + 1
+'   ulCol = ulCol + 2
+'   gap = 2
+'   rows = 7
+'   cols = 5
+'   CALL AMenu (array$(), first, startItem, count, scanCode, fileColor, hiLiteColor, rows, cols, gap, ulRow, ulCol)
+
+' END SUB
+
+' SUB Editor(ed$, activeLength, scanCode, numOnly, isCapsOn, normalColor, editColor, row, column) STATIC
+'   'TODO: Handle numOnly
+'   'TODO: Handle isCapsOn
+'   IF scanCode = 1 THEN
+'     'p = *what is was at last exit*
+'   ELSEIF scanCode = 2 THEN
+'     p = column
+'   ELSE
+'     p = 1
+'     ulRow = row
+'     ulCol = column
+'     originalEd$ = ed$
+'   END IF
+'   insert = 0
+'   LOCATE , , 1, 7, 7 ' single line cursor, on.
+'   DO
+'     LOCATE ulRow, ulCol + p - 1
+'     QPrintRC ed$, ulRow, ulCol, editColor
+'     WHILE INKEY$ <> "": WEND              ' not sure needed.
+'     DO
+'       scanCode = MGetKey(row, column) ' scanCode might be returned to caller.
+'       SELECT CASE scanCode
+'         CASE -83 ' Del
+'           ed$ = LEFT$(ed$, p - 1) + MID$(ed$, p + 1) + " "
+'           EXIT DO
+'         CASE -82 ' Ins
+'           insert = NOT insert
+'           IF insert THEN
+'             'LOCATE , , 1, 5, 7 ' quarter height cursor, on.
+'             LOCATE , , 1, 3, 7 ' half height cursor, on.
+'           ELSE
+'             LOCATE , , 1, 7, 7 ' single line cursor, on.
+'           END IF
+'         CASE 8 ' Backspace
+'           IF p = 1 THEN ' If pressed at beginning of the line, exit.
+'             QPrintRC ed$, ulRow, ulCol, normalColor
+'             activeLength = LEN(RTRIM$(ed$))
+'             LOCATE , , 0
+'             EXIT SUB
+'           END IF
+'           p = p -1: ed$ = LEFT$(ed$, p - 1) + MID$(ed$, p + 1) + " ": EXIT DO
+'         CASE -46 ' ALT+C
+'           p = 1: ed$ = SPACE$(LEN(ed$)): EXIT DO
+'         CASE -19 ' ALT+R
+'           ed$ = originalEd$
+'           ' IF LEN(RTRIM$(ed$)) > 0 THEN p = LEN(RTRIM$(ed$)) + 1 ELSE p = 1
+'           ' Removed the above line as it appears the original does not reset the cursor position.
+'           EXIT DO
+'         CASE -71 ' Home
+'           p = 1: EXIT DO
+'         CASE -79 ' End
+'           IF LEN(RTRIM$(ed$)) > 0 THEN p = LEN(RTRIM$(ed$)) + 1
+'           EXIT DO
+'         CASE -75 ' Left
+'           p = p - 1: EXIT DO
+'         CASE -77 ' Right
+'           p = p + 1: EXIT DO
+'         CASE 32 TO 126
+'           ch$ = CHR$(scanCode)
+'           IF numOnly THEN
+'             SELECT CASE scanCode
+'               CASE 45
+'               CASE 46
+'               CASE 48 TO 57
+'               CASE ELSE
+'                 ch$ = ""
+'             END SELECT
+'           END IF
+'           IF ch$ <> "" THEN
+'             IF insert THEN ' insert
+'               ed$ = LEFT$(LEFT$(ed$, p - 1) + ch$ + MID$(ed$, p), LEN(originalEd$))
+'             ELSE ' overwrite
+'               MID$(ed$, p, 1) = ch$
+'             END IF
+'             p = p + 1
+'             EXIT DO
+'           END IF
+'         'CASE 13, 27 ' Enter, Esc
+'         CASE ELSE
+'           'QPrintRC STR$(scanCode) + "   ", 1, 1, 7
+'           QPrintRC ed$, ulRow, ulCol, normalColor
+'           activeLength = LEN(RTRIM$(ed$))
+'           LOCATE , , 0
+'           EXIT SUB
+'       END SELECT
+'     LOOP
+'     IF p < 1 THEN p = 1     
+'     IF p > LEN(ed$) THEN p = LEN(ed$)
+'     'QPrintRC STR$(p) + "   ", 2, 1, 7
+'   LOOP
+' END SUB
+
+' ' MAMenu is a full-featured multi-column menu routine, which allows
+' ' selecting items either with the keyboard or a mouse. This is a mouse-aware
+' ' version of the original AMenu routine, which is described elsewhere.
+' SUB MAMenu(array$(), first, selection, start, count, scanCode, normColor, hiLiteColor, numRows, numCols, gap, row, column)
+'   w = LEN(array$(start))                ' width of each column.
+'   ulRow = row                           ' store menu location because row and column
+'   ulCol = column                        ' are replaced with mouse coords on return
+'   IF scanCode <> 3 THEN
+'     DO
+'       IF selection > start + ((numRows * numCols) - 1) THEN
+'         start = start + (numRows * numCols)
+'       ELSE
+'         EXIT DO
+'       END IF
+'     LOOP
+'   END IF
+'   DO
+'     DO
+'       IF selection < start THEN         ' current item before the display range?
+'         start = start - numRows        ' scroll display to the left.
+'       ELSEIF selection > start + ((numRows * numCols) - 1) THEN ' current item beyond the display range?
+'         start = start + numRows        ' scroll display to the right.
+'       ELSE
+'         EXIT DO
+'       END IF
+'     LOOP
+'     FOR rr = 0 TO numRows - 1           ' for each display row,
+'       FOR cc = 0 TO numCols - 1         ' for each display column,
+'         index = start + rr + (cc * numRows) ' determine element index,
+'         IF index = selection THEN clr = hiLiteColor ELSE clr = normColor ' determine color,
+'         IF index <= UBOUND(array$) THEN text$ = array$(index) ELSE text$ = SPACE$(w) ' determine text (can be blank),
+'         QPrintRC text$, ulRow + rr, ulCol + (cc * (w + gap)), clr ' render text.
+'       NEXT
+'     NEXT
+'     IF scanCode = 9999 THEN EXIT SUB     'TODO: For testing...
+'     IF scanCode = 9998 THEN passthrough = -1
+'     WHILE INKEY$ <> "": WEND              ' not sure needed.
+'     DO
+'       scanCode = MGetKey(row, column) ' scanCode might be returned to caller.
+'       SELECT CASE scanCode
+'         CASE -72 ' Up
+'           IF selection > 1 THEN          ' if current more than min,
+'             selection = selection - 1   ' decrement.
+'           END IF
+'           IF passthrough THEN EXIT SUB ELSE EXIT DO
+'         CASE -80 ' Down
+'           IF selection < UBOUND(array$) THEN  ' if current less than max,
+'             selection = selection + 1        ' increment.
+'           END IF
+'           IF passthrough THEN EXIT SUB ELSE EXIT DO
+'         CASE -75 ' Left
+'           IF selection - numRows > 0 THEN    ' more columns to the left?
+'             selection = selection - numRows ' shift columns right.
+'           ELSEIF selection > 1 THEN           ' if not shifted (above),
+'             selection = 1                     ' set current item to first.
+'           END IF
+'           IF passthrough THEN EXIT SUB ELSE EXIT DO
+'         CASE -77 ' Right
+'           IF selection + numRows <= UBOUND(array$) THEN ' more columns to the right?
+'             selection = selection + numRows            ' shift columns left.
+'           ELSEIF selection < UBOUND(array$) THEN         ' if not shifted (above),
+'             selection = UBOUND(array$)                   ' set current item to last.
+'           END IF
+'           IF passthrough THEN EXIT SUB ELSE EXIT DO
+'         CASE ELSE                         ' any other key,
+'           EXIT SUB                        ' return to caller.
+'       END SELECT
+'     LOOP
+'   LOOP
+' END SUB
+
+' SUB MAMenuT(Array$(), First, Selection, Start, Length, Count, ScanCode, NormalColor, Hilight, NumRows, NumCols, Gap, Row, Column)
+'   ERROR 73 ' Feature Unavailable
+' END SUB
+
+' SUB MEditor(ed$, activeLength, scanCode, numOnly, isCapsOn, normalColor, editColor, row, column, currentColumn)
+'   column = currentColumn
+'   CALL Editor(ed$, activeLength, scanCode, numOnly, isCapsOn, normalColor, editColor, row, column)
+' END SUB
+
+' SUB MenuVert(Array$(), First, NumLines, ScanCode, Choice, NormalColr, HiLiteColor, Row, Column)
+'   'TODO: Pretty much looks like a single column version of AMenu.
+'   ERROR 73 ' Feature Unavailable
+' END SUB
+
+' ' MGetKey first clears the keyboard buffer of any pending keys, and 
+' ' then waits until either a key or mouse button has been pressed. This 
+' ' is a "mouse-aware" version of the QuickPak Professional WaitKey routine. 
+' FUNCTION MGetKey(row, col)
+'   ' scanCode is returned holding the key or mouse button that was 
+'   ' pressed, and row and col indicate the location of the 
+'   ' mouse cursor at the time the mouse button was pressed. 
+'   WHILE INKEY$ <> "": WEND
+'   DO: CALL GetCursor(x, y, button): LOOP UNTIL button = 0
+'   DO
+'     CALL GetCursor(x, y, button)
+'     IF _PIXELSIZE = 0 THEN
+'       col = (x \ 8) + 1
+'       row = (y \ 8) + 1
+'     END IF
+'     IF (button AND 1) = 1 THEN MGetKey = 1000: EXIT DO
+'     IF (button AND 2) = 2 THEN MGetKey = 1001: EXIT DO
+'     IF (button AND 4) = 4 THEN MGetKey = 1002: EXIT DO
+'     a$ = INKEY$
+'     IF a$ <> "" THEN
+'       IF LEN(a$) = 1 THEN
+'         MGetKey = ASC(a$)
+'       ELSE
+'         MGetKey = -ASC(RIGHT$(a$, 1))
+'       END IF
+'       EXIT DO
+'     END IF
+'   LOOP
+' END FUNCTION
+
+' SUB MMenuVert(Array$(), First, Selection, Start, ScanCode, NormalColr, Hilight, NumRows, Row, Column)
+'   ERROR 73 ' Feature Unavailable
+' END SUB
+
+' SUB Spread(Wks$(), Format$(), ColumnWidths(), Wide, Rows, Action)
+'   ERROR 73 ' Feature Unavailable
+' END SUB
+
+' SUB YesNo(YN$, PromptParam$, ScanCode, NormalColor, EditColor, Row, Column)
+'   ERROR 73 ' Feature Unavailable
+' END SUB
+
+' ' ****************************************
+' ' Chapter 6 - Keyboard / Mouse Routines
+' ' ****************************************
+
+' FUNCTION AltKey
+'   ' See ALTKEY.ASM
+'   LALT& = 100308
+'   RALT& = 100307
+'   AltKey = _KEYDOWN(LALT&) OR _KEYDOWN(RALT&)
+' END FUNCTION
+
+' ' ButtonPress will report how many times a specified mouse button 
+' ' was pressed since the last time it was called. It also returns the X/Y 
+' ' coordinates where the mouse cursor was located when that button 
+' ' was last pressed. 
+' SUB ButtonPress (button, status, count, x, y)
+
+'   ' NOTE: it appears that button press count is monitored "outside" of
+'   '       this method; it is reset within this method to 0 (I think?), 
+'   '       but will need to figure out a way to determine the number of
+'   '       presses (clicks) some other way.
+
+'   ' button is the button of interest, with a 1 indicating button 1,  
+'   ' 2 meaning button 2, and 3 for button 3 (if the mouse has a third button). 
+
+'   ' status is the current button status, and has the same meaning as 
+'   ' the information returned by the GetCursor mouse routine. 
+
+'     button1 = _MOUSEBUTTON(1)
+'     button2 = _MOUSEBUTTON(2)
+'     button3 = _MOUSEBUTTON(3)
+'     status = 0
+'     IF button = 1 AND button1 THEN status = 1
+'     IF button = 2 AND button2 THEN status = status + 2
+'     IF button = 3 AND button3 THEN status = status + 4
+
+'   ' Count tells how many times the button has been pressed since 
+'   ' ButtonPress was last called. X and Y hold the mouse cursor 
+'   ' position at the time the button was pressed. Use the GetCursor 
+'   ' routine to determine the current mouse cursor location. 
+
+'   IF _MOUSEINPUT THEN 
+'     ' WHILE _MOUSEBUTTON(button)
+'     '   IF button = 1 THEN count1 = count1 + 1
+'     '   IF button = 2 THEN count2 = count2 + 1
+'     '   IF button = 3 THEN count3 = count3 + 1
+'     ' WEND
+'     IF _MOUSEBUTTON(1) THEN count1 = count1 + 1
+'     IF _MOUSEBUTTON(2) THEN count2 = count2 + 1
+'     IF _MOUSEBUTTON(3) THEN count3 = count3 + 1
+'     IF _PIXELSIZE = 0 THEN
+'       col = _MOUSEX
+'       row = _MOUSEY
+'       x = (col - 1) * 8
+'       y = (row - 1) * 8
+'     ELSE
+'       x = _MOUSEX
+'       y = _MOUSEY
+'     END IF
+'     lastX = x
+'     lastY = y
+'   ELSE
+'     x = lastX
+'     y = lastY
+'   END IF
+  
+'   IF button = 1 THEN count = count1: count1 = 0
+'   IF button = 2 THEN count = count2: count2 = 0
+'   IF button = 3 THEN count = count3: count3 = 0
+
+' END SUB
+
+' ' CapsLock will quickly tell if the CapsLock key is currently depressed. 
+' FUNCTION CapsLock
+'   ' Active receives -1 if the CapsLock key is currently down, or O if it is not. 
+'   CapsLock = _CAPSLOCK
+' END FUNCTION
+
+' ' CapsOff turns off the CapsLock key status. 
+' SUB CapsOff
+'   _CAPSLOCK OFF
+' END SUB
+
+' ' CapsOn turns on the CapsLock key status. 
+' SUB CapsOn
+'   _CAPSLOCK ON
+' END SUB
+
+' ' ClearBuf will quickly clear the keyboard of any key strokes that are 
+' ' currently pending. 
+' SUB ClearBuf
+'   'WHILE INKEY$ <> "": WEND 
+'   _KEYCLEAR
+' END SUB
+
+' FUNCTION CtrlKey
+'   RCTRL& = 100305
+'   LCTRL& = 100306
+'   CtrlKey = _KEYDOWN(RCTRL&) OR _KEYDOWN(LCTRL&)
+' END FUNCTION
+
+' ' GetCursor reports the current location of the mouse cursor, and 
+' ' which mouse buttons are currently depressed. 
+' SUB GetCursor (x, y, button) STATIC
+'   ' x and y return holding the current mouse cursor coordinates, 
+'   ' and button is bit coded to indicate which buttons are currently 
+'   ' down. 
+'   IF _MOUSEINPUT THEN
+'     IF _PIXELSIZE = 0 THEN
+'       col = _MOUSEX
+'       row = _MOUSEY
+'       x = (col - 1) * 8
+'       y = (row - 1) * 8
+'     ELSE
+'       x = _MOUSEX
+'       y = _MOUSEY
+'     END IF
+'     button1 = _MOUSEBUTTON(1)
+'     button2 = _MOUSEBUTTON(2)
+'     button3 = _MOUSEBUTTON(3)
+'     button = 0
+'     IF button1 THEN button = 1
+'     IF button2 THEN button = button + 2
+'     IF button3 THEN button = button + 4
+'     lastX = x
+'     lastY = y
+'     lastButton = button
+'   ELSE
+'     x = lastX
+'     y = lastY
+'     button = lastButton
+'   END IF
+' END SUB
+
+' ' GetCursorT reports the current location of the mouse cursor, and 
+' ' which mouse buttons are currently depressed.
+' SUB GetCursorT(row, col, button)
+'   ' col and row return holding the current mouse coordinates, and 
+'   ' button is bit-coded to indicate which buttons are currently being pressed. 
+'   CALL GetCursor(x, y, button)
+'   IF _PIXELSIZE = 0 THEN
+'     col = (x \ 8) + 1
+'     row = (y \ 8) + 1
+'   END IF
+' END SUB
+
+' ' GrafCursor greatly simplifies defining the shape of the mouse 
+' ' cursor for use in graphics mode. 
+' SUB GrafCursor(x, y, cursor$)
+'   ' x and y define the cursor "hot spot", and cursor$ is either a 
+'   ' conventional or fixed-length string that contains the new cursor shape. 
+
+'   ' https://learn.microsoft.com/en-us/windows/win32/menurc/using-cursors
+
+'   ' NOT IMPLEMENTED
+
+' END SUB
+
+' SUB HideCursor
+'   _MOUSEHIDE
+' END SUB
+
+' ' InitMouse is used both to determine if a mouse is present in the host 
+' ' PC, and to reset the mouse driver software to its default values. 
+' SUB InitMouse(there)
+'   ' there receives -1 if a mouse is present, or O if no mouse is installed. 
+'   there = -1 ' we are working on modern platforms, of course there is a mouse.
+' END SUB
+
+' FUNCTION InStat
+'   ERROR 73 ' Feature Unavailable
+' END FUNCTION
+
+' ' Keyboard provides a continual display of the current Cap and NumLock
+' ' status, but without having to loop repeatedly to obtain the information. 
+' SUB Keyboard(row, column, color1, color2, mode) STATIC
+
+'   ' Row% and Column% indicate where on the screen the status is to 
+'   ' be displayed. 
+'   '
+'   ' Colorl % and Color2% tell Keyboard what colors to use when 
+'   ' removing and displaying the "CAP" and "NUM" messages 
+'   ' respectively. 
+'   '
+'   ' Mode% is either 1 to install the Keyboard routine, or Oto remove it. 
+
+'   IF mode = 1 THEN
+
+'     IF KeyboardMethodTimerId <> 0 THEN
+'       TIMER(KeyboardMethodTimerId) OFF
+'       TIMER(KeyboardMethodTimerId) FREE
+'       KeyboardMethodTimerId = 0
+'     END IF
+
+'     KeyboardMethodRow = row
+'     KeyboardMethodCol = column
+'     KeyboardMethodColor1 = color1
+'     KeyboardMethodColor2 = color2
+
+'     KeyboardMethodTimerId = _FREETIMER
+'     ON TIMER(KeyboardMethodTimerId, .05) Internal_Keyboard_Timer
+'     TIMER(KeyboardMethodTimerId) ON
+
+'   ELSE
+
+'     IF KeyboardMethodTimerId <> 0 THEN
+'       TIMER(KeyboardMethodTimerId) OFF
+'       TIMER(KeyboardMethodTimerId) FREE
+'       KeyboardMethodTimerId = 0
+'     END IF
+
+'     QPrintRC "        ", KeyboardMethodRow, KeyboardMethodCol, KeyboardMethodColor1
+
+'   END IF
+
+' END SUB
+
+' SUB Internal_Keyboard_Timer STATIC
+
+'   STATIC prevNumState As Short
+'   STATIC prevCapState As Short
+
+'   numState = NumLock
+'   IF numState <> prevNumState THEN
+'     IF numState THEN 
+'       QPrintRC "NUM", KeyboardMethodRow, KeyboardMethodCol, KeyboardMethodColor2
+'     ELSE
+'       QPrintRC "   ", KeyboardMethodRow, KeyboardMethodCol, KeyboardMethodColor1
+'     END IF
+'     prevNumState = numState
+'   END IF
+'   capState = CapsLock
+'   IF capState <> prevCapState THEN
+'     IF capState THEN 
+'       QPrintRC "CAPS", KeyboardMethodRow, KeyboardMethodCol + 4, KeyboardMethodColor2
+'     ELSE
+'       QPrintRC "    ", KeyboardMethodRow, KeyboardMethodCol + 4, KeyboardMethodColor1
+'     END IF
+'     prevCapState = capState
+'   END IF
+
+' END SUB
+
+' ' KeyDown reports if any keys are currently being pressed. 
+' FUNCTION KeyDown
+
+'   ' Set to -1 (True) if a key is currently being pressed, or 
+'   ' 0 if no keys are pressed. 
+
+'   bksp = _KEYDOWN(8)
+'   tb = _KEYDOWN(9)
+'   entr = _KEYDOWN(13)
+'   esc = _KEYDOWN(27) ' ESC
+
+'   internalF1 = _KEYDOWN(15104) ' F1
+'   internalF2 = _KEYDOWN(15360) ' F2
+'   internalF3 = _KEYDOWN(15616) ' F3
+'   internalF4 = _KEYDOWN(15872) ' F4
+'   internalF5 = _KEYDOWN(16128) ' F5
+'   internalF6 = _KEYDOWN(16384) ' F6
+'   internalF7 = _KEYDOWN(16640) ' F7
+'   internalF8 = _KEYDOWN(16896) ' F8
+'   internalF9 = _KEYDOWN(17152) ' F9
+'   internalF10 = _KEYDOWN(17408) ' F10
+'   internalF11 = _KEYDOWN(34048) ' F11
+'   internalF12 = _KEYDOWN(34304) ' F12
+'   ins = _KEYDOWN(20992) ' INS
+'   hm = _KEYDOWN(18176) ' HOME
+'   pgup = _KEYDOWN(18688) ' PGUP
+'   del = _KEYDOWN(21248) ' DEL
+'   ed = _KEYDOWN(20224) ' END
+'   pgdn = _KEYDOWN(20736) ' PGDN
+'   up = _KEYDOWN(18432) ' UP
+'   dn = _KEYDOWN(20480) ' DN
+'   lt = _KEYDOWN(19200) ' LEFT
+'   rt = _KEYDOWN(19712) ' RIGHT
+'   num = _KEYDOWN(100300) ' Num Lock
+'   caps = _KEYDOWN(100301) ' Caps Lock
+'   rshift = _KEYDOWN(100303) ' Right Shift
+'   lshift = _KEYDOWN(100304) ' Left Shift
+'   rctrl = _KEYDOWN(100305) ' Right Control
+'   lctrl = _KEYDOWN(100306) ' Left Control
+'   ralt = _KEYDOWN(100307) ' Right Alt
+'   lalt = _KEYDOWN(100308) ' Left Alt
+
+'   atoz = 0
+'   FOR i = 32 TO 126
+'     IF _KEYDOWN(i) THEN atoz = 1: EXIT FOR
+'   NEXT
+
+'   accum& = bksp + tb + entr + esc
+'   accum& = accum& + internalF1 + internalF2 + internalF3 + internalF4 + internalF5 + internalF6 + internalF7 + internalF8 + internalF9 + internalF10 + internalF11 + internalF12
+'   accum& = accum& + hm + pgup + del + ed + pgdn + up + dn + lt + rt
+'   accum& = accum& + num + caps + rshift + lshift + rctrl + lctrl + ralt + lalt
+'   accum& = accum& + atoz
+
+'   IF accum& THEN
+'     KeyDown = -1
+'   ELSE
+'     KeyDown = 0
+'   END IF
+
+' END FUNCTION
+
+' SUB Motion(Value)
+'   ERROR 73 ' Feature Unavailable
+' END SUB
+
+' SUB Mouse(AX, BX, CX, DX)
+'   ERROR 73 ' Feature Unavailable
+' END SUB
+
+' ' MouseRange will return a range number that tells where the mouse 
+' ' cursor is located, based on an array of screen coordinates. 
+' SUB MouseRange(array() AS Area, start, numEls, row, col, button, rangeNum)
+'   ' array() / start is the first element in a special TYPE array, and 
+'   ' numEls is the number of elements in that array. row and 
+'   ' col return the current location of the mouse cursor, button 
+'   ' indicates which mouse button is currently depressed, and 
+'   ' rangeNum holds the range within which the cursor is located.
+'   rangeNum = 0 ' no current window
+'   row = -1: col = -1 
+'   CALL GetCursorT(row, col, button)
+'   IF button > 0 THEN
+'     FOR entry = numEls TO start STEP - 1
+'       IF row >= array(entry).Y1 AND row <= array(entry).Y2 THEN
+'         IF col >= array(entry).X1 AND col <= array(entry).X2 THEN
+'           IF array(entry).RN = -1 THEN
+'             rangeNum = entry
+'           ELSE
+'             rangeNum = array(entry).RN
+'           END IF
+'           EXIT FOR
+'         END IF
+'       END IF
+'     NEXT
+'   END IF
+' END SUB
+
+' SUB MouseRange1(array() AS Area, start, numEls, row, col, button, rangeNum)
+'   rangeNum = 0 ' no current window
+'   row = -1: col = -1 
+'   CALL GetCursorT(row, col, button)
+'   FOR entry = numEls TO start STEP - 1
+'     IF row >= array(entry).Y1 AND row <= array(entry).Y2 THEN
+'       IF col >= array(entry).X1 AND col <= array(entry).X2 THEN
+'         IF array(entry).RN = -1 THEN
+'           rangeNum = entry
+'         ELSE
+'           rangeNum = array(entry).RN
+'         END IF
+'         EXIT FOR
+'       END IF
+'     END IF
+'   NEXT
+' END SUB
+
+' ' MouseRangeG works in the same way as MouseRange, 
+' ' but all parameters are given and returned as pixels 
+' ' instead of rows and columns. 
+' SUB MouseRangeG(array() AS Area, start, numEls, x, y, button, rangeNum)
+'   rangeNum = 0 ' no current window
+'   x = -1: y = -1 
+'   CALL GetCursor(x, y, button)
+'   IF button > 0 THEN
+'     FOR entry = numEls TO start STEP - 1
+'       IF y >= array(entry).Y1 AND y <= array(entry).Y2 THEN
+'         IF x >= array(entry).X1 AND x <= array(entry).X2 THEN
+'           IF array(entry).RN = -1 THEN
+'             rangeNum = entry
+'           ELSE
+'             rangeNum = array(entry).RN
+'           END IF
+'           EXIT FOR
+'         END IF
+'       END IF
+'     NEXT
+'   END IF
+' END SUB
+
+' SUB MouseRangeG1(array() AS Area, start, numEls, x, y, button, rangeNum)
+'   rangeNum = 0 ' no current window
+'   x = -1: y = -1 
+'   CALL GetCursor(x, y, button)
+'   FOR entry = numEls TO start STEP - 1
+'     IF y >= array(entry).Y1 AND y <= array(entry).Y2 THEN
+'       IF x >= array(entry).X1 AND x <= array(entry).X2 THEN
+'         IF array(entry).RN = -1 THEN
+'           rangeNum = entry
+'         ELSE
+'           rangeNum = array(entry).RN
+'         END IF
+'         EXIT FOR
+'       END IF
+'     END IF
+'   NEXT
+' END SUB
+
+' FUNCTION MBuffSize
+'   'ERROR 73 ' Feature Unavailable
+' END FUNCTION
+
+' SUB MGetState(Buffer$)
+'   'ERROR 73 ' Feature Unavailable
+' END SUB
+
+' SUB MSetState(Buffer$)
+'   'ERROR 73 ' Feature Unavailable
+' END SUB
+
+' ' MouseTrap will establish the allowable range of movement for the mouse cursor. 
+' SUB MouseTrap(ulRow, ulCol, lrRow, lrCol)
+'   ' https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-clipcursor
+'   ' https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getclipcursor
+'   ' https://learn.microsoft.com/en-us/windows/win32/menurc/using-cursors
+
+'   EXIT SUB 'NOTE: Disabling functionality.
+
+'   DIM rec AS Rectangle
+'   IF _PIXELSIZE = 0 THEN
+'     rec.left = (ulCol - 1) * 8
+'     rec.top = (ulRow - 1) * 8
+'     rec.bottom = lrRow * 8
+'     rec.right = lrcol * 8
+'   ELSE
+'     rec.left = ulCol
+'     rec.top = ulRow
+'     rec.bottom = lrRow
+'     rec.right = lrcol
+'   END IF
+'   work = ClipCursor(rec)
+
+' END SUB
+
+' ' NumLock will quickly tell if the NumLock key is currently depressed. 
+' FUNCTION NumLock
+'   ' Active receives -1 if the NumLock key is currently down, or O if it is not. 
+'   NumLock = _NUMLOCK
+' END FUNCTION
+
+' ' NumOff turns off the NumLock key status. 
+' SUB NumOff
+'   _NUMLOCK OFF
+' END SUB
+
+' ' NumOn turns on the NumLock key status. 
+' SUB NumOn
+'   _NUMLOCK ON
+' END SUB
+
+' ' PeekBuf provides a handy way to determine what key if any is the 
+' ' next one pending in the keyboard buffer, without actually removing 
+' ' it as INKEY$ does. 
+' FUNCTION PeekBuf
+'   ' Char receives the ASCII value of the pending key if it is a normal 
+'   ' key, 0 if no keys are pending at all, or a negative value representing 
+'   ' an extended key's scan code. 
+'   PeekBuf = INP(&H60)
+' END FUNCTION
+
+' SUB RptKey(Char, Count)
+'   ERROR 73 ' Feature Unavailable
+' END SUB
+
+' ' ScrlLock will quickly tell if the ScrlLock key is currently depressed. 
+' FUNCTION ScrlLock
+'   ' Active receives -1 if the ScrlLock key is currently down, or O if it is not. 
+'   ScrlLock = _SCROLLLOCK
+' END FUNCTION
+
+' SUB SetCursor(x, y)
+'   ' https://learn.microsoft.com/en-us/windows/win32/menurc/using-cursors
+'   _MOUSEMOVE x, y
+' END SUB
+
+' FUNCTION ShiftKey
+'   KEY_LSHIFT& = 100304
+'   KEY_RSHIFT& = 100303
+'   ShiftKey = _KEYDOWN(KEY_LSHIFT&) OR _KEYDOWN(KEY_RSHIFT&)
+' END FUNCTION
+
+' SUB ShowCursor
+'   _MOUSESHOW
+' END SUB
+
+' SUB StuffBuf(X$)
+'   ' User32 (Windows) SendInput https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-sendinput API
+'   'ERROR 73 ' Feature Unavailable
+' END SUB
+
+' ' TextCursor provides an easy way to initialize the mouse cursor in 
+' ' text mode, and define its color. 
+' SUB TextCursor(FG, BG)
+'   ' NOTE: I'm not sure that this is required (or is even possible)
+'   '       within the context of QB64 - for now, just stub.
+' END SUB
+
+' ' FUNCTION WaitKey
+' '   WHILE INKEY$ <> "": WEND ' Clear any pending key strokes.
+' '   WHILE INKEY$ = "": WEND ' Wait for a key.
+' '   ' TODO: Return the key value.
+' ' END FUNCTION
+
+' ' WaitKey first clears the keyboard buffer of any keys that may be 
+' ' pending, and then waits until a key is pressed. 
+' ' SUB WaitKey
+' '   WHILE INKEY$ <> "": WEND ' Clear any pending key strokes.
+' '   WHILE INKEY$ = "": WEND ' Wait for a key.
+' ' END SUB
+
+' FUNCTION WaitKey
+'   WHILE INKEY$ <> "": WEND ' Clear any pending key strokes.
+'   DO ' Wait for a key.
+'     a$ = INKEY$
+'     IF a$ <> "" THEN
+'       IF LEN(a$) = 1 THEN
+'         WaitKey = ASC(a$)
+'       ELSE
+'         WaitKey = -ASC(RIGHT$(a$, 1))
+'       END IF
+'       EXIT DO
+'     END IF
+'   LOOP
+' END SUB
+
+' SUB WaitKeyS
+'   WHILE INKEY$ <> "": WEND ' Clear any pending key strokes.
+'   DO ' Wait for a key.
+'     a$ = INKEY$
+'     IF a$ <> "" THEN
+'       EXIT DO
+'     END IF
+'   LOOP
+' END SUB
+
+' FUNCTION WaitScan
+'   ERROR 73 ' Feature Unavailable
+' END FUNCTION
+
+' ' WaitUp halts a program's execution until no mouse buttons are being depressed. 
+' SUB WaitUp
+'   DO
+'     Call GetCursor(x, y, button)
+'   LOOP WHILE button
+' END SUB
+
+' ' **************************************
+' ' Chapter 7 - Miscellaneous Routines
+' ' **************************************
+
+' FUNCTION AddUSI(X, Y)
+'   ' See ADDUSI.ASM
+'   ERROR 73 ' Feature Unavailable
+' END FUNCTION
+
+' SUB BCopy(src AS _MEM, dest AS _MEM, numBytes, direction)
+' 'SUB BCopy(fromSeg, fromAddr, toSeg, toAddr, numBytes, direction)
+
+'   ' FromSeg% and FromAddr% indicate the source location of the 
+'   ' block, and ToSeg% and ToAddr% tell where to copy it to. 
+'   ' NumBytes% is, well, you can figure that one out. Direction% is 
+'   ' either O to copy in the forward direction, or -1 to copy backwards. 
+
+'   DIM totalSize AS _OFFSET: totalSize = numEls * size
+  
+'   IF direction = 0 THEN
+'     _MEMCOPY src, src.OFFSET, totalSize TO dest, dest.OFFSET
+'   ELSE
+'     ' Not really sure what this means.
+'     ' Also, of the included examples that use BCopy, 
+'     ' **ALL** of them are passing a 0 for this param.
+'     ERROR 73 ' Feature Unavailable
+'   END IF
+
+' END SUB
+
+' ' BCopyT will copy one or more elements in a TYPE array to 
+' ' another array, or to any location in memory. Alternately, BCopyT 
+' ' can be used to move any contiguous block of memory, even if the 
+' ' number of bytes exceeds 65536. 
+' SUB BCopyT(src AS _MEM, dest AS _MEM, elSize, numEls)
+' 'SUB BCopyT(SEG fromEl, SEG toEl, elSize, numEls) 
+' 'SUB BCopyT(fromSeg, fromAdr, toSeg, toAdr%, numBytes, numEls) 
+' 'SUB BCopyT(src AS _MEM, srcEl, dest AS _MEM, destEl, elSize, numEls)
+
+'   ' FromEl is the starting element of the source array and ToEl is the 
+'   ' starting element in the destination array. El Size% is the size of each 
+'   ' element in bytes, or a special code (see below). NumEls% is the 
+'   ' number of elements to be copied. 
+'   '
+'   ' With the alternate call form, FromSeg%, FromAdr%, ToSeg%, and 
+'   ' ToAdr% define the source and destination segments and addresses. 
+'   ' NumBytes % then tells how many bytes are to be copied. 
+
+'   ' PRINT v.OFFSET; " the beginning of the memory block as _OFFSET"
+'   ' PRINT v.SIZE; " the largest available region of memory of the ELEMENT in bytes as _OFFSET"
+'   ' PRINT v.ELEMENTSIZE; " the byte size of the elements within the blocks AS _OFFSET"
+'   ' PRINT "     ^----- represents the memory block 'left', from the current element to max"
+
+'   ' PRINT v.TYPE; " the type (represented as bits combined to form a value"
+'   ' IF v.TYPE AND 1 THEN PRINT "   BIT 01: _BYTE"
+'   ' IF v.TYPE AND 2 THEN PRINT "   BIT 02: INTEGER"
+'   ' IF v.TYPE AND 4 THEN PRINT "   BIT 03: LONG or SINGLE"
+'   ' IF v.TYPE AND 8 THEN PRINT "   BIT 04: DOUBLE or _INTEGER64"
+'   ' IF v.TYPE AND 16 THEN PRINT "   BIT 05: Not Defined"
+'   ' IF v.TYPE AND 32 THEN PRINT "   BIT 06: _FLOAT"
+'   ' IF v.TYPE AND 64 THEN PRINT "   BIT 07: Not Defined"
+'   ' IF v.TYPE AND 128 THEN PRINT "   BIT 08: 'integer type'"
+'   ' IF v.TYPE AND 256 THEN PRINT "   BIT 09: 'floating point type'"
+'   ' IF v.TYPE AND 512 THEN PRINT "   BIT 10: string (fixed or variable length)"
+'   ' IF v.TYPE AND 1024 THEN PRINT "   BIT 11: _UNSIGNED"
+'   ' IF v.TYPE AND 2048 THEN PRINT "   BIT 12: _MEMIMAGE"
+'   ' IF v.TYPE AND 4096 THEN PRINT "   BIT 13: _MEM TYPE structure"
+'   ' IF v.TYPE AND 8192 THEN PRINT "   BIT 14: _OFFSET"
+'   ' IF v.TYPE AND 16384 THEN PRINT "   BIT 15: _MEMNEW(size) or _MEMNEW(offset_size)"
+'   ' IF v.TYPE AND 32768 THEN PRINT "   BIT 16: UDT (TYPE...END TYPE)"
+'   ' IF v.TYPE AND 65536 THEN PRINT "   BIT 17: an array of data"
+
+'   SELECT CASE elSize
+'     CASE -1 : size = 2 ' 2-byte integer 
+'     CASE -2 : size = 4 ' 4-byte long integer
+'     CASE -3 : size = 4 ' 4-byte single precision
+'     CASE -4 : size = 8 ' 8-byte double precision
+'     CASE IS > 0: size = elSize
+'     CASE ELSE
+'       EXIT SUB
+'   END SELECT
+
+'   'DIM srcOffset AS _OFFSET: srcOffset = src.OFFSET + ((srcEl - 1) * size)
+'   'DIM destOffset AS _OFFSET: destOffset = dest.OFFSET + ((destEl - 1) * size)
+'   DIM totalSize AS _OFFSET: totalSize = numEls * size
+  
+'   _MEMCOPY src, src.OFFSET, totalSize TO dest, dest.OFFSET
+
+' END SUB
+
+' SUB BLPrint(LPTNumber, X$, ErrorCount)
+'   ERROR 73 ' Feature Unavailable
+' END SUB
+
+' ' Chime provides five different types of beep tones, and five short 
+' ' attention-getting trill sounds.
+' SUB Chime(number)
+
+'   SELECT CASE number
+'     CASE 1: QPSound 100, 5
+'     CASE 2: QPSound 200, 5
+'     CASE 3: QPSound 400, 5
+'     CASE 4: QPSound 800, 5
+'     CASE 5: QPSound 1600, 5
+'     CASE 6
+'       QPSound 659, 1
+'       QPSound 523, 1
+'       QPSound 659, 1
+'       QPSound 523, 1
+'     CASE 7
+'       FOR i = 300 TO 750 STEP 50
+'         QPSound i, 1
+'       NEXT
+'     CASE 8
+'       FOR i = 1000 TO 1700 STEP 100
+'         QPSound i, 1
+'       NEXT
+'     CASE 9
+'       FOR i = 1 TO 6
+'         QPSound 200 * i, 1
+'       NEXT
+'     CASE 10
+'       QPSound 220, 1
+'       QPSound 330, 1
+'       QPSound 440, 1
+'       QPSound 660, 1
+'       QPSound 880, 1
+'       QPSound 1319, 1
+'       QPSound 1760, 1
+'     CASE ELSE
+'   END SELECT
+
+' END SUB
+
+' ' Clock provides a continual display of the current time, but without 
+' ' having to loop repeatedly in the BASIC program.
+' SUB Clock(row, column, colr, mode)
+
+'   ' Row% and Column% indicate where on the screen the time is to be 
+'   ' displayed, Colr% tells Clock what color to use, and Mode% is 
+'   ' either 1 to install the routine, or O to remove it. 
+
+'   IF mode = 1 THEN
+
+'     IF ClockMethodTimerId <> 0 THEN
+'       TIMER(ClockMethodTimerId) OFF
+'       TIMER(ClockMethodTimerId) FREE
+'       ClockMethodTimerId = 0
+'     END IF
+
+'     ClockMethodRow = row
+'     ClockMethodCol = column
+'     ClockMethodColr = colr
+'     ClockMethod24 = 0
+
+'     ClockMethodTimerId = _FREETIMER
+'     ON TIMER(ClockMethodTimerId, .05) Internal_Clock_Timer
+'     TIMER(ClockMethodTimerId) ON
+
+'   ELSE
+
+'     IF ClockMethodTimerId <> 0 THEN
+'       TIMER(ClockMethodTimerId) OFF
+'       TIMER(ClockMethodTimerId) FREE
+'       ClockMethodTimerId = 0
+'     END IF
+
+'     QPrintRC "        ", ClockMethodRow, ClockMethodCol, ClockMethodColr
+
+'   END IF
+
+' END SUB
+
+' ' Clock24 provides a continual 24-hour display of the current time, but 
+' ' without having to loop repeatedly in the BASIC program.
+' SUB Clock24(row, column, colr, mode)
+
+'   ' Row% and Column% indicate where on the screen the time is to be 
+'   ' displayed, Colr% tells Clock what color to use, and Mode% is 
+'   ' either 1 to install the routine, or O to remove it. 
+
+'   IF mode = 1 THEN
+
+'     IF ClockMethodTimerId <> 0 THEN
+'       TIMER(ClockMethodTimerId) OFF
+'       TIMER(ClockMethodTimerId) FREE
+'       ClockMethodTimerId = 0
+'     END IF
+
+'     ClockMethodRow = row
+'     ClockMethodCol = column
+'     ClockMethodColr = colr
+'     ClockMethod24 = -1
+
+'     ClockMethodTimerId = _FREETIMER
+'     ON TIMER(ClockMethodTimerId, .05) Internal_Clock_Timer
+'     TIMER(ClockMethodTimerId) ON
+
+'   ELSE
+
+'     IF ClockMethodTimerId <> 0 THEN
+'       TIMER(ClockMethodTimerId) OFF
+'       TIMER(ClockMethodTimerId) FREE
+'       ClockMethodTimerId = 0
+'     END IF
+
+'     QPrintRC "        ", ClockMethodRow, ClockMethodCol, ClockMethodColr
+
+'   END IF
+
+' END SUB
+
+' SUB Internal_Clock_Timer
+'   display$ = TIME$
+'   QPrintRC display$, ClockMethodRow, ClockMethodCol, ClockMethodColr
+' END SUB
+
+' ' Compare will compare any two blocks of memory, and report if they are the same. 
+' FUNCTION Compare(segAdr1 AS _MEM, segAdr2 AS _MEM, numBytes)
+' 'FUNCTION Compare(Seg1, Adr1, Seg2, Adr2, NumBytes)
+
+'   SELECT CASE numBytes
+'     CASE -1: size = 2
+'     CASE -2: size = 4
+'     CASE -3: size = 4
+'     CASE -4: size = 8
+'     CASE ELSE: size = numBytes
+'   END SELECT
+
+'   s1$ = SPACE$(size)
+'   s2$ = SPACE$(size)
+'   _MEMGET segAdr1, segAdr1.OFFSET, s1$
+'   _MEMGET segAdr2, segAdr2.OFFSET, s2$
+'   Compare = (s1$ = s2$)
+
+' END FUNCTION
+
+' ' CompareT will compare any two TYPE variables, and report if they are the same. 
+' FUNCTION CompareT(block1 AS _MEM, block2 AS _MEM, numBytes)
+'   s1$ = SPACE$(numBytes)
+'   s2$ = SPACE$(numBytes)
+'   _MEMGET block1, block1.OFFSET, s1$
+'   _MEMGET block2, block2.OFFSET, s2$
+'   CompareT = (s1$ = s2$)
+' END FUNCTION
+
+' ' Date2Num converts a date in string form to an equivalent integer variable. 
+' FUNCTION Date2Num (dat$) STATIC
+
+'   d$ = dat$
+
+'   REDIM dyMth(13)            ' DyMth() holds number of days into the year
+'   ' RESTORE                     '   for a given month
+'   ' FOR c = 1 TO 13
+'   '   READ dyMth(C)
+'   ' NEXT
+'   ' DATA 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365
+
+'   dyMth(1) = 0
+'   dyMth(2) = 31
+'   dyMth(3) = 59
+'   dyMth(4) = 90
+'   dyMth(5) = 120
+'   dyMth(6) = 151
+'   dyMth(7) = 181
+'   dyMth(8) = 212
+'   dyMth(9) = 243
+'   dyMth(10) = 273
+'   dyMth(11) = 304
+'   dyMth(12) = 334
+'   dyMth(13) = 365
+
+'   p = 1 ' pointer
+'   c$ = "" ' collector
+'   part = 1 ' 3 parts; 1) month, 2) day, 3) year
+'   collect = 0 ' 
+'   DO
+'     IF p > LEN(dat$) THEN
+'       ch$ = ""
+'     ELSE
+'       ch$ = MID$(dat$, p, 1) ' current character
+'     END IF
+'     SELECT CASE ch$
+'       CASE "1", "2", "3", "4", "5", "6", "7", "8", "9", "0"
+'         c$ = c$ + ch$
+'         IF part < 3 AND LEN(c$) = 2 THEN collect = -1
+'       CASE ELSE
+'         IF LEN(c$) > 0 THEN collect = -1
+'     END SELECT
+'     IF collect <> 0 THEN
+'       SELECT CASE part
+'         CASE 1: month = VAL(c$): c$ = "": part = part + 1
+'         CASE 2: day = VAL(c$): c$ = "": part = part + 1
+'         CASE 3: year = VAL(c$): EXIT DO
+'         CASE ELSE
+'       END SELECT
+'       collect = 0
+'     END IF
+'     p = p + 1
+'   LOOP
+
+'   'NOTE: remarked out the three lines below in favor of a more complete parser (above)
+
+'   ' year = VAL(MID$(dat$, 7))                  ' Read year
+'   IF year >= 1900 THEN year = year - 1900
+
+'   'month = VAL(LEFT$(dat$, 2))                ' Extract Month #
+'   'day = VAL(MID$(dat$, 4, 2))                ' Extract Day #
+
+'   days = (year - 80!) * 365
+'   IF year >= 80 THEN
+'     adDays = (year - 77) \ 4
+'   ELSE
+'     adDays = (year - 80) \ 4
+'   END IF
+
+'   days = days + adDays                    ' Add a day for each Leap Year
+'   'LeapYr below is 0 when true!
+'   leapYr = year MOD 4                      ' Find Leap year flag
+'   IF year = 0 THEN leapYr = 1    'EW 12-13-95: 1900 <> leap year, 2000 is
+'   days = days + dyMth(month) + day      ' Add # of days into year
+
+'   ' If leap year, add 1 day
+'   IF leapYr = 0 AND month > 2 THEN days = days + 1
+'   Date2Num = days
+
+' END FUNCTION
+
+' FUNCTION DayName$(day)
+'   SELECT CASE day
+'     CASE 1: DayName$ = "Sun"
+'     CASE 2: DayName$ = "Mon"
+'     CASE 3: DayName$ = "Tue"
+'     CASE 4: DayName$ = "Wed"
+'     CASE 5: DayName$ = "Thu"
+'     CASE 6: DayName$ = "Fri"
+'     CASE 7: DayName$ = "Sat"
+'     CASE ELSE
+'       DayName$ = ""
+'   END SELECT
+' END FUNCTION
+
+' FUNCTION EDate2Num(Dat$)
+'   ERROR 73 ' Feature Unavailable
+' END FUNCTION
+
+' ' As its name implies, Empty is an empty procedure that does absolutely
+' ' nothing. However, Empty is invaluable when timing BASIC functions, 
+' ' precisely because it takes such little time to execute. 
+' SUB Empty(dummy)
+'   ' do nothing.
+' END SUB
+
+' FUNCTION ENum2Date$(Days)
+'   ERROR 73 ' Feature Unavailable
+' END FUNCTION
+
+' SUB Extended
+'   ERROR 73 ' Feature Unavailable
+' END SUB
+
+' FUNCTION Factorial#(Number)
+'   SELECT CASE number
+'     CASE 0: Factorial# = 1.0                           
+'     CASE 1: Factorial# = 1.0                           
+'     CASE 2: Factorial# = 2.0                           
+'     CASE 3: Factorial# = 6.0                           
+'     CASE 4: Factorial# = 24.0                          
+'     CASE 5: Factorial# = 120.0                         
+'     CASE 6: Factorial# = 720.0                         
+'     CASE 7: Factorial# = 5040.0                        
+'     CASE 8: Factorial# = 40320.0                       
+'     CASE 9: Factorial# = 362880.0                      
+'     CASE 10: Factorial# = 3628800.0                    
+'     CASE 11: Factorial# = 39916800.0                   
+'     CASE 12: Factorial# = 479001600.0                  
+'     CASE 13: Factorial# = 6227020800.0                 
+'     CASE 14: Factorial# = 87178291200.0                
+'     CASE 15: Factorial# = 1307674368000.0              
+'     CASE 16: Factorial# = 20922789888000.0             
+'     CASE 17: Factorial# = 355687428096000.0            
+'     CASE 18: Factorial# = 6402373705728000.0           
+'     CASE 19: Factorial# = 1.21645100408832E+17         
+'     CASE 20: Factorial# = 2.43290200817664E+18         
+'     CASE 21: Factorial# = 5.109094217170944E+19        
+'     CASE 22: Factorial# = 1.124000727777608E+21        
+'     CASE 23: Factorial# = 2.585201673888498E+22        
+'     CASE 24: Factorial# = 6.204484017332394E+23        
+'     CASE 25: Factorial# = 1.551121004333098E+25        
+'     CASE 26: Factorial# = 4.032914611266057E+26        
+'     CASE 27: Factorial# = 1.088886945041835E+28        
+'     CASE 28: Factorial# = 3.048883446117138E+29        
+'     CASE 29: Factorial# = 8.841761993739701E+30        
+'     CASE 30: Factorial# = 2.652528598121911E+32        
+'     CASE 31: Factorial# = 8.222838654177924E+33        
+'     CASE 32: Factorial# = 2.631308369336936E+35        
+'     CASE 33: Factorial# = 8.683317618811889E+36        
+'     CASE 34: Factorial# = 2.952327990396041E+38        
+'     CASE 35: Factorial# = 1.033314796638614E+40        
+'     CASE 36: Factorial# = 3.719933267899013E+41        
+'     CASE 37: Factorial# = 1.376375309122635E+43        
+'     CASE 38: Factorial# = 5.23022617466601E+44         
+'     CASE 39: Factorial# = 2.039788208119745E+46        
+'     CASE 40: Factorial# = 8.15915283247898E+47         
+'     CASE 41: Factorial# = 3.34525266131638E+49         
+'     CASE 42: Factorial# = 1.40500611775288E+51         
+'     CASE 43: Factorial# = 6.041526306337384E+52        
+'     CASE 44: Factorial# = 2.65827157478845E+54         
+'     CASE 45: Factorial# = 1.196222208654802E+56        
+'     CASE 46: Factorial# = 5.502622159812089E+57        
+'     CASE 47: Factorial# = 2.586232415111683E+59        
+'     CASE 48: Factorial# = 1.241391559253607E+61        
+'     CASE 49: Factorial# = 6.082818640342679E+62        
+'     CASE 50: Factorial# = 3.041409320171338E+64        
+'     CASE 51: Factorial# = 1.551118753287382E+66        
+'     CASE 52: Factorial# = 8.06581751709439E+67         
+'     CASE 53: Factorial# = 4.274883284060024E+69        
+'     CASE 54: Factorial# = 2.308436973392413E+71        
+'     CASE 55: Factorial# = 1.269640335365826E+73        
+'     CASE 56: Factorial# = 7.109985878048632E+74        
+'     CASE 57: Factorial# = 4.052691950487723E+76        
+'     CASE 58: Factorial# = 2.350561331282879E+78        
+'     CASE 59: Factorial# = 1.386831185456898E+80        
+'     CASE 60: Factorial# = 8.32098711274139E+81         
+'     CASE 61: Factorial# = 5.075802138772246E+83        
+'     CASE 62: Factorial# = 3.146997326038794E+85        
+'     CASE 63: Factorial# = 1.98260831540444E+87         
+'     CASE 64: Factorial# = 1.268869321858841E+89        
+'     CASE 65: Factorial# = 8.247650592082472E+90        
+'     CASE 66: Factorial# = 5.443449390774432E+92        
+'     CASE 67: Factorial# = 3.647111091818871E+94        
+'     CASE 68: Factorial# = 2.48003554243683E+96         
+'     CASE 69: Factorial# = 1.711224524281413E+98        
+'     CASE 70: Factorial# = 1.197857166996989E+100       
+'     CASE 71: Factorial# = 8.504785885678624E+101       
+'     CASE 72: Factorial# = 6.123445837688612E+103       
+'     CASE 73: Factorial# = 4.470115461512686E+105       
+'     CASE 74: Factorial# = 3.307885441519387E+107       
+'     CASE 75: Factorial# = 2.48091408113954E+109        
+'     CASE 76: Factorial# = 1.885494701666051E+111       
+'     CASE 77: Factorial# = 1.451830920282859E+113       
+'     CASE 78: Factorial# = 1.132428117820629E+115       
+'     CASE 79: Factorial# = 8.94618213078298E+116        
+'     CASE 80: Factorial# = 7.15694570462638E+118        
+'     CASE 81: Factorial# = 5.797126020747369E+120       
+'     CASE 82: Factorial# = 4.753643337012843E+122       
+'     CASE 83: Factorial# = 3.94552396972066E+124        
+'     CASE 84: Factorial# = 3.314240134565354E+126       
+'     CASE 85: Factorial# = 2.817104114380549E+128       
+'     CASE 86: Factorial# = 2.422709538367274E+130       
+'     CASE 87: Factorial# = 2.107757298379527E+132       
+'     CASE 88: Factorial# = 1.854826422573984E+134       
+'     CASE 89: Factorial# = 1.650795516090847E+136       
+'     CASE 90: Factorial# = 1.485715964481761E+138       
+'     CASE 91: Factorial# = 1.352001527678403E+140       
+'     CASE 92: Factorial# = 1.243841405464131E+142       
+'     CASE 93: Factorial# = 1.156772507081641E+144       
+'     CASE 94: Factorial# = 1.087366156656743E+146       
+'     CASE 95: Factorial# = 1.032997848823906E+148       
+'     CASE 96: Factorial# = 9.916779348709491E+149       
+'     CASE 97: Factorial# = 9.619275968248216E+151       
+'     CASE 98: Factorial# = 9.426890448883248E+153       
+'     CASE 99: Factorial# = 9.332621544394415E+155       
+'     CASE 100: Factorial# = 9.332621544394418E+157      
+'     CASE 101: Factorial# = 9.42594775983836E+159       
+'     CASE 102: Factorial# = 9.614466715035125E+161      
+'     CASE 103: Factorial# = 9.902900716486178E+163      
+'     CASE 104: Factorial# = 1.029901674514563E+166      
+'     CASE 105: Factorial# = 1.081396758240291E+168      
+'     CASE 106: Factorial# = 1.146280563734709E+170      
+'     CASE 107: Factorial# = 1.226520203196137E+172      
+'     CASE 108: Factorial# = 1.324641819451829E+174      
+'     CASE 109: Factorial# = 1.443859583202494E+176      
+'     CASE 110: Factorial# = 1.588245541522742E+178      
+'     CASE 111: Factorial# = 1.762952551090246E+180      
+'     CASE 112: Factorial# = 1.974506857221075E+182      
+'     CASE 113: Factorial# = 2.231192748659814E+184      
+'     CASE 114: Factorial# = 2.543559733472186E+186      
+'     CASE 115: Factorial# = 2.925093693493014E+188      
+'     CASE 116: Factorial# = 3.393108684451899E+190      
+'     CASE 117: Factorial# = 3.96993716080872E+192       
+'     CASE 118: Factorial# = 4.68452584975429E+194       
+'     CASE 119: Factorial# = 5.574585761207606E+196      
+'     CASE 120: Factorial# = 6.689502913449135E+198      
+'     CASE 121: Factorial# = 8.094298525273444E+200      
+'     CASE 122: Factorial# = 9.875044200833601E+202      
+'     CASE 123: Factorial# = 1.214630436702533E+205      
+'     CASE 124: Factorial# = 1.506141741511141E+207      
+'     CASE 125: Factorial# = 1.882677176888926E+209      
+'     CASE 126: Factorial# = 2.372173242880048E+211      
+'     CASE 127: Factorial# = 3.012660018457662E+213      
+'     CASE 128: Factorial# = 3.856204823625808E+215      
+'     CASE 129: Factorial# = 4.974504222477287E+217      
+'     CASE 130: Factorial# = 6.466855489220473E+219      
+'     CASE 131: Factorial# = 8.471580690878813E+221      
+'     CASE 132: Factorial# = 1.118248651196004E+224      
+'     CASE 133: Factorial# = 1.487270706090685E+226      
+'     CASE 134: Factorial# = 1.99294274616152E+228       
+'     CASE 135: Factorial# = 2.690472707318049E+230      
+'     CASE 136: Factorial# = 3.659042881952548E+232      
+'     CASE 137: Factorial# = 5.012888748274988E+234      
+'     CASE 138: Factorial# = 6.917786472619482E+236      
+'     CASE 139: Factorial# = 9.615723196941089E+238      
+'     CASE 140: Factorial# = 1.346201247571752E+241      
+'     CASE 141: Factorial# = 1.898143759076171E+243      
+'     CASE 142: Factorial# = 2.695364137888163E+245      
+'     CASE 143: Factorial# = 3.854370717180069E+247      
+'     CASE 144: Factorial# = 5.550293832739308E+249      
+'     CASE 145: Factorial# = 8.047926057471989E+251      
+'     CASE 146: Factorial# = 1.174997204390911E+254      
+'     CASE 147: Factorial# = 1.72724589045464E+256       
+'     CASE 148: Factorial# = 2.556323917872864E+258      
+'     CASE 149: Factorial# = 3.808922637630569E+260      
+'     CASE 150: Factorial# = 5.713383956445857E+262      
+'     CASE 151: Factorial# = 8.627209774233244E+264      
+'     CASE 152: Factorial# = 1.311335885683453E+267      
+'     CASE 153: Factorial# = 2.006343905095684E+269      
+'     CASE 154: Factorial# = 3.089769613847352E+271      
+'     CASE 155: Factorial# = 4.789142901463393E+273      
+'     CASE 156: Factorial# = 7.471062926282892E+275      
+'     CASE 157: Factorial# = 1.172956879426413E+278      
+'     CASE 158: Factorial# = 1.853271869493735E+280      
+'     CASE 159: Factorial# = 2.946702272495036E+282      
+'     CASE 160: Factorial# = 4.714723635992061E+284      
+'     CASE 161: Factorial# = 7.590705053947223E+286      
+'     CASE 162: Factorial# = 1.229694218739449E+289      
+'     CASE 163: Factorial# = 2.004401576545303E+291      
+'     CASE 164: Factorial# = 3.287218585534299E+293      
+'     CASE 165: Factorial# = 5.423910666131583E+295      
+'     CASE 166: Factorial# = 9.003691705778434E+297      
+'     CASE 167: Factorial# = 1.503616514864998E+300      
+'     CASE 168: Factorial# = 2.526075744973199E+302      
+'     CASE 169: Factorial# = 4.269068009004706E+304      
+'     CASE 170: Factorial# = 7.257415615308004E+306      
+'     CASE ELSE 
+'       Factorial# = -1.0
+'   END SELECT
+' END FUNCTION
+
+' SUB FileView(FileName$, Ky, Action, FVInfo AS FVInfo, Buffer(), first)
+'   ERROR 73 ' Feature Unavailable
+' END SUB
+
+' FUNCTION FudgeFactor&
+'   FudgeFactor& = 33814
+' END FUNCTION
+
+' FUNCTION GetCPU
+'   GetCPU = 486 ' matches DOSBOX
+' END FUNCTION
+
+' FUNCTION GetDS
+'   ERROR 73 ' Feature Unavailable
+' END FUNCTION
+
+' SUB GetEquip(floppies, parallels, serials)
+'   floppies = 1  ' matches DOSBOX
+'   parallels = 3 ' matches DOSBOX
+'   serials = 2   ' matches DOSBOX
+' END SUB
+
+' SUB LockUp
+'   DO:LOOP
+' END SUB
+
+' FUNCTION MathChip
+'   MathChip = -1
+' END FUNCTION
+
+' ' MaxInt compares two integer variables and returns 
+' ' the value of the higher one.
+' FUNCTION MaxInt (num1, num2)
+'   IF num1 > num2 THEN 
+'     MaxInt = num1 
+'   ELSE 
+'     MaxInt = num2 
+'   END IF 
+' END FUNCTION
+
+' ' MaxLong compares two long integer variables and returns 
+' ' the value of the higher one.
+' FUNCTION MaxLong& (Num1&, Num2&)
+'   IF Num1& > Num2& THEN 
+'     MaxLong& = Num1& 
+'   ELSE 
+'     MaxLong& = Num2& 
+'   END IF 
+' END FUNCTION
+
+' ' MidStrRest is a specialized version of the string manager routine StringRest, 
+' ' which is designed to restore a MID$ portion of a string array. 
+' SUB MidStrRest (buffer$, strNumber, storage(), offset)
+'   ERROR 73 ' Feature Unavailable
+' END SUB
+
+' ' MidStrSave is a specialized versions of the string manager routine 
+' ' StringSave, which is designed to save a MID$ portion of a string array. 
+' SUB MidStrSave (array$(), element, numEls, firstChar, numChars, storage(), offset)
+
+'   ' Where Storage%() is an integer array used to store the portion of the string
+'   ' array, and Array$() is the string array from which the text is being captured. 
+'   '
+'   ' NumEls% is the number of string elements to save, FirstChar% 
+'   ' indicates with which character to begin saving each element, and 
+'   ' NumChars% is the number of subsequent characters to save. If a 
+'   ' string contains too few characters when being saved, it is padded 
+'   ' with blank spaces in the storage array. 
+'   '
+'   ' When restoring, strings are accessed one by one, and StrNumber% 
+'   ' tells which one to retrieve.
+'   '
+'   ' These routines were designed specifically for use with the QEdit 
+'   ' subprogram, to allow capturing and restoring text in columns. It is 
+'   ' unlikely that you would need these in your own programs, and they 
+'   ' are documented here solely for completeness. 
+'   '
+'   ' Note that the string portions being saved and restored must be less 
+'   ' than 256 characters in length.
+
+'   ERROR 73 ' Feature Unavailable
+
+' END SUB
+
+' ' Returns the number of strings stored in an integer array. 
+' FUNCTION NumStrings(array(), element, numBytes)
+
+'   'ORIGINAL: DIM Array$(NumStrings%(SEG Array%(1), NumBytes)) 
+
+'   ' Once an array has been loaded from disk or copied from expanded 
+'   ' memory, you will need to know how many strings it contains. This 
+'   ' is what NumStrings% is for. If the array is going to be sent to 
+'   ' QEdit for editing, you will probably want to include additional 
+'   ' elements when dimensioning the string array. 
+
+'   ' write the code to determine how many CRLF are in the array....
+'   prev = 0
+'   count = 0
+'   FOR index = element TO UBOUND(array)
+'     value = array(index)
+'     b1 = value AND &HFF
+'     b2 = (value AND &HFF00) \ 256
+'     IF prev = 13 AND b1 = 10 THEN
+'       count = count + 1
+'     ELSEIF b1 = 13 AND b2 = 10 THEN
+'       count = count + 1
+'     END IF
+'     prev = b2
+'   NEXT
+
+'   NumStrings = count
+
+' END FUNCTION
+
+' ' Copies all or part of a string array to an integer array. 
+' SUB StringSave (array$(), strElement, array(), intElement, numStr)
+
+'   'ORIGINAL: CALL StringSave (BYVAL VARPTR(Array$(1)), SEG Array%(1), NumStrings%)
+
+'   ' Where Array$(1) is the first element in the string array, Array%(1) 
+'   ' is the first element in the integer array, and NumStrings % is the 
+'   ' number of string elements in Array$() to be saved. Of course, you 
+'   ' would specify element zero instead of element one for either array 
+'   ' if that is appropriate. It is essential that the integer array be 
+'   ' sufficiently dimensioned to hold the string data. See the description 
+'   ' for the StringSize function to see how to determine the number of 
+'   ' elements needed. 
+
+'   'NOTE: Testing against the original found that a CR/LF are added to each string.
+
+'   index = intElement
+'   FOR element = strElement TO strElement + numStr - 1
+'     element$ = carry$ + array$(element) + CHR$(13) + CHR$(10): carry$ = ""
+'     FOR char = 1 TO LEN(element$) STEP 2
+'       value$ = MID$(element$, char, 2)
+'       IF LEN(value$) = 1 THEN carry$ = value$: EXIT FOR
+'       l = ASC(LEFT$(value$, 1)): r = ASC(RIGHT$(value$, 1))
+'       array(index) = l + (r * 256): index = index + 1
+'     NEXT
+'   NEXT
+'   IF LEN(carry$) > 0 THEN
+'     l = ASC(carry$): r = 0
+'     array(index) = l + (r + 256)
+'   END IF
+
+' END SUB
+
+' ' FindLastSM (SM stands for String Manager) determines the actual 
+' ' number of bytes occupied by strings in an integer storage array. 
+' FUNCTION FindLastSM& (array(), first, numBytes&)
+
+'   ' di = numBytes - 1 ' not sure why this is here, but it does match the original behavior.
+'   ' b1 = -1
+'   ' b2 = -1
+'   ' FOR index = UBOUND(array) TO first STEP -1
+'   '   value = array(index) ' two bytes
+'   '   b1 = value AND &HFF
+'   '   b2 = (value AND &HFF00) \ 256
+'   '   IF b1 <> 0 THEN EXIT FOR ELSE di = di - 1
+'   '   IF b2 <> 0 THEN EXIT FOR ELSE di = di - 1
+'   ' NEXT
+'   ' IF (di MOD 2 = 0) AND b1 = 26 THEN di = di - 1
+'   ' IF (di MOD 2 = 1) AND b2 = 26 THEN di = di - 1
+'   ' FindLastSM = di
+
+'   totalSize = UBOUND(array) - LBOUND(array) + 1 ' how many bytes (total)?
+'   DIM work(1 TO totalSize * 2) AS _BYTE         ' prepare a byte array
+
+'   '---------------------------------------------  copy the integer array to the byte array
+'   DIM src AS _MEM: src = _MEM(array())
+'   DIM dst AS _MEM: dst = _MEM(work())
+'   _MEMCOPY src, src.OFFSET, src.SIZE TO dst, dst.OFFSET
+'   _MEMFREE dst: _MEMFREE src
+
+'   FOR index = UBOUND(work) TO 1 STEP - 1
+'     IF work(index) > 0 THEN FindLastSM& = index: EXIT FUNCTION
+'   NEXT
+
+'   FindLastSM& = -1
+
+' END FUNCTION
+
+' SUB Get1Str(work$, array(), element, strNumber)
+
+'   totalSize = UBOUND(array) - LBOUND(array) + 1 ' how many bytes (total)?
+'   DIM work(1 TO totalSize * 2) AS _BYTE         ' prepare a byte array
+
+'   '---------------------------------------------  copy the integer array to the byte array
+'   DIM src AS _MEM: src = _MEM(array())
+'   DIM dst AS _MEM: dst = _MEM(work())
+'   _MEMCOPY src, src.OFFSET, src.SIZE TO dst, dst.OFFSET
+'   _MEMFREE dst: _MEMFREE src
+
+'   '---------------------------------------------  determine starting offset for the target string
+'   entry = 1
+'   index = 1
+'   offsetStart = -1
+'   DO
+'     IF work(index) = 13 AND work(index + 1) = 10 THEN
+'       entry = entry + 1
+'       IF entry = strNumber THEN offsetStart = index + 2: EXIT DO
+'     END IF
+'     index = index + 1
+'     IF index + 1 > UBOUND(work) THEN EXIT DO
+'   LOOP
+
+'   if offsetStart = -1 THEN work$ = "": EXIT SUB
+
+'   '----------------------------------------------  determine the span for this string.
+'   offsetEnd = UBOUND(work)
+'   index = offsetStart
+'   DO
+'     IF work(index) = 13 AND work(index + 1) = 10 THEN
+'       offsetEnd = index - 1: EXIT DO
+'     END IF
+'     index = index + 1
+'     IF index + 1 > UBOUND(work) THEN EXIT DO
+'   LOOP
+
+'   result$ = ""
+'   FOR index = offsetStart TO offsetEnd
+'     result$ = result$ + CHR$(work(index))
+'   NEXT
+
+'   work$ = result$
+
+' END SUB
+
+' ' Tells StringRestore the length of the next string to retrieve. GetN ext 
+' ' is a low-level routine that scans ahead in the integer storage array 
+' ' looking for the CHR$(13) that marks the end of the current string. 
+' ' Once it is found, the length of the string is calculated and returned 
+' ' to StringRestore. ThisAddress % is also modified to point to the next 
+' ' string element in storage for the next time it is called. It is 
+' ' extremely unlikely that you would need to call this routine directly. 
+
+' FUNCTION GetNext(segment, thisAddress, lastAddress)
+
+'   'ORIGINAL: Array$(X) = SPACE$(GetNext%(Segment%, ThisAddress%, LastAddress%)) 
+
+'   ' Where Segment% and ThisAddress% indicate where in 
+'   ' the integer array GetNext is to begin scanning, and LastAddress% 
+'   ' points to the last active byte in the integer array. 
+
+'   ERROR 73 ' Feature Unavailable
+
+' END FUNCTION
+
+' ' Copies strings from an integer array into a string array. This is a 
+' ' low-level routine used by the BASIC StringRestore subprogram, 
+' ' and it is very unlikely that you would need to call it directly. 
+' SUB StringRest(array$(), strElement, array(), intElement, numStr) 
+  
+'   'ORIGINAL: CALL StringRest(BYVAL VARPTR(Array$(1)), SEG Array%(1), NumStrings%) 
+
+'   ' Where Array$(1) is the first element in the string array, Array%(1) 
+'   ' is the first element in the integer array, and NumStrings% is the 
+'   ' number of string elements being restored. Of course, you would 
+'   ' specify element zero instead of element one for either array if that 
+'   ' is appropriate. StringRest requires that the correct number of 
+'   ' characters has already been set aside in each string element. 
+
+'   totalSize = UBOUND(array) - LBOUND(array) + 1 ' how many bytes (total)?
+'   DIM work(1 TO totalSize * 2) AS _BYTE         ' prepare a byte array
+
+'   '---------------------------------------------  copy the integer array to the byte array
+'   DIM src AS _MEM: src = _MEM(array())
+'   DIM dst AS _MEM: dst = _MEM(work())
+'   _MEMCOPY src, src.OFFSET, src.SIZE TO dst, dst.OFFSET
+'   _MEMFREE dst: _MEMFREE src
+
+'   index = strElement
+
+'   ch = 1
+'   DO
+'     c = work(ch)
+'     SELECT CASE c
+'       CASE 13
+'         index = index + 1
+'         ch = ch + 1: IF work(ch) = 10 THEN ch = ch + 1
+'       CASE ELSE
+'         array$(index) = array$(index) + CHR$(c)
+'         ch = ch + 1
+'     END SELECT
+'     IF ch > UBOUND(work) THEN EXIT DO
+'     IF index > UBOUND(array$) THEN EXIT DO
+'   LOOP
+
+' END SUB
+
+' ' Returns the number of bytes needed to store a string array in an integer array. 
+' FUNCTION StringSize&(array$(), start, numStringEls)
+  
+'   'ORIGINAL: NumBytes = StringSize&(BYVAL VARPTR(Array$(Start)), NumStringEls%)
+
+'   ' Where Array$(Start) is the first element to save in the string array, 
+'   ' and NumStringEls % is the number of elements in the string array to include. 
+'   '
+'   ' This function returns the number of bytes needed rather than the 
+'   ' number of elements, so you will know exactly how many bytes to 
+'   ' specify when saving the integer array to disk. To determine how 
+'   ' large to dimension the integer array to, simply divide the number of 
+'   ' bytes by two. If you intend to dimension the integer array starting at 
+'   ' element 1 (instead of 0), you should also add one extra element in 
+'   ' case the number of bytes is an odd number. 
+'   '
+'   '   DIM Array%(NumBytes \ 2)
+'   ' 
+'   ' or
+'   ' 
+'   '   DIM Array$(1 TO NumBytes \ 2 + 1)
+
+'   c& = numStringEls * 2 ' At least 2 bytes per array element (CRLF)...
+'   FOR x = start TO start + numStringEls - 1
+'     c& = c& + LEN(array$(x)) ' add the number of bytes that make of length for each string element
+'   NEXT
+'   StringSize& = c&
+
+' END FUNCTION
+
+' ' Returns the length of a single string stored in an integer array. 
+' ' StrLength is a low-level routine used by the BASIC Get1String 
+' ' function. It is unlikely that you will need to access StrLength 
+' ' directly. 
+' FUNCTION StrLength (array(), element, numBytes&, strNumber)
+
+'   'ORIGINAL: Length= Strlength%(SEG Array%(1), NumBytes, StringNumber%) 
+
+'   ' Where Array%(1) is the first element in the integer storage array, 
+'   ' NumBytes is the total number of bytes in the array (as reported by 
+'   ' StringSize), and StringNumber% tells which string's length to 
+'   ' return. Notice that NumBytes may be either an integer or long 
+'   ' integer. A long integer is required if the array exceeds 32767 bytes 
+'   ' in size. 
+
+'   totalSize = UBOUND(array) - LBOUND(array) + 1 ' how many bytes (total)?
+'   DIM work(1 TO totalSize * 2) AS _BYTE         ' prepare a byte array
+
+'   '---------------------------------------------  copy the integer array to the byte array
+'   DIM src AS _MEM: src = _MEM(array())
+'   DIM dst AS _MEM: dst = _MEM(work())
+'   _MEMCOPY src, src.OFFSET, src.SIZE TO dst, dst.OFFSET
+'   _MEMFREE dst: _MEMFREE src
+
+'   '---------------------------------------------  determine starting offset for the target string
+'   entry = 1
+'   index = 1
+'   offsetStart = -1
+'   DO
+'     IF work(index) = 13 AND work(index + 1) = 10 THEN
+'       entry = entry + 1
+'       IF entry = strNumber THEN offsetStart = index + 2: EXIT DO
+'     END IF
+'     index = index + 1
+'     IF index + 1 > UBOUND(work) THEN EXIT DO
+'   LOOP
+
+'   if offsetStart = -1 THEN StrLength = -1: EXIT SUB
+
+'   '----------------------------------------------  determine the span for this string.
+'   offsetEnd = UBOUND(work)
+'   index = offsetStart
+'   DO
+'     IF work(index) = 13 AND work(index + 1) = 10 THEN
+'       offsetEnd = index - 1: EXIT DO
+'     END IF
+'     index = index + 1
+'     IF index + 1 > UBOUND(work) THEN EXIT DO
+'   LOOP
+
+'   StrLength = offsetEnd - offsetStart + 1
+
+' END FUNCTION
+
+' ' Sub1String will substitute a string contained in a "far" integer array 
+' ' with a new one of the same or different length.
+' SUB Sub1String(new$, array(), element, numBytes&, strNumber)
+  
+'   'ORIGINAL: CALL Sub1String(New$, SEG Array%(1), NumBytes%, StrNumber%)
+
+'   ' Where New$ is the new string to assign into the array, Array%(1) 
+'   ' is the first element in the integer storage array, NumBytes is the 
+'   ' number of active bytes (see below), and StrNumber% indicates 
+'   ' which string to replace. After SublString has performed the 
+'   ' substitution, NumBytes is modified to reflect the new number of 
+'   ' bytes taken. NumBytes may be either an integer or long integer. 
+'   ' 
+'   ' Sub1String is meant to be used in conjunction with the string 
+'   ' manager routines, and it is demonstrated in the DEMONSTR.BAS 
+'   ' example program. 
+'   '
+'   ' Because it is possible the new string may be longer than the original 
+'   ' string, we recommend that you include enough extra elements when 
+'   ' dimensioning the integer array. The demo program includes an 
+'   ' additional 100 elements (200 bytes), but you may need even more, 
+'   ' based on the number of substitutions you may make, and the added 
+'   ' length of the new strings.
+
+'   ' first we need to determine where in the array the string number
+'   ' start and end currently exist.
+
+'   totalSize = UBOUND(array) - LBOUND(array) + 1 ' how many bytes (total)?
+'   DIM work(1 TO totalSize * 2) AS _BYTE         ' prepare a byte array
+
+'   '---------------------------------------------  copy the integer array to the byte array
+'   DIM src AS _MEM: src = _MEM(array())
+'   DIM dst AS _MEM: dst = _MEM(work())
+'   _MEMCOPY src, src.OFFSET, src.SIZE TO dst, dst.OFFSET
+'   _MEMFREE dst: _MEMFREE src
+
+'   '---------------------------------------------  determine starting offset for the target string
+'   entry = 1
+'   index = 1
+'   offsetStart = -1
+'   DO
+'     IF work(index) = 13 AND work(index + 1) = 10 THEN
+'       entry = entry + 1
+'       IF entry = strNumber THEN offsetStart = index + 2: EXIT DO
+'     END IF
+'     index = index + 1
+'     IF index + 1 > UBOUND(work) THEN EXIT DO
+'   LOOP
+
+'   '----------------------------------------------  determine the span for this string.
+'   offsetEnd = UBOUND(work)
+'   index = offsetStart
+'   DO
+'     IF work(index) = 13 AND work(index + 1) = 10 THEN
+'       offsetEnd = index - 1: EXIT DO
+'     END IF
+'     index = index + 1
+'     IF index + 1 > UBOUND(work) THEN EXIT DO
+'   LOOP
+  
+'   currentLength = offsetEnd - offsetStart + 1 ' does not include CRLF
+
+'   diff = currentLength - LEN(new$)
+
+'   IF diff < 0 THEN
+'     ' need to expand
+'     diff = -diff
+'     FOR index = UBOUND(work) TO offsetStart + diff STEP - 1
+'       work(index) = work(index - diff)
+'     NEXT
+'   ELSEIF diff > 0 THEN
+'     ' need to collapse
+'     FOR index = offsetStart TO UBOUND(work) - diff STEP - 1
+'       work(index) = work(index + diff)
+'     NEXT
+'   END IF
+
+'   ' now apply the new text into the available region
+'   FOR ch = 0 TO LEN(new$) - 1
+'     work(offsetStart + ch) = ASC(MID$(new$, ch + 1, 1))
+'   NEXT
+
+'   '---------------------------------------------  determine the new overall byte count
+'   FOR index = UBOUND(work) TO 1 STEP - 1
+'     IF work(index) > 0 THEN numBytes& = index: EXIT FOR
+'   NEXT
+
+'   '---------------------------------------------  copy the byte array to the integer array
+'   src = _MEM(array())
+'   dst = _MEM(work())
+'   _MEMCOPY dst, dst.OFFSET, dst.SIZE TO src, src.OFFSET
+'   _MEMFREE dst: _MEMFREE src
+
+' END SUB
+
+' ' MinInt compares two integer variables, and returns the value of the 
+' ' smaller one.
+' FUNCTION MinInt (num1, num2)
+'   IF num1 < num2 THEN 
+'     MinInt = num1 
+'   ELSE 
+'     MinInt = num2 
+'   END IF 
+' END FUNCTION
+
+' ' MinInt compares two long integer variables, and returns the value 
+' ' of the smaller one.
+' FUNCTION MinLong& (num1&, num2&)
+'   IF num1& < num2& THEN 
+'     MinLong& = num1& 
+'   ELSE 
+'     MinLong& = num2& 
+'   END IF 
+' END FUNCTION
+
+' FUNCTION MonthName$(Month)
+'   ERROR 73 ' Feature Unavailable
+' END FUNCTION
+
+' FUNCTION Num2Date$ (days) STATIC
+
+'    REDIM dyMth(13)            ' DyMth holds the number of days into the year
+'    RESTORE
+'    FOR c = 1 TO 13            ' for a given month
+'      READ dyMth(C)
+'    NEXT
+'    DATA 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365
+
+'    IF days > 0 THEN sd = 1 ELSE sd = -1
+'    year = ((days - sd - ((days + 1401) \ 1461)) \ 365) ' Find year number
+
+'    IF days > 0 THEN
+'      year = 80 + year
+'      sy = 77
+'    ELSE
+'      year = 79 + year
+'      sy = 80
+'    END IF
+'                                                      ' Find days into year
+'    daysInYr = ABS((((year - 80!) * 365) + ((year - sy) \ 4)) - days)
+
+'    ' LeapYr below is 0 when true!
+'    leapYr = year MOD 4                             ' See if its a Leap Year
+'    IF year = 0 THEN leapYr = 1   'EW 12-13-95: 1900 <> leap year, 2000 is
+
+'    month = 1                                        ' Loop to find month number
+'    ad = 0: ad2 = 0
+'    WHILE daysInYr < dyMth(month) + ad2 OR daysInYr > dyMth(month + 1) + ad
+'      ad2 = ad
+'      month = month + 1
+'      IF leapYr = 0 AND month > 1 THEN ad = 1
+'    WEND
+
+'    day = daysInYr - dyMth(month)                  ' Find days into month
+'    IF leapYr = 0 AND month > 2 THEN day = day - 1
+
+'    year = year + 1900
+'    yr$ = RIGHT$(STR$(year), LEN(STR$(year)) - 1)    ' Get year portion
+'    IF LEN(yr$) < 2 THEN yr$ = "0" + yr$
+
+'    mo$ = RIGHT$(STR$(month), LEN(STR$(month)) - 1)  ' Get month portion
+'    IF LEN(mo$) < 2 THEN mo$ = "0" + mo$
+
+'    da$ = RIGHT$(STR$(day), LEN(STR$(day)) - 1)      ' Find day portion
+'    IF LEN(da$) < 2 THEN da$ = "0" + da$
+
+'    dat$ = mo$ + "-" + da$ + "-" + yr$                 ' Make date string
+
+'    Num2Date$ = dat$
+
+' END FUNCTION
+
+' FUNCTION Num2Day(d)
+'   dd = d
+'                                       ' 12/31/1979 (0) was a Monday (2)
+'   dd = dd + 1                       ' adjust for the turnover point is
+'   dd = dd MOD 7                     ' modulus 7
+'   IF dd < 0 THEN                     ' is it a negative value?  
+'     dd = 7 + dd                     ' add this fudge
+'   END IF
+'   dd = dd + 1                       ' adjust 0-6 to 1-7
+'   Num2Day = dd                      ' return result
+' END FUNCTION
+
+' ' Time2Num converts a time in string form to an equivalent number 
+' ' of seconds after midnight. 
+' FUNCTION Num2Time$(time&)
+'   s& = time&
+'   h& = s& \ 3600: s& = s& - (h& * 3600)
+'   m& = s& \ 60: s& = s& - (m& * 60)
+'   Num2Time$ = RIGHT$("0" + LTRIM$(STR$(h&)), 2) + ":" + RIGHT$("0" + LTRIM$(STR$(m&)), 2) + ":" + RIGHT$("0" + LTRIM$(STR$(s&)), 2)
+' END FUNCTION
+
+' ' Pause will pause a program's execution for a specified period of 
+' ' time to a resolution as small as 1/18th of a second. 
+' SUB Pause(ticks)
+'   resolution! = 1 / 18.2
+'   _DELAY ticks * resolution!
+' END SUB
+
+' ' Pause2 will pause a program's execution for a specified number of microseconds. 
+' SUB Pause2(microseconds)
+'   _DELAY microseconds / 1000000
+' END SUB
+
+' ' Pause3 provides a simple method for obtaining delays with a resolution
+' ' of 1 millisecond, without having to reprogram the PC's timer chips
+' SUB Pause3 (milliseconds, fudg&)
+'   ' milliseconds is the desired number of milliseconds to delay, 
+'   ' and fudg& was previously obtained using the FudgeFactor function. 
+'   _DELAY milliseconds / 1000
+' END SUB
+
+' ' PDQTimer is an integer-only TIMER replacement that avoids the 
+' ' inclusion of BASIC's floating point code in your programs. 
+' FUNCTION PDQTimer&
+'   ' The documentation sample suggests that the resolution is in 1/10th of a second.
+'   PDQTimer& = INT(TIMER * 10)
+' END FUNCTION
+
+' FUNCTION Peek1(segment, address)
+'   SELECT CASE segment
+'     CASE 0
+'       SELECT CASE address
+'         CASE &H463 ' Color Monitor?
+'           ' IF Peek1(0, &H463) <> &HB4 THEN ColorMon = 1   ' see what monitor is active
+'         CASE &H417 ' Capslock and Numlock status?
+'           result = 0
+'           IF _CAPSLOCK THEN result = result + &H40
+'           IF _NUMLOCK THEN result = result + &H20
+'           Peek1 = result
+'           ' CapStatus = Peek1(0, &H417) AND &H40        'get BIOS status of Caps Lock
+'           ' NumStatus = Peek1(0, &H417) AND &H20        'get BIOS status of Num Lock
+'           ' &H40 Capslock Active
+'           ' &H20 Numlock Active
+'         CASE ELSE
+'           ERROR 73 ' Feature Unavailable
+'       END SELECT
+'     CASE ELSE
+'       ERROR 73 ' Feature Unavailable
+'   END SELECT
+' END FUNCTION
+
+' FUNCTION Peek2(Segment, Address)
+'   ERROR 73 ' Feature Unavailable
+' END FUNCTION
+
+' SUB Poke1(Segment, Address, Byte)
+'   ERROR 73 ' Feature Unavailable
+' END SUB
+
+' SUB Poke2(Segment, Address, Word)
+'   ERROR 73 ' Feature Unavailable
+' END SUB
+
+' FUNCTION Power(Y, N)
+'   Power = x ^ N
+' END FUNCTION
+
+' FUNCTION Power2(N)
+'   Power2 = 2 ^ N
+' END FUNCTION
+
+' FUNCTION PRNReady(LPTNumber)
+'   ERROR 73 ' Feature Unavailable
+' END FUNCTION
+
+' SUB PSwap
+'   ERROR 73 ' Feature Unavailable
+' END SUB
+
+' SUB QPCli
+'   ERROR 73 ' Feature Unavailable
+' END SUB
+
+' SUB QPSti
+'   ERROR 73 ' Feature Unavailable
+' END SUB
+
+' SUB QPPlay(Tune$)
+'   ERROR 73 ' Feature Unavailable
+' END SUB
+
+' ' QPSound is nearly identical to BASIC's SOUND statement, but provides
+' ' a considerable reduction in the amount of code added to a program. 
+' SUB QPSound(frequency, duration)
+'   ' The only real difference between QPSound and BASIC's SOUND is 
+'   ' that the sound is played in the "foreground" only. Where BASIC's 
+'   ' SOUND returns to your program immediately and continues to play 
+'   ' the tone in the background, QPSound waits until it has completed 
+'   ' before returning. QPSound is demonstrated in the QPSOUND.BAS 
+'   ' example program. 
+'   SOUND frequency, duration
+'   SOUND 20000, 1
+' END SUB
+
+' FUNCTION QPSegAdr&(Any$)
+'   ERROR 73 ' Feature Unavailable
+' END FUNCTION
+
+' FUNCTION QPSSeg(Any$)
+'   ERROR 73 ' Feature Unavailable
+' END FUNCTION
+
+' FUNCTION QPUSI(LongInt&)
+'   ERROR 73 ' Feature Unavailable
+' END FUNCTION
+
+' SUB Reboot
+'   ERROR 73 ' Feature Unavailable
+' END SUB
+
+' ' ShiftIL shifts the bits in an integer variable a specified number of 
+' ' positions to the left. 
+' SUB ShiftIL(intVar, numBits)
+'   intVar = _SHL(intVar, numBits)
+' END SUB
+
+' ' ShiftIR shifts the bits in an integer variable a specified number of 
+' ' positions to the right. 
+' SUB ShiftIR(intVar, numBits)
+'   intVar = _SHR(intVar, numBits)
+' END SUB
+
+' SUB ShiftLL(intVar&, numBits)
+'   intVar& = _SHL(intVar&, numBits)
+' END SUB
+
+' SUB ShiftLR(intVar&, numBits)
+'   intVar& = _SHR(intVar&, numBits)
+' END SUB
+
+' ' Soundex returns a value that corresponds to the sound of a word. 
+' FUNCTION Soundex$(Word$)
+
+'   ' Word$ is any single word or proper name, and Code$ receives a 
+'   ' four-digit Soundex code such as "0122". 
+
+'   ' This routine employs the standard Soundex algorithm to return a 
+'   ' four-character string that loosely approximates how the string 
+'   ' sounds. 
+'   '   
+'   ' Soundex is often used for searching a database of names, when the 
+'   ' exact spelling is not known. To see if one string sounds like 
+'   ' another, you would simply compare the results that Soundex returns: 
+'   ' 
+'   '   IF Soundex$(First$) = Soundex$(Second$) THEN 
+'   '     PRINT "They sound alike" 
+'   '   END IF 
+'   ' 
+'   ' When a string is being converted to its equivalent Soundex code, 
+'   ' vowels are removed, and consonants that are similar are given the 
+'   ' same value. Note that when the same sound occurs twice or more 
+'   ' in succession, only one of them is counted. Also note that with 
+'   ' long strings the conversion ceases when all four digits are filled. 
+'   ' Likewise, short strings are padded with trailing "O" characters. 
+'   ' 
+'   ' The conversion codes are shown in the table below. 
+'   ' 
+'   ' Letters 
+'   ' CodeNum 
+'   ' B F P V C G J K Q S X Z D T L M N R 
+'   ' 1 1 1 1 2 2 2 2 2 2 2 2 3 3 4 5 5 6 
+'   ' 
+'   ' Thus, the string "QuickPak" would be coded as "2212" ("QCPK"). 
+'   ' The first consonant, "Q", is translated to "2", and the vowels "ui" 
+'   ' are ignored. The "c" is then converted to "2", but the following 
+'   ' "k" is ignored because it has the same code as the "c". The "P" is 
+'   ' translated to "1 ", the vowel "a" is ignored, and the final "K" is 
+'   ' converted to "2". 
+'   ' 
+'   ' It is important to understand that because of the many quirks in the 
+'   ' English language, Soundex is not always reliable. 
+
+'   result$ = ""
+
+'   FOR index = 1 TO LEN(word$)
+'     ch$ = MID$(word$, index, 1)
+'     IF INSTR("AEIOUYaeiouy", ch$) THEN
+'       ' skip
+'     ELSEIF INSTR("BFPVbfpv", ch$) THEN
+'       IF RIGHT$(result$, 1) <> "1" THEN result$ = result$ + "1"    
+'     ELSEIF INSTR("CGJKQSXZcgjkqsxz", ch$) THEN
+'       IF RIGHT$(result$, 1) <> "2" THEN result$ = result$ + "2"    
+'     ELSEIF INSTR("DTdt", ch$) THEN
+'       IF RIGHT$(result$, 1) <> "3" THEN result$ = result$ + "3"    
+'     ELSEIF INSTR("Ll", ch$) THEN
+'       IF RIGHT$(result$, 1) <> "4" THEN result$ = result$ + "4"    
+'     ELSEIF INSTR("MNmn", ch$) THEN
+'       IF RIGHT$(result$, 1) <> "5" THEN result$ = result$ + "5"    
+'     ELSEIF INSTR("Rr", ch$) THEN
+'       IF RIGHT$(result$, 1) <> "6" THEN result$ = result$ + "6"    
+'     ELSE
+'       '???? skip?
+'     END IF
+'     IF LEN(result$) = 4 THEN EXIT FOR 
+'   NEXT
+
+'   IF LEN(result$) < 4 THEN
+'     result$ = LEFT$(result$ + "0000", 4)
+'   END IF
+
+'   Soundex$ = result$
+
+' END FUNCTION
+
+' SUB SysTime(T$)
+'   ERROR 73 ' Feature Unavailable
+' END SUB
+
+' ' Time2Num converts a time in string form to an equivalent number 
+' ' of seconds after midnight. 
+' FUNCTION Time2Num&(t$)
+'   h$ = LEFT$(t$, 2)
+'   IF MID$(t$, 3, 1) = ":" THEN m$ = MID$(t$, 4, 2) ELSE m$ = MID$(t$, 3, 2)
+'   s$ = RIGHT$(t$, 2)
+'   Time2Num& = (VAL(h$) * 3600) + (VAL(m$) * 60) + VAL(s$)
+' END FUNCTION
+
+' FUNCTION Times2(Number)
+'   ERROR 73 ' Feature Unavailable
+' END FUNCTION
+
+' ' Traplnt will constrain an incoming value to within a specified upper and lower limit. 
+' FUNCTION TrapInt(value, loLimit, hiLimit)
+'   IF value < loLimit THEN TrapInt = loLimit: EXIT FUNCTION
+'   IF value > hiLimit THEN TrapInt = hiLimit: EXIT FUNCTION
+'   TrapInt = value
+' END FUNCTION
+
+' SUB VLAdd(Value1#, Value2#, Sum#, ErrFlag)
+'   ERROR 73 ' Feature Unavailable
+' ENd SUB
+
+' SUB VLDiv(Dividend#, Divisor#, Quotient#, Remainder#, ErrFlag)
+'   ERROR 73 ' Feature Unavailable
+' END SUB
+
+' SUB VLMul(Value1#, Value2#, Product#, ErrFlag)
+'   ERROR 73 ' Feature Unavailable
+' END SUB
+
+' SUB VLPack(Number$, Value#, ErrFlag)
+'   ERROR 73 ' Feature Unavailable
+' END SUB
+
+' SUB VLSub(Value1#, Value2#, Difference#, ErrFlag)
+'   ERROR 73 ' Feature Unavailable
+' END SUB
+
+' SUB VLUnpack(Alias#, Number$, ErrFlag)
+'   ERROR 73 ' Feature Unavailable
+' END SUB
+
+' ' WeekDay will return the day of the week (1 through 7) given a 
+' ' legal DOS date in a string form. 
+' FUNCTION WeekDay(dy$)
+'   WeekDay = Num2Day(Date2Num(dy$))
+' END FUNCTION
+
+' ' ****************************************
+' ' Chapter 8 - String Manipulation Routines
+' ' ****************************************
+
+' ' ASCII obtains the ASCII value for a string exactly as BASIC's ASC 
+' ' function does, but it will not cause an "Illegal Function Call" error 
+' ' if the string is null. 
+' FUNCTION ASCII (char$)
+'   ' See ASCII.ASM
+'   IF LEN(char$) THEN ASCII = ASC(char$) ELSE ASCII = -1
+' END SUB
+
+' ' Blanks will report the number of leading blanks in the specified 
+' ' string. Both CHR$(32) and the CHR$(0) "null" character are recognized. 
+' FUNCTION Blanks(work$)
+'   ' NumBlanks receives the number of leading blank and/or CHR$(0) 
+'   ' bytes in Work$. 
+'   IF work$ = "" THEN
+'     result = 0
+'   ELSE
+'     result = LEN(work$)
+'     FOR index = 1 TO LEN(work$)
+'       SELECT CASE ASC(MID$(work$, index, 1))
+'         CASE 0, 32
+'         CASE ELSE
+'           result = index - 1: EXIT FOR
+'       END SELECT
+'     NEXT
+'   END IF
+'   Blanks = result
+' END FUNCTION
+
+' ' Compact compresses a string by removing all embedded blanks.
+' FUNCTION Compact$(old$)
+'   result$ = ""
+'   FOR index = 1 TO LEN(old$)
+'     ch$ = MID$(old$, index, 1)
+'     SELECT CASE ch$
+'       CASE " "
+'       CASE ELSE
+'         result$ = result$ + ch$
+'     END SELECT
+'   NEXT
+'   old$ = result$ ' to match original behavior; see docs.
+'   Compact$ = result$
+' END FUNCTION
+
+' SUB Encrypt(text$, password$)
+
+'   ' NOTE: This isn't matching the original algorythm.
+'   '       But I'm assuming that Encrypt2 was meant to replace
+'   '       Encrypt as they were not interchangable; so using the
+'   '       same approach.
+
+'   m = LEN(text$)
+'   l = LEN(password$)
+
+'   IF m < 1 THEN EXIT SUB
+'   IF l < 1 THEN EXIT SUB
+'   IF l > 44 THEN EXIT SUB
+
+'   FOR x = 1 TO LEN(text$)
+'     char = ASC(MID$(password$, (x MOD l) - l * ((x MOD l) = 0), 1))
+'     MID$(text$, x, 1) = CHR$(ASC(MID$(text$, x, 1)) XOR char)
+'   NEXT
+
+' END SUB
+
+' SUB Encrypt2(text$, password$)
+
+'   m = LEN(text$)
+'   l = LEN(password$)
+
+'   IF m < 1 THEN EXIT SUB
+'   IF l < 1 THEN EXIT SUB
+'   IF l > 44 THEN EXIT SUB
+
+'   FOR x = 1 TO LEN(text$)
+'     char = ASC(MID$(password$, (x MOD l) - l * ((x MOD l) = 0), 1))
+'     MID$(text$, x, 1) = CHR$(ASC(MID$(text$, x, 1)) XOR char)
+'   NEXT
+
+' END SUB
+
+' FUNCTION Far2Str$(Segment, Address)
+'   ERROR 73 ' Feature Unavailable
+' END FUNCTION
+
+' ' FUsing accepts an incoming number and image string, and returns 
+' ' it as a formatted string much like BASIC's PRINT USING would. 
+' FUNCTION FUsing$ (number$, image$)
+  
+'   ' Number is any number whether integer, single, or double precision, 
+'   ' and Image$ indicates how the result is to be formatted. If the 
+'   ' number will not fit within the allotted space, the first digit of the 
+'   ' returned string will be replaced with a percent sign (  ) . 
+
+'   ' It is very important that you not include any blank spaces within the 
+'   ' image string. For example "##.##" is perfectly legal, while 
+'   ' "## .##" will not work as expected. 
+
+'   ' The table below summarizes FUsing's capabilities: 
+
+'   '     # represents each digit position 
+'   '     . specifies a decimal point 
+'   '     + causes the sign of the number ( + or -) to be added (the 
+'   '       sign must be the first character in the field) 
+'   '    ** replaces leading spaces in the field with asterisks
+'   '    $$ adds a dollar sign to the left of the number  
+'   '   **$ combines the effects of ** and $$ 
+'   '     , specifies that commas are to be added to the formatted string
+  
+'   ' FUsing is demonstrated in the DEMOCM.BAS example program. 
+ 
+'   ' Although BASIC accepts multiple commas in the image string, 
+'   ' FUsing requires only one. If there is a decimal point within the 
+'   ' string, the comma must be placed just before it. Otherwise, the 
+'   ' comma must be the last character. 
+
+'   result$ = ""
+
+'   number# = VAL(number$)
+'   format$ = image$
+
+'   IF INSTR(format$, "#") = 0 THEN using$ = format$ + "#"
+
+'   leadingPlus = LEFT$(format$, 1) = "+"
+'   dollarSign = INSTR(format$, "$") > 0
+'   doubleDollarSign = INSTR(format$, "$$") > 0
+'   asteriskFillDollarSign = INSTR(format$, "**$") > 0
+
+'   exponential = INSTR(format$, "^^^^") > 0
+'   trailingMinus = RIGHT$(format$, 1) = "-"
+'   hundreds = INSTR(format$, ",") > 0
+'   float = INSTR(format$, ".") > 0
+'   precision = 0
+
+'   IF float THEN
+'     positionStart = INSTR(format$, ".")
+'     positionEnd = positionStart + 1
+'     DO
+'       SELECT CASE MID$(format$, positionEnd, 1)
+'         CASE "#": positionEnd = positionEnd + 1
+'         CASE ELSE
+'           positionEnd = positionEnd -1
+'           EXIT DO
+'       END SELECT
+'       IF positionEnd > LEN(format$) THEN
+'         positionEnd = positionEnd - 1
+'         EXIT DO
+'       END IF
+'     LOOP
+'     precision = positionEnd - positionStart
+'   END IF
+
+'   length = _INSTRREV(format$, "#") - INSTR(format$, "#") + 1
+'   IF INSTR(format$, ".") > 0 AND INSTR(format$, ".") = INSTR(format$, "#") - 1 THEN
+'     ' Numeric format stars with a period...
+'     length = length + 1
+'   END IF
+'   IF asteriskFillDollarSign THEN
+'     length = length + 1
+'   ELSEIF asteriskFill THEN
+'     length = length + 2
+'   END IF
+'   IF exponential THEN length = length + 4
+'   IF NOT float THEN number# = CINT(number#)
+'   sign$ = " "
+'   IF number# < 0 THEN
+'     sign$ = "-"
+'   ELSEIF leadingPlus THEN
+'     sign$ = "+"
+'   END IF
+'   IF dollarSign THEN length = length + 1
+
+'   value$ = LTRIM$(STR$(ABS(number#)))
+
+'   IF float THEN
+'     IF INSTR(value$, ".") = 0 THEN ' a whole number, just extend decimal place as desired
+'       value$ = value$ + "." + STRING$(precision, "0")
+'     ELSE
+'       DO
+'         SELECT CASE LEN(value$) - _INSTRREV(value$, ".") 
+'           CASE IS > precision
+'             value$ = LEFT$(value$, LEN(value$) - 1)
+'           CASE IS < precision
+'             value$ = value$ + "0"
+'           CASE ELSE
+'             EXIT DO
+'         END SELECT
+'       LOOP
+'     END IF
+'   END IF
+'   IF hundreds THEN
+'     index = INSTR(value$, ".")
+'     IF index = 0 THEN index = LEN(value$) ELSE index = index - 1
+'     DO
+'       index = index - 3
+'       IF index < 1 THEN EXIT DO
+'       IF MID$(value$, index, 1) <> "," THEN
+'         value$ = LEFT$(value$, index) + "," + RIGHT$(value$, LEN(value$) - index)
+'         index = index
+'       END IF
+'     LOOP
+'   END IF
+
+'   IF exponential THEN
+'     numericOnly$ = MID$(format$, INSTR(format$, "#"), _INSTRREV(format$, "#") - INSTR(format$, "#") + 1)
+'     CALL ReplaceString (numericOnly$, "#", "0")
+'     IF INSTR(format$, ".") > 0 AND INSTR(format$, ".") = INSTR(format$, "#") - 1 THEN
+'       numericOnly$ = "." + numericOnly$
+'     ELSE
+'       WHILE MID$(numericOnly$, 2, 1) = "0"
+'         numericOnly$ = MID$(numericOnly$, 2)
+'         IF LEN(numericOnly$) = 1 THEN EXIT WHILE
+'       WEND
+'     END IF
+'     value$ = LTRIM$(STR$(number#)) + "E+00"
+'   END IF
+
+'   IF length < LEN(value$) THEN result$ = result$ + ""
+
+'   IF length > LEN(value$) THEN
+'     IF asteriskFill THEN
+'       IF sign$ <> " " THEN
+'         result$ = result$ + STRING$(length - LEN(value$) + 1, "*")
+'       ELSE
+'         result$ = result$ + STRING$(length - LEN(value$), "*")
+'       END IF
+'     ELSE
+'       result$ = result$ + STRING$(length - LEN(value$), " ")
+'     END IF
+'   END IF
+'   IF NOT trailingMinus AND sign$ <> " " THEN result$ = result$ + sign$
+'   IF dollarSign THEN result$ = result$ + "$"
+'   result$ = result$ + value$
+'   IF trailingMinus THEN result$ = result$ + sign$
+
+'   FUsing$ = result$
+
+' END FUNCTION
+
+' ' InCount will quickly report how many times one string occurs 
+' ' within another, and the case-sensitive search string may contain 
+' ' any number of "?" wild cards. 
+' FUNCTION InCount(Source$, SearchValue$)
+'   result = 0
+'   pos1 = 1
+'   DO
+'     p = QInstr(pos1, Source$, SearchValue$)
+'     IF p > 0 THEN
+'       result = result + 1
+'       pos1 = p + LEN(SearchValue$)
+'     ELSE
+'       EXIT DO
+'     END IF
+'   LOOP
+'   InCount = result
+' END FUNCTION
+
+' ' InCount2 will quickly report how many times one string occurs 
+' ' within another, and the case-insensitive search string may contain 
+' ' any number of "?" wild cards. 
+' FUNCTION InCount2(source$, searchValue$)
+'   result = 0
+'   pos1 = 1
+'   DO
+'     p = QInstr2(pos1, source$, searchValue$)
+'     IF p > 0 THEN
+'       result = result + 1
+'       pos1 = p + LEN(searchValue$)
+'     ELSE
+'       EXIT DO
+'     END IF
+'   LOOP
+'   InCount2 = result
+' END FUNCTION
+
+' FUNCTION InCountTbl(Source$, Table$)
+'   ERROR 73 ' Feature Unavailable
+' END FUNCTION
+
+' FUNCTION InstrTbl(start, source$, table$)
+'   l = LEN(source$)
+'   c = start
+'   DO
+'     IF c > l THEN EXIT DO
+'     ch$ = MID$(source$, c, 1)
+'     FOR x = 1 TO LEN(table$)
+'       m$ = MID$(table$, x, 1)
+'       IF ch$ = m$ THEN
+'         InstrTbl = c: EXIT FUNCTION
+'       END IF
+'     NEXT
+'     c = c + 1
+'   LOOP
+'   InstrTbl = -1
+' END FUNCTION
+
+' FUNCTION InstrTbl2(start, source$, table$)
+'   l = LEN(source$)
+'   c = start
+'   DO
+'     IF c > l THEN EXIT DO
+'     ch$ = LCASE$(MID$(source$, c, 1))
+'     FOR x = 1 TO LEN(table$)
+'       m$ = LCASE$(MID$(table$, x, 1))
+'       IF ch$ = m$ THEN
+'         InstrTbl2 = c: EXIT FUNCTION
+'       END IF
+'     NEXT
+'     c = c + 1
+'   LOOP
+'   InstrTbl2 = -1
+' END FUNCTION
+
+' FUNCTION InstrTblB(start, source$, table$)
+'   l = LEN(source$)
+'   c = start
+'   DO
+'     IF c < 1 THEN EXIT DO
+'     ch$ = MID$(source$, c, 1)
+'     FOR x = 1 TO LEN(table$)
+'       m$ = MID$(table$, x, 1)
+'       IF ch$ = m$ THEN
+'         InstrTblB = c: EXIT FUNCTION
+'       END IF
+'     NEXT
+'     c = c - 1
+'   LOOP
+'   InstrTblB = -1
+' END FUNCTION
+
+' FUNCTION InstrTblB2(start, source$, table$)
+'   l = LEN(source$)
+'   c = start
+'   DO
+'     IF c < 1 THEN EXIT DO
+'     ch$ = LCASE$(MID$(source$, c, 1))
+'     FOR x = 1 TO LEN(table$)
+'       m$ = LCASE$(MID$(table$, x, 1))
+'       IF ch$ = m$ THEN
+'         InstrTblB2 = c: EXIT FUNCTION
+'       END IF
+'     NEXT
+'     c = c - 1
+'   LOOP
+'   InstrTblB2 = -1
+' END FUNCTION
+
+' ' LongestStr returns the length of the longest string in an entire array. 
+' FUNCTION LongestStr(array$())
+
+'   ' MaxLength receives the length of the longest string contained in Array$(). 
+
+'   result = 0
+
+'   FOR index = LBOUND(array$) TO UBOUND(array$)
+'     l = LEN(array$(index))
+'     IF l > result THEN result = l
+'   NEXT
+
+'   LongestStr = result
+
+' END FUNCTION
+
+' SUB LowASCII(X$)
+'   ERROR 73 ' Feature Unavailable
+' END SUB
+
+' SUB Lower(value$)
+'   value$ = LCASE$(value$)
+' END SUB
+
+' ' LowerTbl will convert all of the characters in a string to lower 
+' ' case, and it also looks in a supplied table to determine how to 
+' ' handle foreign characters. 
+' SUB LowerTbl(work$, table$)
+
+'   ' Work$ is the string to be processed, and Table$ holds one or more 
+'   ' pairs of lower and upper case extended characters. 
+
+'   FOR entry = 1 TO LEN(table$) STEP 2
+'     match$ = MID$(table$, entry, 1)
+'     replacement$ = MID$(table$, entry + 1, 1)
+'     DO
+'       cx = INSTR(work$, match$)
+'       IF cx > 0 THEN
+'         MID$(work$, cx, 1) = replacement$
+'       ELSE
+'         EXIT DO
+'       END IF  
+'     LOOP
+'   NEXT
+
+' END SUB
+
+' FUNCTION MidChar(Work$, Position)
+'   ERROR 73 ' Feature Unavailable
+' END SUB
+
+' SUB MidCharS(Work$, Postion, Char)
+'   ERROR 73 ' Feature Unavailable
+' END SUB
+
+' ' Notlnstr reports the first location in one string that does not match 
+' ' any of the characters in another string. 
+' FUNCTION NotInstr(start, searched$, table$)
+
+'   ' Position receives the offset of the first character in Searched$ that 
+'   ' doesn't match any of the characters in Table$. If all characters 
+'   ' match, Position will be zero. 
+  
+'   FOR index = start TO LEN(searched$)
+'     ch$ = MID$(searched$, index, 1)
+'     IF INSTR(table$, ch$) = 0 THEN
+'       NotInstr = index: EXIT FUNCTION
+'     END IF
+'   NEXT
+
+'   NotInstr = 0
+
+' END FUNCTION
+
+' ' Null will report if the specified string is either null, or is filled only 
+' ' with blank or CHR$(0) characters. 
+' FUNCTION Null(work$)
+'   result = -1
+'   IF work$ <> "" THEN
+'     FOR index = 1 TO LEN(work$)
+'       SELECT CASE ASC(MID$(work$, index, 1))
+'         CASE 0 ', 32
+'         CASE ELSE
+'           result = 0: EXIT FOR
+'       END SELECT
+'     NEXT
+'   END IF
+'   Null = result
+' END FUNCTION
+
+' ' ParseString accepts a string containing delimited information, and 
+' ' returns portions of that string each time it is invoked. 
+' FUNCTION ParseString$(curPos, work$, table$)
+'   ' curPos tells where in the string to begin processing, work$ is the 
+'   ' string being read, and delimitTbl$ is a table of one or more delimiting 
+'   ' characters. result$ then receives the next delimited component from work$. 
+
+'   IF curPos > LEN(work$) THEN ParseString$ = "": EXIT FUNCTION
+'   IF curPos < 1 THEN curPos = 1
+
+'   match = InstrTbl(curPos, work$, table$)
+
+'   IF match < 1 THEN curPos = LEN(work$) + 1: ParseString$ = "": EXIT FUNCTION
+
+'   ParseString$ = MID$(work$, curPos, match - curPos)
+'   curPos = match + 1
+
+' END FUNCTION
+
+' FUNCTION PMatch (work$)
+
+'   l = LEN(work$)
+
+'   IF l = 0 THEN PMatch = -1: EXIT FUNCTION
+
+'   c = 2: p = 0
+
+'   DO
+
+'     If c > l THEN EXIT DO
+
+'     ch$ = MID$(work$, c, 1)
+
+'     IF ch$ = "(" THEN
+'       p = p + 1
+'     ELSEIF ch$ = ")" THEN
+'       IF p > 0 THEN 
+'         p = p - 1
+'       ELSE
+'         PMatch = c: EXIT FUNCTION
+'       END IF
+'     END IF
+'     c = c + 1
+
+'   LOOP
+
+'   PMatch = -1
+
+' END FUNCTION
+
+' SUB ProperName(Work$)
+'   ERROR 73 ' Feature Unavailable
+' END SUB
+
+' QInstr serves the same purpose as BASIC's INSTR function, 
+' except it accepts any number of "?" wild cards.
+FUNCTION QInstr(startPosition As Short, sourceValue As String, searchValue As String) As Short
+
+  ' Setting position to 0 will return 0; matching QB behavior.
+  IF startPosition = 0 THEN QInstr = 0: EXIT FUNCTION
+
+  Var position = startPosition
+  DO
+    Var segment = MID$(sourceValue, position, LEN(searchValue))
+    IF LEN(segment) <> LEN(searchValue) THEN EXIT DO
+    Var isMatch = 1 ' assume we are going to find a match
+    FOR index As Short = 1 TO LEN(searchValue) ' test against each character in search value
+      Var character = MID$(searchValue, index, 1) ' determine character
+      IF character <> "?" THEN ' if not a wildcard,
+        IF MID$(segment, index, 1) <> character THEN isMatch = 0 : EXIT FOR
+      END IF
+    NEXT
+    IF isMatch THEN QInstr = position : EXIT FUNCTION
+    position = position + 1
+  LOOP
+
+  QInstr = 0
+
+END FUNCTION
+
+' QInstr2 serves the same purpose as BASIC's INSTR function, except 
+' it accepts any number of "?" wild cards and it ignores capitalization 
+' when examining the strings.
+FUNCTION QInstr2(startPosition As Short, sourceValue As String, searchValue As String) As Short
+
+  ' Setting position to 0 will return 0; matching QB behavior.
+  IF startPosition = 0 THEN QInstr2 = 0: EXIT FUNCTION
+
+  Var position = startPosition
+  DO
+    Var segment = LCASE$(MID$(sourceValue, position, LEN(searchValue)))
+    IF LEN(segment) <> LEN(searchValue) THEN EXIT DO
+    Var isMatch = 1
+    FOR index As Short = 1 TO LEN(searchValue)
+      Var character = LCASE$(MID$(searchValue, index, 1))
+      IF character <> "?" THEN
+        IF MID$(segment, index, 1) <> character THEN isMatch = 0 : EXIT FOR
+      END IF
+    NEXT
+    IF isMatch THEN QInstr2 = position : EXIT FUNCTION
+    position = position + 1
+  LOOP
+
+  QInstr2 = 0
+
+END FUNCTION
+
+' ' QlnstrB is similar to the QuickPak Professional Qlnstr function, 
+' ' except it scans the source string backwards looking for a specified 
+' ' substring. Like Qlnstr, function accepts any number of "?" wild 
+' ' cards to match any character. 
+' FUNCTION QInstrB(startPosition, sourceValue$, searchValue$)
+
+'   ' Setting position to 0 will return 0; matching QB behavior.
+'   IF startPosition = 0 THEN QInstrB = 0: EXIT FUNCTION
+
+'   position = startPosition
+'   DO
+'     segment$ = MID$(sourceValue$, position, LEN(searchValue$))
+'     IF LEN(segment$) <> LEN(searchValue$) THEN EXIT DO
+'     isMatch = 1
+'     FOR index = 1 TO LEN(searchValue$)
+'       character$ = MID$(searchValue$, index, 1)
+'       IF character$ <> "?" THEN
+'         IF MID$(segment$, index, 1) <> character$ THEN isMatch = 0 : EXIT FOR
+'       END IF
+'     NEXT
+'     IF isMatch THEN QInstrB = position : EXIT FUNCTION
+'     position = position - 1
+'     IF position < 1 THEN EXIT DO
+'   LOOP
+
+'   QInstrB = 0
+
+' END FUNCTION
+
+' FUNCTION QInstrB2(startPosition, sourceValue$, searchValue$)
+
+'   ' Setting position to 0 will return 0; matching QB behavior.
+'   IF startPosition = 0 THEN QInstrB2 = 0: EXIT FUNCTION
+
+'   position = startPosition
+'   DO
+'     segment$ = LCASE$(MID$(sourceValue$, position, LEN(searchValue$)))
+'     IF LEN(segment$) <> LEN(searchValue$) THEN EXIT DO
+'     isMatch = 1
+'     FOR index = 1 TO LEN(searchValue$)
+'       character$ = LCASE$(MID$(searchValue$, index, 1))
+'       IF character$ <> "?" THEN
+'         IF MID$(segment$, index, 1) <> character$ THEN isMatch = 0 : EXIT FOR
+'       END IF
+'     NEXT
+'     IF isMatch THEN QInstrB2 = position : EXIT FUNCTION
+'     position = position - 1
+'     IF position < 1 THEN EXIT DO
+'   LOOP
+
+'   QInstrB2 = 0
+
+' END FUNCTION
+
+' SUB QInstrH(Segment, Address, SearchValue$, NumBytes&)
+'   ERROR 73 ' Feature Unavailable
+' END SUB
+
+' FUNCTION QPLeft$(text$, numChars)
+'   QPLeft$ = LEFT$(text$, numChars)
+' END FUNCTION
+
+' FUNCTION QPMid$(text$, startChar, numChars)
+'   IF numChars = -1 THEN
+'     QPMid$ = MID$(text$, startChar)
+'   ELSE
+'     QPMid$ = MID$(text$, startChar, numChars)
+'   END IF
+' END FUNCTION
+
+' FUNCTION QPRight$(text$, numChars)
+'   QPRight$ = RIGHT$(text$, numChars)
+' END FUNCTION
+
+' ' QPLen serves the same purpose as BASIC's LEN function, but it is considerably faster.
+' FUNCTION QPLen(text$)
+'   QPLen = LEN(text$)
+' END FUNCTION
+
+' FUNCTION QPSadd(Work$)
+'   ERROR 73 ' Feature Unavailable
+' END FUNCTION
+
+' FUNCTION QPStrI$(IntVar)
+'   QPStrI$ = LTRIM$(STR$(IntVar))
+' END FUNCTION
+
+' FUNCTION QPStrL$(LongInt&)
+'   QPStrL$ = LTRIM$(STR$(LongInt&))
+' END FUNCTION
+
+' FUNCTION QPTrim$(inputValue$)
+'   QPTrim$ = QPLTrim$(QPRTrim$(inputValue$))
+' END FUNCTION
+
+' FUNCTION QPLTrim$(inputValue$)
+'   result$ = inputvalue$
+'   DO
+'     IF LEN(result$) = 0 THEN EXIT DO
+'     ch$ = LEFT$(result$, 1)
+'     SELECT CASE ch$
+'       CASE CHR$(0), " " ', CHR$(9), CHR$(13), CHR$(10)
+'         result$ = RIGHT$(result$, LEN(result$) - 1)
+'       CASE ELSE: EXIT DO
+'     END SELECT
+'   LOOP
+'   QPLTrim$ = result$
+' END FUNCTION
+
+' FUNCTION QPRTrim$(inputValue$)
+'   result$ = inputvalue$
+'   DO
+'     IF LEN(result$) = 0 THEN EXIT DO
+'     ch$ = RIGHT$(result$, 1)
+'     SELECT CASE ch$
+'       CASE CHR$(0), " " ', CHR$(9), CHR$(13), CHR$(10)
+'         result$ = LEFT$(result$, LEN(result$) - 1)
+'       CASE ELSE: EXIT DO
+'     END SELECT
+'   LOOP
+'   QPRTrim$ = result$
+' END FUNCTION
+
+' FUNCTION QPValI (X$)
+'   QPValI = VAL(X$)
+' END FUNCTION
+
+' FUNCTION QPValL&(Work$)
+'   ERROR 73 ' Feature Unavailable
+' END FUNCTION
+
+' SUB RemCtrl(X$, Replace$)
+'   ERROR 73 ' Feature Unavailable
+' END SUB
+
+' ReplaceChar replaces all occurrences of a specified character in a 
+' string with a different character.
+SUB ReplaceChar(Byref sourceValue As String, oldValue As String, newValue As String)
+  Var oldChar = LEFT$(oldValue, 1)
+  Var newChar = LEFT$(newValue, 1)
+  ReplaceString sourceValue, oldChar, newChar
+END SUB
+
+' ReplaceChar2 replaces all occurrences of a specified character in a 
+' string with a different character while ignoring capitalization. 
+SUB ReplaceChar2(Byref sourceValue As String, oldValue As String, newValue As String)
+  Var oldChar = LEFT$(oldValue, 1)
+  Var newChar = LEFT$(newValue, 1)
+  ReplaceString2 sourceValue, oldChar, newChar
+END SUB
+
+' ' SUB ReplaceCharT(typeVar as Any, typeLength, oldChar, newChar)
+' ' END SUB
+
+' ' SUB ReplaceCharT2(typeVar as Any, typeLength, oldChar, newChar)
+' ' END SUB
+
+' ReplaceString replaces all occurrences of a specified string with a 
+' different string (case-sensitive). Both the string being searched 
+' for and its replacement may be any length.
+SUB ReplaceString (Byref sourceValue As String, oldValue As String, newValue As String) 'STATIC
+  Var oldLen = LEN(oldValue)
+  Var newLen = LEN(newValue)
+  Var p = 1
+Again:
+  p = QInstr(p, sourceValue, oldValue)' case-sensitive
+  IF p THEN
+    sourceValue = LEFT$(sourceValue, p - 1) + newValue + MID$(sourceValue, p + oldLen)
+    p = p + newLen
+    GOTO Again
+  END IF
+END SUB
+
+' ReplaceString2 replaces all occurrences of a specified string with a 
+' different string (case-insensitive). Both the string being searched 
+' for and its replacement may be any length.
+SUB ReplaceString2 (Byref sourceValue As String, oldValue As String, newValue As String) 'STATIC
+  Var oldLen = LEN(oldValue)
+  Var newLen = LEN(newValue)
+  Var p = 1
+Again:
+  p = QInstr2(p, sourceValue, oldValue) ' case-insensitive
+  IF p THEN
+    sourceValue = LEFT$(sourceValue, p - 1) + newValue + MID$(sourceValue, p + oldLen)
+    p = p + newLen
+    GOTO Again
+  END IF
+END SUB
+
+' SUB ReplaceTbl(Work$, Table$)
+'   ERROR 73 ' Feature Unavailable
+' END SUB
+
+' SUB Sequence(work$)
+'   p = LEN(work$)
+'   DO
+'     IF p < 1 THEN 
+'       IF carry THEN
+'         ' handle "overflow"
+'         FOR p = 1 TO LEN(work$)
+'           ch = ASC(MID$(work$, p, 1))
+'           SELECT CASE ch
+'             CASE 48 TO 57: MID$(work$, p, 1) = CHR$(48)
+'             CASE 97 TO 122: MID$(work$, p, 1) = CHR$(97)
+'             CASE 65 TO 90: MID$(work$, p, 1) = CHR$(65)
+'             CASE ELSE
+'           END SELECT
+'         NEXT
+'         EXIT DO          
+'       END IF
+'       EXIT DO
+'     END IF
+'     carry = 0
+'     ch = ASC(MID$(work$, p, 1))
+'     SELECT CASE ch
+'       CASE 48 TO 57
+'         IF ch = 57 THEN
+'           ch = 48: carry = -1
+'         ELSE
+'           ch = ch + 1
+'         END IF
+'         MID$(work$, p, 1) = CHR$(ch)
+'       CASE 97 TO 122
+'         IF ch = 122 THEN
+'           ch = 97: carry = -1
+'         ELSE
+'           ch = ch + 1
+'         END IF
+'         MID$(work$, p, 1) = CHR$(ch)
+'       CASE 65 TO 90
+'         IF ch = 90 THEN
+'           ch = 65: carry = -1
+'         ELSE
+'           ch = ch + 1
+'         END IF
+'         MID$(work$, p, 1) = CHR$(ch)
+'       CASE ELSE
+'         carry = -1
+'     END SELECT
+'     p = p - 1
+'     IF NOT carry THEN EXIT DO
+'   LOOP
+' END SUB
+
+' SUB Translate(x$)
+'   FOR p = 1 TO LEN(x$)
+'     c = ASC(MID$(x$, p, 1))
+'     SELECT CASE c
+'       CASE 196: MID$(x$, p, 1) = "-"
+'       CASE 205, 240: MID$(x$, p, 1) = "="
+'       CASE 176, 177, 178, 179, 186, 220, 221, 222, 223: MID$(x$, p, 1) = "|"
+'       CASE 218, 194, 191, 195, 197, 180, 192, 193, 217, 201, 203, 187, 204, 208, 185, 200, 202, 188: MID$(x$, p, 1) = "+"
+'       CASE IS > 127: MID$(x$, p, 1) = "+"
+'       CASE ELSE
+'     END SELECT
+'   NEXT
+' END SUB
+
+' SUB Upper(value$)
+'   value$ = UCASE$(value$)
+' END SUB
+
+' ' UpperTbl will capitalize all of the characters in a string, and it also 
+' ' looks in a supplied table to determine how to handle foreign characters. 
+' SUB UpperTbl(work$, table$)
+
+'   ' Work$ is the string to be capitalized, and Table$ holds one or more 
+'   ' pairs of lower and upper case extended characters. 
+
+'   FOR entry = 1 TO LEN(table$) STEP 2
+'     match$ = MID$(table$, entry, 1)
+'     replacement$ = MID$(table$, entry + 1, 1)
+'     DO
+'       cx = INSTR(work$, match$)
+'       IF cx > 0 THEN
+'         MID$(work$, cx, 1) = replacement$
+'       ELSE
+'         EXIT DO
+'       END IF  
+'     LOOP
+'   NEXT
+
+' END SUB
+
+' ' ****************************************
+' ' Chapter 9 - Video Routines
+' ' ****************************************
+
+' ' APrint will quickly print any portion of a conventional (not 
+' ' fixed-length) string array, and contain the display within a specified 
+' ' area of the screen. 
+' SUB APrint(array$(), first, numEls, firstChar, numChars, colr, page)
+'   'BUG: The VERTMENU.BAS file makes a call where colr is -1;
+'   '     however, it appears to be not using the current "basic" fg/bg but
+'   '     the value from "somewhere else". Testing combined with COLOR, PRINT
+'   '     MQPrint, QPrintRC, etc. and -1 for colr does not seem to be affected
+'   '     by any of these. COLOR, for example, seems to be completely ignored 
+'   '     which doesn't seem to match what the documentation states.
+'   ' NOTE: page is currently not implemented.
+'   ' If page is -1, use current page.
+'   IF page > -1 THEN SCREEN , , page, page
+'   row = CSRLIN
+'   col = POS(0)
+'   FOR element = first to first + numEls - 1
+'     value$ = MID$(array$(element), firstChar, numChars)
+'     QPrintRC value$ + SPACE$(numChars - LEN(value$)), row, col, colr
+'     row = row + 1
+'   NEXT
+' END SUB
+
+' ' APrint0 will quickly print any portion of a conventional (not 
+' ' fixed-length) string array, and contain the display within a specified 
+' ' area of the screen. 
+' SUB APrint0(array$(), first, numEls, firstChar, numChars, colr)
+'   CALL APrint(array$(), first, numEls, firstChar, numChars, colr, 0)
+' END SUB
+
+' ' APrintT will quickly print any portion of a fixed-length string array 
+' ' or the string component of a TYPE array, and contain the display 
+' ' within a specified area of the screen. 
+' 'SUB APrintT(array() AS FLen, first, elSize, numEls, firstChar, numChars, colr, page)
+' SUB APrintT(src AS _MEM, elSize, numEls, firstChar, numChars, colr, page)
+
+'   ' array$(first) is the first element to be included, and elSize% is the 
+'   ' total length in bytes of each element. 
+'   '
+'   ' numEls% is the total number of elements to print, firstChar% is 
+'   ' the first character in each string to be displayed, and numChars% 
+'   ' is the number of characters to print. 
+'   '
+'   ' colr% specifies the display color, coded in the format used by 
+'   ' QuickPak Professional. If -1 is used for colr%, the current screen 
+'   ' colors will be maintained. 
+'   ' 
+'   ' page% indicates the video page to write to, which is relevant only 
+'   ' when a color monitor is installed. If page% is set to -1, APrintT 
+'   ' will use the current page. 
+'   '
+'   ' Printing always begins at the current cursor location.
+
+'   DIM offset AS _OFFSET: offset = src.OFFSET
+'   'DIM s AS STRING ' * elSize
+
+'   IF page > -1 THEN SCREEN , , page, page
+'   row = CSRLIN
+'   col = POS(0)
+'   FOR x = 1 TO numEls
+'     s$ = SPACE$(elSize)
+'     _MEMGET src, offset, s$
+'     value$ = MID$(s$, firstChar, numChars)
+'     QPrintRC value$ + SPACE$(numChars - LEN(value$)), row, col, colr
+'     row = row + 1
+'     offset = offset + elSize
+'   NEXT
+
+'   ' DIM s$(LBOUND(array) TO UBOUND(array))
+'   ' FOR x = LBOUND(array) TO UBOUND(array)
+'   '   s$(x) = array(x).S
+'   ' NEXT
+'   ' CALL APrint(s$(), first, numEls, firstChar, numChars, colr, page)
+
+' END SUB
+
+' ' APrintT0 will quickly print any portion of a fixed-length string 
+' ' array or the string component of a TYPE array, and contain the 
+' ' display within a specified area of the screen. 
+' SUB APrintT0(block AS _MEM, elSize, numEls, firstChar, numChars, colr)
+'   ERROR 73 ' Feature Unavailable
+' END SUB
+
+' ' ArraySize will quickly calculate how many elements are needed in an
+' ' integer array that is intended to hold a portion of the display screen.
+' FUNCTION ArraySize(ulRow, ulCol, lrRow, lrCol)
+'   ArraySize = (lrRow - ulRow + 1) * (lrCol - ulCol + 1)
+' END FUNCTION
+
+' ' Box will quickly draw a box frame on the screen. 
+' SUB Box(ulRow, ulCol, lrRow, lrCol, char, colr, page)
+'   ' NOTE: page isn't currently implemented
+'   ' If page = -1 then use current active page.
+'   SELECT CASE char
+'     CASE 1 ' single line all around
+'       ' first row
+'       QPrintRC CHR$(218), ulRow, ulCol, colr
+'       QPrintRC STRING$((lrCol - ulCol) - 1, 196), ulRow, ulCol + 1, colr
+'       QPrintRC CHR$(191), ulRow, lrCol, colr
+'       ' middle
+'       FOR r = ulRow + 1 TO lrRow - 1
+'         QPrintRC CHR$(179), r, ulCol, colr
+'         QPrintRC CHR$(179), r, lrCol, colr
+'       NEXT
+'       ' last row
+'       QPrintRC CHR$(192), lrRow, ulCol, colr
+'       QPrintRC STRING$((lrCol - ulCol) - 1, 196), lrRow, ulCol + 1, colr
+'       QPrintRC CHR$(217), lrRow, lrCol, colr
+'     CASE 2 ' double line all around
+'       ' first row
+'       QPrintRC CHR$(201), ulRow, ulCol, colr
+'       QPrintRC STRING$((lrCol - ulCol) - 1, 205), ulRow, ulCol + 1, colr
+'       QPrintRC CHR$(187), ulRow, lrCol, colr
+'       ' middle
+'       FOR r = ulRow + 1 TO lrRow - 1
+'         QPrintRC CHR$(186), r, ulCol, colr
+'         QPrintRC CHR$(186), r, lrCol, colr
+'       NEXT
+'       ' last row
+'       QPrintRC CHR$(200), lrRow, ulCol, colr
+'       QPrintRC STRING$((lrCol - ulCol) - 1, 205), lrRow, ulCol + 1, colr
+'       QPrintRC CHR$(188), lrRow, lrCol, colr
+'     CASE 3 ' double line horizontally, single line vertically
+'       ' first row
+'       QPrintRC CHR$(213), ulRow, ulCol, colr
+'       QPrintRC STRING$((lrCol - ulCol) - 1, 205), ulRow, ulCol + 1, colr
+'       QPrintRC CHR$(184), ulRow, lrCol, colr
+'       ' middle
+'       FOR r = ulRow + 1 TO lrRow - 1
+'         QPrintRC CHR$(179), r, ulCol, colr
+'         QPrintRC CHR$(179), r, lrCol, colr
+'       NEXT
+'       ' last row
+'       QPrintRC CHR$(212), lrRow, ulCol, colr
+'       QPrintRC STRING$((lrCol - ulCol) - 1, 205), lrRow, ulCol + 1, colr
+'       QPrintRC CHR$(190), lrRow, lrCol, colr
+'     CASE 4 ' single line horizontally, double line vertically
+'       ' first row
+'       QPrintRC CHR$(214), ulRow, ulCol, colr
+'       QPrintRC STRING$((lrCol - ulCol) - 1, 196), ulRow, ulCol + 1, colr
+'       QPrintRC CHR$(183), ulRow, lrCol, colr
+'       ' middle
+'       FOR r = ulRow + 1 TO lrRow - 1
+'         QPrintRC CHR$(186), r, ulCol, colr
+'         QPrintRC CHR$(186), r, lrCol, colr
+'       NEXT
+'       ' last row
+'       QPrintRC CHR$(211), lrRow, ulCol, colr
+'       QPrintRC STRING$((lrCol - ulCol) - 1, 196), lrRow, ulCol + 1, colr
+'       QPrintRC CHR$(189), lrRow, lrCol, colr
+'     CASE ELSE ' ASCII character will be used for entire box
+'       ' first row
+'       QPrintRC CHR$(char), ulRow, ulCol, colr
+'       QPrintRC STRING$((lrCol - ulCol) - 1, char), ulRow, ulCol + 1, colr
+'       QPrintRC CHR$(char), ulRow, lrCol, colr
+'       ' middle
+'       FOR r = ulRow + 1 TO lrRow - 1
+'         QPrintRC CHR$(char), r, ulCol, colr
+'         QPrintRC CHR$(char), r, lrCol, colr
+'       NEXT
+'       ' last row
+'       QPrintRC CHR$(char), lrRow, ulCol, colr
+'       QPrintRC STRING$((lrCol - ulCol) - 1, char), lrRow, ulCol + 1, colr
+'       QPrintRC CHR$(char), lrRow, lrCol, colr
+'   END SELECT
+' END SUB
+
+' ' Box0 will quickly draw a box frame on the screen.
+' SUB Box0(ulRow, ulCol, lrRow, lrCol, char, colr)
+'   CALL Box(ulRow, ulCol, lrRow, lrCol, char, colr, 0)
+' END SUB
+
+' BPrint will print either a conventional or fixed-length string at the 
+' current cursor position through DOS. 
+SUB BPrint(text As String)
+  'prevControlChr = _CONTROLCHR ' <----------- QB64 definately get's this wrong...
+  'IF prevControlChr THEN _CONTROLCHR ON
+  Var temp = text
+  ReplaceChar temp, CHR$(13), ""
+  PRINT temp;
+  'IF prevControlChr THEN _CONTROLCHR OFF
+END SUB
+
+' ' ClearEOL (Clear to End of Line) erases the current screen line 
+' ' starting at the current cursor position. 
+' SUB ClearEOL(clr As Short)
+'   ' colr specifies the display color. 
+'   ' If -1 is used for Colr, the current screen 
+'   ' colors will be maintained. 
+'   Var r = CSRLIN
+'   Var c = POS(0)
+'   Var columns = _WIDTH
+'   QPrintRC Space$(columns - c), r, c, clr 
+' END SUB
+
+SUB ClearScr (ulRow As Short, ulCol As Short, lrRow As Short, lrCol As Short, colr As Short, page As Short)
+  ' NOTE: page is currently not implemented.
+  ' page of -1 is "current page"
+  FOR r As Short = ulRow TO lrRow
+    FOR c As Short = ulCol TO lrCol
+      QPrintRC " ", r, c, colr
+    NEXT
+  NEXT
+END SUB
+
+SUB ClearScr0 (ulRow As Short, ulCol As Short, lrRow As Short, lrCol As Short, colr As Short)
+  FOR r As Short = ulRow TO lrRow
+    FOR c As Short = ulCol TO lrCol
+      QPrintRC " ", r, c, colr
+    NEXT
+  NEXT
+END SUB
+
+' ' FillScrn will fill any rectangular portion of the display screen with 
+' ' the specified character. 
+' SUB FillScrn(ulRow, ulCol, lrRow, lrCol, colr, char, page)
+'   ' NOTE: page is currently not implemented.
+'   ' If page = -1 then current active page is used.
+'   FOR r = ulRow TO lrRow
+'     QPrintRC STRING$(lrCol - ulCol + 1, char), r, ulCol, colr
+'   NEXT
+' END SUB
+
+' ' Fil1Scrn0 will fill any rectangular portion of the display screen with 
+' ' the specified character. 
+' SUB FillScrn0(ulRow, ulCol, lrRow, lrCol, colr, char)
+'   CALL FillScrn (ulRow, ulCol, lrRow, lrCol, colr, char, 0)
+' END SUB
+
+' ' GetVMode will report the current video mode, the currently active 
+' ' display page, the page size, and the number of rows and columns. 
+' SUB GetVMode (mode, page, pageSize, rows, columns)
+'   mode = 3 ' matches DOSBOX
+'   page = 0 'TODO: Need to handle, but the default is 0.
+'   pageSize = 4096 ' matches DOSBOX
+'   columns = _WIDTH
+'   rows = _HEIGHT
+' END SUB
+
+FUNCTION Monitor As Short
+  ' NOTE: The documentation for QPrintAny() and Monitor don't appear to align????
+  Monitor = 7 ' VGA adapter with a color monitor.
+END FUNCTION
+
+FUNCTION EGAMem As Short
+  EGAMem = 4 ' Assuming VGA and matching what is reported in DOSBOX.
+END FUNCTION
+
+' ChatGPT conversion????
+' SUB MakeMono(ArrayAdr AS LONG, NumEls AS LONG)
+'   DIM Array(NumEls)
+'   FOR i = 1 TO NumEls
+'   Array(i) = PEEK(ArrayAdr + i - 1)
+'   IF (Array(i) AND 7) <> 0 THEN
+'   Array(i) = (Array(i) AND 248) OR 7
+'   END IF
+'   NEXT
+' END SUB
+
+' MakeMono will convert the colors on a text screen held in an 
+' integer array to those suitable for display on a monochrome monitor. 
+SUB MakeMono(array() As Short, element As Short, size As Short)
+  IF size < 1 THEN EXIT SUB
+  ' element is the location in the array() array where the screen 
+  ' begins, and size is the size of the screen in characters. 
+  FOR index As Short = element TO element + size - 1
+    ' clr = element(index) AND &H00FF ' split color
+    ' 'ch = ((element(index) AND &HFF00) \ 256) AND &H00FF ' split character
+    ' CALL SplitColor(clr, fg, bg)
+
+    ' If the text foreground color is black (inverse), then the color is left unchanged.
+    ' Otherwise the background is cleared to black, and the 
+    ' foreground is set to white. However, the intensity and flashing color 
+    ' attributes are left unchanged. 
+    IF (array(index) AND 7) <> 0 THEN
+      array(index) = (array(index) AND 248) OR 7
+    END IF
+  NEXT
+END SUB
+
+' ' MPaintBox is similar to PaintBox, except it always turns off the 
+' ' mouse cursor before painting the screen. When it is finished the 
+' ' cursor is turned back on. 
+' SUB MPaintBox (ulRow, ulCol, lrRow, lrCol, colr)
+'   ' Paint a portion of the screen; leaving text intact (only change color).
+'   CALL PaintBox0 (ulRow, ulCol, lrRow, lrCol, colr)
+' END SUB
+
+' SUB MPRestore(ulRow, ulCol, lrRow, lrCol, originalWidth, element(), start)
+
+'   w = lrCol - ulCol + 1
+'   h = lrRow - ulRow + 1
+
+'   index = start '+ LBOUND(element)  ' not really sure why the +1 is needed???
+'                                       ' but I've verified that index of 1 is the correct starting
+'                                       ' element for a saved array.
+'   r = 0
+'   DO
+'     FOR c = 0 TO w - 1
+'       ' clr = element(index + c) AND &H00FF ' split color
+'       ' ch = ((element(index + c) AND &HFF00) \ 256) AND &H00FF ' split character
+'       ch = element(index + c) AND &H00FF ' split color
+'       clr = ((element(index + c) AND &HFF00) \ 256) AND &H00FF ' split character
+'       QPrintRC CHR$(ch), ulRow + r, ulCol + c, clr
+'     NEXT
+'     r = r + 1: index = index + originalWidth
+'   LOOP UNTIL r => h OR index => UBOUND(element)
+
+' END SUB
+
+' MQPrint is similar to QPrint, except it always turns off the mouse cursor
+' before printing. When it is finished the cursor is turned back on. 
+SUB MQPrint (txt As String, colr As Short)
+  Var ofg = -1: Var obg = -1
+  IF colr = -1 THEN
+    ' Maintain existing color...
+  ELSE
+     Dim c As ULong = COLOR()
+     ofg = LoWord(c): obg = HiWord(c)
+     Dim fg As Short: Dim bg As Short
+     SplitColor colr, fg, bg
+     COLOR fg, bg
+  END IF
+  Var pr = CSRLIN
+  Var pc = POS(0)
+  'prevControlChr = _CONTROLCHR ' <----------- QB64 definately get's this wrong...
+  'IF NOT prevControlChr THEN _CONTROLCHR OFF
+  PRINT txt;
+  'IF NOT prevControlChr THEN _CONTROLCHR ON
+  LOCATE pr, pc
+  IF ofg <> -1 AND obg <> -1 THEN
+    COLOR ofg, obg
+  END IF
+END SUB
+
+' ' MScrnRest is similar to ScrnRest, except it always turn off 
+' ' the mouse cursor while it is working. 
+' SUB MScrnRest (ulRow, ulCol, lrRow, lrCol, element())
+'   ScrnRest0 ulRow, ulCol, lrRow, lrCol, element()
+' END SUB
+
+' ' MScrnSave is similar to ScrnSave, except it always turn off 
+' ' the mouse cursor while it is working. 
+' SUB MScrnSave (ulRow, ulCol, lrRow, lrCol, element())
+'   'TODO: Capture the region for restoration later.
+'   ScrnSave0 ulRow, ulCol, lrRow, lrCol, element()
+' END SUB
+
+FUNCTION OneColor (fg As Short, bg As Short) As Short
+  Dim f As Short = fg
+  Dim b As Short = bg
+  OneColor = (f AND 16) * 8 + ((b AND 7) * 16) + (f AND 15)
+END FUNCTION
+
+' ' PaintBox will paint any rectangular area of the screen, without 
+' ' disturbing the text that is already present. 
+' SUB PaintBox (ulRow, ulCol, lrRow, lrCol, colr, page)
+'   ' NOTE: page isn't currently used.
+'   ' If page = -1 then current active screen should be used.
+'   IF _PIXELSIZE = 0 THEN
+'     FOR r = ulRow TO lrRow
+'       FOR c = ulCol TO lrCol
+'         ch = SCREEN(r, c)
+'         QPrintRC CHR$(ch), r, c, colr
+'       NEXT
+'     NEXT
+'   ELSE  
+'     ERROR 73 ' Feature Unavailable
+'   END IF
+' END SUB
+
+' ' PaintBox0 will paint any rectangular area of the screen, without 
+' ' disturbing the text that is already present. 
+' SUB PaintBox0 (ulRow, ulCol, lrRow, lrCol, colr)
+'   CALL PaintBox (ulRow, ulCol, lrRow, lrCol, colr, 0)
+' END SUB
+
+' SUB PUsing (number$, image$, color1, color2, page, row, column)
+'   ' number$ is any number whether integer, single, or double precision, 
+'   ' and image$ indicates how the result is to be formatted. Image$ may 
+'   ' contain both leading and trailing text as shown below.
+'   ' color1 and color2 indicate the colors for the text and numeric 
+'   ' portions of image$ respectively. Either color may be set to -1 to 
+'   ' maintain the current screen colors.   
+'   ' page tells PUsing what screen page to print to, which may 
+'   ' optionally be given as -1 to use the current page. 
+'   ' row and column specify where the printing is to be located on 
+'   ' the screen. 
+'   CALL QPrintRC (FUsing$(number$, image$), row, column, color2)
+'   'TODO: page is currently not honored.
+'   'TODO: color1 needs to be implemented.
+'   'TODO: "raw text" (non formatted) is currently not printed (ignored by FUsing$)
+' END SUB
+
+SUB QPrint (text As String, colr As Short, page As Short)
+  Dim ofg As Long = -1: Dim obg As Long = -1
+  IF colr = -1 THEN
+    ' Maintain existing color...
+  ELSE
+    Dim c As ULong = COLOR()
+    ofg = LoWord(c): obg = HiWord(c)
+    Dim fg As Short: Dim bg As Short
+    SplitColor colr, fg, bg
+    'COLOR QBColor(fg), QBColor(bg)
+    COLOR fg, bg
+  END IF
+  Dim pr As Short = CSRLIN
+  Dim pc As Short = POS(0)
+  'Dim prevControlChr = _CONTROLCHR ' <----------- QB64 definately get's this wrong...
+  'IF NOT prevControlChr THEN _CONTROLCHR OFF
+  PRINT text;
+  'IF NOT prevControlChr THEN _CONTROLCHR ON
+  LOCATE pr, pc
+  IF ofg <> -1 AND obg <> -1 THEN
+    COLOR ofg, obg
+  END IF
+END SUB
+
+' FUNCTION QBColor (colr As Short) As ULong
+'   DIM result As ULong = colr
+'   SELECT CASE colr
+'     CASE 0: result = RGB(0, 0, 0)
+'     CASE 1: result = RGB(170, 0, 0) '  1 red
+'     CASE 2: result = RGB(0, 170, 0) '  2 green
+'     CASE 3: result = RGB(170, 85, 0) '  3 yellow (not really yellow; oh well)
+'     CASE 4: result = RGB(0, 0, 170) '  4 blue
+'     CASE 5: result = RGB(170, 0, 170) '  5 magenta
+'     CASE 6: result = RGB(0, 170, 170) '  6 cyan
+'     CASE 7: result = RGB(170, 170, 170) ' white (well VGA defines this as (170, 170, 170); darkgray is (169, 169, 169); so we are super close)
+'     CASE 8: result = RGB(85, 85, 85) '  8 grey
+'     CASE 9: result = RGB(255, 85, 85) '  9 bright red
+'     CASE 10: result = RGB(85, 255, 85) ' 10 bright green
+'     CASE 11: result = RGB(255, 255, 85) ' 11 bright yellow
+'     CASE 12: result = RGB(85, 85, 255) ' 12 bright blue
+'     CASE 13: result = RGB(255, 85, 255) ' 13 bright magenta
+'     CASE 14: result = RGB(85, 255, 255) ' 14 bright cFsyan
+'     CASE 15: result = RGB(255, 255, 255)
+'     CASE ELSE
+'   END SELECT
+'   QBColor = result
+' END FUNCTION
+
+' To determine if in "default screen mode"; use screenptr - if null, on console.
+
+SUB QPrint0 (text As String, colr As Short)
+  Var ofg = -1: Var obg = -1
+  IF colr = -1 THEN
+    ' Maintain existing color...
+  ELSE
+     Var c = COLOR()
+     ofg = LoWord(c): obg = HiWord(c)
+     Dim fg As Short: Dim bg As Short
+     SplitColor colr, fg, bg
+     COLOR fg, bg
+  END IF
+  Var pr = CSRLIN
+  Var pc = POS(0)
+  'prevControlChr = _CONTROLCHR ' <----------- QB64 definately get's this wrong...
+  'IF NOT prevControlChr THEN _CONTROLCHR OFF
+  PRINT text;
+  'IF NOT prevControlChr THEN _CONTROLCHR ON
+  LOCATE pr, pc
+  IF ofg <> -1 AND obg <> -1 THEN
+    COLOR ofg, obg
+  END IF
+END SUB
+
+' ' QPrintAny provides a simple way for a BASIC program to utilize 
+' ' two monitors at the same time. 
+' SUB QPrintAny (txt$, clr, monCode, row, column)
+'   ' NOTE: monCode is currently not active.
+'   '       1 - Monochrome monitor at segment &HB000
+'   '       2 - CGA monitor at segment &HB800
+'   '       3 - EGA or VGA monitor at segment &HB800
+'   ofg = -1: obg = -1
+'   IF clr = -1 THEN
+'     ' Maintain existing color...
+'   ELSE
+'      ofg = _DEFAULTCOLOR: obg = _BACKGROUNDCOLOR
+'      SplitColor clr, fg%, bg%
+'      COLOR QBColor(fg%), QBColor(bg%)
+'   END IF
+'   pr = CSRLIN
+'   pc = POS(0)
+'   LOCATE row, column
+'   prevControlChr = _CONTROLCHR ' <----------- QB64 definately get's this wrong...
+'   IF NOT prevControlChr THEN _CONTROLCHR OFF
+'   PRINT txt$;
+'   IF NOT prevControlChr THEN _CONTROLCHR ON
+'   LOCATE pr, pc
+'   IF ofg <> -1 AND obg <> -1 THEN
+'     COLOR ofg, obg
+'   END IF
+' END SUB
+
+SUB QPrintRC (txt As String, r As Short, c As Short, clr As Short)
+  IF r < 1 OR r > 25 OR c < 1 OR c > 80 THEN EXIT SUB
+  Var ofg = -1: Var obg = -1
+  IF clr = -1 THEN
+    ' Maintain existing color...
+  ELSE
+     Var c = COLOR()
+     ofg = LoWord(c): obg = HiWord(c)
+     Dim fg As Short: Dim bg As Short
+     SplitColor clr, fg, bg
+     COLOR fg, bg
+  END IF
+  Var pr = CSRLIN
+  Var pc = POS(0)
+  LOCATE r, c
+  'prevControlChr = _CONTROLCHR ' <----------- QB64 definately get's this wrong...
+  'IF NOT prevControlChr THEN _CONTROLCHR OFF
+  PRINT txt;
+  'IF NOT prevControlChr THEN _CONTROLCHR ON
+  LOCATE pr, pc
+  IF ofg <> -1 AND obg <> -1 THEN
+    COLOR ofg, obg
+  END IF
+END SUB
+
+' ' ReadScrn will quickly read characters from the display screen, and 
+' ' store them in a specified string variable. 
+' SUB ReadScrn (row, column, x$, page)
+'   ' row and column tell ReadScrn where on the screen the 
+'   ' characters are located, x$ receives the screen contents, and page 
+'   ' indicates which video page to read. If Page is set to -1, then 
+'   ' ReadScrn will read from the currently active screen page. 
+'   ' The number of characters to be read is specified by the length of X$.
+'   FOR c = column TO column + LEN(x$) - 1
+'     MID$(x$, c - column + 1, 1) = CHR$(SCREEN(row, c))
+'   NEXT
+' END SUB
+
+' ' ReadScrn0 will quickly read characters from the display screen, 
+' ' and store them in a specified string variable. 
+' SUB ReadScrn0 (row, column, x$)
+'   ' Row and Column tell ReadScrn0 where on the screen the 
+'   ' characters are located, and X$ receives the screen contents. 
+'   ' The number of characters to read is specified by the length of X$. 
+'   CALL ReadScrn (row, column, x$, 0)
+' END SUB
+
+' ' ScrnRest will restore a screen that had previously been saved with 
+' ' ScrnSave or ScrnSave0. 
+' SUB ScrnRest (ulRow, ulCol, lrRow, lrCol, element(), page)
+'   ' NOTE: page is currently not implemented
+'   IF _PIXELSIZE = 0 THEN
+'     rows = (lrRow - ulRow) + 1
+'     cols = (lrCol - ulCol) + 1
+'     FOR r = 0 TO rows - 1
+'       FOR c = 0 TO cols - 1
+'         index = LBOUND(element) + ((r * cols) + c)
+'         ' clr = element(index) AND &H00FF ' split color
+'         ' ch = ((element(index) AND &HFF00) \ 256) AND &H00FF ' split character
+'         ch = element(index) AND &H00FF ' split color
+'         clr = ((element(index) AND &HFF00) \ 256) AND &H00FF ' split character
+'         QPrintRC CHR$(ch), ulRow + r, ulCol + c, clr
+'       NEXT
+'     NEXT
+'   ELSE
+'     ERROR 73 ' Feature Unavailable
+'   END IF
+' END SUB
+
+' ' ScrnRest0 will restore a screen that had previously been saved with 
+' ' ScrnSave or ScrnSave0. 
+' SUB ScrnRest0 (ulRow, ulCol, lrRow, lrCol, element())
+'   ScrnRest ulRow, ulCol, lrRow, lrCol, element(), 0
+' END SUB
+
+' ' ScrnSave will save all or part of a text screen into an integer array, 
+' ' to allow restoring it again at a later time. 
+' SUB ScrnSave (ulRow, ulCol, lrRow, lrCol, element(), page)
+'   ' NOTE: page is currently not implemented
+'   IF _PIXELSIZE = 0 THEN
+'     rows = (lrRow - ulRow) + 1
+'     cols = (lrCol - ulCol) + 1
+'     FOR r = 0 TO rows - 1
+'       FOR c = 0 TO cols - 1
+'         index = LBOUND(element) + ((r * cols) + c)
+'         ' ch = SCREEN(ulRow + r, ulCol + c, 0)
+'         ' clr = SCREEN(ulRow + r, ulCol + c, 1)
+'         clr = SCREEN(ulRow + r, ulCol + c, 0)
+'         ch = SCREEN(ulRow + r, ulCol + c, 1)
+'         element(index) = (ch * 256) + clr ' combine
+'       NEXT
+'     NEXT
+'   ELSE
+'     ERROR 73 ' Feature Unavailable
+'   END IF
+' END SUB
+
+' ' ScrnSave will save all or part of a text screen into an integer array, 
+' ' to allow restoring it again at a later time. 
+' SUB ScrnSave0 (ulRow, ulCol, lrRow, lrCol, element())
+'   ScrnSave ulRow, ulCol, lrRow, lrCol, element(), 0
+' END SUB
+
+' ' ScrollD will scroll any portion of the display screen down a 
+' ' specified number of lines.
+' SUB ScrollD(ulRow, ulCol, lrRow, lrCol, lines, page)
+  
+'   ' NOTE: page is currently not implemented.
+'   ' If page = -1 then current screen will be scrolled.
+
+'   tr = (lrRow - ulRow) + 1
+'   IF tr < lines THEN
+'     ' If the number of lines to scroll is greater than the area to scroll, just clear.
+'     CALL ClearScr (ulRow, ulCol, lrRow, lrCol, -1, page)
+'   ELSE
+'     DIM array(ArraySize(ulRow + lines, ulCol, lrRow, lrCol))
+'     CALL ScrnSave (ulRow, ulCol, lrRow - lines, lrCol, array(), page)
+'     CALL ScrnRest (ulRow + lines, ulCol, lrRow, lrCol, array(), page)
+'     CALL ClearScr (ulRow, ulCol, ulRow + (lines - 1), lrCol, -1, page)
+'   END IF
+
+' END SUB
+
+' ' ScrollL will scroll any portion of the display screen left a 
+' ' specified number of columns.
+' SUB ScrollL(ulRow, ulCol, lrRow, lrCol, columns, page)
+
+'   ' NOTE: page is currently not implemented.
+'   ' If page = -1 then current screen will be scrolled.
+
+'   tc = (lrCol - ulCol) + 1
+'   IF tc < columns THEN
+'     ' If the number of columns to scroll is greater than the area to scroll, just clear.
+'     CALL ClearScr (ulRow, ulCol, lrRow, lrCol, -1, page)
+'   ELSE
+'     DIM array(ArraySize(ulRow, ulCol + columns, lrRow, lrCol))
+'     CALL ScrnSave (ulRow, ulCol + columns, lrRow, lrCol, array(), page)
+'     CALL ScrnRest (ulRow, ulCol, lrRow, lrCol - columns, array(), page)
+'     CALL ClearScr (ulRow, lrCol - (columns - 1), lrRow, lrCol, -1, page)
+'   END IF
+
+' END SUB
+
+' ' ScrollR will scroll any portion of the display screen right a 
+' ' specified number of columns.
+' SUB ScrollR(ulRow, ulCol, lrRow, lrCol, columns, page)
+
+'   ' NOTE: page is currently not implemented.
+'   ' If page = -1 then current screen will be scrolled.
+
+'   tc = (lrCol - ulCol) + 1
+'   IF tc < columns THEN
+'     ' If the number of columns to scroll is greater than the area to scroll, just clear.
+'     CALL ClearScr (ulRow, ulCol, lrRow, lrCol, -1, page)
+'   ELSE
+'     DIM array(ArraySize(ulRow, ulCol, lrRow, lrCol - columns))
+'     CALL ScrnSave (ulRow, ulCol, lrRow, lrCol - columns, array(), page)
+'     CALL ScrnRest (ulRow, ulCol + columns, lrRow, lrCol, array(), page)
+'     CALL ClearScr (ulRow, ulCol, lrRow, ulCol + (columns - 1), -1, page)
+'   END IF
+
+' END SUB
+
+' ' ScrollU will scroll any portion of the display screen up a 
+' ' specified number of lines.
+' SUB ScrollU(ulRow, ulCol, lrRow, lrCol, lines, page)
+
+'   ' NOTE: page is currently not implemented.
+'   ' If page = -1 then current screen will be scrolled.
+
+'   tr = (lrRow - ulRow) + 1
+'   IF tr < lines THEN
+'     ' If the number of lines to scroll is greater than the area to scroll, just clear.
+'     CALL ClearScr (ulRow, ulCol, lrRow, lrCol, -1, page)
+'   ELSE
+'     DIM array(ArraySize(ulRow, ulCol, lrRow - lines, lrCol))
+'     CALL ScrnSave (ulRow + lines, ulCol, lrRow, lrCol, array(), page)
+'     CALL ScrnRest (ulRow, ulCol, lrRow - lines, lrCol, array(), page)
+'     CALL ClearScr (lrRow - (lines - 1), ulCol, lrRow, lrCol, -1, page)
+'   END IF
+
+' END SUB
+
+SUB SplitColor (colr As Short, Byref fg As Short, Byref bg As Short)
+  fg = (colr AND 128) \ 8 + (colr AND 15) 
+  bg = (colr AND 112) \ 16 
+END SUB
+
+' ' Chapter Next
+
+' FUNCTION BitShift (value, cmd$, bits)
+'   mult = 2
+'   SELECT CASE bits
+'     CASE 1 ' already set
+'     CASE 2: mult = 4
+'     CASE 3: mult = 8
+'     CASE 4: mult = 16
+'     CASE 5: mult = 32
+'     CASE 6: mult = 64
+'     CASE 7: mult = 128
+'     CASE 8: mult = 256
+'     CASE 9: mult = 512
+'     CASE 10: mult = 1024
+'     CASE 11: mult = 2048
+'     CASE 12: mult = 4096
+'     CASE 13: mult = 8192
+'     CASE 14: mult = 16384
+'     CASE 15: mult = 32768
+'     CASE 16: mult = 65536
+'     CASE ELSE
+'   END SELECT
+'   IF cmd$ = "<<" THEN ' "value" has to be shifted "bits" bit(s) to the left.
+'     ' formula: x = x * 2 ^ y
+'     BitShift = ((value * mult) AND &HFFFF)
+'   ELSEIF cmd$ = ">>" THEN ' "value" has to be shifted "bits" bit(s) to the right.
+'     ' formula: x = x / 2 ^ y
+'     BitShift = value \ mult
+'   END IF
+' END FUNCTION
+
+' ' FUNCTION FRE(value$)
+' '   RETURN 32768
+' ' END FUNCTION

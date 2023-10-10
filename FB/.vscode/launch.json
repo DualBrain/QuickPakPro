@@ -1,0 +1,13 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+      {
+          "name": "F5 Anything: Launch FB Compiler",
+          "type": "f5anything",
+          "request": "launch",
+          "command": "./run.cmd",
+          "terminalIndex": 0,
+          "showTerminal": true
+      }
+  ]
+}
