@@ -1,3 +1,3 @@
 @echo off
-fbc64 testing.bas pro.bas
+fbc32 testing.bas pro.bas
 testing.exe

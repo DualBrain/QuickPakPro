@@ -269,3 +269,27 @@ IF false Then
   Next
 
 End If
+
+' SortT/SortT2
+If true Then
+
+  Type NameNumber
+    Name As String * 20
+    Number As Short
+  End Type
+
+  Dim a(3) As NameNumber
+  a(0).Name = "b"
+  a(1).Name = "A"
+  a(2).Name = "c"
+  a(3).Name = "B"
+
+  Dim ndx(3) As Short
+
+  ISortT @a(0), @ndx(0), 4, 0, Len(NameNumber), 0, 20
+
+  For index As Short = 0 To 3
+    PRINT index; " "; ndx(index); " "; a(ndx(index)).Name
+  NEXT
+
+End If

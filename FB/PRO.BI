@@ -1,3 +1,5 @@
+Dim Shared Pro_Internal_DosError As Short
+
 ' ****************************************
 ' Chapter 2 - Array Routines 
 ' ****************************************
@@ -70,8 +72,14 @@ DECLARE SUB SortT2(address As Any Ptr, numEls As Short, direction As Short, elSi
 ' Chapter 3 - DOS Services
 ' ****************************************
 
-
-
+DECLARE SUB CDir(newDir As String)
+DECLARE SUB ClipFile(fileName As String, newLength As Long)
+DECLARE SUB DiskInfo(drive As String, Byref bytes As Short, Byref sectors As Short, Byref freeClusters As Long, Byref totalClusters As Long)
+DECLARE FUNCTION DiskRoom(drive As String) As Long
+DECLARE FUNCTION DiskSize(drive As String) As Long
+DECLARE FUNCTION DosError AS Short
+DECLARE FUNCTION DOSVer As Short
+DECLARE FUNCTION ErrorMsg(errorNumber As Short) As String
 
 ' ****************************************
 

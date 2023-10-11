@@ -1,12 +1,10 @@
-' *********** PRO.BAS - added value functionality for QB64
+' *********** PRO.BAS - added value functionality for FreeBASIC
 '                       inspired by QuickPak Professional 
 '                       for QB45/PDS71/VBDOS10
 
 ' Copyright (c) 2023 Cory Smith
 
 #INCLUDE ONCE "PRO.BI"
-
-REM DEFINT A-Z
 
 ' ****************************************
 ' Chapter 2 - Array Routines 
@@ -647,14 +645,104 @@ SUB ISortStr2(array As String Ptr, ndx As Short Ptr, numEls As Short, direction 
 
 END SUB
 
+' ISortT will sort all or part of a fixed-length string or TYPE array 
+' into either ascending or descending order by manipulating elements 
+' in a parallel integer index array.
 SUB ISortT(array As Any Ptr, ndx As Short Ptr, numEls As Short, direction As Short, elSize As Short, memberOffset As Short, memberSize As Short)
-  ERROR 73 ' Feature Unavailable
+
+  InitInt(ndx, 0, numEls)
+
+  Dim bytes(memberSize - 1) As Byte
+  Dim swapBuffer(elSize - 1) As Byte
+
+  ' Sort the ndx using array values
+  Var c = 0
+  Var min = 0
+  Var max = numEls - 1
+  For i As Short = 1 To max
+    For j As Short = min To max - i 
+
+      c += 1
+
+      Var lIndex = *ndx + j
+      Var rIndex = *ndx + (j + 1)
+      
+      Var lBlockStart = lIndex * elSize
+      Var rBlockStart = rIndex * elSize
+
+      Var lMemberStart = lBlockStart + memberOffset
+      Var rMemberStart = rBlockStart + memberOffset
+
+      Var offset = array + lMemberStart
+      Var dest = @bytes(0)
+      Var startAddress = FB_MEMCOPY (Byval dest, Byval offset, memberSize)
+
+      Var lMember = ""
+      FOR ch As Short = 0 TO elSize - 1
+        lMember = lMember + CHR(bytes(ch))
+      NEXT
+
+      offset = array + rMemberStart
+      startAddress = FB_MEMCOPY (Byval dest, Byval offset, memberSize)
+
+      Var rMember = ""
+      FOR ch As Short = 0 TO elSize - 1
+        rMember = rMember + CHR(bytes(ch))
+      NEXT
+
+      'PRINT "["; LTRIM$(STR$(c)) ;"]("; LTRIM$(STR$(lIndex)); ","; LTRIM$(STR$(lBlockStart)); "):"; ASC(lMember); ",'"; lMember; "'<("; LTRIM$(STR$(rIndex)); ","; LTRIM$(STR$(rBlockStart)); "):"; ASC(rMember); "'"; rMember; "'?";
+
+      IF direction THEN ' descending
+        PRINT ""; LTRIM$(STR$(c)) ;":"; LTRIM$(STR$(lIndex)); ","; LTRIM$(STR$(rIndex)); "?";
+        IF lMember < rMember THEN 
+          SWAP *(ndx + j), *(ndx + (j + 1)) 
+          PRINT "Y";
+        ELSE
+          PRINT "N";
+        END IF
+      ELSE ' ascending
+        PRINT " "; LTRIM$(STR$(c)) ;":"; LTRIM$(STR$(lIndex)); ","; LTRIM$(STR$(rIndex)); "?";
+        IF lMember > rMember THEN 
+          SWAP *(ndx + j), *(ndx + (j + 1))
+          PRINT "Y";
+        ELSE
+          PRINT "N";
+        END IF
+      END IF
+
+      ' the following code needs to move to SortT/SortT2
+      ' ' descending / ascending and is lower/higher accordingly...
+      ' IF (direction AndAlso lMember < rMember) OrElse (Not direction Andalso lMember > rMember) THEN 
+      '   ' SWAP
+      '   dest = @swapBuffer(0)
+      '   offset = array + lBlockStart
+      '   startAddress = FB_MEMCOPY (Byval dest, Byval offset, elSize)
+      '   dest = array + lBlockStart
+      '   offset = array + rBlockStart
+      '   startAddress = FB_MEMCOPY (Byval dest, Byval offset, elSize)
+      '   dest = array + rBlockStart
+      '   offset = @swapBuffer(0)
+      '   startAddress = FB_MEMCOPY (Byval dest, Byval offset, elSize)
+      ' END IF
+    
+    NEXT
+
+  NEXT
+
+  PRINT
+
 END SUB
 
+' ISortT2 will sort (ignoring case) all or part of a fixed-length 
+' string or TYPE array into either ascending or descending order 
+' by manipulating elements in a parallel integer index array.
 SUB ISortT2(array As Any Ptr, ndx As Short Ptr, numEls As Short, direction As Short, elSize As Short, memberOffset As Short, memberSize As Short)
   ERROR 73 ' Feature Unavailable
 END SUB
 
+' KeySort is a recursive subprogram that will sort a user-defined 
+' TYPE array based on any number of keys. Each key may be sorted 
+' independently, ascending or descending. 
 SUB KeySort(array As Any Ptr, elSize As Short, numEls As Short, table As Any Ptr, numKeys As Short)
   ERROR 73 ' Feature Unavailable
 END SUB
@@ -779,6 +867,10 @@ FUNCTION MinC(address As Double Ptr, numEls As Short) As Double
   MinC = current
 END FUNCTION
 
+' Search will scan all or part of a numeric array to find the first 
+' element that matches a given value. Searching may be performed 
+' either forward or backward through the array, and the match may 
+' be specified to be exact, less or equal, or greater or equal. 
 SUB Search(address As Any Ptr, numEls As Short, match As Any Ptr, Byref found As Short, direction As Short, matchCode As Short, varType As Short)
 
   ERROR 73 ' Feature Unavailable
@@ -811,10 +903,16 @@ SUB Search(address As Any Ptr, numEls As Short, match As Any Ptr, Byref found As
 
 END SUB
 
+' SearchT will search an entire TYPE array for a match on any single 
+' TYPE member. When used with the string portion of a TYPE, SearchT 
+' honors capitalization.
 SUB SearchT(address As Any Ptr, numEls As Short, match As Any Ptr, Byref found As Short, direction As Short, code As Short, structSize As Short, memberOff As Short, memberSize As Short)
   ERROR 73 ' Feature Unavailable
 END SUB
 
+' SearchT2 will search an entire TYPE array for a match on any single 
+' TYPE member. When used with the string portion of a TYPE, SearchT2 
+' ignores capitalization.
 SUB SearchT2(address As Any Ptr, numEls As Short, match As Any Ptr, Byref found As Short, direction As Short, code As Short, structSize As Short, memberOff As Short, memberSize As Short)
   ERROR 73 ' Feature Unavailable
 END SUB
@@ -834,6 +932,7 @@ SUB SetBit(Byref array As String, element As Short, value As Short)
   MID$(array, entry, 1) = CHR$(byt)
 END SUB
 
+' Quick Sorts for ordering all or a portion of a numeric array. 
 SUB SortD(address As Double Ptr, numEls As Short, direction As Short)
 
   ERROR 73 ' Feature Unavailable
@@ -857,18 +956,22 @@ SUB SortD(address As Double Ptr, numEls As Short, direction As Short)
 
 END SUB
 
+' Quick Sorts for ordering all or a portion of a numeric array. 
 SUB SortI(address As Short Ptr, numEls As Short, direction As Short)
   ERROR 73 ' Feature Unavailable
 END SUB
 
+' Quick Sorts for ordering all or a portion of a numeric array. 
 SUB SortL(address As Long Ptr, numEls As Short, direction As Short)
   ERROR 73 ' Feature Unavailable
 END SUB
 
+' Quick Sorts for ordering all or a portion of a numeric array. 
 SUB SortS(address As Single Ptr, numEls As Short, direction As Short)
   ERROR 73 ' Feature Unavailable
 END SUB
 
+' Quick Sorts for ordering all or a portion of a numeric array. 
 SUB SortC(address As Double Ptr, numEls As Short, direction As Short)
   ERROR 73 ' Feature Unavailable
 END SUB
@@ -982,10 +1085,14 @@ SUB SortStr2(address As String Ptr, numEls As Short, direction As Short)
 
 END SUB
 
+' SortT will sort all or part of a fixed-length string or TYPE array 
+' into either ascending or descending order.
 SUB SortT(address As Any Ptr, numEls As Short, direction As Short, elSize As Short, memberOffset As Short, memberSize As Short)
   ERROR 73 ' Feature Unavailable
 END SUB
 
+' SortT2 will sort all or part of a fixed-length string or TYPE array 
+' into either ascending or descending order without regard to capitalization. 
 SUB SortT2(address As Any Ptr, numEls As Short, direction As Short, elSize As Short, memberOffset As Short, memberSize As Short)
   ERROR 73 ' Feature Unavailable
 END SUB
@@ -994,138 +1101,141 @@ END SUB
 ' Chapter 3 - DOS Services
 ' ****************************************
 
-' SUB CDir(NewDir$)
-'   CHDIR NewDir$
-' END SUB
+SUB CDir(newDir As String)
+  CHDIR newDir
+END SUB
 
-' SUB ClipFile(FileName$, NewLength&)
-'   ERROR 73 ' Feature Unavailable
-' END SUB
+SUB ClipFile(fileName As String, newLength As Long)
+  ERROR 73 ' Feature Unavailable
+END SUB
 
-' ' Disklnfo calls on DOS to examine a disk, and reports its 
-' ' sector and cluster makeup. 
-' SUB DiskInfo(drive$, bytes, sectors, freeClusters&, totalClusters&)
-'  ' Drive$ contains the letter of the drive to examine, and Bytes% returns 
-'  ' how many bytes each sector holds. Sectors% contains the number of sectors 
-'  ' in each disk cluster, FreeClusters& tells how many of them are available, 
-'  ' and Total Clusters& indicates the total disk capacity. 
-'   path$ = drive$
-'   IF INSTR(_OS$, "[WINDOWS]") THEN
-'     IF LEN(path$) = 1 THEN path$ = path$ + ":\"
-'     result& = GetDiskFreeSpace(_OFFSET(path$), _OFFSET(bytes), _OFFSET(sectors), _OFFSET(freeClusters&), _OFFSET(totalClusters&))
-'     IF result& = 0 THEN ' Failed
-'       bytes = 0
-'       sectors = 0
-'       freeClusters& = 0
-'       totalClusters& = 0
-'       'TODO: Need to set DOSError.
+' Disklnfo calls on DOS to examine a disk, and reports its 
+' sector and cluster makeup. 
+SUB DiskInfo(drive As String, Byref bytes As Short, Byref sectors As Short, Byref freeClusters As Long, Byref totalClusters As Long)
+  ERROR 73 ' Feature Unavailable
+ ' Drive$ contains the letter of the drive to examine, and Bytes% returns 
+ ' how many bytes each sector holds. Sectors% contains the number of sectors 
+ ' in each disk cluster, FreeClusters& tells how many of them are available, 
+ ' and Total Clusters& indicates the total disk capacity. 
+  Var path = drive
+  IF False THEN 'INSTR(_OS$, "[WINDOWS]") THEN
+    IF LEN(path) = 1 THEN path = path + ":\"
+    Var result = 0 'result& = GetDiskFreeSpace(_OFFSET(path$), _OFFSET(bytes), _OFFSET(sectors), _OFFSET(freeClusters&), _OFFSET(totalClusters&))
+    IF result = 0 THEN ' Failed
+      bytes = 0
+      sectors = 0
+      freeClusters = 0
+      totalClusters = 0
+      'TODO: Need to set DOSError.
 
-'       ' A note regarding how to calculate the total free bytes...
-'       ' freeBytes& = sectors * bytes * freeClusters&
+      ' A note regarding how to calculate the total free bytes...
+      ' freeBytes& = sectors * bytes * freeClusters&
 
-'     ELSE 
-'       'NOTE: Appears to not be working due to (guessing)
-'       '      lack of "very large" drive support in GetDiskFreeSpaceA;
-'       '      may have to switch to use GetDiskFreeSpaceExA possibly
-'       '      combined with GetDiskFreeSpaceA???
-'     END IF
-'   ELSE
-'     ERROR 73 ' Feature Unavailable
-'   END IF
-' END SUB
+    ELSE 
+      'NOTE: Appears to not be working due to (guessing)
+      '      lack of "very large" drive support in GetDiskFreeSpaceA;
+      '      may have to switch to use GetDiskFreeSpaceExA possibly
+      '      combined with GetDiskFreeSpaceA???
+    END IF
+  ELSE
+    ERROR 73 ' Feature Unavailable
+  END IF
+END SUB
 
-' ' DiskRoom returns the number of bytes that are 
-' ' currently available on a specified disk drive. 
-' FUNCTION DiskRoom&(Drive$)
-'   ' Drive$ contains either an upper or lower case letter for the disk 
-'   ' drive being examined, or is null to indicate the default drive. Room 
-'   ' is assigned the number of available bytes. 
-'   ERROR 73 ' Feature Unavailable
-' END FUNCTION
+' DiskRoom returns the number of bytes that are 
+' currently available on a specified disk drive. 
+FUNCTION DiskRoom(drive As String) As Long
+  ' Drive$ contains either an upper or lower case letter for the disk 
+  ' drive being examined, or is null to indicate the default drive. Room 
+  ' is assigned the number of available bytes. 
+  ERROR 73 ' Feature Unavailable
+  DiskRoom = -1
+END FUNCTION
 
-' ' DiskSize returns the total capacity in bytes of a specified disk drive. 
-' FUNCTION DiskSize&(Drive$)
-'   ' Drive$ contains an upper or lower case letter for the disk drive 
-'   ' being examined, or is null to indicate the default drive. Size is 
-'   ' assigned the total number of bytes the disk can hold.
-'   ERROR 73 ' Feature Unavailable
-' END FUNCTION
+' DiskSize returns the total capacity in bytes of a specified disk drive. 
+FUNCTION DiskSize(drive As String) As Long
+  ' Drive$ contains an upper or lower case letter for the disk drive 
+  ' being examined, or is null to indicate the default drive. Size is 
+  ' assigned the total number of bytes the disk can hold.
+  ERROR 73 ' Feature Unavailable
+  DiskSize = -1
+END FUNCTION
 
-' ' DOSError reports if an error occurred during the last call to a 
-' ' QuickPak Professional DOS routine.
-' FUNCTION DosError
-'   ' DOSError% returns O if there was no error, or -1 if there was. 
-'   DosError = Pro_Internal_DosError
-' END FUNCTION
+' DOSError reports if an error occurred during the last call to a 
+' QuickPak Professional DOS routine.
+FUNCTION DosError AS Short
+  ' DOSError% returns O if there was no error, or -1 if there was. 
+  DosError = Pro_Internal_DosError
+END FUNCTION
 
-' ' DOSVer returns the version of DOS that is presently 
-' ' running on the host PC. 
-' FUNCTION DOSVer
-'   DOSVer = 611 ' Fixed as DOS 6.11
-' END FUNCTION
+' DOSVer returns the version of DOS that is presently 
+' running on the host PC. 
+FUNCTION DOSVer As Short
+  DOSVer = 611 ' Fixed as DOS 6.11
+END FUNCTION
 
-' ' ErrorMsg returns an appropriate message given 
-' ' any of the BASIC error numbers for a DOS service. 
-' FUNCTION ErrorMsg$(ErrorNumber)
-'   SELECT CASE ErrorNumber
-'     CASE 1: ErrorMsg$ = "NEXT without FOR"
-'     CASE 2: ErrorMsg$ = "Syntax error"
-'     CASE 3: ErrorMsg$ = "RETURN without GOSUB"
-'     CASE 4: ErrorMsg$ = "Out of DATA"
-'     CASE 5: ErrorMsg$ = "Illegal function call"
-'     CASE 6: ErrorMsg$ = "Overflow"
-'     CASE 7: ErrorMsg$ = "Out of memory"
-'     CASE 8: ErrorMsg$ = "Label not defined"
-'     CASE 9: ErrorMsg$ = "Subscript out of range"
-'     CASE 10: ErrorMsg$ = "Duplicate definition"
-'     CASE 11: ErrorMsg$ = "Division by zero"
-'     CASE 12: ErrorMsg$ = "Illegal in direct mode"
-'     CASE 13: ErrorMsg$ = "Type mismatch"
-'     CASE 14: ErrorMsg$ = "Out of string space"
-'     CASE 16: ErrorMsg$ = "String formula too complex"
-'     CASE 17: ErrorMsg$ = "Cannot continue"
-'     CASE 18: ErrorMsg$ = "Function not defined"
-'     CASE 19: ErrorMsg$ = "No RESUME"
-'     CASE 20: ErrorMsg$ = "RESUME without error"
-'     CASE 24: ErrorMsg$ = "Device timeout"
-'     CASE 25: ErrorMsg$ = "Device fault"
-'     CASE 26: ErrorMsg$ = "FOR without NEXT"
-'     CASE 27: ErrorMsg$ = "Out of paper"
-'     CASE 29: ErrorMsg$ = "WHILE without WEND"
-'     CASE 30: ErrorMsg$ = "WEND without WHILE"
-'     CASE 33: ErrorMsg$ = "Duplicate label"
-'     CASE 35: ErrorMsg$ = "Subprogram not defined"
-'     CASE 37: ErrorMsg$ = "Argument-count mismatch"
-'     CASE 38: ErrorMsg$ = "Array not defined"
-'     CASE 40: ErrorMsg$ = "Variable required"
-'     CASE 50: ErrorMsg$ = "FIELD overflow"
-'     CASE 51: ErrorMsg$ = "Internal error"
-'     CASE 52: ErrorMsg$ = "Bad file name or number"
-'     CASE 53: ErrorMsg$ = "File not found"
-'     CASE 54: ErrorMsg$ = "Bad file mode"
-'     CASE 55: ErrorMsg$ = "File already open"
-'     CASE 56: ErrorMsg$ = "FIELD statement active"
-'     CASE 57: ErrorMsg$ = "Device I/O error"
-'     CASE 58: ErrorMsg$ = "File already exists"
-'     CASE 59: ErrorMsg$ = "Bad record length"
-'     CASE 61: ErrorMsg$ = "Disk full"
-'     CASE 62: ErrorMsg$ = "Input past end of file"
-'     CASE 63: ErrorMsg$ = "Bad record number"
-'     CASE 64: ErrorMsg$ = "Bad file name"
-'     CASE 67: ErrorMsg$ = "Too many files"
-'     CASE 68: ErrorMsg$ = "Device unavailable"
-'     CASE 69: ErrorMsg$ = "Communication-buffer overflow"
-'     CASE 70: ErrorMsg$ = "Permission denied"
-'     CASE 71: ErrorMsg$ = "Disk not ready"
-'     CASE 72: ErrorMsg$ = "Disk-media error"
-'     CASE 73: ErrorMsg$ = "Feature unavailable"
-'     CASE 74: ErrorMsg$ = "Rename across disks"
-'     CASE 75: ErrorMsg$ = "Path/File access error"
-'     CASE 76: ErrorMsg$ = "Path not found"
-'     CASE ELSE
-'        ErrorMsg$ = "Unknown"
-'   END SELECT
-' END FUNCTION
+' ErrorMsg returns an appropriate message given 
+' any of the BASIC error numbers for a DOS service. 
+FUNCTION ErrorMsg(errorNumber As Short) As String
+  SELECT CASE errorNumber
+    CASE 1: ErrorMsg = "NEXT without FOR"
+    CASE 2: ErrorMsg = "Syntax error"
+    CASE 3: ErrorMsg = "RETURN without GOSUB"
+    CASE 4: ErrorMsg = "Out of DATA"
+    CASE 5: ErrorMsg = "Illegal function call"
+    CASE 6: ErrorMsg = "Overflow"
+    CASE 7: ErrorMsg = "Out of memory"
+    CASE 8: ErrorMsg = "Label not defined"
+    CASE 9: ErrorMsg = "Subscript out of range"
+    CASE 10: ErrorMsg = "Duplicate definition"
+    CASE 11: ErrorMsg = "Division by zero"
+    CASE 12: ErrorMsg = "Illegal in direct mode"
+    CASE 13: ErrorMsg = "Type mismatch"
+    CASE 14: ErrorMsg = "Out of string space"
+    CASE 16: ErrorMsg = "String formula too complex"
+    CASE 17: ErrorMsg = "Cannot continue"
+    CASE 18: ErrorMsg = "Function not defined"
+    CASE 19: ErrorMsg = "No RESUME"
+    CASE 20: ErrorMsg = "RESUME without error"
+    CASE 24: ErrorMsg = "Device timeout"
+    CASE 25: ErrorMsg = "Device fault"
+    CASE 26: ErrorMsg = "FOR without NEXT"
+    CASE 27: ErrorMsg = "Out of paper"
+    CASE 29: ErrorMsg = "WHILE without WEND"
+    CASE 30: ErrorMsg = "WEND without WHILE"
+    CASE 33: ErrorMsg = "Duplicate label"
+    CASE 35: ErrorMsg = "Subprogram not defined"
+    CASE 37: ErrorMsg = "Argument-count mismatch"
+    CASE 38: ErrorMsg = "Array not defined"
+    CASE 40: ErrorMsg = "Variable required"
+    CASE 50: ErrorMsg = "FIELD overflow"
+    CASE 51: ErrorMsg = "Internal error"
+    CASE 52: ErrorMsg = "Bad file name or number"
+    CASE 53: ErrorMsg = "File not found"
+    CASE 54: ErrorMsg = "Bad file mode"
+    CASE 55: ErrorMsg = "File already open"
+    CASE 56: ErrorMsg = "FIELD statement active"
+    CASE 57: ErrorMsg = "Device I/O error"
+    CASE 58: ErrorMsg = "File already exists"
+    CASE 59: ErrorMsg = "Bad record length"
+    CASE 61: ErrorMsg = "Disk full"
+    CASE 62: ErrorMsg = "Input past end of file"
+    CASE 63: ErrorMsg = "Bad record number"
+    CASE 64: ErrorMsg = "Bad file name"
+    CASE 67: ErrorMsg = "Too many files"
+    CASE 68: ErrorMsg = "Device unavailable"
+    CASE 69: ErrorMsg = "Communication-buffer overflow"
+    CASE 70: ErrorMsg = "Permission denied"
+    CASE 71: ErrorMsg = "Disk not ready"
+    CASE 72: ErrorMsg = "Disk-media error"
+    CASE 73: ErrorMsg = "Feature unavailable"
+    CASE 74: ErrorMsg = "Rename across disks"
+    CASE 75: ErrorMsg = "Path/File access error"
+    CASE 76: ErrorMsg = "Path not found"
+    CASE ELSE
+       ErrorMsg = "Unknown"
+  END SELECT
+END FUNCTION
 
 ' ' ExeName returns the full name of the currently executing program, 
 ' ' including the drive, path, and file name. ExeName requires DOS 
