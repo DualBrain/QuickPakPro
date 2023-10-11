@@ -43,7 +43,7 @@ DECLARE SUB ISortStr(array As String Ptr, ndx As Short Ptr, numEls As Short, dir
 DECLARE SUB ISortStr2(array As String Ptr, ndx As Short Ptr, numEls As Short, direction As Short)
 DECLARE SUB ISortT(array As Any Ptr, ndx As Short Ptr, numEls As Short, direction As Short, elSize As Short, memberOffset As Short, memberSize As Short)
 DECLARE SUB ISortT2(array As Any Ptr, ndx As Short Ptr, numEls As Short, direction As Short, elSize As Short, memberOffset As Short, memberSize As Short)
-DECLARE SUB KeySort(array As Any Ptr, elSize As Short, numEls As Short, table As Any Ptr, numKeys As Short)
+DECLARE SUB KeySort(array As Any Ptr, elSize As Short, numEls As Short, table() As Short, numKeys As Short)
 DECLARE FUNCTION MaxD(address As Double Ptr, numEls As Short) As Double
 DECLARE FUNCTION MaxI(address As Short Ptr, numEls As Short) As Short
 DECLARE FUNCTION MaxL(address As Long Ptr, numEls As Short) As Long
@@ -54,9 +54,20 @@ DECLARE FUNCTION MinI(address As Short Ptr, numEls As Short) As Short
 DECLARE FUNCTION MinL(address As Long Ptr, numEls As Short) As Long
 DECLARE FUNCTION MinS(address As Single Ptr, numEls As Short) As Single
 DECLARE FUNCTION MinC(address As Double Ptr, numEls As Short) As Double
-DECLARE SUB Search (address As Double Ptr, numEls As Short, match As Double, Byref found As Short, direction As Short, matchCode As Short, varType As Short)
-DECLARE SUB SearchT(address As Any Ptr, numEls As Short, match As Any Ptr, Byref found As Short, direction As Short, code As Short, structSize As Short, memberOff As Short, memberSize As Short)
-DECLARE SUB SearchT2(address As Any Ptr, numEls As Short, match As Any Ptr, Byref found As Short, direction As Short, code As Short, structSize As Short, memberOff As Short, memberSize As Short)
+DECLARE SUB Search OVERLOAD (address As Double Ptr, numEls As Short, match As Double, Byref found As Short, direction As Short, matchCode As Short, varType As Short = -4)
+DECLARE SUB Search OVERLOAD (address As Short Ptr, numEls As Short, match As Short, Byref found As Short, direction As Short, matchCode As Short, varType As Short = -1)
+DECLARE SUB Search OVERLOAD (address As Long Ptr, numEls As Short, match As Long, Byref found As Short, direction As Short, matchCode As Short, varType As Short = -2)
+DECLARE SUB Search OVERLOAD (address As Single Ptr, numEls As Short, match As Single, Byref found As Short, direction As Short, matchCode As Short, varType As Short = -3)
+DECLARE SUB SearchT OVERLOAD (address As Any Ptr, numEls As Short, match As String, Byref found As Short, direction As Short, code As Short, structSize As Short, memberOff As Short, memberSize As Short)
+DECLARE SUB SearchT OVERLOAD (address As Any Ptr, numEls As Short, match As Double, Byref found As Short, direction As Short, code As Short, structSize As Short, memberOff As Short, memberSize As Short)
+DECLARE SUB SearchT OVERLOAD (address As Any Ptr, numEls As Short, match As Short, Byref found As Short, direction As Short, code As Short, structSize As Short, memberOff As Short, memberSize As Short)
+DECLARE SUB SearchT OVERLOAD (address As Any Ptr, numEls As Short, match As Long, Byref found As Short, direction As Short, code As Short, structSize As Short, memberOff As Short, memberSize As Short)
+DECLARE SUB SearchT OVERLOAD (address As Any Ptr, numEls As Short, match As Single, Byref found As Short, direction As Short, code As Short, structSize As Short, memberOff As Short, memberSize As Short)
+DECLARE SUB SearchT2 OVERLOAD (address As Any Ptr, numEls As Short, match As String, Byref found As Short, direction As Short, code As Short, structSize As Short, memberOff As Short, memberSize As Short)
+DECLARE SUB SearchT2 OVERLOAD (address As Any Ptr, numEls As Short, match As Double, Byref found As Short, direction As Short, code As Short, structSize As Short, memberOff As Short, memberSize As Short)
+DECLARE SUB SearchT2 OVERLOAD (address As Any Ptr, numEls As Short, match As Short, Byref found As Short, direction As Short, code As Short, structSize As Short, memberOff As Short, memberSize As Short)
+DECLARE SUB SearchT2 OVERLOAD (address As Any Ptr, numEls As Short, match As Long, Byref found As Short, direction As Short, code As Short, structSize As Short, memberOff As Short, memberSize As Short)
+DECLARE SUB SearchT2 OVERLOAD (address As Any Ptr, numEls As Short, match As Single, Byref found As Short, direction As Short, code As Short, structSize As Short, memberOff As Short, memberSize As Short)
 DECLARE SUB SetBit(Byref array As String, element As Short, value As Short)
 DECLARE SUB SortD(address As Double Ptr, numEls As Short, direction As Short)
 DECLARE SUB SortI(address As Short Ptr, numEls As Short, direction As Short)

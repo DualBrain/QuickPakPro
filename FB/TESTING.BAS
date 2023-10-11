@@ -275,6 +275,27 @@ IF false Then
 
 End If
 
+' KeySort
+If false then
+
+  Dim a(3) As NameNumber
+  a(0).Name = "b": a(0).Number = 3
+  a(1).Name = "D": a(1).Number = 1
+  a(2).Name = "c": a(2).Number = 4
+  a(3).Name = "B": a(3).Number = 1
+
+  Dim key(1 TO 2, 1 TO 3) As Short
+  key(1, 1) = 22: key(1, 2) = -1: key(1, 3) = 0 ' Number
+  key(2, 1) = 0: key(2, 2) = 20: key(2, 3) = 0 ' Name
+
+  KeySort @a(0), Len(NameNumber), UBOUND(a) + 1, key(), 2
+
+  For i As Short = 0 To UBOUND(a)
+    PRINT a(i).Name; a(i).Number
+  Next
+
+End If
+
 ' SortT/SortT2
 If false Then
 
@@ -351,7 +372,7 @@ If false Then
 End If
 
 ' Search
-If true Then
+If false Then
 
   Dim a(5) As Double
   a(0) = 1.2
@@ -362,7 +383,7 @@ If true Then
   a(5) = 100.0
 
   Dim found As Short
-  Search @a(0), UBOUND(a) + 1, .1, found, -1, 0, 0
+  Search @a(0), UBOUND(a) + 1, .1, found, -1, 0
   PRINT found
 
   'SortD @a(0), Ubound(a) + 1, 1
@@ -370,5 +391,22 @@ If true Then
   ' For i As Short = 0 To UBound(a)
   '   PRINT a(i)
   ' Next
+
+End If
+
+' SearchT/2
+If true Then
+
+  Dim a(3) As NameNumber
+  a(0).Name = "Name 3": a(0).Number = 3
+  a(1).Name = "Name 1": a(0).Number = 1
+  a(2).Name = "Name 2": a(0).Number = 2
+  a(3).Name = "Name 6": a(0).Number = 6
+
+  Dim found As Short = 0
+  SearchT2 @a(0), UBOUND(a) + 1, "name 2", found, 0, 0, Len(NameNumber), 0, 20
+  'Dim s As Short = 2
+  'SearchT @a(0), UBOUND(a) + 1, s, found, 0, 0, Len(NameNumber), 22, -1
+  PRINT found
 
 End If

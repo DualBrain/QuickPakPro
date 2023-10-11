@@ -777,8 +777,42 @@ END SUB
 ' KeySort is a recursive subprogram that will sort a user-defined 
 ' TYPE array based on any number of keys. Each key may be sorted 
 ' independently, ascending or descending. 
-SUB KeySort(array As Any Ptr, elSize As Short, numEls As Short, table As Any Ptr, numKeys As Short)
-  ERROR 73 ' Feature Unavailable
+SUB KeySort(array As Any Ptr, elSize As Short, numEls As Short, table() As Short, numKeys As Short)
+
+  ' for the first pass, simply call SortT using the values of key 1.
+
+  Var memberOffset = table(1, 1)
+  Var memberSize = table(1, 2)
+  Var memberDir = table(1, 3)
+
+  Select Case memberSize
+    Case -1: memberSize = 2
+    Case -2: memberSize = 4
+    Case -3: memberSize = 4
+    Case -4: memberSize = 8
+    Case -5: memberSize = 8
+    Case Else
+  End Select
+
+  SortT array, numEls, memberDir, elSize, memberOffset, memberSize
+
+  If numKeys > 1 Then
+
+    'TODO: after the first pass is sorted, scan through the result to 
+    ' determine if there are any duplicates for the first key.
+    ' if there are, determine how many duplicates and pass the
+    ' results of this to a further SortT using the values of key 2.
+    ' repeat as necessary for each further key (level).
+
+    For key As Short = 2 To numKeys
+      Var memberOffset = table(key, 1)
+      Var memberSize = table(key, 2)
+      Var memberDir = table(key, 3)
+      'PRINT memberOffset; ","; memberSize; ","; memberDir
+    Next
+
+  End If
+
 END SUB
 
 ' MaxD will return the largest value in a 
@@ -905,9 +939,108 @@ END FUNCTION
 ' element that matches a given value. Searching may be performed 
 ' either forward or backward through the array, and the match may 
 ' be specified to be exact, less or equal, or greater or equal. 
-SUB Search(array As Double Ptr, numEls As Short, match As Double, Byref found As Short, direction As Short, matchCode As Short, varType As Short)
+SUB Search(array As Double Ptr, numEls As Short, match As Double, Byref found As Short, direction As Short, matchCode As Short, varType As Short = -4)
 
-  'TODO: Need to implement all of the valid varType numeric types.
+  If Not (varType = -4 OrElse varType = -5) Then found = 0: EXIT SUB
+
+  Var c = 0
+
+  Var min = 0
+  Var max = numEls - 1
+  Dim inc As Short
+  IF NOT direction THEN inc = 1 ELSE inc = -1: SWAP min, max
+
+  SELECT CASE matchCode
+    CASE 0 ' find an exact match only
+      FOR i As Short = min TO max STEP inc
+        c += 1
+        IF *(array + i) = match THEN found = c: EXIT SUB
+      NEXT
+    CASE 1 ' match if the element is greater or equal
+      FOR i As Short = min TO max STEP inc
+        c += 1
+        IF *(array + i) >= match THEN found = c: EXIT SUB
+      NEXT
+    CASE -1 ' match if the element is less or equal 
+      FOR i As Short = min TO max STEP inc
+        c += 1
+        IF *(array + i) <= match THEN found = c: EXIT SUB
+      NEXT
+    CASE ELSE
+      found = 0
+  END SELECT
+
+END SUB
+
+SUB Search(array As Short Ptr, numEls As Short, match As Short, Byref found As Short, direction As Short, matchCode As Short, varType As Short = -1)
+
+  If Not varType = -1 Then found = 0: EXIT SUB
+
+  Var c = 0
+
+  Var min = 0
+  Var max = numEls - 1
+  Dim inc As Short
+  IF NOT direction THEN inc = 1 ELSE inc = -1: SWAP min, max
+
+  SELECT CASE matchCode
+    CASE 0 ' find an exact match only
+      FOR i As Short = min TO max STEP inc
+        c += 1
+        IF *(array + i) = match THEN found = c: EXIT SUB
+      NEXT
+    CASE 1 ' match if the element is greater or equal
+      FOR i As Short = min TO max STEP inc
+        c += 1
+        IF *(array + i) >= match THEN found = c: EXIT SUB
+      NEXT
+    CASE -1 ' match if the element is less or equal 
+      FOR i As Short = min TO max STEP inc
+        c += 1
+        IF *(array + i) <= match THEN found = c: EXIT SUB
+      NEXT
+    CASE ELSE
+      found = 0
+  END SELECT
+
+END SUB
+
+SUB Search(array As Long Ptr, numEls As Short, match As Long, Byref found As Short, direction As Short, matchCode As Short, varType As Short = -2)
+
+  If Not varType = -2 Then found = 0: EXIT SUB
+
+  Var c = 0
+
+  Var min = 0
+  Var max = numEls - 1
+  Dim inc As Short
+  IF NOT direction THEN inc = 1 ELSE inc = -1: SWAP min, max
+
+  SELECT CASE matchCode
+    CASE 0 ' find an exact match only
+      FOR i As Short = min TO max STEP inc
+        c += 1
+        IF *(array + i) = match THEN found = c: EXIT SUB
+      NEXT
+    CASE 1 ' match if the element is greater or equal
+      FOR i As Short = min TO max STEP inc
+        c += 1
+        IF *(array + i) >= match THEN found = c: EXIT SUB
+      NEXT
+    CASE -1 ' match if the element is less or equal 
+      FOR i As Short = min TO max STEP inc
+        c += 1
+        IF *(array + i) <= match THEN found = c: EXIT SUB
+      NEXT
+    CASE ELSE
+      found = 0
+  END SELECT
+
+END SUB
+
+SUB Search(array As Single Ptr, numEls As Short, match As Single, Byref found As Short, direction As Short, matchCode As Short, varType As Short = -3)
+
+  If Not varType = -3 Then found = 0: EXIT SUB
 
   Var c = 0
 
@@ -941,15 +1074,408 @@ END SUB
 ' SearchT will search an entire TYPE array for a match on any single 
 ' TYPE member. When used with the string portion of a TYPE, SearchT 
 ' honors capitalization.
-SUB SearchT(address As Any Ptr, numEls As Short, match As Any Ptr, Byref found As Short, direction As Short, code As Short, structSize As Short, memberOff As Short, memberSize As Short)
-  ERROR 73 ' Feature Unavailable
+SUB SearchT(array As Any Ptr, numEls As Short, match As String, Byref found As Short, direction As Short, code As Short, elSize As Short, memberOffset As Short, memberSize As Short)
+
+  Var ignoreCase = 0
+  IF found = -1 Then ignoreCase = 1: found = 0
+
+  If ignoreCase Then match = UCASE$(match)
+
+  IF NOT memberSize > 0 THEN found = 0: EXIT SUB
+
+  Dim bytes(memberSize - 1) AS Byte
+
+  Var c = 0
+
+  Var min = 0
+  Var max = numEls - 1
+  Dim inc As Short
+  IF NOT direction THEN inc = 1 ELSE inc = -1: SWAP min, max
+
+  SELECT CASE code
+    CASE 0 ' find an exact match only
+
+      FOR i As Short = min TO max STEP inc
+
+        Var lBlockStart = i * elSize
+        Var rBlockStart = i * elSize
+
+        Var lMemberStart = lBlockStart + memberOffset
+        Var rMemberStart = rBlockStart + memberOffset
+
+        Var offset = array + lMemberStart
+        Var dest = @bytes(0)
+        Var startAddress = FB_MEMCOPY (Byval dest, Byval offset, memberSize)
+        Var value = RTRIM$(Bytes2String(bytes()))
+        If ignoreCase Then value = UCASE$(value)
+
+        c += 1
+        IF value = match THEN found = c: EXIT SUB
+
+      NEXT
+    CASE 1 ' match if the element is greater or equal
+      FOR i As Short = min TO max STEP inc
+
+        Var lBlockStart = i * elSize
+        Var rBlockStart = i * elSize
+
+        Var lMemberStart = lBlockStart + memberOffset
+        Var rMemberStart = rBlockStart + memberOffset
+
+        Var offset = array + lMemberStart
+        Var dest = @bytes(0)
+        Var startAddress = FB_MEMCOPY (Byval dest, Byval offset, memberSize)
+        Var value = RTRIM$(Bytes2String(bytes()))
+        If ignoreCase Then value = UCASE$(value)
+
+        c += 1
+        IF value >= match THEN found = c: EXIT SUB
+
+      NEXT
+    CASE -1 ' match if the element is less or equal 
+      FOR i As Short = min TO max STEP inc
+
+        Var lBlockStart = i * elSize
+        Var rBlockStart = i * elSize
+
+        Var lMemberStart = lBlockStart + memberOffset
+        Var rMemberStart = rBlockStart + memberOffset
+
+        Var offset = array + lMemberStart
+        Var dest = @bytes(0)
+        Var startAddress = FB_MEMCOPY (Byval dest, Byval offset, memberSize)
+        Var value = RTRIM$(Bytes2String(bytes()))
+        If ignoreCase Then value = UCASE$(value)
+
+        c += 1
+        IF value <= match THEN found = c: EXIT SUB
+
+      NEXT
+    CASE ELSE
+      found = 0
+  END SELECT
+
+END SUB
+
+' SearchT will search an entire TYPE array for a match on any single 
+' TYPE member. When used with the string portion of a TYPE, SearchT 
+' honors capitalization.
+SUB SearchT(array As Any Ptr, numEls As Short, match As Double, Byref found As Double, direction As Short, code As Short, elSize As Short, memberOffset As Short, memberSize As Short)
+
+  IF NOT (memberSize = -4 OrElse memberSize = -5) THEN found = 0: EXIT SUB
+
+  memberSize = 8
+  Dim value AS Double
+
+  Var c = 0
+
+  Var min = 0
+  Var max = numEls - 1
+  Dim inc As Short
+  IF NOT direction THEN inc = 1 ELSE inc = -1: SWAP min, max
+
+  SELECT CASE code
+    CASE 0 ' find an exact match only
+      FOR i As Short = min TO max STEP inc
+
+        Var lBlockStart = i * elSize
+        Var rBlockStart = i * elSize
+
+        Var lMemberStart = lBlockStart + memberOffset
+        Var rMemberStart = rBlockStart + memberOffset
+
+        Var offset = array + lMemberStart
+        Var dest = @value
+        Var startAddress = FB_MEMCOPY (Byval dest, Byval offset, memberSize)
+
+        c += 1
+        IF value = match THEN found = c: EXIT SUB
+
+      NEXT
+    CASE 1 ' match if the element is greater or equal
+      FOR i As Short = min TO max STEP inc
+
+        Var lBlockStart = i * elSize
+        Var rBlockStart = i * elSize
+
+        Var lMemberStart = lBlockStart + memberOffset
+        Var rMemberStart = rBlockStart + memberOffset
+
+        Var offset = array + lMemberStart
+        Var dest = @value
+        Var startAddress = FB_MEMCOPY (Byval dest, Byval offset, memberSize)
+
+        c += 1
+        IF value >= match THEN found = c: EXIT SUB
+
+      NEXT
+    CASE -1 ' match if the element is less or equal 
+      FOR i As Short = min TO max STEP inc
+
+        Var lBlockStart = i * elSize
+        Var rBlockStart = i * elSize
+
+        Var lMemberStart = lBlockStart + memberOffset
+        Var rMemberStart = rBlockStart + memberOffset
+
+        Var offset = array + lMemberStart
+        Var dest = @value
+        Var startAddress = FB_MEMCOPY (Byval dest, Byval offset, memberSize)
+
+        c += 1
+        IF value <= match THEN found = c: EXIT SUB
+
+      NEXT
+    CASE ELSE
+      found = 0
+  END SELECT
+
+END SUB
+
+' SearchT will search an entire TYPE array for a match on any single 
+' TYPE member. When used with the string portion of a TYPE, SearchT 
+' honors capitalization.
+SUB SearchT(array As Any Ptr, numEls As Short, match As Short, Byref found As Short, direction As Short, code As Short, elSize As Short, memberOffset As Short, memberSize As Short)
+
+  IF NOT (memberSize = -1) THEN found = 0: EXIT SUB
+
+  memberSize = 2
+  Dim value AS Short
+
+  Var c = 0
+
+  Var min = 0
+  Var max = numEls - 1
+  Dim inc As Short
+  IF NOT direction THEN inc = 1 ELSE inc = -1: SWAP min, max
+
+  SELECT CASE code
+    CASE 0 ' find an exact match only
+      FOR i As Short = min TO max STEP inc
+
+        Var blockStart = i * elSize
+        Var memberStart = blockStart + memberOffset
+
+        Var offset = (array + memberStart)
+        Var dest = @value
+        Var startAddress = FB_MEMCOPY (Byval dest, Byval offset, memberSize)
+
+        c += 1
+        IF value = match THEN found = c: EXIT SUB
+
+      NEXT
+    CASE 1 ' match if the element is greater or equal
+      FOR i As Short = min TO max STEP inc
+
+        Var lBlockStart = i * elSize
+        Var rBlockStart = i * elSize
+
+        Var lMemberStart = lBlockStart + memberOffset
+        Var rMemberStart = rBlockStart + memberOffset
+
+        Var offset = array + lMemberStart
+        Var dest = @value
+        Var startAddress = FB_MEMCOPY (Byval dest, Byval offset, memberSize)
+
+        c += 1
+        IF value >= match THEN found = c: EXIT SUB
+
+      NEXT
+    CASE -1 ' match if the element is less or equal 
+      FOR i As Short = min TO max STEP inc
+
+        Var lBlockStart = i * elSize
+        Var rBlockStart = i * elSize
+
+        Var lMemberStart = lBlockStart + memberOffset
+        Var rMemberStart = rBlockStart + memberOffset
+
+        Var offset = array + lMemberStart
+        Var dest = @value
+        Var startAddress = FB_MEMCOPY (Byval dest, Byval offset, memberSize)
+
+        c += 1
+        IF value <= match THEN found = c: EXIT SUB
+
+      NEXT
+    CASE ELSE
+      found = 0
+  END SELECT
+
+END SUB
+
+' SearchT will search an entire TYPE array for a match on any single 
+' TYPE member. When used with the string portion of a TYPE, SearchT 
+' honors capitalization.
+SUB SearchT(array As Any Ptr, numEls As Short, match As Long, Byref found As Short, direction As Short, code As Short, elSize As Short, memberOffset As Short, memberSize As Short)
+
+  IF NOT memberSize = -2 THEN found = 0: EXIT SUB
+
+  memberSize = 4
+  Dim value AS Long
+
+  Var c = 0
+
+  Var min = 0
+  Var max = numEls - 1
+  Dim inc As Short
+  IF NOT direction THEN inc = 1 ELSE inc = -1: SWAP min, max
+
+  SELECT CASE code
+    CASE 0 ' find an exact match only
+      FOR i As Short = min TO max STEP inc
+
+        Var lBlockStart = i * elSize
+        Var rBlockStart = i * elSize
+
+        Var lMemberStart = lBlockStart + memberOffset
+        Var rMemberStart = rBlockStart + memberOffset
+
+        Var offset = array + lMemberStart
+        Var dest = @value
+        Var startAddress = FB_MEMCOPY (Byval dest, Byval offset, memberSize)
+
+        c += 1
+        IF value = match THEN found = c: EXIT SUB
+
+      NEXT
+    CASE 1 ' match if the element is greater or equal
+      FOR i As Short = min TO max STEP inc
+
+        Var lBlockStart = i * elSize
+        Var rBlockStart = i * elSize
+
+        Var lMemberStart = lBlockStart + memberOffset
+        Var rMemberStart = rBlockStart + memberOffset
+
+        Var offset = array + lMemberStart
+        Var dest = @value
+        Var startAddress = FB_MEMCOPY (Byval dest, Byval offset, memberSize)
+
+        c += 1
+        IF value >= match THEN found = c: EXIT SUB
+
+      NEXT
+    CASE -1 ' match if the element is less or equal 
+      FOR i As Short = min TO max STEP inc
+
+        Var lBlockStart = i * elSize
+        Var rBlockStart = i * elSize
+
+        Var lMemberStart = lBlockStart + memberOffset
+        Var rMemberStart = rBlockStart + memberOffset
+
+        Var offset = array + lMemberStart
+        Var dest = @value
+        Var startAddress = FB_MEMCOPY (Byval dest, Byval offset, memberSize)
+
+        c += 1
+        IF value <= match THEN found = c: EXIT SUB
+
+      NEXT
+    CASE ELSE
+      found = 0
+  END SELECT
+
+END SUB
+
+' SearchT will search an entire TYPE array for a match on any single 
+' TYPE member. When used with the string portion of a TYPE, SearchT 
+' honors capitalization.
+SUB SearchT(array As Any Ptr, numEls As Short, match As Single, Byref found As Short, direction As Short, code As Short, elSize As Short, memberOffset As Short, memberSize As Short)
+
+  IF NOT memberSize = -3 THEN found = 0: EXIT SUB
+
+  memberSize = 4
+  Dim value AS Single
+
+  Var c = 0
+
+  Var min = 0
+  Var max = numEls - 1
+  Dim inc As Short
+  IF NOT direction THEN inc = 1 ELSE inc = -1: SWAP min, max
+
+  SELECT CASE code
+    CASE 0 ' find an exact match only
+      FOR i As Short = min TO max STEP inc
+
+        Var lBlockStart = i * elSize
+        Var rBlockStart = i * elSize
+
+        Var lMemberStart = lBlockStart + memberOffset
+        Var rMemberStart = rBlockStart + memberOffset
+
+        Var offset = array + lMemberStart
+        Var dest = @value
+        Var startAddress = FB_MEMCOPY (Byval dest, Byval offset, memberSize)
+
+        c += 1
+        IF value = match THEN found = c: EXIT SUB
+
+      NEXT
+    CASE 1 ' match if the element is greater or equal
+      FOR i As Short = min TO max STEP inc
+
+        Var lBlockStart = i * elSize
+        Var rBlockStart = i * elSize
+
+        Var lMemberStart = lBlockStart + memberOffset
+        Var rMemberStart = rBlockStart + memberOffset
+
+        Var offset = array + lMemberStart
+        Var dest = @value
+        Var startAddress = FB_MEMCOPY (Byval dest, Byval offset, memberSize)
+
+        c += 1
+        IF value >= match THEN found = c: EXIT SUB
+
+      NEXT
+    CASE -1 ' match if the element is less or equal 
+      FOR i As Short = min TO max STEP inc
+
+        Var lBlockStart = i * elSize
+        Var rBlockStart = i * elSize
+
+        Var lMemberStart = lBlockStart + memberOffset
+        Var rMemberStart = rBlockStart + memberOffset
+
+        Var offset = array + lMemberStart
+        Var dest = @value
+        Var startAddress = FB_MEMCOPY (Byval dest, Byval offset, memberSize)
+
+        c += 1
+        IF value <= match THEN found = c: EXIT SUB
+
+      NEXT
+    CASE ELSE
+      found = 0
+  END SELECT
+
 END SUB
 
 ' SearchT2 will search an entire TYPE array for a match on any single 
 ' TYPE member. When used with the string portion of a TYPE, SearchT2 
 ' ignores capitalization.
-SUB SearchT2(address As Any Ptr, numEls As Short, match As Any Ptr, Byref found As Short, direction As Short, code As Short, structSize As Short, memberOff As Short, memberSize As Short)
-  ERROR 73 ' Feature Unavailable
+SUB SearchT2(address As Any Ptr, numEls As Short, match As String, Byref found As Short, direction As Short, code As Short, elSize As Short, memberOffset As Short, memberSize As Short)
+  found = -1
+  SearchT address, numEls, match, found, direction, code, elSize, memberOffset, memberSize
+END SUB
+
+' SUB SearchT2(address As Any Ptr, numEls As Short, match As Double, Byref found As Short, direction As Short, code As Short, elSize As Short, memberOffset As Short, memberSize As Short)
+'   SearchT address, numEls, match, found, direction, code, elSize, memberOffset, memberSize
+' END SUB
+
+SUB SearchT2(address As Any Ptr, numEls As Short, match As Short, Byref found As Short, direction As Short, code As Short, elSize As Short, memberOffset As Short, memberSize As Short)
+  SearchT address, numEls, match, found, direction, code, elSize, memberOffset, memberSize
+END SUB
+
+SUB SearchT2(address As Any Ptr, numEls As Short, match As Long, Byref found As Short, direction As Short, code As Short, elSize As Short, memberOffset As Short, memberSize As Short)
+  SearchT address, numEls, match, found, direction, code, elSize, memberOffset, memberSize
+END SUB
+
+SUB SearchT2(address As Any Ptr, numEls As Short, match As Single, Byref found As Short, direction As Short, code As Short, elSize As Short, memberOffset As Short, memberSize As Short)
+  SearchT address, numEls, match, found, direction, code, elSize, memberOffset, memberSize
 END SUB
 
 ' SetBit will set an element in a QuickPak Professional Bit array to 
