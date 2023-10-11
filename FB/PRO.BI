@@ -54,7 +54,7 @@ DECLARE FUNCTION MinI(address As Short Ptr, numEls As Short) As Short
 DECLARE FUNCTION MinL(address As Long Ptr, numEls As Short) As Long
 DECLARE FUNCTION MinS(address As Single Ptr, numEls As Short) As Single
 DECLARE FUNCTION MinC(address As Double Ptr, numEls As Short) As Double
-DECLARE SUB Search(address As Any Ptr, numEls As Short, match As Any Ptr, Byref found As Short, direction As Short, matchCode As Short, varType As Short)
+DECLARE SUB Search (address As Double Ptr, numEls As Short, match As Double, Byref found As Short, direction As Short, matchCode As Short, varType As Short)
 DECLARE SUB SearchT(address As Any Ptr, numEls As Short, match As Any Ptr, Byref found As Short, direction As Short, code As Short, structSize As Short, memberOff As Short, memberSize As Short)
 DECLARE SUB SearchT2(address As Any Ptr, numEls As Short, match As Any Ptr, Byref found As Short, direction As Short, code As Short, structSize As Short, memberOff As Short, memberSize As Short)
 DECLARE SUB SetBit(Byref array As String, element As Short, value As Short)

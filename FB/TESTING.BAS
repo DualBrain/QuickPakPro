@@ -7,6 +7,11 @@ Type Thing
   B As Short
 End Type
 
+Type NameNumber
+  Name As String * 20
+  Number As Short
+End Type
+
 ' AddInt
 IF False Then
   Dim a(100) As Short
@@ -271,12 +276,7 @@ IF false Then
 End If
 
 ' SortT/SortT2
-If true Then
-
-  Type NameNumber
-    Name As String * 20
-    Number As Short
-  End Type
+If false Then
 
   Dim a(3) As NameNumber
   a(0).Name = "b"
@@ -285,11 +285,90 @@ If true Then
   a(3).Name = "B"
 
   Dim ndx(3) As Short
+  InitInt(@ndx(0), 0, UBOUND(ndx) + 1)
 
-  ISortT @a(0), @ndx(0), 4, 0, Len(NameNumber), 0, 20
+  ISortT2 @a(0), @ndx(0), 4, 0, Len(NameNumber), 0, 20
 
   For index As Short = 0 To 3
-    PRINT index; " "; ndx(index); " "; a(ndx(index)).Name
+    PRINT a(ndx(index)).Name
   NEXT
+
+End If
+
+' SortD
+If false Then
+
+  Dim a(5) As Double
+  a(0) = 1.2
+  a(1) = 0.5
+  a(2) = 35.0
+  a(3) = 42.0
+  a(4) = 0.1
+  a(5) = 100.0
+
+  SortD @a(0), Ubound(a) + 1, 1
+
+  For i As Short = 0 To UBound(a)
+    PRINT a(i)
+  Next
+
+End If
+
+' SortStr/SortStr2
+If false Then
+
+  Dim a(5) As String
+  a(0) = "Zbx3"
+  a(1) = "d35x"
+  a(2) = "bbb"
+  a(3) = "1200"
+  a(4) = "Bax3"
+  a(5) = "1000"
+
+  SortStr2 @a(0), UBOUND(a) + 1, 0
+
+  For i As Short = 0 To UBOUND(a)
+    PRINT a(i)
+  Next
+
+End If
+
+' SortT/SortT2
+If false Then
+
+  Dim a(3) As NameNumber
+  a(0).Name = "b"
+  a(1).Name = "A"
+  a(2).Name = "c"
+  a(3).Name = "B"
+
+  SortT2 @a(0), UBOUND(a) + 1, 1, Len(NameNumber), 0, 20
+
+  For i As Short = 0 To UBOUND(a)
+    PRINT a(i).Name
+  Next
+
+End If
+
+' Search
+If true Then
+
+  Dim a(5) As Double
+  a(0) = 1.2
+  a(1) = 0.5
+  a(2) = 35.0
+  a(3) = 42.0
+  a(4) = 0.1
+  a(5) = 100.0
+
+  Dim found As Short
+  Search @a(0), UBOUND(a) + 1, .1, found, -1, 0, 0
+  PRINT found
+
+  'SortD @a(0), Ubound(a) + 1, 1
+
+  ' For i As Short = 0 To UBound(a)
+  '   PRINT a(i)
+  ' Next
 
 End If

@@ -645,6 +645,16 @@ SUB ISortStr2(array As String Ptr, ndx As Short Ptr, numEls As Short, direction 
 
 END SUB
 
+FUNCTION Bytes2String(buffer() As Byte) As String
+
+  Var result = ""
+  FOR ch As Short = 0 TO UBOUND(buffer)
+    result += CHR$(buffer(ch))
+  NEXT
+  Bytes2String = result
+
+END FUNCTION
+
 ' ISortT will sort all or part of a fixed-length string or TYPE array 
 ' into either ascending or descending order by manipulating elements 
 ' in a parallel integer index array.
@@ -656,16 +666,13 @@ SUB ISortT(array As Any Ptr, ndx As Short Ptr, numEls As Short, direction As Sho
   Dim swapBuffer(elSize - 1) As Byte
 
   ' Sort the ndx using array values
-  Var c = 0
   Var min = 0
   Var max = numEls - 1
   For i As Short = 1 To max
     For j As Short = min To max - i 
-
-      c += 1
-
-      Var lIndex = *ndx + j
-      Var rIndex = *ndx + (j + 1)
+      
+      Var lIndex = *(ndx + j)
+      Var rIndex = *(ndx + (j + 1))
       
       Var lBlockStart = lIndex * elSize
       Var rBlockStart = rIndex * elSize
@@ -677,36 +684,20 @@ SUB ISortT(array As Any Ptr, ndx As Short Ptr, numEls As Short, direction As Sho
       Var dest = @bytes(0)
       Var startAddress = FB_MEMCOPY (Byval dest, Byval offset, memberSize)
 
-      Var lMember = ""
-      FOR ch As Short = 0 TO elSize - 1
-        lMember = lMember + CHR(bytes(ch))
-      NEXT
+      Var lMember = Bytes2String(bytes())
 
       offset = array + rMemberStart
       startAddress = FB_MEMCOPY (Byval dest, Byval offset, memberSize)
 
-      Var rMember = ""
-      FOR ch As Short = 0 TO elSize - 1
-        rMember = rMember + CHR(bytes(ch))
-      NEXT
-
-      'PRINT "["; LTRIM$(STR$(c)) ;"]("; LTRIM$(STR$(lIndex)); ","; LTRIM$(STR$(lBlockStart)); "):"; ASC(lMember); ",'"; lMember; "'<("; LTRIM$(STR$(rIndex)); ","; LTRIM$(STR$(rBlockStart)); "):"; ASC(rMember); "'"; rMember; "'?";
+      Var rMember = Bytes2String(bytes())
 
       IF direction THEN ' descending
-        PRINT ""; LTRIM$(STR$(c)) ;":"; LTRIM$(STR$(lIndex)); ","; LTRIM$(STR$(rIndex)); "?";
         IF lMember < rMember THEN 
           SWAP *(ndx + j), *(ndx + (j + 1)) 
-          PRINT "Y";
-        ELSE
-          PRINT "N";
         END IF
       ELSE ' ascending
-        PRINT " "; LTRIM$(STR$(c)) ;":"; LTRIM$(STR$(lIndex)); ","; LTRIM$(STR$(rIndex)); "?";
         IF lMember > rMember THEN 
           SWAP *(ndx + j), *(ndx + (j + 1))
-          PRINT "Y";
-        ELSE
-          PRINT "N";
         END IF
       END IF
 
@@ -729,15 +720,58 @@ SUB ISortT(array As Any Ptr, ndx As Short Ptr, numEls As Short, direction As Sho
 
   NEXT
 
-  PRINT
-
 END SUB
 
 ' ISortT2 will sort (ignoring case) all or part of a fixed-length 
 ' string or TYPE array into either ascending or descending order 
 ' by manipulating elements in a parallel integer index array.
 SUB ISortT2(array As Any Ptr, ndx As Short Ptr, numEls As Short, direction As Short, elSize As Short, memberOffset As Short, memberSize As Short)
-  ERROR 73 ' Feature Unavailable
+
+  InitInt(ndx, 0, numEls)
+
+  Dim bytes(memberSize - 1) As Byte
+  Dim swapBuffer(elSize - 1) As Byte
+
+  ' Sort the ndx using array values
+  Var min = 0
+  Var max = numEls - 1
+  For i As Short = 1 To max
+    For j As Short = min To max - i 
+      
+      Var lIndex = *(ndx + j)
+      Var rIndex = *(ndx + (j + 1))
+      
+      Var lBlockStart = lIndex * elSize
+      Var rBlockStart = rIndex * elSize
+
+      Var lMemberStart = lBlockStart + memberOffset
+      Var rMemberStart = rBlockStart + memberOffset
+
+      Var offset = array + lMemberStart
+      Var dest = @bytes(0)
+      Var startAddress = FB_MEMCOPY (Byval dest, Byval offset, memberSize)
+
+      Var lMember = Bytes2String(bytes())
+
+      offset = array + rMemberStart
+      startAddress = FB_MEMCOPY (Byval dest, Byval offset, memberSize)
+
+      Var rMember = Bytes2String(bytes())
+
+      IF direction THEN ' descending
+        IF UCASE$(lMember) < UCASE$(rMember) THEN 
+          SWAP *(ndx + j), *(ndx + (j + 1)) 
+        END IF
+      ELSE ' ascending
+        IF UCASE$(lMember) > UCASE$(rMember) THEN 
+          SWAP *(ndx + j), *(ndx + (j + 1))
+        END IF
+      END IF
+    
+    NEXT
+
+  NEXT
+
 END SUB
 
 ' KeySort is a recursive subprogram that will sort a user-defined 
@@ -871,35 +905,36 @@ END FUNCTION
 ' element that matches a given value. Searching may be performed 
 ' either forward or backward through the array, and the match may 
 ' be specified to be exact, less or equal, or greater or equal. 
-SUB Search(address As Any Ptr, numEls As Short, match As Any Ptr, Byref found As Short, direction As Short, matchCode As Short, varType As Short)
+SUB Search(array As Double Ptr, numEls As Short, match As Double, Byref found As Short, direction As Short, matchCode As Short, varType As Short)
 
-  ERROR 73 ' Feature Unavailable
+  'TODO: Need to implement all of the valid varType numeric types.
 
-'   c = 0
+  Var c = 0
 
-'   min = start
-'   max = start + numEls - 1
-'   IF NOT direction THEN inc = 1 ELSE inc = -1: SWAP min, max
+  Var min = 0
+  Var max = numEls - 1
+  Dim inc As Short
+  IF NOT direction THEN inc = 1 ELSE inc = -1: SWAP min, max
 
-'   SELECT CASE matchCode
-'     CASE 0 ' find an exact match only
-'       FOR i = min TO max STEP inc
-'         c = c + 1
-'         IF array(i) = match THEN found = c: EXIT SUB
-'       NEXT
-'     CASE 1 ' match if the element is greater or equal
-'       FOR i = min TO max STEP inc
-'         c = c + 1
-'         IF array(i) => match THEN found = c: EXIT SUB
-'       NEXT
-'     CASE -1 ' match if the element is less or equal 
-'       FOR i = min TO max STEP inc
-'         c = c + 1
-'         IF array(i) =< match THEN found = c: EXIT SUB
-'       NEXT
-'     CASE ELSE
-'       found = 0
-'   END SELECT
+  SELECT CASE matchCode
+    CASE 0 ' find an exact match only
+      FOR i As Short = min TO max STEP inc
+        c += 1
+        IF *(array + i) = match THEN found = c: EXIT SUB
+      NEXT
+    CASE 1 ' match if the element is greater or equal
+      FOR i As Short = min TO max STEP inc
+        c += 1
+        IF *(array + i) >= match THEN found = c: EXIT SUB
+      NEXT
+    CASE -1 ' match if the element is less or equal 
+      FOR i As Short = min TO max STEP inc
+        c += 1
+        IF *(array + i) <= match THEN found = c: EXIT SUB
+      NEXT
+    CASE ELSE
+      found = 0
+  END SELECT
 
 END SUB
 
@@ -933,168 +968,333 @@ SUB SetBit(Byref array As String, element As Short, value As Short)
 END SUB
 
 ' Quick Sorts for ordering all or a portion of a numeric array. 
-SUB SortD(address As Double Ptr, numEls As Short, direction As Short)
+SUB SortD(array As Double Ptr, numEls As Short, direction As Short)
 
-  ERROR 73 ' Feature Unavailable
+  Var min = 0
+  Var max = numEls - 1
 
-'   min = start
-'   max = start + numEls - 1
-
-'   FOR i = min TO max
-'     FOR j = min TO max - i 
-'       IF dir THEN ' descending
-'         IF array#(j) < array#(j + 1) THEN 
-'           SWAP array#(j), array#(j + 1) 
-'         END IF
-'       ELSE ' ascending
-'         IF array#(j) > array#(j + 1) THEN 
-'           SWAP array#(j), array#(j + 1) 
-'         END IF
-'       END IF
-'     NEXT
-'   NEXT
+  FOR i As Short = 1 TO max
+    FOR j As Short = min TO max - i 
+      IF direction THEN ' descending
+        IF *(array + j) < *(array + (j + 1)) THEN 
+          SWAP *(array + j), *(array + (j + 1))
+        END IF
+      ELSE ' ascending
+        IF *(array + j) > *(array + (j + 1)) THEN 
+          SWAP *(array + j), *(array + (j + 1))
+        END IF
+      END IF
+    NEXT
+  NEXT
 
 END SUB
 
 ' Quick Sorts for ordering all or a portion of a numeric array. 
-SUB SortI(address As Short Ptr, numEls As Short, direction As Short)
-  ERROR 73 ' Feature Unavailable
+SUB SortI(array As Short Ptr, numEls As Short, direction As Short)
+
+  Var min = 0
+  Var max = numEls - 1
+
+  FOR i As Short = 1 TO max
+    FOR j As Short = min TO max - i 
+      IF direction THEN ' descending
+        IF *(array + j) < *(array + (j + 1)) THEN 
+          SWAP *(array + j), *(array + (j + 1))
+        END IF
+      ELSE ' ascending
+        IF *(array + j) > *(array + (j + 1)) THEN 
+          SWAP *(array + j), *(array + (j + 1))
+        END IF
+      END IF
+    NEXT
+  NEXT
+
 END SUB
 
 ' Quick Sorts for ordering all or a portion of a numeric array. 
-SUB SortL(address As Long Ptr, numEls As Short, direction As Short)
-  ERROR 73 ' Feature Unavailable
+SUB SortL(array As Long Ptr, numEls As Short, direction As Short)
+
+  Var min = 0
+  Var max = numEls - 1
+
+  FOR i As Short = 1 TO max
+    FOR j As Short = min TO max - i 
+      IF direction THEN ' descending
+        IF *(array + j) < *(array + (j + 1)) THEN 
+          SWAP *(array + j), *(array + (j + 1))
+        END IF
+      ELSE ' ascending
+        IF *(array + j) > *(array + (j + 1)) THEN 
+          SWAP *(array + j), *(array + (j + 1))
+        END IF
+      END IF
+    NEXT
+  NEXT
+
 END SUB
 
 ' Quick Sorts for ordering all or a portion of a numeric array. 
-SUB SortS(address As Single Ptr, numEls As Short, direction As Short)
-  ERROR 73 ' Feature Unavailable
+SUB SortS(array As Single Ptr, numEls As Short, direction As Short)
+
+  Var min = 0
+  Var max = numEls - 1
+
+  FOR i As Short = 1 TO max
+    FOR j As Short = min TO max - i 
+      IF direction THEN ' descending
+        IF *(array + j) < *(array + (j + 1)) THEN 
+          SWAP *(array + j), *(array + (j + 1))
+        END IF
+      ELSE ' ascending
+        IF *(array + j) > *(array + (j + 1)) THEN 
+          SWAP *(array + j), *(array + (j + 1))
+        END IF
+      END IF
+    NEXT
+  NEXT
+
 END SUB
 
 ' Quick Sorts for ordering all or a portion of a numeric array. 
-SUB SortC(address As Double Ptr, numEls As Short, direction As Short)
-  ERROR 73 ' Feature Unavailable
+SUB SortC(array As Double Ptr, numEls As Short, direction As Short)
+
+  Var min = 0
+  Var max = numEls - 1
+
+  FOR i As Short = 1 TO max
+    FOR j As Short = min TO max - i 
+      IF direction THEN ' descending
+        IF *(array + j) < *(array + (j + 1)) THEN 
+          SWAP *(array + j), *(array + (j + 1))
+        END IF
+      ELSE ' ascending
+        IF *(array + j) > *(array + (j + 1)) THEN 
+          SWAP *(array + j), *(array + (j + 1))
+        END IF
+      END IF
+    NEXT
+  NEXT
+
 END SUB
 
 ' SortStr will sort (case-sensitive) all or just a portion of a conventional (not 
 ' fixed-length) string array into either ascending or descending order. 
-SUB SortStr(address As String Ptr, numEls As Short, direction As Short)
-  ERROR 73 ' Feature Unavailable
-'   ' start is the first element to be included in the sort, 
-'   ' numEls is the number of elements to consider, and dir 
-'   ' indicates the sort direction. If dir is set to zero, then the sorting 
-'   ' will be forward (ascending). Any other value will cause sorting to 
-'   ' be performed backward (descending). 
+SUB SortStr(array As String Ptr, numEls As Short, direction As Short)
 
-'   REDIM qStack(500)    ' create stack
+  ' start is the first element to be included in the sort, 
+  ' numEls is the number of elements to consider, and dir 
+  ' indicates the sort direction. If dir is set to zero, then the sorting 
+  ' will be forward (ascending). Any other value will cause sorting to 
+  ' be performed backward (descending). 
 
-'   s = 1                ' initialize work variables
-'   f = startElement
-'   max = startElement + numOfElements - 1
-'   l = max
+  REDIM qStack(500) As Short    ' create stack
 
-' L1:
-'   temp$ = array$((l + f) \ 2)         ' seek midpoint
-'   i = f
-'   j = l
+  Var s = 1                ' initialize work variables
+  Var f = 0
+  Var max = numEls - 1
+  Var l = max
 
-' L2:
-'   IF dir = 0 THEN
-'     WHILE array$(i) < temp$: i = i + 1: WEND ' use > for descending
-'     WHILE array$(j) > temp$: j = j - 1: WEND ' use < for descending
-'   ELSE
-'     WHILE array$(i) > temp$: i = i + 1: WEND
-'     WHILE array$(j) < temp$: j = j - 1: WEND
-'   END IF
-'   IF i > j GOTO L3
-'   IF i < j THEN 
-'     'PRINT "swap"
-'     SWAP array$(i), array$(j)
-'   END IF
-'   i = i + 1: j = j - 1
-'   IF i <= j GOTO L2
+L1:
+  Var temp = *(array + ((l + f) \ 2))         ' seek midpoint
+  Var i = f
+  Var j = l
 
-' L3:
-'   IF i < l THEN
-'     'PRINT "push"
-'     qStack(s) = i             ' Push I, L
-'     qStack(s + 1) = l
-'     s = s + 2
-'   END IF
+L2:
+  IF direction = 0 THEN
+    WHILE *(array + i) < temp: i = i + 1: WEND ' use > for descending
+    WHILE *(array + j) > temp: j = j - 1: WEND ' use < for descending
+  ELSE
+    WHILE *(array + i) > temp: i = i + 1: WEND
+    WHILE *(array + j) < temp: j = j - 1: WEND
+  END IF
+  IF i > j GOTO L3
+  IF i < j THEN 
+    SWAP *(array + i), *(array + j)
+  END IF
+  i += 1: j -= 1
+  IF i <= j GOTO L2
 
-'   l = j
-'   IF f < l GOTO L1
-'   IF s = 1 GOTO L4
-'   'PRINT "pop"
-'   s = s - 2                   ' Pop L, F
-'   f = qStack(s)
-'   l = qStack(s + 1)
-'   GOTO L1
+L3:
+  IF i < l THEN
+    qStack(s) = i             ' Push I, L
+    qStack(s + 1) = l
+    s += 2
+  END IF
 
-' L4:
-'   ERASE qStack                ' delete the temporary stack array
+  l = j
+  IF f < l GOTO L1
+  IF s = 1 GOTO L4
+  s -= 2                   ' Pop L, F
+  f = qStack(s)
+  l = qStack(s + 1)
+  GOTO L1
+
+L4:
+  ERASE qStack                ' delete the temporary stack array
 
 END SUB
 
 ' SortStr2 will sort (case-insensitive) all or just a portion of a conventional (not 
 ' fixed-length) string array into either ascending or descending order. 
-SUB SortStr2(address As String Ptr, numEls As Short, direction As Short)
-  ERROR 73 ' Feature Unavailable
+SUB SortStr2(array As String Ptr, numEls As Short, direction As Short)
 
-'   REDIM qStack(500)     ' create stack
+  ' start is the first element to be included in the sort, 
+  ' numEls is the number of elements to consider, and dir 
+  ' indicates the sort direction. If dir is set to zero, then the sorting 
+  ' will be forward (ascending). Any other value will cause sorting to 
+  ' be performed backward (descending). 
 
-'   s = 1                ' initialize work variables
-'   f = startElement
-'   l = startElement + numOfElements - 1
+  REDIM qStack(500) As Short    ' create stack
 
-' L1:
-'   temp$ = UCASE$(array$((l + f) \ 2))         ' seek midpoint
-'   i = f
-'   j = l
+  Var s = 1                ' initialize work variables
+  Var f = 0
+  Var max = numEls - 1
+  Var l = max
 
-' L2:
-'   IF dir = 0 THEN
-'     WHILE UCASE$(array$(i)) < temp$: i = i + 1: WEND    ' use > for descending
-'     WHILE UCASE$(array$(j)) > temp$: j = j - 1: WEND    ' use < for descending
-'   ELSE
-'     WHILE UCASE$(array$(i)) > temp$: i = i + 1: WEND    ' use > for descending
-'     WHILE UCASE$(array$(j)) < temp$: j = j - 1: WEND    ' use < for descending
-'   END IF
-'   IF i > j GOTO L3
-'   IF i < j THEN SWAP array$(i), array$(j)
-'   i = i + 1: j = j - 1
-'   IF i <= j GOTO L2
+L1:
+  Var temp = UCASE$(*(array + ((l + f) \ 2)))         ' seek midpoint
+  Var i = f
+  Var j = l
 
-' L3:
-'   IF i < l THEN
-'     qStack(s) = i             ' Push I, L
-'     qStack(s + 1) = l
-'     s = s + 2
-'   END IF
+L2:
+  IF direction = 0 THEN
+    WHILE UCASE$(*(array + i)) < temp: i = i + 1: WEND ' use > for descending
+    WHILE UCASE$(*(array + j)) > temp: j = j - 1: WEND ' use < for descending
+  ELSE
+    WHILE UCASE$(*(array + i)) > temp: i = i + 1: WEND
+    WHILE UCASE$(*(array + j)) < temp: j = j - 1: WEND
+  END IF
+  IF i > j GOTO L3
+  IF i < j THEN 
+    SWAP *(array + i), *(array + j)
+  END IF
+  i += 1: j -= 1
+  IF i <= j GOTO L2
 
-'   l = j
-'   IF f < l GOTO L1
-'   IF s = 1 GOTO L4
-'   s = s - 2                   ' Pop L, F
-'   f = qStack(s)
-'   l = qStack(s + 1)
-'   GOTO L1
+L3:
+  IF i < l THEN
+    qStack(s) = i             ' Push I, L
+    qStack(s + 1) = l
+    s += 2
+  END IF
 
-' L4:
-'   ERASE qStack                ' delete the temporary stack array
+  l = j
+  IF f < l GOTO L1
+  IF s = 1 GOTO L4
+  s -= 2                   ' Pop L, F
+  f = qStack(s)
+  l = qStack(s + 1)
+  GOTO L1
+
+L4:
+  ERASE qStack                ' delete the temporary stack array
 
 END SUB
 
 ' SortT will sort all or part of a fixed-length string or TYPE array 
 ' into either ascending or descending order.
-SUB SortT(address As Any Ptr, numEls As Short, direction As Short, elSize As Short, memberOffset As Short, memberSize As Short)
-  ERROR 73 ' Feature Unavailable
+SUB SortT(array As Any Ptr, numEls As Short, direction As Short, elSize As Short, memberOffset As Short, memberSize As Short)
+
+  Dim bytes(memberSize - 1) As Byte
+  Dim swapBuffer(elSize - 1) As Byte
+
+  ' Sort the ndx using array values
+  Var min = 0
+  Var max = numEls - 1
+  For i As Short = 1 To max
+    For j As Short = min To max - i 
+      
+      Var lIndex = j
+      Var rIndex = j + 1
+      
+      Var lBlockStart = lIndex * elSize
+      Var rBlockStart = rIndex * elSize
+
+      Var lMemberStart = lBlockStart + memberOffset
+      Var rMemberStart = rBlockStart + memberOffset
+
+      Var offset = array + lMemberStart
+      Var dest = @bytes(0)
+      Var startAddress = FB_MEMCOPY (Byval dest, Byval offset, memberSize)
+
+      Var lMember = Bytes2String(bytes())
+
+      offset = array + rMemberStart
+      startAddress = FB_MEMCOPY (Byval dest, Byval offset, memberSize)
+
+      Var rMember = Bytes2String(bytes())
+
+      ' descending / ascending and is lower/higher accordingly...
+      IF (direction AndAlso lMember < rMember) OrElse (Not direction Andalso lMember > rMember) THEN 
+        ' SWAP
+        dest = @swapBuffer(0)
+        offset = array + lBlockStart
+        startAddress = FB_MEMCOPY (Byval dest, Byval offset, elSize)
+        dest = array + lBlockStart
+        offset = array + rBlockStart
+        startAddress = FB_MEMCOPY (Byval dest, Byval offset, elSize)
+        dest = array + rBlockStart
+        offset = @swapBuffer(0)
+        startAddress = FB_MEMCOPY (Byval dest, Byval offset, elSize)
+      END IF
+    
+    NEXT
+
+  NEXT
+
 END SUB
 
 ' SortT2 will sort all or part of a fixed-length string or TYPE array 
 ' into either ascending or descending order without regard to capitalization. 
-SUB SortT2(address As Any Ptr, numEls As Short, direction As Short, elSize As Short, memberOffset As Short, memberSize As Short)
-  ERROR 73 ' Feature Unavailable
+SUB SortT2(array As Any Ptr, numEls As Short, direction As Short, elSize As Short, memberOffset As Short, memberSize As Short)
+
+  Dim bytes(memberSize - 1) As Byte
+  Dim swapBuffer(elSize - 1) As Byte
+
+  Var min = 0
+  Var max = numEls - 1
+  For i As Short = 1 To max
+    For j As Short = min To max - i 
+      
+      Var lIndex = j
+      Var rIndex = j + 1
+      
+      Var lBlockStart = lIndex * elSize
+      Var rBlockStart = rIndex * elSize
+
+      Var lMemberStart = lBlockStart + memberOffset
+      Var rMemberStart = rBlockStart + memberOffset
+
+      Var offset = array + lMemberStart
+      Var dest = @bytes(0)
+      Var startAddress = FB_MEMCOPY (Byval dest, Byval offset, memberSize)
+
+      Var lMember = UCase$(Bytes2String(bytes()))
+
+      offset = array + rMemberStart
+      startAddress = FB_MEMCOPY (Byval dest, Byval offset, memberSize)
+
+      Var rMember = UCase$(Bytes2String(bytes()))
+
+      ' descending / ascending and is lower/higher accordingly...
+      IF (direction AndAlso lMember < rMember) OrElse _
+         (Not direction AndAlso lMember > rMember) THEN 
+        ' SWAP
+        dest = @swapBuffer(0)
+        offset = array + lBlockStart
+        startAddress = FB_MEMCOPY (Byval dest, Byval offset, elSize)
+        dest = array + lBlockStart
+        offset = array + rBlockStart
+        startAddress = FB_MEMCOPY (Byval dest, Byval offset, elSize)
+        dest = array + rBlockStart
+        offset = @swapBuffer(0)
+        startAddress = FB_MEMCOPY (Byval dest, Byval offset, elSize)
+      END IF
+    
+    NEXT
+
+  NEXT
+
 END SUB
 
 ' ****************************************
