@@ -1,3 +1,3 @@
 @echo off
-fbc32 testing.bas pro.bas
-testing.exe
+fbc32 isortstr.bas pro.bas
+isortstr.exe

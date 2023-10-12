@@ -4357,20 +4357,20 @@ END SUB
 ' '   WHILE INKEY$ = "": WEND ' Wait for a key.
 ' ' END SUB
 
-' FUNCTION WaitKey
-'   WHILE INKEY$ <> "": WEND ' Clear any pending key strokes.
-'   DO ' Wait for a key.
-'     a$ = INKEY$
-'     IF a$ <> "" THEN
-'       IF LEN(a$) = 1 THEN
-'         WaitKey = ASC(a$)
-'       ELSE
-'         WaitKey = -ASC(RIGHT$(a$, 1))
-'       END IF
-'       EXIT DO
-'     END IF
-'   LOOP
-' END SUB
+FUNCTION WaitKey AS SHORT
+  WHILE INKEY$ <> "": WEND ' Clear any pending key strokes.
+  DO ' Wait for a key.
+    VAR a = INKEY$
+    IF a <> "" THEN
+      IF LEN(a) = 1 THEN
+        WaitKey = ASC(a)
+      ELSE
+        WaitKey = -ASC(RIGHT$(a, 1))
+      END IF
+      EXIT DO
+    END IF
+  LOOP
+END FUNCTION
 
 ' SUB WaitKeyS
 '   WHILE INKEY$ <> "": WEND ' Clear any pending key strokes.

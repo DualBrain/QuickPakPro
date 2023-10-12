@@ -108,6 +108,8 @@ DECLARE FUNCTION QInstr2(startPosition As Short, sourceValue As String, searchVa
 
 DECLARE SUB AMenu (address As String Ptr, start As Short, count As Short, scanCode As Short, fileColr As Short, hiLiteColr As Short, rows As Short, columns As Short, spacing As Short, row As Short, column As Short)
 
+DECLARE FUNCTION WaitKey AS SHORT
+
 ' CONST BAR_LINE = 1                        ' Line number for the menu bar
 
 '                                           ' Alt Key translation table

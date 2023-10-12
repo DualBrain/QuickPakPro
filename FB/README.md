@@ -43,7 +43,7 @@ This is a work-in-progress project.
 |HCOPY.BAS   |         |   |HUGE.BAS    |         |   |IMINMAX.BAS |         |
 |INCOUNT.BAS |         |   |INSERT.BAS  |         |   |INSERTT.BAS |         |
 |INSTALL.BAS |         |   |INSTAT.BAS  |         |   |INSTRTBL.BAS|         |
-|ISORTI.BAS  |         |   |ISORTI2.BAS |         |   |ISORTSTR.BAS|         |
+|ISORTI.BAS  |         |   |ISORTI2.BAS |         |   |ISORTSTR.BAS| EXE     |
 |ISORTT.BAS  |         |   |KEYDOWN.BAS |         |   |KEYS.BAS    |         |
 |KEYSORT.BAS |         |   |KEYSTAT.BAS |         |   |LINCOUNT.BAS|         |
 |LOADEXEC.BAS|         |   |LOCKFILE.BAS|         |   |LONGSTR.BAS |         |
@@ -79,3 +79,11 @@ This is a work-in-progress project.
 |YESNOB.BAS  |         |   |            |         |   |            |         |
 
 Files marked with *INCLUDE* are meant to be included, while files marked as *EXE* are to be compiled as an executable (stand-alone example). The replacement of the PRO.LIB functionality is implemented in the *PRO.BAS* and *PRO.BI* source files. (Files marked with *N/A* are either hardware specific and/or simply "not possible" with the current release of FB. If you disagree, please discuss.)
+
+## More
+
+Placing a few links here for me to explore things a bit further as the project continues to grow:
+
+- [EXTERN...END EXTERN](https://www.freebasic.net/wiki/KeyPgExternBlock)
+- [Creating FB bindings for C libraries](https://www.freebasic.net/wiki/DevBindingCreation)
+- [QB64.com C-Libraries](https://qb64.com/wiki/C-Libraries)
