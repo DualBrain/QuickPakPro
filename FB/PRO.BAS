@@ -6,6 +6,10 @@
 
 #INCLUDE ONCE "PRO.BI"
 
+#INCLUDE ONCE "file.bi"
+
+'Declare Sub AltSleep Lib "kernel32" Alias "Sleep" (ByVal dwMilliseconds As Long)
+
 ' ****************************************
 ' Chapter 2 - Array Routines 
 ' ****************************************
@@ -668,7 +672,17 @@ END FUNCTION
 ' in a parallel integer index array.
 SUB ISortT(array As Any Ptr, ndx As Short Ptr, numEls As Short, direction As Short, elSize As Short, memberOffset As Short, memberSize As Short)
 
-  InitInt(ndx, 0, numEls)
+  'NOTE: The InitInt appears to be, based on examples, handled outside of this routine.
+  'InitInt(ndx, 0, numEls)
+
+  SELECT CASE memberSize
+    CASE -1: memberSize = 2
+    CASE -2: memberSize = 4
+    CASE -3: memberSize = 4
+    CASE -4: memberSize = 8
+    CASE -5: memberSize = 8
+    CASE ELSE
+  END SELECT
 
   Dim bytes(memberSize - 1) As Byte
   Dim swapBuffer(elSize - 1) As Byte
@@ -677,6 +691,7 @@ SUB ISortT(array As Any Ptr, ndx As Short Ptr, numEls As Short, direction As Sho
   Var min = 0
   Var max = numEls - 1
   For i As Short = 1 To max
+
     For j As Short = min To max - i 
       
       Var lIndex = *(ndx + j)
@@ -709,21 +724,6 @@ SUB ISortT(array As Any Ptr, ndx As Short Ptr, numEls As Short, direction As Sho
         END IF
       END IF
 
-      ' the following code needs to move to SortT/SortT2
-      ' ' descending / ascending and is lower/higher accordingly...
-      ' IF (direction AndAlso lMember < rMember) OrElse (Not direction Andalso lMember > rMember) THEN 
-      '   ' SWAP
-      '   dest = @swapBuffer(0)
-      '   offset = array + lBlockStart
-      '   startAddress = FB_MEMCOPY (Byval dest, Byval offset, elSize)
-      '   dest = array + lBlockStart
-      '   offset = array + rBlockStart
-      '   startAddress = FB_MEMCOPY (Byval dest, Byval offset, elSize)
-      '   dest = array + rBlockStart
-      '   offset = @swapBuffer(0)
-      '   startAddress = FB_MEMCOPY (Byval dest, Byval offset, elSize)
-      ' END IF
-    
     NEXT
 
   NEXT
@@ -735,7 +735,17 @@ END SUB
 ' by manipulating elements in a parallel integer index array.
 SUB ISortT2(array As Any Ptr, ndx As Short Ptr, numEls As Short, direction As Short, elSize As Short, memberOffset As Short, memberSize As Short)
 
-  InitInt(ndx, 0, numEls)
+  'NOTE: The InitInt appears to be, based on examples, handled outside of this routine.
+  'InitInt(ndx, 0, numEls)
+
+  SELECT CASE memberSize
+    CASE -1: memberSize = 2
+    CASE -2: memberSize = 4
+    CASE -3: memberSize = 4
+    CASE -4: memberSize = 8
+    CASE -5: memberSize = 8
+    CASE ELSE
+  END SELECT
 
   Dim bytes(memberSize - 1) As Byte
   Dim swapBuffer(elSize - 1) As Byte
@@ -757,12 +767,16 @@ SUB ISortT2(array As Any Ptr, ndx As Short Ptr, numEls As Short, direction As Sh
 
       Var offset = array + lMemberStart
       Var dest = @bytes(0)
-      Var startAddress = FB_MEMCOPY (Byval dest, Byval offset, memberSize)
+      'NOTE: The use of Byval below is "unknown" as the documentation
+      '      seems to suggest using them but the examples don't.
+      'Var startAddress = FB_MEMCOPY (Byval dest, Byval offset, memberSize)
+      Var startAddress = FB_MEMCOPY (dest, offset, memberSize)
 
       Var lMember = Bytes2String(bytes())
 
       offset = array + rMemberStart
-      startAddress = FB_MEMCOPY (Byval dest, Byval offset, memberSize)
+      'startAddress = FB_MEMCOPY (Byval dest, Byval offset, memberSize)
+      startAddress = FB_MEMCOPY (dest, offset, memberSize)
 
       Var rMember = Bytes2String(bytes())
 
@@ -1729,6 +1743,15 @@ END SUB
 ' into either ascending or descending order.
 SUB SortT(array As Any Ptr, numEls As Short, direction As Short, elSize As Short, memberOffset As Short, memberSize As Short)
 
+  SELECT CASE memberSize
+    CASE -1: memberSize = 2
+    CASE -2: memberSize = 4
+    CASE -3: memberSize = 4
+    CASE -4: memberSize = 8
+    CASE -5: memberSize = 8
+    CASE ELSE
+  END SELECT
+
   Dim bytes(memberSize - 1) As Byte
   Dim swapBuffer(elSize - 1) As Byte
 
@@ -1781,6 +1804,15 @@ END SUB
 ' SortT2 will sort all or part of a fixed-length string or TYPE array 
 ' into either ascending or descending order without regard to capitalization. 
 SUB SortT2(array As Any Ptr, numEls As Short, direction As Short, elSize As Short, memberOffset As Short, memberSize As Short)
+
+  SELECT CASE memberSize
+    CASE -1: memberSize = 2
+    CASE -2: memberSize = 4
+    CASE -3: memberSize = 4
+    CASE -4: memberSize = 8
+    CASE -5: memberSize = 8
+    CASE ELSE
+  END SELECT
 
   Dim bytes(memberSize - 1) As Byte
   Dim swapBuffer(elSize - 1) As Byte
@@ -2563,49 +2595,49 @@ END FUNCTION
 '   LastDrive = ASC(RIGHT$(list$, 1))
 ' END FUNCTION
 
-' ' LineCount will quickly count all of the lines of text in a specified file.
-' FUNCTION LineCount(fileName$, buffer$)
+' LineCount will quickly count all of the lines of text in a specified file.
+FUNCTION LineCount(fileName As String, buffer As String) As Short
 
-'   ' The main purpose of LineCount is to report the number of lines in a 
-'   ' text file, in preparation for dimensioning an array to hold them. 
-'   ' When a program will be reading a text file into an array, knowing 
-'   ' this ahead of time can be a big help. The only other possibilities 
-'   ' would be to read through the entire file once just to count the lines, 
-'   ' or guess at how large to dimension the array to. 
+  ' The main purpose of LineCount is to report the number of lines in a 
+  ' text file, in preparation for dimensioning an array to hold them. 
+  ' When a program will be reading a text file into an array, knowing 
+  ' this ahead of time can be a big help. The only other possibilities 
+  ' would be to read through the entire file once just to count the lines, 
+  ' or guess at how large to dimension the array to. 
 
-'   ' One important caveat you should be aware of when using 
-'   ' LineCount is that it merely counts the number of CHR$(13) 
-'   ' carriage returns in the file. Line feeds are not considered at all. 
+  ' One important caveat you should be aware of when using 
+  ' LineCount is that it merely counts the number of CHR$(13) 
+  ' carriage returns in the file. Line feeds are not considered at all. 
 
-'   ' fileName$ is the name of the file to examine, and may contain an 
-'   ' optional drive letter or path name. buffer$ is a temporary work area 
-'   ' needed by LineCount to hold the file, and count receives the 
-'   ' number of lines of text. 
+  ' fileName$ is the name of the file to examine, and may contain an 
+  ' optional drive letter or path name. buffer$ is a temporary work area 
+  ' needed by LineCount to hold the file, and count receives the 
+  ' number of lines of text. 
 
-'   ' If there are more than 32767 lines in the file (very unlikely if you 
-'   ' think about it), LineCount will return a negative number. Simply 
-'   ' add 65536 to that number to get the actual count. 
+  ' If there are more than 32767 lines in the file (very unlikely if you 
+  ' think about it), LineCount will return a negative number. Simply 
+  ' add 65536 to that number to get the actual count. 
 
-'   ' If the file doesn't exist or some other error occurs, LineCount will 
-'   ' instead receive -1. 
+  ' If the file doesn't exist or some other error occurs, LineCount will 
+  ' instead receive -1. 
 
-'   result = 0
+  VAR result = 0
 
-'   IF _FileExists(fileName$) THEN
-'     ff = FREEFILE
-'     OPEN fileName$ FOR INPUT AS #ff
-'     DO UNTIL EOF(1)
-'       LINE INPUT #ff, buffer$
-'       result = result + 1
-'     LOOP
-'     CLOSE #ff
-'   ELSE
-'     result = -1
-'   END IF
+  IF FileExists(fileName) THEN
+    VAR ff = FREEFILE
+    OPEN fileName FOR INPUT AS #ff
+    DO UNTIL EOF(1)
+      LINE INPUT #ff, buffer
+      result = result + 1
+    LOOP
+    CLOSE #ff
+  ELSE
+    result = -1
+  END IF
 
-'   LineCount = result
+  LineCount = result
 
-' END FUNCTION
+END FUNCTION
 
 ' ' LoadExec is a SHELL replacement that lets you execute another 
 ' ' program, and then retrieve its exit code (the DOS error level). 
@@ -5507,12 +5539,13 @@ END FUNCTION
 '   Num2Time$ = RIGHT$("0" + LTRIM$(STR$(h&)), 2) + ":" + RIGHT$("0" + LTRIM$(STR$(m&)), 2) + ":" + RIGHT$("0" + LTRIM$(STR$(s&)), 2)
 ' END FUNCTION
 
-' ' Pause will pause a program's execution for a specified period of 
-' ' time to a resolution as small as 1/18th of a second. 
-' SUB Pause(ticks)
-'   resolution! = 1 / 18.2
-'   _DELAY ticks * resolution!
-' END SUB
+' Pause will pause a program's execution for a specified period of 
+' time to a resolution as small as 1/18th of a second. 
+SUB Pause(ticks AS SHORT)
+  VAR resolution = 1 / 18.2
+  'AltSleep (ticks * resolution) * 1000
+  Sleep (ticks * resolution) * 1000, 1
+END SUB
 
 ' ' Pause2 will pause a program's execution for a specified number of microseconds. 
 ' SUB Pause2(microseconds)

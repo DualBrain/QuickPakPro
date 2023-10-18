@@ -40,12 +40,12 @@ This is a work-in-progress project.
 |GET1STR.BAS |         |   |GETATTR.BAS |         |   |GETCMOS.BAS |         |
 |GETCOLOR.BAS|         |   |GETDIR.BAS  |         |   |GETEQUIP.BAS|         |
 |GETVMODE.BAS|         |   |GRAFCURS.BAS|         |   |HAND2NAM.BAS|         |
-|HCOPY.BAS   |         |   |HUGE.BAS    |         |   |IMINMAX.BAS |         |
+|HCOPY.BAS   |         |   |HUGE.BAS    |         |   |IMINMAX.BAS | EXE     |
 |INCOUNT.BAS |         |   |INSERT.BAS  | EXE     |   |INSERTT.BAS |         |
 |INSTALL.BAS |         |   |INSTAT.BAS  |         |   |INSTRTBL.BAS|         |
 |ISORTI.BAS  |         |   |ISORTI2.BAS |         |   |ISORTSTR.BAS| EXE     |
-|ISORTT.BAS  |         |   |KEYDOWN.BAS |         |   |KEYS.BAS    |         |
-|KEYSORT.BAS |         |   |KEYSTAT.BAS |         |   |LINCOUNT.BAS|         |
+|ISORTT.BAS  | EXE*    |   |KEYDOWN.BAS |         |   |KEYS.BAS    |         |
+|KEYSORT.BAS | EXE*    |   |KEYSTAT.BAS |         |   |LINCOUNT.BAS|         |
 |LOADEXEC.BAS|         |   |LOCKFILE.BAS|         |   |LONGSTR.BAS |         |
 |LTS2MENU.BAS|         |   |LTSMENU.BAS |         |   |MAINMENU.BAS|         |
 |MAKEQLB.BAS |         |   |MARQUEE.BAS |         |   |MASKIN.BAS  |         |
@@ -65,9 +65,9 @@ This is a work-in-progress project.
 |READSECT.BAS|         |   |REPLACE.BAS |         |   |RPTKEY.BAS  |         |
 |RWTEST.BAS  |         |   |SCANFILE.BAS|         |   |SCIFORM.BAS |         |
 |SCRNDUMP.BAS|         |   |SCRNSR.BAS  |         |   |SCROLL.BAS  |         |
-|SCROLLIN.BAS|         |   |SEARCH.BAS  |         |   |SEQUENCE.BAS|         |
+|SCROLLIN.BAS|         |   |SEARCH.BAS  | EXE     |   |SEQUENCE.BAS|         |
 |SETATTR.BAS |         |   |SETCNF.BI   |         |   |SHIFT.BAS   |         |
-|SORTI.BAS   |         |   |SORTSTR.BAS |         |   |SORTT.BAS   |         |
+|SORTI.BAS   |         |   |SORTSTR.BAS | EXE     |   |SORTT.BAS   | EXE*    |
 |SOUNDEX.BAS |         |   |SPELLNUM.BAS|         |   |SPLITNAM.BAS|         |
 |SPREAD.BAS  |         |   |SRCHPATH.BAS|         |   |STRREST.BAS |         |
 |STUFFBUF.BAS|         |   |TEST.BAS    |         |   |TEXTIN.BAS  |         |

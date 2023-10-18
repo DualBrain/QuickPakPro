@@ -95,6 +95,8 @@ DECLARE FUNCTION ErrorMsg(errorNumber As Short) As String
 
 ' ****************************************
 
+DECLARE FUNCTION LineCount(fileName As String, buffer As String) As Short
+
 DECLARE SUB QPrint (text As String, colr As Short, page As Short)
 'DECLARE FUNCTION QBColor (colr As Short) As ULong
 DECLARE SUB QPrint0 (text As String, colr As Short)
@@ -110,6 +112,7 @@ DECLARE FUNCTION QInstr2(startPosition As Short, sourceValue As String, searchVa
 DECLARE SUB AMenu (address As String Ptr, start As Short, count As Short, scanCode As Short, fileColr As Short, hiLiteColr As Short, rows As Short, columns As Short, spacing As Short, row As Short, column As Short)
 
 DECLARE FUNCTION WaitKey AS SHORT
+DECLARE SUB Pause(ticks AS SHORT)
 
 ' CONST BAR_LINE = 1                        ' Line number for the menu bar
 
