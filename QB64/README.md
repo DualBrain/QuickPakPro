@@ -1,6 +1,6 @@
 # QuickPak Professional for QB64
 
-This is a work-in-progress project that is fairly complete (within the restrictions/limitations of QB64).
+This is a work-in-progress project that is fairly complete (within the restrictions/limitations of QB64). One of the desired goals is to write the equivalent functionality using QB64 directly; instead of, for example, using C/C++ to create a separate library.
 
 ## Progress
 
@@ -78,4 +78,4 @@ This is a work-in-progress project that is fairly complete (within the restricti
 |WINDOW.BAS  |         |   |WIPES.BAS   | EXE     |   |WORDWRAP.BAS| EXE     |
 |YESNOB.BAS  | INCLUDE |   |            |         |   |            |         |
 
-Files marked with *INCLUDE* are meant to be included, while files marked as *EXE* are to be compiled as an executable (stand-alone example). The replacement of the PRO.LIB functionality is implemented in the *PRO.BAS* and *PRO.BI* source files. (Files marked with *N/A* are either hardware specific and/or simply "not possible" with the current release of QB64. If you disagree, please discuss.)
+Files marked with *INCLUDE* are meant to be included, while files marked as *EXE* are to be compiled as an executable (stand-alone example). The replacement of the PRO.LIB functionality is implemented in the *PRO.BAS* and *PRO.BI* source files. (Files marked with *N/A* are either hardware specific and/or simply "not possible" with the current release of QB64 (v2.1). If you disagree, please discuss.)

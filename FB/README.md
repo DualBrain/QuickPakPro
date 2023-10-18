@@ -1,6 +1,6 @@
 # QuickPak Professional for FreeBASIC
 
-This is a work-in-progress project.
+This is a **work-in-progress project**. One of the desired goals with this project is to rewrite as much functionality as possible leveraging FB directly; meaning avoiding using a separate C/C++ library.
 
 ## Progress
 
@@ -78,9 +78,11 @@ This is a work-in-progress project.
 |WINDOW.BAS  |         |   |WIPES.BAS   |         |   |WORDWRAP.BAS|         |
 |YESNOB.BAS  |         |   |            |         |   |            |         |
 
-Files marked with *INCLUDE* are meant to be included, while files marked as *EXE* are to be compiled as an executable (stand-alone example). The replacement of the PRO.LIB functionality is implemented in the *PRO.BAS* and *PRO.BI* source files. (Files marked with *N/A* are either hardware specific and/or simply "not possible" with the current release of FB. If you disagree, please discuss.)
+Files marked with *INCLUDE* are meant to be included, while files marked as *EXE* are to be compiled as an executable (stand-alone example). The replacement of the PRO.LIB functionality is implemented in the *PRO.BAS* and *PRO.BI* source files. (Files marked with *N/A* are either hardware specific and/or simply "not possible" with the current release of FB. If you disagree, please discuss. Items marked with an asterisks *most likely need additional testing/improvements*.)
 
-## More
+## Future Possibility
+
+Given the flexibility of FB, the thought has crossed my mind that the FB edition *might* be something that could be utilized with QB64; will explore this more once the FB edition is *more complete*.
 
 Placing a few links here for me to explore things a bit further as the project continues to grow:
 

@@ -2,7 +2,7 @@
 
 The original QuickPak Professional add-on was the absolute *best* product for writing professional applications using QB4.5/PDS7.1 in the late-1980s and early-1990s. It was touted as *The Most Comprehensive Collection of BASIC Tools Ever Produced*.
 
-QuickPak Professional for QB4.5/PDS7.1/VBDOS1.0 (MS-DOS) was released into the *public domain* around the end of 2018 by [Gene Buckle](https://github.com/geneb). This project serves to resurrect much of the functionality (where possible) for use with QB64 v2.1+ (MIT License).
+QuickPak Professional for QB4.5/PDS7.1/VBDOS1.0 (MS-DOS) was released into the *public domain* around the end of 2018 by [Gene Buckle](https://github.com/geneb). This project serves to resurrect much of the functionality (where possible) for use several *modern* dialects of BASIC such as [QB64](QB64/README.md), [FreeBASIC](FB/README.md), as well as others.
 
 You can find the original QuickPak Professional installation [here](http://annex.retroarchive.org/crescent/index.html) along with a [PDF copy of the manual](http://annex.retroarchive.org/crescent/QuickPak%20Professional.pdf). You can also access the [original repo here](https://github.com/geneb/QuickPak-Pro-DOS).
 
@@ -12,6 +12,7 @@ We also want to thank [Gene Buckle](https://github.com/geneb) for making this al
 
 - [QB64](QB64/README.md)
 - [FreeBASIC](FB/README.md)
+- *Other* - let's talk!
 
 ## Contributing
 
