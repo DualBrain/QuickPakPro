@@ -8,7 +8,7 @@ This is a work-in-progress project.
 | ---------- | ------- | - | ---------- | ------- | - | ---------- | ------- |
 |AMENU.BAS   |         |   |APRINT.BAS  |         |   |APRINTT.BAS |         |
 |ASCCHART.BAS|         |   |ASCIIPIK.BAS|         |   |ASSEMBLY.BAS|         |
-|BCOPYT.BAS  |         |   |BIGPRINT.BAS|         |   |BITS.BAS    |         |
+|BCOPYT.BAS  |         |   |BIGPRINT.BAS|         |   |BITS.BAS    | EXE     |
 |BLPRINT.BAS |         |   |BPRINT.BAS  |         |   |CALC.BAS    |         |
 |CALENDAR.BAS|         |   |CAPNUM.BAS  |         |   |CLEARSCR.BAS|         |
 |COLORPIK.BAS|         |   |COLORS.BAS  |         |   |COMPARE.BAS |         |
@@ -33,15 +33,15 @@ This is a work-in-progress project.
 |FGETAH.BAS  |         |   |FGETR.BAS   |         |   |FGETRT.BAS  |         |
 |FILECOMP.BAS|         |   |FILECOPY.BAS|         |   |FILECRPT.BAS|         |
 |FILEINFO.BAS|         |   |FILESORT.BAS|         |   |FILEVIEW.BAS|         |
-|FILL.BAS    |         |   |FILLSCRN.BAS|         |   |FIND.BAS    |         |
-|FINDLAST.BAS|         |   |FINDT.BAS   |         |   |FLINPUT.BAS |         |
+|FILL.BAS    | EXE     |   |FILLSCRN.BAS|         |   |FIND.BAS    | EXE     |
+|FINDLAST.BAS|         |   |FINDT.BAS   | EXE     |   |FLINPUT.BAS |         |
 |FLUSH.BAS   |         |   |FNOTHER.BAS |         |   |FNSPREAD.BAS|         |
 |FORMAT.BAS  |         |   |FULLNAME.BAS|         |   |GASGAUGE.BAS|         |
 |GET1STR.BAS |         |   |GETATTR.BAS |         |   |GETCMOS.BAS |         |
 |GETCOLOR.BAS|         |   |GETDIR.BAS  |         |   |GETEQUIP.BAS|         |
 |GETVMODE.BAS|         |   |GRAFCURS.BAS|         |   |HAND2NAM.BAS|         |
 |HCOPY.BAS   |         |   |HUGE.BAS    |         |   |IMINMAX.BAS |         |
-|INCOUNT.BAS |         |   |INSERT.BAS  |         |   |INSERTT.BAS |         |
+|INCOUNT.BAS |         |   |INSERT.BAS  | EXE     |   |INSERTT.BAS |         |
 |INSTALL.BAS |         |   |INSTAT.BAS  |         |   |INSTRTBL.BAS|         |
 |ISORTI.BAS  |         |   |ISORTI2.BAS |         |   |ISORTSTR.BAS| EXE     |
 |ISORTT.BAS  |         |   |KEYDOWN.BAS |         |   |KEYS.BAS    |         |

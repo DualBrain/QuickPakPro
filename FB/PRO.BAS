@@ -68,6 +68,14 @@ SUB Fill4(address As Long Ptr, value As Long, numEls As Short)
   NEXT
 END SUB
 
+' Fill4 will quickly assign all of the elements in a specified portion of 
+' an single array to any value. 
+SUB Fill4(address As Single Ptr, value As Single, numEls As Short)
+  FOR x As Short = 0 TO numEls - 1
+    *(address + x) = value
+  NEXT
+END SUB
+
 ' Fill8 will quickly assign all of the elements in a specified portion of 
 ' an double array to any value. 
 SUB Fill8(address As Double Ptr, value As Double, numEls As Short)
@@ -1486,9 +1494,9 @@ SUB SetBit(Byref array As String, element As Short, value As Short)
   Var bit1 = element MOD 8
   Var byt = ASC(MID$(array, entry, 1))
   IF value THEN
-    Var byt = byt XOR (2 ^ bit1)
+    byt = byt XOR (2 ^ bit1)
   ELSE 
-    Var byt = byt AND NOT (2 ^ bit1)
+    byt = byt AND NOT (2 ^ bit1)
   END IF
   MID$(array, entry, 1) = CHR$(byt)
 END SUB

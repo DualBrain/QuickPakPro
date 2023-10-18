@@ -1,3 +1,3 @@
 @echo off
-fbc32 isortstr.bas pro.bas
-isortstr.exe
+fbc32 findt.bas pro.bas
+findt.exe
