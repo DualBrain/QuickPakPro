@@ -173,24 +173,55 @@ DECLARE SUB WriteSect2(drive As String, Byref info As String, sector As Short)
 DECLARE FUNCTION WriteTest(drive As String) As Short
 
 ' ****************************************
+' Chapter 4 - Functions
+' ****************************************
 
-
-DECLARE SUB QPrint (text As String, colr As Short, page As Short)
-'DECLARE FUNCTION QBColor (colr As Short) As ULong
-DECLARE SUB QPrint0 (text As String, colr As Short)
-DECLARE SUB QPrintRC (txt As String, r As Short, c As Short, clr As Short)
-DECLARE SUB SplitColor (colr As Short, Byref fg As Short, Byref bg As Short)
-DECLARE FUNCTION OneColor (fg As Short, bg As Short) As Short
-
-DECLARE SUB ReplaceString (Byref sourceValue As String, oldValue As String, newValue As String)
-DECLARE SUB ReplaceString2 (Byref sourceValue As String, oldValue As String, newValue As String)
-DECLARE FUNCTION QInstr(startPosition As Short, sourceValue As String, searchValue As String) As Short
-DECLARE FUNCTION QInstr2(startPosition As Short, sourceValue As String, searchValue As String) As Short
+' ****************************************
+' Chapter 5 - Menu/Input Routines
+' ****************************************
 
 DECLARE SUB AMenu (address As String Ptr, start As Short, count As Short, scanCode As Short, fileColr As Short, hiLiteColr As Short, rows As Short, columns As Short, spacing As Short, row As Short, column As Short)
 
+' ****************************************
+' Chapter 6 - Keyboard/Mouse Routines
+' ****************************************
+
 DECLARE FUNCTION WaitKey AS SHORT
+
+' ****************************************
+' Chapter 7 - Miscellaneous Routines
+' ****************************************
+
 DECLARE SUB Pause(ticks AS SHORT)
+
+' ****************************************
+' Chapter 8 - String Manipulation Routines
+' ****************************************
+
+DECLARE FUNCTION QInstr(startPosition As Short, sourceValue As String, searchValue As String) As Short
+DECLARE FUNCTION QInstr2(startPosition As Short, sourceValue As String, searchValue As String) As Short
+DECLARE SUB ReplaceString (Byref sourceValue As String, oldValue As String, newValue As String)
+DECLARE SUB ReplaceString2 (Byref sourceValue As String, oldValue As String, newValue As String)
+
+' ****************************************
+' Chapter 9 - Video Routines
+' ****************************************
+
+DECLARE FUNCTION OneColor (fg As Short, bg As Short) As Short
+DECLARE SUB QPrint (text As String, colr As Short, page As Short)
+DECLARE SUB QPrint0 (text As String, colr As Short)
+DECLARE SUB QPrintRC (txt As String, r As Short, c As Short, clr As Short)
+DECLARE SUB SplitColor (colr As Short, Byref fg As Short, Byref bg As Short)
+
+' ****************************************
+' Chapter Next
+' ****************************************
+
+DECLARE FUNCTION BitShift (value As Short, cmd As String, bits As Short) As Short
+DECLARE FUNCTION FRE(value As String) As Short
+DECLARE FUNCTION IsWindows() AS Short
+
+' ****************************************
 
 ' CONST BAR_LINE = 1                        ' Line number for the menu bar
 
@@ -388,5 +419,3 @@ DECLARE SUB Pause(ticks AS SHORT)
 '   FUNCTION ClipCursor%% (Rect AS Rectangle) 'sets mouse box work area on desktop
 '   SUB SetCursorPos (BYVAL x AS LONG, BYVAL y AS LONG) 'move cursor position
 ' END DECLARE
-
-DECLARE FUNCTION IsWindows() AS Short

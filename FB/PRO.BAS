@@ -3360,9 +3360,9 @@ FUNCTION WriteTest(drive As String) As Short
   WriteTest = 0
 END FUNCTION
 
-' ' ****************************************
-' ' Chapter 4 - Functions
-' ' ****************************************
+' ****************************************
+' Chapter 4 - Functions
+' ****************************************
 
 ' FUNCTION Bin2Num(binary$)
 '   b$ = RIGHT$("0000000000000000" + binary$, 16)
@@ -3427,9 +3427,9 @@ END FUNCTION
 '   ERROR 73 ' Feature Unavailable
 ' END FUNCTION
 
-' ' ****************************************
-' ' Chapter 5 - Menu/Input Routines
-' ' ****************************************
+' ****************************************
+' Chapter 5 - Menu/Input Routines
+' ****************************************
 
 SUB AMenu (address As String Ptr, start As Short, count As Short, scanCode As Short, fileColr As Short, hiLiteColr As Short, rows As Short, columns As Short, spacing As Short, row As Short, column As Short)
 
@@ -3979,9 +3979,9 @@ END SUB
 '   ERROR 73 ' Feature Unavailable
 ' END SUB
 
-' ' ****************************************
-' ' Chapter 6 - Keyboard / Mouse Routines
-' ' ****************************************
+' ****************************************
+' Chapter 6 - Keyboard / Mouse Routines
+' ****************************************
 
 ' FUNCTION AltKey
 '   ' See ALTKEY.ASM
@@ -4525,9 +4525,9 @@ END FUNCTION
 '   LOOP WHILE button
 ' END SUB
 
-' ' **************************************
-' ' Chapter 7 - Miscellaneous Routines
-' ' **************************************
+' **************************************
+' Chapter 7 - Miscellaneous Routines
+' **************************************
 
 ' FUNCTION AddUSI(X, Y)
 '   ' See ADDUSI.ASM
@@ -5899,9 +5899,9 @@ END SUB
 '   WeekDay = Num2Day(Date2Num(dy$))
 ' END FUNCTION
 
-' ' ****************************************
-' ' Chapter 8 - String Manipulation Routines
-' ' ****************************************
+' ****************************************
+' Chapter 8 - String Manipulation Routines
+' ****************************************
 
 ' ' ASCII obtains the ASCII value for a string exactly as BASIC's ASC 
 ' ' function does, but it will not cause an "Illegal Function Call" error 
@@ -6730,9 +6730,9 @@ END SUB
 
 ' END SUB
 
-' ' ****************************************
-' ' Chapter 9 - Video Routines
-' ' ****************************************
+' ****************************************
+' Chapter 9 - Video Routines
+' ****************************************
 
 ' ' APrint will quickly print any portion of a conventional (not 
 ' ' fixed-length) string array, and contain the display within a specified 
@@ -7136,7 +7136,6 @@ SUB QPrint (text As String, colr As Short, page As Short)
     ofg = LoWord(c): obg = HiWord(c)
     Dim fg As Short: Dim bg As Short
     SplitColor colr, fg, bg
-    'COLOR QBColor(fg), QBColor(bg)
     COLOR fg, bg
   END IF
   Dim pr As Short = CSRLIN
@@ -7150,30 +7149,6 @@ SUB QPrint (text As String, colr As Short, page As Short)
     COLOR ofg, obg
   END IF
 END SUB
-
-' FUNCTION QBColor (colr As Short) As ULong
-'   DIM result As ULong = colr
-'   SELECT CASE colr
-'     CASE 0: result = RGB(0, 0, 0)
-'     CASE 1: result = RGB(170, 0, 0) '  1 red
-'     CASE 2: result = RGB(0, 170, 0) '  2 green
-'     CASE 3: result = RGB(170, 85, 0) '  3 yellow (not really yellow; oh well)
-'     CASE 4: result = RGB(0, 0, 170) '  4 blue
-'     CASE 5: result = RGB(170, 0, 170) '  5 magenta
-'     CASE 6: result = RGB(0, 170, 170) '  6 cyan
-'     CASE 7: result = RGB(170, 170, 170) ' white (well VGA defines this as (170, 170, 170); darkgray is (169, 169, 169); so we are super close)
-'     CASE 8: result = RGB(85, 85, 85) '  8 grey
-'     CASE 9: result = RGB(255, 85, 85) '  9 bright red
-'     CASE 10: result = RGB(85, 255, 85) ' 10 bright green
-'     CASE 11: result = RGB(255, 255, 85) ' 11 bright yellow
-'     CASE 12: result = RGB(85, 85, 255) ' 12 bright blue
-'     CASE 13: result = RGB(255, 85, 255) ' 13 bright magenta
-'     CASE 14: result = RGB(85, 255, 255) ' 14 bright cFsyan
-'     CASE 15: result = RGB(255, 255, 255)
-'     CASE ELSE
-'   END SELECT
-'   QBColor = result
-' END FUNCTION
 
 ' To determine if in "default screen mode"; use screenptr - if null, on console.
 
@@ -7213,7 +7188,7 @@ END SUB
 '   ELSE
 '      ofg = _DEFAULTCOLOR: obg = _BACKGROUNDCOLOR
 '      SplitColor clr, fg%, bg%
-'      COLOR QBColor(fg%), QBColor(bg%)
+'      COLOR fg%, bg%
 '   END IF
 '   pr = CSRLIN
 '   pc = POS(0)
@@ -7416,41 +7391,43 @@ SUB SplitColor (colr As Short, Byref fg As Short, Byref bg As Short)
   bg = (colr AND 112) \ 16 
 END SUB
 
-' ' Chapter Next
+' ****************************************
+' Chapter Next
+' ****************************************
 
-' FUNCTION BitShift (value, cmd$, bits)
-'   mult = 2
-'   SELECT CASE bits
-'     CASE 1 ' already set
-'     CASE 2: mult = 4
-'     CASE 3: mult = 8
-'     CASE 4: mult = 16
-'     CASE 5: mult = 32
-'     CASE 6: mult = 64
-'     CASE 7: mult = 128
-'     CASE 8: mult = 256
-'     CASE 9: mult = 512
-'     CASE 10: mult = 1024
-'     CASE 11: mult = 2048
-'     CASE 12: mult = 4096
-'     CASE 13: mult = 8192
-'     CASE 14: mult = 16384
-'     CASE 15: mult = 32768
-'     CASE 16: mult = 65536
-'     CASE ELSE
-'   END SELECT
-'   IF cmd$ = "<<" THEN ' "value" has to be shifted "bits" bit(s) to the left.
-'     ' formula: x = x * 2 ^ y
-'     BitShift = ((value * mult) AND &HFFFF)
-'   ELSEIF cmd$ = ">>" THEN ' "value" has to be shifted "bits" bit(s) to the right.
-'     ' formula: x = x / 2 ^ y
-'     BitShift = value \ mult
-'   END IF
-' END FUNCTION
+FUNCTION BitShift (value As Short, cmd As String, bits As Short) As Short
+  Var mult = 2
+  SELECT CASE bits
+    CASE 1 ' already set
+    CASE 2: mult = 4
+    CASE 3: mult = 8
+    CASE 4: mult = 16
+    CASE 5: mult = 32
+    CASE 6: mult = 64
+    CASE 7: mult = 128
+    CASE 8: mult = 256
+    CASE 9: mult = 512
+    CASE 10: mult = 1024
+    CASE 11: mult = 2048
+    CASE 12: mult = 4096
+    CASE 13: mult = 8192
+    CASE 14: mult = 16384
+    CASE 15: mult = 32768
+    CASE 16: mult = 65536
+    CASE ELSE
+  END SELECT
+  IF cmd = "<<" THEN ' "value" has to be shifted "bits" bit(s) to the left.
+    ' formula: x = x * 2 ^ y
+    BitShift = ((value * mult) AND &HFFFF)
+  ELSEIF cmd = ">>" THEN ' "value" has to be shifted "bits" bit(s) to the right.
+    ' formula: x = x / 2 ^ y
+    BitShift = value \ mult
+  END IF
+END FUNCTION
 
-' ' FUNCTION FRE(value$)
-' '   RETURN 32768
-' ' END FUNCTION
+FUNCTION FRE(value As String) As Short
+  RETURN 32768
+END FUNCTION
 
 FUNCTION IsWindows() AS Short
   #IfDef __FB_WIN32__
