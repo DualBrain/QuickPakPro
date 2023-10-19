@@ -11,6 +11,7 @@
 #INCLUDE ONCE "file.bi"
 #INCLUDE ONCE "dir.bi"
 '#INCLUDE ONCE "windows.bi"
+'#INCLUDE ONCE "fbgfx.bi"
 
 #IfDef __FB_WIN32__
   extern "Windows"
@@ -3364,83 +3365,140 @@ END FUNCTION
 ' Chapter 4 - Functions
 ' ****************************************
 
-' FUNCTION Bin2Num(binary$)
-'   b$ = RIGHT$("0000000000000000" + binary$, 16)
-'   result& = VAL(MID$(b$, 16, 1))
-'   FOR x = LEN(b$) - 1 TO 2 STEP - 1
-'     v = VAL(MID$(b$, x, 1))
-'     IF v > 0 THEN
-'       v = 16 - x
-'       result& = result& + (2 ^ v)
-'     END IF
-'   NEXT
-'   'IF INSTR(b$, "0") = 0 THEN
-'   '  result& = -1
-'   'ELSE
-'   IF MID$(b$, 1, 1) = "1" THEN
-'     result& = -(32768 - result&) 
-'   END IF
-'   Bin2Num = CINT(result&)
-' END FUNCTION
+FUNCTION Bin2Num(binstr As String) As Short
+  Var b = RIGHT$("0000000000000000" + binstr, 16)
+  Var result = VAL(MID$(b, 16, 1))
+  FOR x As Short = LEN(b) - 1 TO 2 STEP - 1
+    Var v = VAL(MID$(b, x, 1))
+    IF v > 0 THEN
+      v = 16 - x
+      result = result + (2 ^ v)
+    END IF
+  NEXT
+  'IF INSTR(b, "0") = 0 THEN
+  '  result = -1
+  'ELSE
+  IF MID$(b, 1, 1) = "1" THEN
+    result = -(32768 - result) 
+  END IF
+  Bin2Num = CINT(result)
+END FUNCTION
 
-' ' Num2Bin will convert a number into an equivalent binary string with 
-' ' a fixed length of 16 digits. 
-' FUNCTION Num2Bin$(number)
-'   n& = number
-'   IF n& < O THEN n& = n& + 65536 
-'   IF n& = 0 THEN
-'     Num2Bin$ = "0000000000000000"
-'   ELSEIF n& > 0 THEN
-'     result$ = ""
-'     i# = 2 ^ CLNG(LOG(n&) / LOG(2) + 0.1)
-'     DO WHILE i# >= 1
-'       c& = FIX(n& / i#)
-'       result$ = result$ + LTRIM$(STR$(c&))
-'       n& = n& - i# * c&
-'       i# = i# / 2
-'     LOOP
-'     Num2Bin$ = RIGHT$("0000000000000000" + result$, 16)
-'   END IF
-' END FUNCTION
+' C2F - see FNOTHER.BAS
+' Delimit - see FNOTHER.BAS
+' Eval - see FNOTHER.BAS
+' ExpandTab - see FNOTHER.BAS
+' F2C - see FNOTHER.BAS
+' LastFirst - see FNOTHER.BAS
+' LastLast - see FNOTHER.BAS
 
-' ' Num2Bin2 will convert a number into an equivalent binary string with 
-' ' only as many digits as required to represent the number. 
-' FUNCTION Num2Bin2$(number)
-'   n& = number
-'   IF n& < O THEN n& = n& + 65536 
-'   IF n& = 0 THEN
-'     Num2Bin2$ = "0"
-'   ELSEIF n& > 0 THEN
-'     result$ = ""
-'     i# = 2 ^ CLNG(LOG(n&) / LOG(2) + 0.1)
-'     DO WHILE i# >= 1
-'       c& = FIX(n& / i#)
-'       result$ = result$ + LTRIM$(STR$(c&))
-'       n& = n& - i# * c&
-'       i# = i# / 2
-'     LOOP
-'     Num2Bin2$ = result$
-'   END IF
-' END FUNCTION
+' Num2Bin will convert a number into an equivalent binary string with 
+' a fixed length of 16 digits. 
+FUNCTION Num2Bin(number As Short) As String
+  Dim n As Long = number
+  IF n < 0 THEN n = n + 65536 
+  IF n = 0 THEN
+    Num2Bin = "0000000000000000"
+  ELSEIF n > 0 THEN
+    Var result = ""
+    Dim i As Double = 2 ^ CLNG(LOG(n) / LOG(2) + 0.1)
+    DO WHILE i >= 1
+      Dim c As Long = FIX(n / i)
+      result = result + LTRIM$(STR$(c))
+      n = n - i * c
+      i = i / 2
+    LOOP
+    Num2Bin = RIGHT$("0000000000000000" + result, 16)
+  END IF
+END FUNCTION
 
-' FUNCTION QPHex$(Value, NumDigits)
-'   ERROR 73 ' Feature Unavailable
-' END FUNCTION
+' Num2Bin2 will convert a number into an equivalent binary string with 
+' only as many digits as required to represent the number. 
+FUNCTION Num2Bin2(number As Short) As String
+  Dim n As Long = number
+  IF n < 0 THEN n = n + 65536 
+  IF n = 0 THEN
+    Num2Bin2 = "0"
+  ELSEIF n > 0 THEN
+    Var result = ""
+    Dim i As Double = 2 ^ CLNG(LOG(n) / LOG(2) + 0.1)
+    DO WHILE i >= 1
+      Dim c As Long = FIX(n / i)
+      result = result + LTRIM$(STR$(c))
+      n = n - i * c
+      i = i / 2
+    LOOP
+    Num2Bin2 = result
+  END IF
+END FUNCTION
+
+' Pad - see FNOTHER.BAS
+' Parse - see FNOTHER.BAS
+' ParseStr - see FNOTHER.BAS
+
+' QPHex is a fast replacement for BASIC's HEX$ function, and it 
+' also returns a string padded to a specified number of digits. 
+FUNCTION QPHex(value As Short, numDigits As Short) As String
+  ERROR 73 ' Feature Unavailable
+  QPHex = ""
+END FUNCTION
+
+' QPHex is a fast replacement for BASIC's HEX$ function, and it 
+' also returns a string padded to a specified number of digits. 
+FUNCTION QPHex(value As Long, numDigits As Short) As String
+  ERROR 73 ' Feature Unavailable
+  QPHex = ""
+END FUNCTION
+
+' Rand - see FNOTHER.BAS
+' ShrinkTab - see FNOTHER.BAS
+' Signed - see FNOTHER.BAS
+' UnParseStr - see FNOTHER.BAS
+' UnSigned - see FNOTHER.BAS
+
+' QPACOS - see FNSPREAD.BAS
+' QPASIN - see FNSPREAD.BAS
+' QPATAN2 - see FNSPREAD.BAS
+' QPLOG10 - see FNSPREAD.BAS
+' QPROUND - see FNSPREAD.BAS
+' QPFV - see FNSPREAD.BAS
+' QPFVN - see FNSPREAD.BAS
+' QPFVP - see FNSPREAD.BAS
+' QPFVD - see FNSPREAD.BAS
+' QPFVND - see FNSPREAD.BAS
+' QPFVPD - see FNSPREAD.BAS
+' QPPMT - see FNSPREAD.BAS
+' QPPV - see FNSPREAD.BAS
+' QPPVN - see FNSPREAD.BAS
+' QPPMTD - see FNSPREAD.BAS
+' QPPVD - see FNSPREAD.BAS
+' QPPVND - see FNSPREAD.BAS
+' QPCINT - see FNSPREAD.BAS
+' QPCTERM - see FNSPREAD.BAS
+' QPIRR - see FNSPREAD.BAS
+' QPNPV - see FNSPREAD.BAS
+' QPRATE - see FNSPREAD.BAS
+' QPDDB - see FNSPREAD.BAS
+' QPSLN - see FNSPREAD.BAS
+' QPSYD - see FNSPREAD.BAS
+' QPAVG - see FNSPREAD.BAS
+' QPCOUNT - see FNSPREAD.BAS
+' QPMAX - see FNSPREAD.BAS
+' QPMIN - see FNSPREAD.BAS
+' QPSTD - see FNSPREAD.BAS
+' QPSUM - see FNSPREAD.BAS
+' QPVAR - see FNSPREAD.BAS
 
 ' ****************************************
 ' Chapter 5 - Menu/Input Routines
 ' ****************************************
 
-SUB AMenu (address As String Ptr, start As Short, count As Short, scanCode As Short, fileColr As Short, hiLiteColr As Short, rows As Short, columns As Short, spacing As Short, row As Short, column As Short)
-
-  ' IF Start > 0 THEN
-  '   PRINT *(Address - 1)
-  ' END IF
-  ' PRINT *Address
-  ' IF Start < Count - 1 THEN
-  '   PRINT *(Address + 1)
-  ' END IF
-
+' AMenu is a sophisticated multi-column menu program that accepts a 
+' list of choices in a conventional (not fixed-length) string array. A 
+' selection is made by moving the cursor bar to the desired choice, 
+' and then pressing Enter. 
+SUB AMenu (address As String Ptr, startItem As Short, count As Short, scanCode As Short, normColor As Short, hiLiteColor As Short, numRows As Short, numCols As Short, gap As Short, ulRow As Short, ulCol As Short)
+  ERROR 73
 END SUB
 
 ' SUB AMenu(array$(), first, item, count, scanCode, normColor, hiLiteColor, numRows, numCols, gap, ulRow, ulCol)
@@ -3983,12 +4041,12 @@ END SUB
 ' Chapter 6 - Keyboard / Mouse Routines
 ' ****************************************
 
-' FUNCTION AltKey
-'   ' See ALTKEY.ASM
-'   LALT& = 100308
-'   RALT& = 100307
-'   AltKey = _KEYDOWN(LALT&) OR _KEYDOWN(RALT&)
-' END FUNCTION
+FUNCTION AltKey As Short
+  ' See ALTKEY.ASM
+  ' NOTE: FB's MultiKey appears to only work in a Command Prompt console, 
+  '       but not in a Windows Terminal console nor the console in VSCode.
+  AltKey = MultiKey(&h38) 'FB.SC_ALT)
+END FUNCTION
 
 ' ' ButtonPress will report how many times a specified mouse button 
 ' ' was pressed since the last time it was called. It also returns the X/Y 
@@ -4051,11 +4109,11 @@ END SUB
 
 ' END SUB
 
-' ' CapsLock will quickly tell if the CapsLock key is currently depressed. 
-' FUNCTION CapsLock
-'   ' Active receives -1 if the CapsLock key is currently down, or O if it is not. 
-'   CapsLock = _CAPSLOCK
-' END FUNCTION
+' CapsLock will quickly tell if the CapsLock key is currently depressed. 
+FUNCTION CapsLock As Short
+  ' Active receives -1 if the CapsLock key is currently down, or O if it is not. 
+  CapsLock = MultiKey(&h3a) 'FB.SC_CAPSLOCK)
+END FUNCTION
 
 ' ' CapsOff turns off the CapsLock key status. 
 ' SUB CapsOff
@@ -4074,11 +4132,9 @@ END SUB
 '   _KEYCLEAR
 ' END SUB
 
-' FUNCTION CtrlKey
-'   RCTRL& = 100305
-'   LCTRL& = 100306
-'   CtrlKey = _KEYDOWN(RCTRL&) OR _KEYDOWN(LCTRL&)
-' END FUNCTION
+FUNCTION CtrlKey As Short
+  CtrlKey = MultiKey(&h1d) 'FB.SC_CONTROL)
+END FUNCTION
 
 ' ' GetCursor reports the current location of the mouse cursor, and 
 ' ' which mouse buttons are currently depressed. 
@@ -4413,11 +4469,11 @@ END SUB
 
 ' END SUB
 
-' ' NumLock will quickly tell if the NumLock key is currently depressed. 
-' FUNCTION NumLock
-'   ' Active receives -1 if the NumLock key is currently down, or O if it is not. 
-'   NumLock = _NUMLOCK
-' END FUNCTION
+' NumLock will quickly tell if the NumLock key is currently depressed. 
+FUNCTION NumLock As Short
+  ' Active receives -1 if the NumLock key is currently down, or O if it is not. 
+  NumLock = MultiKey(&h45) 'FB.SC_NUMLOCK)
+END FUNCTION
 
 ' ' NumOff turns off the NumLock key status. 
 ' SUB NumOff
@@ -4443,22 +4499,21 @@ END SUB
 '   ERROR 73 ' Feature Unavailable
 ' END SUB
 
-' ' ScrlLock will quickly tell if the ScrlLock key is currently depressed. 
-' FUNCTION ScrlLock
-'   ' Active receives -1 if the ScrlLock key is currently down, or O if it is not. 
-'   ScrlLock = _SCROLLLOCK
-' END FUNCTION
+' ScrlLock will quickly tell if the ScrlLock key is currently depressed. 
+FUNCTION ScrlLock As Short
+  ' Active receives -1 if the ScrlLock key is currently down, or O if it is not. 
+  ScrlLock = MultiKey(&h46) 'FB.SC_SCROLLLOCK)
+END FUNCTION
 
 ' SUB SetCursor(x, y)
 '   ' https://learn.microsoft.com/en-us/windows/win32/menurc/using-cursors
 '   _MOUSEMOVE x, y
 ' END SUB
 
-' FUNCTION ShiftKey
-'   KEY_LSHIFT& = 100304
-'   KEY_RSHIFT& = 100303
-'   ShiftKey = _KEYDOWN(KEY_LSHIFT&) OR _KEYDOWN(KEY_RSHIFT&)
-' END FUNCTION
+FUNCTION ShiftKey As Short
+  'ShiftKey = MultiKey(FB.SC_LSHIFT) OR MultiKey(FB.SC_RSHIFT)
+  ShiftKey = MultiKey(&h2a) OR MultiKey(&h36)
+END FUNCTION
 
 ' SUB ShowCursor
 '   _MOUSESHOW

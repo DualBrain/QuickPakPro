@@ -176,16 +176,28 @@ DECLARE FUNCTION WriteTest(drive As String) As Short
 ' Chapter 4 - Functions
 ' ****************************************
 
+DECLARE FUNCTION Bin2Num(binary As String) As Short
+DECLARE FUNCTION Num2Bin(number As Short) As String
+DECLARE FUNCTION Num2Bin2(number As Short) As String
+DECLARE FUNCTION QPHex OVERLOAD (value As Short, numDigits As Short) As String
+DECLARE FUNCTION QPHex OVERLOAD (value As Long, numDigits As Short) As String
+
 ' ****************************************
 ' Chapter 5 - Menu/Input Routines
 ' ****************************************
 
-DECLARE SUB AMenu (address As String Ptr, start As Short, count As Short, scanCode As Short, fileColr As Short, hiLiteColr As Short, rows As Short, columns As Short, spacing As Short, row As Short, column As Short)
+DECLARE SUB AMenu (address As String Ptr, startItem As Short, count As Short, scanCode As Short, normColor As Short, hiLiteColor As Short, numRows As Short, numCols As Short, gap As Short, ulRow As Short, ulCol As Short)
 
 ' ****************************************
 ' Chapter 6 - Keyboard/Mouse Routines
 ' ****************************************
 
+DECLARE FUNCTION AltKey As Short
+DECLARE FUNCTION CapsLock As Short
+DECLARE FUNCTION CtrlKey As Short
+DECLARE FUNCTION NumLock As Short
+DECLARE FUNCTION ScrlLock As Short
+DECLARE FUNCTION ShiftKey As Short
 DECLARE FUNCTION WaitKey AS SHORT
 
 ' ****************************************
