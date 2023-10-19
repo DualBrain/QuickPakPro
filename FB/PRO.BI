@@ -194,7 +194,10 @@ DECLARE SUB AMenu (address As String Ptr, startItem As Short, count As Short, sc
 
 DECLARE FUNCTION AltKey As Short
 DECLARE FUNCTION CapsLock As Short
+DECLARE SUB ClearBuf
 DECLARE FUNCTION CtrlKey As Short
+DECLARE SUB InitMouse(Byref there As Short)
+DECLARE FUNCTION MGetKey(row As Short, col As Short) As Short
 DECLARE FUNCTION NumLock As Short
 DECLARE FUNCTION ScrlLock As Short
 DECLARE FUNCTION ShiftKey As Short
@@ -204,6 +207,17 @@ DECLARE FUNCTION WaitKey AS SHORT
 ' Chapter 7 - Miscellaneous Routines
 ' ****************************************
 
+DECLARE FUNCTION Date2Num (dat As String) As Short
+DECLARE FUNCTION DayName(d As Short) As String
+DECLARE FUNCTION Factorial(number As Short) As Double
+DECLARE FUNCTION FudgeFactor As Long
+DECLARE FUNCTION GetCPU As Short
+DECLARE SUB LockUp
+DECLARE FUNCTION MathChip As Short
+DECLARE FUNCTION MaxInt (num1 As Short, num2 As Short) As Short
+DECLARE FUNCTION MaxLong (Num1 As Long, Num2 As Long) As Long
+DECLARE FUNCTION MinInt (num1 As Short, num2 As Short) As Short
+DECLARE FUNCTION MinLong (num1 As Long, num2 As Long) As Long
 DECLARE SUB Pause(ticks AS SHORT)
 
 ' ****************************************
