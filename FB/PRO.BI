@@ -218,7 +218,7 @@ DECLARE SUB SplitColor (colr As Short, Byref fg As Short, Byref bg As Short)
 ' ****************************************
 
 DECLARE FUNCTION BitShift (value As Short, cmd As String, bits As Short) As Short
-DECLARE FUNCTION FRE(value As String) As Short
+REM DECLARE FUNCTION FRE OVERLOAD (value As String) As Short
 DECLARE FUNCTION IsWindows() AS Short
 
 ' ****************************************

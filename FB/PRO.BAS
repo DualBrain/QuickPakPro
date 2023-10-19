@@ -7425,9 +7425,9 @@ FUNCTION BitShift (value As Short, cmd As String, bits As Short) As Short
   END IF
 END FUNCTION
 
-FUNCTION FRE(value As String) As Short
-  RETURN 32768
-END FUNCTION
+'FUNCTION FRE (value As String) As Short
+'  RETURN 32768
+'END FUNCTION
 
 FUNCTION IsWindows() AS Short
   #IfDef __FB_WIN32__
