@@ -1,3 +1,3 @@
 @echo off
-fbc32 sortt.bas pro.bas
-sortt.exe
+fbc32 dos.bas pro.bas
+dos.exe

@@ -1,4 +1,5 @@
 Dim Shared Pro_Internal_DosError As Short
+Dim Shared Pro_Internal_WhichError As Short
 
 ' ****************************************
 ' Chapter 2 - Array Routines 
@@ -86,16 +87,93 @@ DECLARE SUB SortT2(address As Any Ptr, numEls As Short, direction As Short, elSi
 
 DECLARE SUB CDir(newDir As String)
 DECLARE SUB ClipFile(fileName As String, newLength As Long)
-DECLARE SUB DiskInfo(drive As String, Byref bytes As Short, Byref sectors As Short, Byref freeClusters As Long, Byref totalClusters As Long)
-DECLARE FUNCTION DiskRoom(drive As String) As Long
-DECLARE FUNCTION DiskSize(drive As String) As Long
+DECLARE FUNCTION DCount(dirSpec As String) As Short
+DECLARE SUB DiskInfo(drive As String, Byref bytes As Short, Byref sectors As Short, Byref freeClusters As ULong, Byref totalClusters As ULong)
+DECLARE FUNCTION DiskRoom(drive As String) As ULong
+DECLARE FUNCTION DiskSize(drive As String) As ULong
 DECLARE FUNCTION DosError AS Short
 DECLARE FUNCTION DOSVer As Short
 DECLARE FUNCTION ErrorMsg(errorNumber As Short) As String
+DECLARE FUNCTION ExeName As String
+DECLARE FUNCTION Exist(fileName As String) AS Short
+DECLARE SUB FClose(handle As Short)
+DECLARE SUB FCopy(source As String, dest As String, buffer AS String, Byref errCode AS Short)
+DECLARE FUNCTION FCount(fileSpec As String) AS Short
+DECLARE SUB FCreate(fileName As String)
+DECLARE FUNCTION FEof(handle As Short) As Short
+DECLARE SUB FFlush(handle As Short)
+DECLARE SUB FGet(handle As Short, Byref destination As String)
+DECLARE SUB FGetA(handle As Short, array As Any Ptr, numBytes As Short)
+DECLARE SUB FGetAH(fileName As String, array As Any Ptr, elSize As Short, numEls As Short)
+DECLARE SUB FGetR(handle As Short, Byref destination As String, recNumber As Long)
+DECLARE SUB FGetRT(handle As Short, destination As Any Ptr, recNumber As Long, recSize As Short)
+DECLARE SUB FGetRTA(handle As Short, destination As Any Ptr, recNumber As Long, recSize As Short)
+DECLARE SUB FGetT(handle As Short, destination As Any Ptr, numBytes As Short)
+DECLARE FUNCTION FileComp(file1 As String, file2 As String, Byref errCode As Short) As Short
+DECLARE SUB FileInfo(fileName As String, tVar As Any Ptr)
+DECLARE FUNCTION FileSize(fileName As String) As Long
+DECLARE FUNCTION FLInput(handle As Short, buffer As String) As String
+DECLARE FUNCTION FLoc(handle As Short) As Long
+DECLARE FUNCTION FLof(handle As Short) As Long
+DECLARE SUB FOpen(fileName As String, Byref handle As Short)
+DECLARE SUB FOpenS(fileName As String, Byref handle As Short)
+DECLARE SUB FOpenAll(fileName As String, accessMode As Short, shareMode As Short, handle As Short)
+DECLARE FUNCTION FormatDiskette(driveNumber As Short, capacity As Short, bufArray As Short Ptr) As Short
+DECLARE SUB FPut(handle As Short, source As String)
+DECLARE SUB FPutA(handle As Short, array As Any Ptr, numBytes As Short)
+DECLARE SUB FPutAH(fileName As String, array As Any Ptr, elSize As Short, numEls As Short)
+DECLARE SUB FPutR(handle As Short, source As String, recNumber As Long)
+DECLARE SUB FPutRT(handle As Short, source As Any Ptr, recNumber As Long, recSize As Short)
+DECLARE SUB FPutRTA(handle As Short, source As Any Ptr, recNumber As Long, recSize As Short)
+DECLARE SUB FPutT(handle As Short, source As Any Ptr, numBytes As Short)
+DECLARE SUB FSeek(handle As Short, location As Long)
+DECLARE SUB FStamp(fileName As String, newTime As String, newDate As String)
+DECLARE FUNCTION FullName(partName As String) As String
+DECLARE FUNCTION GetAttr(fileName As String) As Short
+DECLARE FUNCTION GetDir(drive As String) As String
+DECLARE FUNCTION GetDisketteType(driveNumber As Short) As Short
+DECLARE FUNCTION GetDrive() As Short
+DECLARE FUNCTION GetVol(drive As String) As String
+DECLARE FUNCTION GoodDrive(drive As String) As Short
+DECLARE SUB Handle2Name(handle As String, Byref fileName AS Any Ptr)
+DECLARE SUB KillDir(dirName As String)
+DECLARE SUB KillFile(fileName As String)
+DECLARE FUNCTION LastDrive As Short
+DECLARE FUNCTION LineCount(fileName As String, buffer As String) As Short
+DECLARE FUNCTION LoadExec(program As String, cmdLine As String) As Short
+DECLARE SUB LockFile(handle As Short, offset As Long, length As Long)
+DECLARE SUB MakeDir(dirName As String)
+DECLARE SUB NameDir(oldName As String, newName As String)
+DECLARE SUB NameFile(oldName As String, newName As String)
+DECLARE FUNCTION NetDrive(drive As String) As Short
+DECLARE SUB PutVol(drive As String, label As String)
+DECLARE SUB QBLoad(fileName As String, array As Short Ptr)
+DECLARE SUB QBSave(fileName As String, array As Short Ptr, numBytes As Short)
+DECLARE SUB ReadDir(array AS String Ptr)
+DECLARE SUB ReadDirT(spec As String, array As String Ptr)
+DECLARE SUB ReadFile(array As String Ptr)
+DECLARE SUB ReadFileI(array As String Ptr)
+DECLARE SUB ReadFileT(spec As String, array As Any Ptr)
+DECLARE SUB ReadFileX(spec As String, Byref dirSize As Long, array As Any Ptr)
+DECLARE SUB ReadSect(drive As String, Byref info As String, sector As Short)
+DECLARE FUNCTION ReadTest(drive As String) As Short
+DECLARE FUNCTION Removable(drive As String) As Short
+DECLARE SUB SetAttr(fileName As String, attribute As Short)
+DECLARE SUB SetCmd(newCommand As String)
+DECLARE SUB SetDrive(drive As String)
+DECLARE SUB SetError(errNum As Short)
+DECLARE SUB SetLevel(errValue As Short)
+DECLARE FUNCTION ShareThere As Short
+DECLARE SUB SplitName (workName As String, Byref drive As String, Byref path As String, Byref fileName As String, Byref ext As String) REM STATIC
+DECLARE SUB UnLockFile(handle As Short, offset As Long, length As Long)
+DECLARE FUNCTION Valid(fileName As String) As Short
+DECLARE FUNCTION WhichError As Short
+DECLARE SUB WriteSect(drive As String, Byref info As String, sector As Short)
+DECLARE SUB WriteSect2(drive As String, Byref info As String, sector As Short)
+DECLARE FUNCTION WriteTest(drive As String) As Short
 
 ' ****************************************
 
-DECLARE FUNCTION LineCount(fileName As String, buffer As String) As Short
 
 DECLARE SUB QPrint (text As String, colr As Short, page As Short)
 'DECLARE FUNCTION QBColor (colr As Short) As ULong
@@ -310,3 +388,5 @@ DECLARE SUB Pause(ticks AS SHORT)
 '   FUNCTION ClipCursor%% (Rect AS Rectangle) 'sets mouse box work area on desktop
 '   SUB SetCursorPos (BYVAL x AS LONG, BYVAL y AS LONG) 'move cursor position
 ' END DECLARE
+
+DECLARE FUNCTION IsWindows() AS Short

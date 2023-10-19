@@ -1,3 +1,5 @@
+#lang "fb"
+
 ' *********** PRO.BAS - added value functionality for FreeBASIC
 '                       inspired by QuickPak Professional 
 '                       for QB45/PDS71/VBDOS10
@@ -7,6 +9,26 @@
 #INCLUDE ONCE "PRO.BI"
 
 #INCLUDE ONCE "file.bi"
+#INCLUDE ONCE "dir.bi"
+'#INCLUDE ONCE "windows.bi"
+
+#IfDef __FB_WIN32__
+  extern "Windows"
+  #IfDef UNICODE
+    Declare Function GetDiskFreeSpace Lib "kernel32" Alias "GetDiskFreeSpaceW" (ByVal lpRootPathName As String, lpSectorsPerCluster As ULong, lpBytesPerSector As ULong, lpNumberOfFreeClusters As ULong, lpTotalNumberOfClusters As ULong) As Long
+  #Else
+    'Declare Function GetDiskFreeSpace Lib "kernel32" Alias "GetDiskFreeSpaceA" (ByVal lpRootPathName As String, lpSectorsPerCluster As ULong Ptr, lpBytesPerSector As ULong Ptr, lpNumberOfFreeClusters As ULong Ptr, lpTotalNumberOfClusters As ULong Ptr) As Long
+    ' C/Win32         = FB
+    ' ---------------   -------------
+    ' LPCSTR          = zstring ptr
+    ' LPDWORD         = long ptr
+    ' WINBOOL         = long
+    ' PULARGE_INTEGER = ulongint ptr
+    Declare Function GetDiskFreeSpace Lib "kernel32" Alias "GetDiskFreeSpaceA" (lpRootPathName As zString ptr, lpSectorsPerCluster As long ptr, lpBytesPerSector As long ptr, lpNumberOfFreeClusters As long ptr, lpTotalNumberOfClusters As long ptr) As Long  
+    Declare Function GetDiskFreeSpaceEx Lib "kernel32" Alias "GetDiskFreeSpaceExA" (lpDirectoryName As zString ptr, lpFreeBytesAvailableToCaller As ulongint ptr, lpTotalNumberOfBytes As ulongint ptr, lpTotalNumberOfFreeBytes As ulongint ptr) As Long
+  #EndIf
+  end extern
+#EndIf
 
 'Declare Sub AltSleep Lib "kernel32" Alias "Sleep" (ByVal dwMilliseconds As Long)
 
@@ -1867,26 +1889,56 @@ END SUB
 ' Chapter 3 - DOS Services
 ' ****************************************
 
+' CDir serves the same purpose as BASIC's CHDIR command, but it 
+' returns a code to indicate an error rather than requiring a separate 
+' error trapping procedure. 
 SUB CDir(newDir As String)
+  'TODO: Add error trapping and setting of DOSError if an error occurs.
   CHDIR newDir
 END SUB
 
+' ClipFile will establish a new length for the specified file, and the 
+' new length may be either shorter or longer than the number of bytes 
+' the file presently occupies. 
 SUB ClipFile(fileName As String, newLength As Long)
   ERROR 73 ' Feature Unavailable
 END SUB
 
-' Disklnfo calls on DOS to examine a disk, and reports its 
+' DCount reports the number of directories that match a particular specification. 
+FUNCTION DCount(dirSpec As String) As Short
+  ' dirSpec$ holds a DOS directory name specification, and Count 
+  ' receives the number of matching directories.
+
+  VAR result = 0
+  Dim attr As UInteger
+
+  VAR nm = Dir(dirSpec, fbDirectory, attr)
+  Do Until Len(nm) = 0
+    If nm <> "." And nm <> ".." Then
+      If (attr And fbDirectory) Then result += 1
+    End If
+    nm = Dir(attr)
+  Loop
+
+  DCount = result
+
+END FUNCTION
+
+' DiskInfo calls on DOS to examine a disk, and reports its 
 ' sector and cluster makeup. 
-SUB DiskInfo(drive As String, Byref bytes As Short, Byref sectors As Short, Byref freeClusters As Long, Byref totalClusters As Long)
-  ERROR 73 ' Feature Unavailable
+SUB DiskInfo(drive As String, Byref bytes As Short, Byref sectors As Short, Byref freeClusters As ULong, Byref totalClusters As ULong)
  ' Drive$ contains the letter of the drive to examine, and Bytes% returns 
  ' how many bytes each sector holds. Sectors% contains the number of sectors 
  ' in each disk cluster, FreeClusters& tells how many of them are available, 
  ' and Total Clusters& indicates the total disk capacity. 
   Var path = drive
-  IF False THEN 'INSTR(_OS$, "[WINDOWS]") THEN
+
+  Dim sectors1 as long
+  Dim bytes1 As Long
+
+  IF IsWindows THEN
     IF LEN(path) = 1 THEN path = path + ":\"
-    Var result = 0 'result& = GetDiskFreeSpace(_OFFSET(path$), _OFFSET(bytes), _OFFSET(sectors), _OFFSET(freeClusters&), _OFFSET(totalClusters&))
+    Var result = GetDiskFreeSpace(path, @bytes1, @sectors1, @freeClusters, @totalClusters)
     IF result = 0 THEN ' Failed
       bytes = 0
       sectors = 0
@@ -1898,10 +1950,20 @@ SUB DiskInfo(drive As String, Byref bytes As Short, Byref sectors As Short, Byre
       ' freeBytes& = sectors * bytes * freeClusters&
 
     ELSE 
-      'NOTE: Appears to not be working due to (guessing)
-      '      lack of "very large" drive support in GetDiskFreeSpaceA;
-      '      may have to switch to use GetDiskFreeSpaceExA possibly
-      '      combined with GetDiskFreeSpaceA???
+
+      bytes = bytes1
+      sectors = sectors1
+
+      Dim freeBytesAvailableToCaller As ulongint
+      Dim totalNumberOfBytes As ulongint
+      Dim totalNumberOfFreeBytes As ulongint
+
+      result = GetDiskFreeSpaceEx(path, @freeBytesAvailableToCaller, @totalNumberOfBytes, @totalNumberOfFreeBytes)
+      If result <> 0 Then
+        freeClusters = totalNumberOfFreeBytes \ (sectors * bytes)
+        totalClusters = totalNumberOfBytes \ (sectors * bytes)
+      End If
+
     END IF
   ELSE
     ERROR 73 ' Feature Unavailable
@@ -1910,21 +1972,53 @@ END SUB
 
 ' DiskRoom returns the number of bytes that are 
 ' currently available on a specified disk drive. 
-FUNCTION DiskRoom(drive As String) As Long
+FUNCTION DiskRoom(drive As String) As ULong
+
   ' Drive$ contains either an upper or lower case letter for the disk 
   ' drive being examined, or is null to indicate the default drive. Room 
   ' is assigned the number of available bytes. 
-  ERROR 73 ' Feature Unavailable
-  DiskRoom = -1
+  Var path = drive
+  IF IsWindows THEN
+    IF LEN(path) = 1 THEN path = path + ":\"
+    Dim freeBytesAvailableToCaller As ulongint
+    Dim totalNumberOfBytes As ulongint
+    Dim totalNumberOfFreeBytes As ulongint
+    Var result = GetDiskFreeSpaceEx(path, @freeBytesAvailableToCaller, @totalNumberOfBytes, @totalNumberOfFreeBytes)
+    IF result = 0 THEN ' Failed
+      DiskRoom = 0
+      'TODO: Need to set DOSError.
+    ELSE 
+      DiskRoom = totalNumberOfFreeBytes
+    END IF
+  ELSE
+    ERROR 73 ' Feature Unavailable
+  END IF
+
 END FUNCTION
 
 ' DiskSize returns the total capacity in bytes of a specified disk drive. 
-FUNCTION DiskSize(drive As String) As Long
+FUNCTION DiskSize(drive As String) As ULong
+
   ' Drive$ contains an upper or lower case letter for the disk drive 
   ' being examined, or is null to indicate the default drive. Size is 
   ' assigned the total number of bytes the disk can hold.
-  ERROR 73 ' Feature Unavailable
-  DiskSize = -1
+  Var path = drive
+  IF IsWindows THEN
+    IF LEN(path) = 1 THEN path = path + ":\"
+    Dim freeBytesAvailableToCaller As ulongint
+    Dim totalNumberOfBytes As ulongint
+    Dim totalNumberOfFreeBytes As ulongint
+    Var result = GetDiskFreeSpaceEx(path, @freeBytesAvailableToCaller, @totalNumberOfBytes, @totalNumberOfFreeBytes)
+    IF result = 0 THEN ' Failed
+      DiskSize = 0
+      'TODO: Need to set DOSError.
+    ELSE 
+      DiskSize = totalNumberOfBytes
+    END IF
+  ELSE
+    ERROR 73 ' Feature Unavailable
+  END IF
+
 END FUNCTION
 
 ' DOSError reports if an error occurred during the last call to a 
@@ -2003,597 +2097,674 @@ FUNCTION ErrorMsg(errorNumber As Short) As String
   END SELECT
 END FUNCTION
 
-' ' ExeName returns the full name of the currently executing program, 
-' ' including the drive, path, and file name. ExeName requires DOS 
-' ' 3.0 or higher, and returns a null string when run under DOS 2. 
-' FUNCTION ExeName$
-'   ' NOTE: Considered UCASE$, but an existing sample suggests that this shouldn't be done here.
-'   ExeName$ = COMMAND$(0)
-' END FUNCTION
+' ExeName returns the full name of the currently executing program, 
+' including the drive, path, and file name. ExeName requires DOS 
+' 3.0 or higher, and returns a null string when run under DOS 2. 
+FUNCTION ExeName As String
+  ' NOTE: Considered UCASE$, but an existing sample suggests that this shouldn't be done here.
 
-' ' Exist will quickly determine the presence of a file. 
-' FUNCTION Exist(fileName$)
-'   ' FileName$ is the file or file specification whose presence is being 
-'   ' determined, and There is assigned either to -1 if the file exists, or 0 
-'   ' if it does not. 
-'   ' The FileName$ parameter may optionally contain a drive letter, a 
-'   ' directory path, and either of the DOS wild cards. For example, 
-'   ' "B:\STUFF\*.BAS" would tell if any BASIC program files are 
-'   ' present on drive B in the \STUFF directory.
-'   IF INSTR(fileName$, "*") > 0 OR INSTR(fileName$, "?") > 0 THEN
-'     Exist = FCount(fileName$) > 0
-'   ELSE
-'     Exist = _FileExists(fileName$)
-'   END IF
-' END FUNCTION
+  VAR exe = COMMAND$(0)
 
-' ' FClose will close a file that had been previously opened with the 
-' ' QuickPak Professional FOpen command. 
-' SUB FClose(handle)
-'   CLOSE #handle
-' END SUB
+  VAR slash = InstrRev(exe, "\")
+  IF slash = 0 THEN slash = InstrRev(exe, "/")
 
-' ' FCopy will copy a file from within a BASIC program without 
-' ' requiring the use of SHELL. 
-' SUB FCopy(source$, dest$, buffer$, errCode)
+  IF slash > 0 THEN
+    exe = RIGHT$(exe, LEN(exe) - slash)
+  END IF
 
-'   ' TODO: Consider if there is a way to leverage LOF/EOF and buffer$
-'   ' NOTE: This is currently (most likely) very "slow" given it is 
-'   '       working one byte at a time - see the TODO: above.
+  VAR path = ExePath
+  IF INSTR(path, "/") THEN
+    ExeName = path + "/" + COMMAND$(0)
+  ELSE
+    ExeName = path + "\" + COMMAND$(0)
+  END IF
 
-'   errCode = 0
+END FUNCTION
 
-'   IF Exist(source$) THEN
+' Exist will quickly determine the presence of a file. 
+FUNCTION Exist(fileName As String) AS Short
+  ' FileName$ is the file or file specification whose presence is being 
+  ' determined, and There is assigned either to -1 if the file exists, or 0 
+  ' if it does not. 
+  ' The FileName$ parameter may optionally contain a drive letter, a 
+  ' directory path, and either of the DOS wild cards. For example, 
+  ' "B:\STUFF\*.BAS" would tell if any BASIC program files are 
+  ' present on drive B in the \STUFF directory.
+  IF INSTR(fileName, "*") > 0 OR INSTR(fileName, "?") > 0 THEN
+    Exist = FCount(fileName) > 0
+  ELSE
+    Exist = FileExists(fileName)
+  END IF
+END FUNCTION
 
-'     ' TODO: Check destination folder exists.
-'     ' TODO: Protect against trying to overwrite (same source and dest path).
+' FastLoad - See FASTFILE.BAS.
+' FastSave - See FASTFILE.BAS.
 
-'     DIM value AS _BYTE
+' FClose will close a file that had been previously opened with the 
+' QuickPak Professional FOpen command. 
+SUB FClose(handle As Short)
+  CLOSE #handle
+END SUB
 
-'     CALL FOpen(source$, src)
-'     CALL FOpen(dest$, dest)
+' FCopy will copy a file from within a BASIC program without 
+' requiring the use of SHELL. 
+SUB FCopy(source As String, destination As String, buffer AS String, Byref errCode AS Short)
 
-'     DO
-'       GET #src, , value
-'       IF FEof(src) THEN EXIT DO
-'       PUT #dest, , value
-'     LOOP
+  ' TODO: Consider if there is a way to leverage LOF/EOF and buffer$
+  ' NOTE: This is currently (most likely) very "slow" given it is 
+  '       working one byte at a time - see the TODO: above.
 
-'     CALL FClose(dest): CALL FClose(source)
+  errCode = 0
 
-'   ELSE
-'     errCode = 2 ' problem with the source file
-'   END IF
+  IF Exist(source) THEN
 
-' END SUB
+    ' TODO: Check destination folder exists.
+    ' TODO: Protect against trying to overwrite (same source and dest path).
 
-' ' FCreate is used to create a file in preparation for writing to it with 
-' ' the QuickPak Professional file handling routines. 
-' SUB FCreate(fileName$)
-'   ff = FREEFILE
-'   OPEN fileName$ FOR OUTPUT AS #ff
-'   CLOSE #ff
-' END SUB
+    DIM value AS Byte
+    DIM src As Short
+    DIM dest As Short
 
-' ' FEof will report if the current DOS Seek location is at the end of 
-' ' the specified file. 
-' FUNCTION FEof(handle)
-'   FEof = EOF(handle)
-' END FUNCTION
+    FOpen source, src
+    FOpen destination, dest
 
-' ' FFlush will flush a file's data buffers to disk without requiring the 
-' ' file to be closed. 
-' SUB FFlush(Handle)
-'   ERROR 73 ' Feature Unavailable
-' END SUB
+    DO
+      GET #src, , value
+      IF FEof(src) THEN EXIT DO
+      PUT #dest, , value
+    LOOP
 
-' ' FGet reads data from a disk file in a manner similar to BASIC's 
-' ' binary GET command, but it returns an error code rather than 
-' ' requiring the use of ON ERROR. 
-' SUB FGet(handle, destination$)
-'   GET #handle, , destination$
-' END SUB
+    FClose dest: FClose src
 
-' ' FGetA is similar to the QuickPak Professional FGetT routine, 
-' ' however it accepts a segmented address thus allowing an entire 
-' ' array to be loaded in one operation. FGetA will load up to 64k 
-' ' bytes at a time. 
-' SUB FGetA(handle, block AS _MEM, numBytes)
+  ELSE
+    errCode = 2 ' problem with the source file
+  END IF
 
-'   DIM work(1 TO numBytes) AS _BYTE    ' prepare a byte array
-'   GET # handle, , work()              ' read the number of bytes into memory
+END SUB
+
+' FCount will report the number of file names that match a particular specification. 
+FUNCTION FCount(fileSpec As String) AS Short
+
+  ' fileSpec$ holds a DOS file name or specification, and Count 
+  ' receives the number of matching entries. 
+
+  VAR result = 0
+
+  Dim attr As UInteger
+
+  VAR nm = Dir(fileSpec, fbNormal Or fbHidden or fbSystem, attr)
+  Do Until Len(nm) = 0
+    If nm <> "." And nm <> ".." Then
+      If (attr And fbDirectory) = 0 Then result += 1
+    End If
+    nm = Dir(attr)
+  Loop
+
+  FCount = result
+
+END FUNCTION
+
+' FCreate is used to create a file in preparation for writing to it with 
+' the QuickPak Professional file handling routines. 
+SUB FCreate(fileName As String)
+  VAR ff = FREEFILE
+  OPEN fileName FOR OUTPUT AS #ff
+  CLOSE #ff
+END SUB
+
+' FEof will report if the current DOS Seek location is at the end of 
+' the specified file. 
+FUNCTION FEof(handle As Short) As Short
+  FEof = EOF(handle)
+END FUNCTION
+
+' FFlush will flush a file's data buffers to disk without requiring the 
+' file to be closed. 
+SUB FFlush(handle As Short)
+  ERROR 73 ' Feature Unavailable
+END SUB
+
+' FGet reads data from a disk file in a manner similar to BASIC's 
+' binary GET command, but it returns an error code rather than 
+' requiring the use of ON ERROR. 
+SUB FGet(handle As Short, Byref destination As String)
+  GET #handle, , destination
+END SUB
+
+' FGetA is similar to the QuickPak Professional FGetT routine, 
+' however it accepts a segmented address thus allowing an entire 
+' array to be loaded in one operation. FGetA will load up to 64k 
+' bytes at a time. 
+SUB FGetA(handle As Short, array As Any Ptr, numBytes As Short)
+
+  ERROR 73 ' Feature Unavailable
+
+  ' DIM work(1 TO numBytes) AS _BYTE    ' prepare a byte array
+  ' GET # handle, , work()              ' read the number of bytes into memory
   
-'   DIM src AS _MEM                     ' copy the byte array to the memory block
-'   src = _MEM(work())
-'   _MEMCOPY src, src.OFFSET, src.SIZE TO block, block.OFFSET
-'   _MEMFREE src
+  ' DIM src AS _MEM                     ' copy the byte array to the memory block
+  ' src = _MEM(work())
+  ' _MEMCOPY src, src.OFFSET, src.SIZE TO block, block.OFFSET
+  ' _MEMFREE src
 
-' END SUB
+END SUB
 
-' SUB FGetAH(FileName$, Array$(), Start, ElSize, NumEls)
-'   ERROR 73 ' Feature Unavailable
-' END SUB
+SUB FGetAH(fileName As String, array As Any Ptr, elSize As Short, numEls As Short)
+  ERROR 73 ' Feature Unavailable
+END SUB
 
-' SUB FGetR(Handle, Destination$, RecNumber&)
-'   ERROR 73 ' Feature Unavailable
-' END SUB
+SUB FGetR(handle As Short, Byref destination As String, recNumber As Long)
+  ERROR 73 ' Feature Unavailable
+END SUB
 
-' SUB FGetRT(Handle, block AS _MEM, RecNumber&, RecSize)
-'   ERROR 73 ' Feature Unavailable
-' END SUB
+SUB FGetRT(handle As Short, destination As Any Ptr, recNumber As Long, recSize As Short)
+  ERROR 73 ' Feature Unavailable
+END SUB
 
-' SUB FGetRTA(Handle, block AS _MEM, RecNumber&, RecSize)
-'   ERROR 73 ' Feature Unavailable
-' END SUB
+SUB FGetRTA(handle As Short, destination As Any Ptr, recNumber As Long, recSize As Short)
+  ERROR 73 ' Feature Unavailable
+END SUB
 
-' SUB FGetT(Handle, block AS _MEM, NumBytes)
-'   ERROR 73 ' Feature Unavailable
-' END SUB
+SUB FGetT(handle As Short, destination As Any Ptr, numBytes As Short)
+  ERROR 73 ' Feature Unavailable
+END SUB
 
-' ' ' FileComp will report if any two disk files are the same. 
-' ' FUNCTION FileComp(file1$, file2$, errCode)
+' FileComp will report if any two disk files are the same. 
+FUNCTION FileComp(file1 As String, file2 As String, Byref errCode As Short) As Short
 
-' '   ' File1$ and File2$ are the two files being compared, and Same 
-' '   ' receives either -1 if they are the same, or O if they are not. 
-' '   '
-' '   ' If a DOS error occurs (file not found, drive door open, etc.), then 
-' '   ' ErrCode% will tell which file the error relates to. An ErrCode% of 
-' '   ' 1 means the problem was with File1$, and 2 means it was with File2$.
-' '   '
-' '   ' Besides returning a true or false condition based on a comparison of 
-' '   ' the two files, FileComp also uses the DOSError and WhichError 
-' '   ' services to report disk errors. This is illustrated in the 
-' '   ' DEMOCOMP .BAS example program.
+  ' File1$ and File2$ are the two files being compared, and Same 
+  ' receives either -1 if they are the same, or O if they are not. 
+  '
+  ' If a DOS error occurs (file not found, drive door open, etc.), then 
+  ' ErrCode% will tell which file the error relates to. An ErrCode% of 
+  ' 1 means the problem was with File1$, and 2 means it was with File2$.
+  '
+  ' Besides returning a true or false condition based on a comparison of 
+  ' the two files, FileComp also uses the DOSError and WhichError 
+  ' services to report disk errors. This is illustrated in the 
+  ' DEMOCOMP .BAS example program.
 
-' '   IF NOT Exist(file1$) THEN errCode = 1: EXIT FUNCTION
-' '   IF NOT Exist(file2$) THEN errCode = 2: EXIT FUNCTION
+  IF NOT Exist(file1) THEN errCode = 1: EXIT FUNCTION
+  IF NOT Exist(file2) THEN errCode = 2: EXIT FUNCTION
   
-' '   s1& = FileSize&(file1$)
-' '   s2& = FileSize&(file2$)
+  Var s1 = FileSize(file1)
+  Var s2 = FileSize(file2)
 
-' '   IF s1& <> s2& THEN FileComp = 0: EXIT FUNCTION
+  IF s1 <> s2 THEN FileComp = 0: EXIT FUNCTION
 
-' '   result = 1 ' assume files match
+  VAR result = -1 ' assume files match
 
-' '   DIM value1 AS _BYTE
-' '   DIM value2 AS _BYTE
+  DIM value1 AS Byte
+  DIM value2 AS Byte
 
-' '   CALL FOpen(file1$, f1)
-' '   CALL FOpen(file2$, f2)
+  Dim f1 As Short, f2 As Short
 
-' '   DO
-' '     GET #f1, , value1
-' '     GET #f2, , value2
-' '     IF value1 <> value2 THEN result = 0: EXIT DO ' unless they don't
-' '   LOOP UNTIL FEof(f1)
+  FOpen file1, f1
+  FOpen file2, f2
 
-' '   CALL FClose(f2): CALL FClose(f1)
+  DO
+    GET #f1, , value1
+    GET #f2, , value2
+    IF value1 <> value2 THEN result = 0: EXIT DO ' unless they don't
+  LOOP UNTIL FEof(f1)
 
-' '   FileComp = result
+  FClose f2: FClose f1
 
-' ' END FUNCTION
+  FileComp = result
 
-' SUB FileInfo(fileName$, tVar AS FInfo)
+END FUNCTION
 
-'   f$ = fileName$
+' FileCopy - see FILECOPY.BAS
+' FileCrypt - see FILECRPT.BAS
 
-'   IF RIGHT$(f$, 1) <> CHR$(0) THEN f$ = f$ + CHR$(0)
+SUB FileInfo(fileName As String, tVar As Any Ptr)
 
-'   DIM createDate AS FILETIME
-'   DIM modifyDate AS FILETIME
-'   DIM accessDate AS FILETIME
-'   DIM systime1 AS SYSTEMTIME
-'   DIM fileHandle AS _OFFSET
+  ERROR 73 ' Feature Unavailable
 
-'   fileHandle = CreateFileA%&(_OFFSET(f$), GENERIC_READ, FILE_SHARE_READ OR FILE_SHARE_WRITE, 0, OPEN_EXISTING, 0, 0)
-'   IF fileHandle <> INVALID_HANDLE_VALUE THEN
-'     IF GetFileTime&(fileHandle, _OFFSET(createDate), _OFFSET(modifyDate), _OFFSET(accessDate)) THEN
-'       'PRINT HEX$(createDate.dwLowDateTime) + HEX$(createDate.dwHighDateTime)
-'       'PRINT HEX$(modifyDate.dwLowDateTime) + HEX$(modifyDate.dwHighDateTime)
-'       'PRINT HEX$(accessDate.dwLowDateTime) + HEX$(accessDate.dwHighDateTime)
-'       IF FileTimeToSystemTime&(_OFFSET(createDate), _OFFSET(systime1)) THEN
-'         tVar.Year = systime1.wYear
-'         tVar.Month = systime1.wMonth
-'         tVar.Day = systime1.wDay
-'         tVar.Hour = systime1.wHour
-'         tVar.Minute = systime1.wMinute
-'         tVar.Second = systime1.wSecond
-'       ELSE
-'         'PRINT "FileTimeToSystemTime failed. Error: 0x" + LCASE$(HEX$(GetLastError&))
-'       END IF
-'     ELSE
-'       'PRINT "GetFileTime failed. Error: 0x" + LCASE$(HEX$(GetLastError&))
-'     END IF
-'     IF CloseHandle&(fileHandle) = 0 THEN
-'       'PRINT "CloseHandle failed. Error: 0x" + LCASE$(HEX$(GetLastError&))
-'     END IF
-'   ELSE
-'     'PRINT "CreateFileA failed. Error: 0x" + LCASE$(HEX$(GetLastError&))
-'   END IF
+  ' f$ = fileName$
 
-'   tVar.Size = FileSize(fileName$)
-'   tVar.Attrib = GetFileAttributes(f$)
+  ' IF RIGHT$(f$, 1) <> CHR$(0) THEN f$ = f$ + CHR$(0)
 
-' END SUB
+  ' DIM createDate AS FILETIME
+  ' DIM modifyDate AS FILETIME
+  ' DIM accessDate AS FILETIME
+  ' DIM systime1 AS SYSTEMTIME
+  ' DIM fileHandle AS _OFFSET
 
-' ' FileSize will quickly return the length of a named file. 
-' FUNCTION FileSize&(fileName$)
+  ' fileHandle = CreateFileA%&(_OFFSET(f$), GENERIC_READ, FILE_SHARE_READ OR FILE_SHARE_WRITE, 0, OPEN_EXISTING, 0, 0)
+  ' IF fileHandle <> INVALID_HANDLE_VALUE THEN
+  '   IF GetFileTime&(fileHandle, _OFFSET(createDate), _OFFSET(modifyDate), _OFFSET(accessDate)) THEN
+  '     'PRINT HEX$(createDate.dwLowDateTime) + HEX$(createDate.dwHighDateTime)
+  '     'PRINT HEX$(modifyDate.dwLowDateTime) + HEX$(modifyDate.dwHighDateTime)
+  '     'PRINT HEX$(accessDate.dwLowDateTime) + HEX$(accessDate.dwHighDateTime)
+  '     IF FileTimeToSystemTime&(_OFFSET(createDate), _OFFSET(systime1)) THEN
+  '       tVar.Year = systime1.wYear
+  '       tVar.Month = systime1.wMonth
+  '       tVar.Day = systime1.wDay
+  '       tVar.Hour = systime1.wHour
+  '       tVar.Minute = systime1.wMinute
+  '       tVar.Second = systime1.wSecond
+  '     ELSE
+  '       'PRINT "FileTimeToSystemTime failed. Error: 0x" + LCASE$(HEX$(GetLastError&))
+  '     END IF
+  '   ELSE
+  '     'PRINT "GetFileTime failed. Error: 0x" + LCASE$(HEX$(GetLastError&))
+  '   END IF
+  '   IF CloseHandle&(fileHandle) = 0 THEN
+  '     'PRINT "CloseHandle failed. Error: 0x" + LCASE$(HEX$(GetLastError&))
+  '   END IF
+  ' ELSE
+  '   'PRINT "CreateFileA failed. Error: 0x" + LCASE$(HEX$(GetLastError&))
+  ' END IF
 
-'   ' fileName$ is the name of the file, and size is assigned its length in 
-'   ' bytes. If the file does not exist size is instead assigned a value of -1. 
+  ' tVar.Size = FileSize(fileName$)
+  ' tVar.Attrib = GetFileAttributes(f$)
 
-'   result& = 0
+END SUB
 
-'   IF NOT _FileExists(fileName$) THEN
-'     result& = -1
-'   ELSE
+' FileSize will quickly return the length of a named file. 
+FUNCTION FileSize(fileName As String) As Long
 
-'     IF INSTR(_OS$, "[WINDOWS]") THEN
-'       DIM pattern AS STRING
-'       DIM fd AS Win32_Find_Data
-'       DIM hFind AS _UNSIGNED _OFFSET
-'       DIM junk AS LONG
-'       pattern = fileName$ + CHR$(0)
-'       hFind = FindFirstFile(_OFFSET(pattern), _OFFSET(fd))
-'       IF hFind <> INVALID_HANDLE_VALUE THEN
-'         result& = fd.nfilesizelow
-'         junk = FindClose(hFind)
-'       ELSE
-'         lastError& = GetLastError
-'         IF lastError& = ERROR_ACCESS_DENIED THEN
-'           ERROR 70 ' Permission denied
-'         ELSE
-'           ERROR 75 ' Path/File access error
-'         END IF
-'       END IF
-'     ELSE
-'       ERROR 73 ' Advanced Feature / Feature Unavailable
-'     END IF
+  ' fileName$ is the name of the file, and size is assigned its length in 
+  ' bytes. If the file does not exist size is instead assigned a value of -1. 
 
-'   END IF
+  If Exist(fileName) Then
+    Var ff = Freefile
+    Open fileName For Binary As #ff
+    FileSize = Lof( ff )
+    Close #ff
+  Else
+    FileSize = -1
+  End If
 
-'   FileSize& = result&
+  ' IF NOT _FileExists(fileName$) THEN
+  '   result& = -1
+  ' ELSE
 
-' END FUNCTION
+  '   IF INSTR(_OS$, "[WINDOWS]") THEN
+  '     DIM pattern AS STRING
+  '     DIM fd AS Win32_Find_Data
+  '     DIM hFind AS _UNSIGNED _OFFSET
+  '     DIM junk AS LONG
+  '     pattern = fileName$ + CHR$(0)
+  '     hFind = FindFirstFile(_OFFSET(pattern), _OFFSET(fd))
+  '     IF hFind <> INVALID_HANDLE_VALUE THEN
+  '       result& = fd.nfilesizelow
+  '       junk = FindClose(hFind)
+  '     ELSE
+  '       lastError& = GetLastError
+  '       IF lastError& = ERROR_ACCESS_DENIED THEN
+  '         ERROR 70 ' Permission denied
+  '       ELSE
+  '         ERROR 75 ' Path/File access error
+  '       END IF
+  '     END IF
+  '   ELSE
+  '     ERROR 73 ' Advanced Feature / Feature Unavailable
+  '   END IF
 
-' SUB FileSort(DataFile$, IndexFile$, First&, Last&, Table(), RecLength)
-'   ERROR 73 ' Feature Unavailable
-' END SUB
+  ' END IF
 
-' ' FLinput will read a line of input from a file that has been opened 
-' ' using the QuickPak Professional FOpen routine. 
-' FUNCTION FLInput$(handle, buffer$)
+END FUNCTION
+
+' FileSort - see FILESORT.BAS
+
+' FLinput will read a line of input from a file that has been opened 
+' using the QuickPak Professional FOpen routine. 
+FUNCTION FLInput(handle As Short, buffer As String) As String
   
-'   ' Handle% is the file handle that was assigned when the file was first 
-'   ' opened, and Buffer$ is a temporary work string needed by FLinput 
-'   ' as it reads the file contents. 
-'   '
-'   ' Unlike the other QuickPak Professional binary input routines that 
-'   ' read a specified number of bytes, words, or elements from a file, 
-'   ' FLinput reads until it encounters the CHR$(13) that marks the end 
-'   ' of a line, or the CHR$(26) that indicates the end of a file. For files 
-'   ' that do not contain an end of file marker, FLinput stops reading at 
-'   ' the physical end of the file. 
-'   '
-'   ' The only errors that are likely when using FLinput are "Input Past 
-'   ' End" (number 62) or "Buffer Too Small" (number 83). It is up to 
-'   ' the calling program to provide a temporary work buffer for 
-'   ' FLinput. If that buff er is too small to read an entire line, you 
-'   ' should invoke FLinput again to obtain the remainder. This is 
-'   ' illustrated in the FLINPUT.BAS example program.
+  ERROR 73 ' Feature Unavailable
 
-'   SetError 0
+  ' Handle% is the file handle that was assigned when the file was first 
+  ' opened, and Buffer$ is a temporary work string needed by FLinput 
+  ' as it reads the file contents. 
+  '
+  ' Unlike the other QuickPak Professional binary input routines that 
+  ' read a specified number of bytes, words, or elements from a file, 
+  ' FLinput reads until it encounters the CHR$(13) that marks the end 
+  ' of a line, or the CHR$(26) that indicates the end of a file. For files 
+  ' that do not contain an end of file marker, FLinput stops reading at 
+  ' the physical end of the file. 
+  '
+  ' The only errors that are likely when using FLinput are "Input Past 
+  ' End" (number 62) or "Buffer Too Small" (number 83). It is up to 
+  ' the calling program to provide a temporary work buffer for 
+  ' FLinput. If that buff er is too small to read an entire line, you 
+  ' should invoke FLinput again to obtain the remainder. This is 
+  ' illustrated in the FLINPUT.BAS example program.
 
-'   result$ = ""
+  SetError 0
 
-'   cp = LOC(handle)
-'   lf = LOF(handle)
-'   lb = LEN(buffer$)
+  Var result = ""
 
-'   IF (cp - 1) + lb => lf THEN
-'     lb = lf - cp
-'   END IF
+  ' cp = LOC(handle)
+  ' lf = LOF(handle)
+  ' lb = LEN(buffer$)
 
-'   IF lb > 0 THEN
+  ' IF (cp - 1) + lb => lf THEN
+  '   lb = lf - cp
+  ' END IF
 
-'     CALL FGet(handle, buffer$)
+  ' IF lb > 0 THEN
 
-'     cr = INSTR(buffer$, CHR$(13))
-'     feed = INSTR(buffer$, CHR$(10))
-'     ef = INSTR(buffer$, CHR$(26))
+  '   CALL FGet(handle, buffer$)
 
-'     IF cr > 0 THEN
-'       result$ = LEFT$(buffer$, cr - 1)
-'       IF cr + 1 = feed THEN
-'         IF cp + feed + 1 < lf THEN
-'           SEEK handle, cp + feed + 1
-'         END IF
-'       ELSE
-'         IF cp + cr < lf THEN
-'           SEEK handle, cp + cr
-'         END IF
-'       END IF
-'     ELSEIF ef > 0 THEN
-'       result$ = LEFT$(buffer$, ef - 1)
-'       SEEK handle, cp + ef
-'       SetError 62 ' End of File
-'     ELSE
-'       result$ = buffer$
-'       SetError 83 ' Buffer too small
-'     END IF
+  '   cr = INSTR(buffer$, CHR$(13))
+  '   feed = INSTR(buffer$, CHR$(10))
+  '   ef = INSTR(buffer$, CHR$(26))
 
-'   ELSE
-'     SetError 62 ' End of File
-'   END IF
+  '   IF cr > 0 THEN
+  '     result$ = LEFT$(buffer$, cr - 1)
+  '     IF cr + 1 = feed THEN
+  '       IF cp + feed + 1 < lf THEN
+  '         SEEK handle, cp + feed + 1
+  '       END IF
+  '     ELSE
+  '       IF cp + cr < lf THEN
+  '         SEEK handle, cp + cr
+  '       END IF
+  '     END IF
+  '   ELSEIF ef > 0 THEN
+  '     result$ = LEFT$(buffer$, ef - 1)
+  '     SEEK handle, cp + ef
+  '     SetError 62 ' End of File
+  '   ELSE
+  '     result$ = buffer$
+  '     SetError 83 ' Buffer too small
+  '   END IF
 
-'   FLInput$ = result$
+  ' ELSE
+  '   SetError 62 ' End of File
+  ' END IF
 
-' END FUNCTION
+  FLInput = result
 
-' FUNCTION FLoc&(Handle)
-'   FLoc& = LOC(Handle)
-' END FUNCTION
+END FUNCTION
 
-' FUNCTION FLof&(handle)
-'   FLof& = LOF(handle)
-' END FUNCTION
+FUNCTION FLoc(handle As Short) As Long
+  FLoc = LOC(handle)
+END FUNCTION
 
-' ' FOpen is used to open a disk file in preparation for reading or 
-' ' writing using the QuickPak Professional file access routines. 
-' SUB FOpen(fileName$, handle)
-'   handle = FREEFILE
-'   OPEN fileName$ FOR BINARY ACCESS READ WRITE AS #handle
-' END SUB
+FUNCTION FLof(handle As Short) As Long
+  FLof = LOF(handle)
+END FUNCTION
 
-' ' FOpenS is used to open for Shared (network access) a disk file in 
-' ' preparation for reading or writing using the QuickPak Professional 
-' ' file access routines.
-' SUB FOpenS(fileName$, handle)
-'   handle = FREEFILE
-'   OPEN fileName$ FOR BINARY ACCESS READ WRITE SHARED AS #handle
-' END SUB
+' FOpen is used to open a disk file in preparation for reading or 
+' writing using the QuickPak Professional file access routines. 
+SUB FOpen(fileName As String, Byref handle As Short)
+  handle = FREEFILE
+  OPEN fileName FOR BINARY ACCESS READ WRITE AS #handle
+END SUB
 
-' SUB FOpenAll(FileName$, AccessMode, ShareMode, Handle)
-'   ERROR 73 ' Feature Unavailable
-' END SUB
+' FOpenS is used to open for Shared (network access) a disk file in 
+' preparation for reading or writing using the QuickPak Professional 
+' file access routines.
+SUB FOpenS(fileName As String, Byref handle As Short)
+  handle = FREEFILE
+  OPEN fileName FOR BINARY ACCESS READ WRITE SHARED AS #handle
+END SUB
 
-' FUNCTION FormatDiskette(DriveNumber, Capacity, BufArray())
-'   ERROR 73 ' Feature Unavailable
-' END FUNCTION
+SUB FOpenAll(fileName As String, accessMode As Short, shareMode As Short, handle As Short)
+  ERROR 73 ' Feature Unavailable
+END SUB
 
-' SUB FPut(handle, source$)
-'   PUT #handle, , source$
-' END SUB
+FUNCTION FormatDiskette(driveNumber As Short, capacity As Short, bufArray As Short Ptr) As Short
+  ERROR 73 ' Feature Unavailable
+  FormatDiskette = 0
+END FUNCTION
 
-' ' FPutA is similar to the QuickPak Professional FPut routine, 
-' ' however it accepts a segmented address thus allowing an entire 
-' ' array to be saved in one operation. FPutA will write up to 64k 
-' ' bytes at a time. 
-' SUB FPutA(handle, array(), start, numBytes)
+SUB FPut(handle As Short, source As String)
+  PUT #handle, , source
+END SUB
 
-'   'ORIGINAL: CALL FPutA(Handle%, SEG Array(Start), NumBytes%)
+' FPutA is similar to the QuickPak Professional FPut routine, 
+' however it accepts a segmented address thus allowing an entire 
+' array to be saved in one operation. FPutA will write up to 64k 
+' bytes at a time. 
+SUB FPutA(handle As Short, array As Any Ptr, numBytes As Short)
 
-'   ' Handle% is the DOS file handle that was assigned when the file was 
-'   ' opened, and Array(Start) is any array (except a conventional string 
-'   ' array) that is to be saved. 
-'   ' 
-'   ' NumBytes% indicates the number of bytes to be written. If the 
-'   ' number of bytes exceeds 32767, then you must instead use a long 
-'   ' integer variable or number. 
+  ERROR 73 ' Feature Unavailable
 
-'   written = 0
-'   FOR element = start TO UBOUND(array)
-'     IF written + 2 > numBytes THEN
-'       IF written + 1 <= numBytes THEN
-'         byt = 0 'TODO: Need to determine the byte to be written.
-'         ch$ = CHR$(byt)
-'         PUT #handle, , ch$
-'         written = written + 1
-'       END IF
-'       EXIT FOR
-'     END IF
-'     PUT #handle, , array(element)
-'     written = written + 2
-'   NEXT
+  'ORIGINAL: CALL FPutA(Handle%, SEG Array(Start), NumBytes%)
 
-' END SUB
+  ' Handle% is the DOS file handle that was assigned when the file was 
+  ' opened, and Array(Start) is any array (except a conventional string 
+  ' array) that is to be saved. 
+  ' 
+  ' NumBytes% indicates the number of bytes to be written. If the 
+  ' number of bytes exceeds 32767, then you must instead use a long 
+  ' integer variable or number. 
 
-' SUB FPutAH(Handle, Array(), start, ElSize, NumEls)
-'   ERROR 73 ' Feature Unavailable
-' END SUB
+  ' written = 0
+  ' FOR element = start TO UBOUND(array)
+  '   IF written + 2 > numBytes THEN
+  '     IF written + 1 <= numBytes THEN
+  '       byt = 0 'TODO: Need to determine the byte to be written.
+  '       ch$ = CHR$(byt)
+  '       PUT #handle, , ch$
+  '       written = written + 1
+  '     END IF
+  '     EXIT FOR
+  '   END IF
+  '   PUT #handle, , array(element)
+  '   written = written + 2
+  ' NEXT
 
-' SUB FPutR(Handle, Source$, RecNumber&)
-'   ERROR 73 ' Feature Unavailable
-' END SUB
+END SUB
 
-' SUB FPutRT(Handle, block AS _MEM, RecNumber&, RecSize)
-'   ERROR 73 ' Feature Unavailable
-' END SUB
+SUB FPutAH(fileName As String, array As Any Ptr, elSize As Short, numEls As Short)
+  ERROR 73 ' Feature Unavailable
+END SUB
 
-' SUB FPutRTA(Handle, block AS _MEM, RecNumber&, RecSize)
-'   ERROR 73 ' Feature Unavailable
-' END SUB
+SUB FPutR(handle As Short, source As String, recNumber As Long)
+  ERROR 73 ' Feature Unavailable
+END SUB
 
-' SUB FPutT(Handle, block AS _MEM, NumBytes)
-'   ERROR 73 ' Feature Unavailable
-' END SUB
+SUB FPutRT(handle As Short, source As Any Ptr, recNumber As Long, recSize As Short)
+  ERROR 73 ' Feature Unavailable
+END SUB
 
-' SUB FSeek(handle, location&)
-'   SEEK handle, location& + 1
-' END SUB
+SUB FPutRTA(handle As Short, source As Any Ptr, recNumber As Long, recSize As Short)
+  ERROR 73 ' Feature Unavailable
+END SUB
 
-' SUB FStamp(FileName$, NewTime$, NewDate$)
-'   ERROR 73 ' Feature Unavailable
-' END SUB
+SUB FPutT(handle As Short, source As Any Ptr, numBytes As Short)
+  ERROR 73 ' Feature Unavailable
+END SUB
 
-' FUNCTION FullName$(partName$)
-'   s = 1
-'   DO
-'     p = InstrTbl(s, partName$, "\/")
-'     section$ = MID$(partName$, s, p - s)
-'     IF section$ = ".." THEN 
-'       c = c + 1
-'     ELSE
-'       s = s - 1 ' walk one character back.
-'       EXIT DO
-'     END IF
-'     IF p = -1 THEN EXIT DO
-'     s = p + 1
-'   LOOP
-'   section$ = MID$(partName$, s)
-'   cwd$ = _CWD$
-'   FOR x = 1 TO c
-'     p = InstrTblB(LEN(cwd$), cwd$, "\/")
-'     IF p > 0 THEN
-'       cwd$ = LEFT$(cwd$, p - 1)
-'     ELSE
-'       EXIT FOR ' error?
-'     END IF
-'   NEXT
-'   IF InstrTblB(LEN(cwd$), cwd$, "\/") <> LEN(cwd$) AND _
-'     InstrTbl(1, section$, "\/") <> 1 THEN
-'     IF InstrTbl(1, cwd$, "\") > 0 THEN
-'       cwd$ = cwd$ + "\"
-'     ELSE
-'       cwd$ = cwd$ + "/"
-'     END IF
-'   END IF
-'   FullName$ = cwd$ + section$
-' END FUNCTION
+SUB FSeek(handle As Short, location As Long)
+  SEEK handle, location + 1
+END SUB
 
-' FUNCTION GetAttr(fileName$)
-'   IF Exist(fileName$) THEN
-'     IF INSTR(_OS$, "[WINDOWS]") THEN
-'       f$ = fileName$
-'       IF RIGHT$(f$, 1) <> CHR$(0) THEN f$ = f$ + CHR$(0)
-'       GetAttr = GetFileAttributes(f$)
-'     ELSE
-'       ERROR 73 ' Feature Unavailable
-'     END IF
-'   ELSE
-'     GetAttr = -1
-'   END IF
-' END FUNCTION
+SUB FStamp(fileName As String, newTime As String, newDate As String)
+  ERROR 73 ' Feature Unavailable
+END SUB
 
-' ' GetDir will return the current directory for either a specified drive 
-' ' or the default drive. 
-' FUNCTION GetDir$(drive$)
- 
-'   ' Parameter may be given as either upper or lower case, and only the first character is considered
-'   ' Returns the complete directory name, minus the drive letter and colon.
+FUNCTION FullName(partName As String) As String
+  ERROR 73 ' Feature Unavailable
+  ' s = 1
+  ' DO
+  '   p = InstrTbl(s, partName$, "\/")
+  '   section$ = MID$(partName$, s, p - s)
+  '   IF section$ = ".." THEN 
+  '     c = c + 1
+  '   ELSE
+  '     s = s - 1 ' walk one character back.
+  '     EXIT DO
+  '   END IF
+  '   IF p = -1 THEN EXIT DO
+  '   s = p + 1
+  ' LOOP
+  ' section$ = MID$(partName$, s)
+  ' cwd$ = _CWD$
+  ' FOR x = 1 TO c
+  '   p = InstrTblB(LEN(cwd$), cwd$, "\/")
+  '   IF p > 0 THEN
+  '     cwd$ = LEFT$(cwd$, p - 1)
+  '   ELSE
+  '     EXIT FOR ' error?
+  '   END IF
+  ' NEXT
+  ' IF InstrTblB(LEN(cwd$), cwd$, "\/") <> LEN(cwd$) AND _
+  '   InstrTbl(1, section$, "\/") <> 1 THEN
+  '   IF InstrTbl(1, cwd$, "\") > 0 THEN
+  '     cwd$ = cwd$ + "\"
+  '   ELSE
+  '     cwd$ = cwd$ + "/"
+  '   END IF
+  ' END IF
+  ' FullName = cwd$ + section$
+  FullName = ""
+END FUNCTION
 
-'   ' _CWD$ (function) returns the current working directory as a STRING value.
-'   ' _STARTDIR$ (function) returns the user's program calling path as a STRING.
+FUNCTION GetAttr(fileName As String) As Short
+  IF Exist(fileName) THEN
+    ' IF INSTR(_OS$, "[WINDOWS]") THEN
+    '   f$ = fileName$
+    '   IF RIGHT$(f$, 1) <> CHR$(0) THEN f$ = f$ + CHR$(0)
+    '   GetAttr = GetFileAttributes(f$)
+    ' ELSE
+    ERROR 73 ' Feature Unavailable
+    'END IF
+  ELSE
+    GetAttr = -1
+  END IF
+END FUNCTION
 
-'   ch$ = MID$(_CWD$, 1, 1)
-'   a = ASC(UCASE$(ch$))
-'   SELECT CASE a
-'     CASE ASC("A") TO ASC("Z")
-'       GetDir$ = MID$(_CWD$, 3)
-'     CASE ELSE
-'       GetDir$ = _CWD$
-'   END SELECT
+' GetDir will return the current directory for either a specified drive 
+' or the default drive. 
+FUNCTION GetDir(drive As String) As String
 
-' END FUNCTION
+  ERROR 73 ' Feature Unavailable
 
-' FUNCTION GetDisketteType(DriveNumber)
-'   ' Use GetDriveType?
-'   ERROR 73 ' Feature Unavailable
-' END FUNCTION
+  ' Parameter may be given as either upper or lower case, and only the first character is considered
+  ' Returns the complete directory name, minus the drive letter and colon.
 
-' ' GetDrive returns the current default disk drive. 
-' FUNCTION GetDrive
-'   ' Drive$ is assigned to a value representing an ASCII character that 
-'   ' holds the current default drive. GetDrive actually returns an integer 
-'   ' result, which can be easily turned into a string as shown above.
+  ' ' _CWD$ (function) returns the current working directory as a STRING value.
+  ' ' _STARTDIR$ (function) returns the user's program calling path as a STRING.
 
-'   ' GetDrive returns a value that represents an upper case ASCII drive 
-'   ' letter. For example, if the current default drive is A, then GetDrive 
-'   ' will return the value 65. Likewise, if the current drive is C, 
-'   ' GetDrive would return 67.
+  ' VAR ch = MID$(_CWD$, 1, 1)
+  ' VAR a = ASC(UCASE$(ch))
+  ' SELECT CASE a
+  '   CASE ASC("A") TO ASC("Z")
+  '     GetDir = MID$(_CWD$, 3)
+  '   CASE ELSE
+  '     GetDir = _CWD$
+  ' END SELECT
 
-'   ' _CWD$ (function) returns the current working directory as a STRING value.
-'   ' _STARTDIR$ (function) returns the user's program calling path as a STRING.
+  GetDir = ""
 
-'   IF INSTR(_OS$, "[WINDOWS]") THEN
-'     ch$ = MID$(_CWD$, 1, 1)
-'     a = ASC(UCASE$(ch$))
-'     SELECT CASE a
-'       CASE 65 TO 90 ' A to Z
-'         GetDrive = a
-'       CASE ELSE
-'         GetDrive = 0
-'     END SELECT
-'   ELSE
-'     ERROR 73 ' Feature Unavailable
-'   END IF
+END FUNCTION
 
-' END FUNCTION
+FUNCTION GetDisketteType(driveNumber As Short) As Short
+  ' Use GetDriveType?
+  ERROR 73 ' Feature Unavailable
+  GetDisketteType = 0
+END FUNCTION
 
-' FUNCTION GetVol$(Drive$)
-'   ERROR 73 ' Feature Unavailable
-' END FUNCTION
+' GetDrive returns the current default disk drive. 
+FUNCTION GetDrive() As Short
 
-' ' GoodDrive will quickly determine whether a 
-' ' specified drive letter is valid. 
-' FUNCTION GoodDrive(drive$)
-'   ' Drive$ is either an upper or lower case letter that represents the 
-'   ' drive to check, and Okay receives either -1 if the drive is valid, 
-'   ' or 0 if it is not. 
-'   ' Possibly use GetLogicalDrives or GetLogicalDriveStringsW
-'   ' along with GetDriveType and/or GetDiskFreeSpace/GetDiskFreeSpaceEx.
-'   CALL DiskInfo(drive$, bytes, sectors, freeClusters&, totalClusters&)
-'   IF bytes = 0 THEN
-'     GoodDrive = 0 ' Not good
-'   ELSE
-'     GoodDrive = -1 ' Good
-'   END IF
-' END FUNCTION
+  ERROR 73 ' Feature Unavailable
 
-' SUB Handle2Name(Handle, FilName AS NameType)
-'   ERROR 73 ' Feature Unavailable
-' END SUB
+  ' Drive$ is assigned to a value representing an ASCII character that 
+  ' holds the current default drive. GetDrive actually returns an integer 
+  ' result, which can be easily turned into a string as shown above.
 
-' SUB KillDir(DirName$)
-'   RMDIR DirName$
-' END SUB
+  ' GetDrive returns a value that represents an upper case ASCII drive 
+  ' letter. For example, if the current default drive is A, then GetDrive 
+  ' will return the value 65. Likewise, if the current drive is C, 
+  ' GetDrive would return 67.
 
-' SUB KillFile(FileName$)
-'   KILL FileName$
-' END SUB
+  ' _CWD$ (function) returns the current working directory as a STRING value.
+  ' _STARTDIR$ (function) returns the user's program calling path as a STRING.
 
-' FUNCTION LastDrive
-'   r = GetLogicalDrives&
-'   list$ = ""
-'   IF (r AND 1) = 1 THEN list$ = list$ + "A"
-'   IF (r AND 2) = 2 THEN list$ = list$ + "B"
-'   IF (r AND 4) = 4 THEN list$ = list$ + "C" 
-'   IF (r AND 8) = 8 THEN list$ = list$ + "D" 
-'   IF (r AND 16) = 16 THEN list$ = list$ + "E" 
-'   IF (r AND 32) = 32 THEN list$ = list$ + "F"
-'   IF (r AND 64) = 64 THEN list$ = list$ + "G"
-'   IF (r AND 128) = 128 THEN list$ = list$ + "H" 
-'   IF (r AND 256) = 256 THEN list$ = list$ + "I"
-'   IF (r AND 512) = 512 THEN list$ = list$ + "J" 
-'   IF (r AND 1024) = 1024 THEN list$ = list$ + "K" 
-'   IF (r AND 2048) = 2048 THEN list$ = list$ + "L" 
-'   IF (r AND 4096) = 4096 THEN list$ = list$ + "M"
-'   IF (r AND 8192) = 8192 THEN list$ = list$ + "N"
-'   IF (r AND 16384) = 16384 THEN list$ = list$ + "O"
-'   IF (r AND 32768) = 32768 THEN list$ = list$ + "P"
-'   IF (r AND 65536) = 65536 THEN list$ = list$ + "Q"
-'   IF (r AND 131072) = 131072 THEN list$ = list$ + "R"
-'   IF (r AND 262144) = 262144 THEN list$ = list$ + "S"
-'   IF (r AND 524288) = 524288 THEN list$ = list$ + "T"
-'   IF (r AND 1048576) = 1048576 THEN list$ = list$ + "U"
-'   IF (r AND 2097152) = 2097152 THEN list$ = list$ + "V"
-'   IF (r AND 4194304) = 4194304 THEN list$ = list$ + "W"
-'   IF (r AND 8388608) = 8388608 THEN list$ = list$ + "X"
-'   IF (r AND 16777216) = 16777216 THEN list$ = list$ + "Y"
-'   IF (r AND 33554432) = 33554432 THEN list$ = list$ + "Z"
-'   'PRINT list$: WaitKeyS
-'   LastDrive = ASC(RIGHT$(list$, 1))
-' END FUNCTION
+  ' IF INSTR(_OS$, "[WINDOWS]") THEN
+  '   ch$ = MID$(_CWD$, 1, 1)
+  '   a = ASC(UCASE$(ch$))
+  '   SELECT CASE a
+  '     CASE 65 TO 90 ' A to Z
+  '       GetDrive = a
+  '     CASE ELSE
+  '       GetDrive = 0
+  '   END SELECT
+  ' ELSE
+  '   ERROR 73 ' Feature Unavailable
+  ' END IF
+
+  GetDrive = -1
+
+END FUNCTION
+
+FUNCTION GetVol(drive As String) As String
+  ERROR 73 ' Feature Unavailable
+  GetVol = ""
+END FUNCTION
+
+' GoodDrive will quickly determine whether a 
+' specified drive letter is valid. 
+FUNCTION GoodDrive(drive As String) As Short
+  ' Drive$ is either an upper or lower case letter that represents the 
+  ' drive to check, and Okay receives either -1 if the drive is valid, 
+  ' or 0 if it is not. 
+  ' Possibly use GetLogicalDrives or GetLogicalDriveStringsW
+  ' along with GetDriveType and/or GetDiskFreeSpace/GetDiskFreeSpaceEx.
+  Dim bytes As Short
+  Dim sectors As Short
+  Dim freeClusters As Long
+  Dim totalClusters As Long
+  DiskInfo drive, bytes, sectors, freeClusters, totalClusters
+  IF bytes = 0 THEN
+    GoodDrive = 0 ' Not good
+  ELSE
+    GoodDrive = -1 ' Good
+  END IF
+END FUNCTION
+
+SUB Handle2Name(handle As String, Byref fileName AS Any Ptr)
+  ERROR 73 ' Feature Unavailable
+END SUB
+
+SUB KillDir(dirName As String)
+  RMDIR dirName
+END SUB
+
+SUB KillFile(fileName As String)
+  KILL fileName
+END SUB
+
+FUNCTION LastDrive As Short
+  Var r = 0 'GetLogicalDrives
+  Var list = ""
+  IF (r AND 1) = 1 THEN list = list + "A"
+  IF (r AND 2) = 2 THEN list = list + "B"
+  IF (r AND 4) = 4 THEN list = list + "C" 
+  IF (r AND 8) = 8 THEN list = list + "D" 
+  IF (r AND 16) = 16 THEN list = list + "E" 
+  IF (r AND 32) = 32 THEN list = list + "F"
+  IF (r AND 64) = 64 THEN list = list + "G"
+  IF (r AND 128) = 128 THEN list = list + "H" 
+  IF (r AND 256) = 256 THEN list = list + "I"
+  IF (r AND 512) = 512 THEN list = list + "J" 
+  IF (r AND 1024) = 1024 THEN list = list + "K" 
+  IF (r AND 2048) = 2048 THEN list = list + "L" 
+  IF (r AND 4096) = 4096 THEN list = list + "M"
+  IF (r AND 8192) = 8192 THEN list = list + "N"
+  IF (r AND 16384) = 16384 THEN list= list + "O"
+  IF (r AND 32768) = 32768 THEN list = list + "P"
+  IF (r AND 65536) = 65536 THEN list = list + "Q"
+  IF (r AND 131072) = 131072 THEN list = list + "R"
+  IF (r AND 262144) = 262144 THEN list = list + "S"
+  IF (r AND 524288) = 524288 THEN list = list + "T"
+  IF (r AND 1048576) = 1048576 THEN list = list + "U"
+  IF (r AND 2097152) = 2097152 THEN list = list + "V"
+  IF (r AND 4194304) = 4194304 THEN list = list + "W"
+  IF (r AND 8388608) = 8388608 THEN list = list + "X"
+  IF (r AND 16777216) = 16777216 THEN list = list + "Y"
+  IF (r AND 33554432) = 33554432 THEN list = list + "Z"
+  'PRINT list: WaitKeyS
+  LastDrive = ASC(RIGHT$(list, 1))
+END FUNCTION
 
 ' LineCount will quickly count all of the lines of text in a specified file.
 FUNCTION LineCount(fileName As String, buffer As String) As Short
@@ -2639,634 +2810,555 @@ FUNCTION LineCount(fileName As String, buffer As String) As Short
 
 END FUNCTION
 
-' ' LoadExec is a SHELL replacement that lets you execute another 
-' ' program, and then retrieve its exit code (the DOS error level). 
-' FUNCTION LoadExec(program$, cmdLine$)
+' LoadExec is a SHELL replacement that lets you execute another 
+' program, and then retrieve its exit code (the DOS error level). 
+FUNCTION LoadExec(program As String, cmdLine As String) As Short
 
-'   ' Program$ is the full name of the program to be run, and CmdLine$ 
-'   ' is an optional command line parameter that is passed to the program. 
+  ' Program$ is the full name of the program to be run, and CmdLine$ 
+  ' is an optional command line parameter that is passed to the program. 
 
-'   ' LoadExec can be used to run .EXE and .COM programs only. You 
-'   ' cannot run a batch file or other non-executable program directly 
-'   ' (but see below). 
-'   '   
-'   ' Note that the DOS service that LoadExec uses does not honor the 
-'   ' PATH setting. Therefore, you must state the complete drive and 
-'   ' path if they are not the current default. See the SearchPath$ 
-'   ' function elsewhere in this manual, which examines the PATH and 
-'   ' returns the fully qualified name of an executable program. 
-'   ' 
-'   ' Normally, ExitCode will receive a value between O and 255, 
-'   ' corresponding to the exit code returned by the program that was 
-'   ' executed. However, it is also possible that the value may be higher 
-'   ' if DOS intervened in the program's termination. Here's how you 
-'   ' can determine how the program was ended, and isolate the two 
-'   ' separate pieces of information:
-'   ' 
-'   '   IF ExitCode <= 255 THEN 
-'   '     PRINT "Normal termination with an exit code of"; ExitCode 
-'   '   ELSE 
-'   '     DOSCode = ExitCode \ 256 
-'   '     ExitCode = ExitCode AND 255 
-'   '     PRINT "DOS intervened" 
-'   '     SELECT CASE DOSCode 
-'   '       CASE 1 
-'   '         'isolate DOS's contribution 
-'   '         'optionally retain the program's part 
-'   '         PRINT "You pressed Ctrl-C or Ctrl-Break to end the program" 
-'   '       CASE 2 
-'   '         PRINT "A critical error occurred and you pressed A (Abort)" 
-'   '       CASE 3 
-'   '         PRINT "The program ended as a TSR -- reboot now!" 
-'   '       CASE ELSE 
-'   '     END SELECT 
-'   '   END IF 
-'   '
-'   ' Due to a bug in DOS 2.x you should not use LoadExec with that 
-'   ' version of DOS. You can prevent this by first querying the DOSVer 
-'   ' function, and checking for a value of at least 300. Related to the 
-'   ' DOS 2.x issue, some older programs (including CHKDSK and 
-'   ' FORMAT) require a DOS 1.x style FCB structure to be present. 
-'   ' To avoid adding a lot of code to accommodate what is clearly a 
-'   ' waning method, LoadExec does not support those either. 
-'   '
-'   ' LOADEXEC.BAS shows how to use LoadExec with the 
-'   ' SearchPath$ function, and also how to execute batch files. Besides 
-'   ' interpreting return codes, it also shows how to detect DOS errors 
-'   ' using WhichError.
+  ' LoadExec can be used to run .EXE and .COM programs only. You 
+  ' cannot run a batch file or other non-executable program directly 
+  ' (but see below). 
+  '   
+  ' Note that the DOS service that LoadExec uses does not honor the 
+  ' PATH setting. Therefore, you must state the complete drive and 
+  ' path if they are not the current default. See the SearchPath$ 
+  ' function elsewhere in this manual, which examines the PATH and 
+  ' returns the fully qualified name of an executable program. 
+  ' 
+  ' Normally, ExitCode will receive a value between O and 255, 
+  ' corresponding to the exit code returned by the program that was 
+  ' executed. However, it is also possible that the value may be higher 
+  ' if DOS intervened in the program's termination. Here's how you 
+  ' can determine how the program was ended, and isolate the two 
+  ' separate pieces of information:
+  ' 
+  '   IF ExitCode <= 255 THEN 
+  '     PRINT "Normal termination with an exit code of"; ExitCode 
+  '   ELSE 
+  '     DOSCode = ExitCode \ 256 
+  '     ExitCode = ExitCode AND 255 
+  '     PRINT "DOS intervened" 
+  '     SELECT CASE DOSCode 
+  '       CASE 1 
+  '         'isolate DOS's contribution 
+  '         'optionally retain the program's part 
+  '         PRINT "You pressed Ctrl-C or Ctrl-Break to end the program" 
+  '       CASE 2 
+  '         PRINT "A critical error occurred and you pressed A (Abort)" 
+  '       CASE 3 
+  '         PRINT "The program ended as a TSR -- reboot now!" 
+  '       CASE ELSE 
+  '     END SELECT 
+  '   END IF 
+  '
+  ' Due to a bug in DOS 2.x you should not use LoadExec with that 
+  ' version of DOS. You can prevent this by first querying the DOSVer 
+  ' function, and checking for a value of at least 300. Related to the 
+  ' DOS 2.x issue, some older programs (including CHKDSK and 
+  ' FORMAT) require a DOS 1.x style FCB structure to be present. 
+  ' To avoid adding a lot of code to accommodate what is clearly a 
+  ' waning method, LoadExec does not support those either. 
+  '
+  ' LOADEXEC.BAS shows how to use LoadExec with the 
+  ' SearchPath$ function, and also how to execute batch files. Besides 
+  ' interpreting return codes, it also shows how to detect DOS errors 
+  ' using WhichError.
 
-'   IF cmdLine$ <> "" THEN
-'     LoadExec = SHELL(program$ + " " + cmdLine$)
-'   ELSE
-'     LoadExec = SHELL(program$ + " " + cmdLine$)
-'   END IF
+  IF cmdLine <> "" THEN
+    LoadExec = SHELL(program + " " + cmdLine)
+  ELSE
+    LoadExec = SHELL(program)
+  END IF
 
-' END FUNCTION
+END FUNCTION
 
-' SUB LockFile(Handle, Offset&, Length&)
-'   ERROR 73 ' Feature Unavailable
-' END SUB
+SUB LockFile(handle As Short, offset As Long, length As Long)
+  ERROR 73 ' Feature Unavailable
+END SUB
 
-' SUB MakeDir(DirName$)
-'   MKDIR DirName$
-' END SUB
+SUB MakeDir(dirName As String)
+  MKDIR dirName
+END SUB
 
-' SUB NameDir(OldName$, NewName$)
-'   NAME OldName$ AS NewName$
-' END SUB
+SUB NameDir(oldName As String, newName As String)
+  NAME oldName AS newName
+END SUB
 
-' SUB NameFile(OldName$, NewName$)
-'   NAME OldName$ AS NewName$
-' END SUB
+SUB NameFile(oldName As String, newName As String)
+  NAME oldName AS newName
+END SUB
 
-' FUNCTION NetDrive(Drive$)
-'   ERROR 73 ' Feature Unavailable
-' END FUNCTION
+FUNCTION NetDrive(drive As String) As Short
+  ERROR 73 ' Feature Unavailable
+  NetDrive = 0
+END FUNCTION
 
-' SUB PutVol(Drive$, Label$)
-'   ERROR 73 ' Feature Unavailable
-' END SUB
+SUB PutVol(drive As String, label As String)
+  ERROR 73 ' Feature Unavailable
+END SUB
 
-' SUB QBLoad(FileName$, Array(), Element)
-'   'DEF SEG = VARSEG(Array(0))
-'     BLOAD FileName$, VARPTR(Array(LBOUND(Array)))
-'   'END SEG
-' END SUB
+SUB QBLoad(fileName As String, array As Short Ptr)
+  'DEF SEG = VARSEG(Array(0))
+  '  BLOAD FileName$, VARPTR(Array(LBOUND(Array)))
+  'END SEG
+END SUB
 
-' SUB QBSave(FileName$, Array(), Element, NumBytes)
-'   ERROR 73 ' Feature Unavailable
-' END SUB
+SUB QBSave(fileName As String, array As Short Ptr, numBytes As Short)
+  ERROR 73 ' Feature Unavailable
+END SUB
 
-' ' DCount reports the number of directories that match a particular specification. 
-' FUNCTION DCount(dirSpec$)
-'   ' dirSpec$ holds a DOS directory name specification, and Count 
-'   ' receives the number of matching directories.
+' QuickDOS - see QD.BAS
 
-'   result = 0
+' ReadDir obtains a list of directory names from disk, and loads them 
+' into a conventional (not fixed-length) string array in one operation. 
+SUB ReadDir(array AS String Ptr)
+  ' array$(0) holds the search specification to indicate which directory 
+  ' names are to be loaded, and subsequent array elements receive each 
+  ' directory name. 
 
-'   IF INSTR(_OS$, "[WINDOWS]") THEN
-'     DIM pattern AS STRING
-'     DIM fd AS Win32_Find_Data
-'     DIM hFind AS _UNSIGNED _OFFSET
-'     DIM junk AS LONG
-'     DIM ffn AS STRING
-'     DIM p As Short
-'     pattern = dirSpec$ + CHR$(0)
-'     hFind = FindFirstFile(_OFFSET(pattern), _OFFSET(fd))
-'     IF hFind <> INVALID_HANDLE_VALUE THEN
-'       DO
-'         IF (fd.dwfileattributes AND FILE_ATTRIBUTE_DIRECTORY) = FILE_ATTRIBUTE_DIRECTORY THEN
-'           ffn = fd.calternatefilename 'cfilename
-'           p = INSTR(ffn, CHR$(0))
-'           IF p > 0 THEN ffn = LEFT$(ffn, p - 1)
-'           IF LTRIM$(ffn) = "" THEN
-'             ffn = fd.cfilename
-'             p = INSTR(ffn, CHR$(0))
-'             IF p > 0 THEN ffn = LEFT$(ffn, p - 1)
-'           END IF
-'           IF ffn = "." THEN
-'           ELSEIF ffn = ".." THEN
-'           'ELSEIF UCASE$(ffn) = "$RECYCLE.BIN" THEN
-'           'ELSEIF INSTR(ffn, "System Volume Information") > 0 THEN
-'           ELSE
-'             result = result + 1
-'           END IF
-'         END IF
-'       LOOP UNTIL FindNextFile(hFind, _OFFSET(fd)) = 0
-'       junk = FindClose(hFind)
-'     ELSE
-'       lastError& = GetLastError
-'       IF lastError& = ERROR_ACCESS_DENIED THEN
-'         ERROR 70 ' Permission denied
-'       ELSE
-'         ERROR 75 ' Path/File access error
-'       END IF
-'     END IF
-'   ELSE
-'     ERROR 73 ' Advanced Feature / Feature Unavailable
-'   END IF
-
-'   DCount = result
-
-' END FUNCTION
-
-' ' ReadDir obtains a list of directory names from disk, and loads them 
-' ' into a conventional (not fixed-length) string array in one operation. 
-' SUB ReadDir(array$(), offset)
-'   ' array$(0) holds the search specification to indicate which directory 
-'   ' names are to be loaded, and subsequent array elements receive each 
-'   ' directory name. 
-
-'   IF INSTR(_OS$, "[WINDOWS]") THEN
+  ' IF INSTR(_OS$, "[WINDOWS]") THEN
     
-'     DIM pattern AS STRING
-'     DIM fd AS Win32_Find_Data
-'     DIM hFind AS _UNSIGNED _OFFSET
-'     DIM junk AS LONG
-'     DIM ffn AS STRING
-'     DIM p As Short
+  '   DIM pattern AS STRING
+  '   DIM fd AS Win32_Find_Data
+  '   DIM hFind AS _UNSIGNED _OFFSET
+  '   DIM junk AS LONG
+  '   DIM ffn AS STRING
+  '   DIM p As Short
 
-'     'pattern = array$(0) + CHR$(0)
-'     pattern = array$(offset) + CHR$(0)
-'     hFind = FindFirstFile(_OFFSET(pattern), _OFFSET(fd))
-'     IF hFind <> INVALID_HANDLE_VALUE THEN
-'       index = 1
-'       DO
-'         IF (fd.dwfileattributes AND FILE_ATTRIBUTE_DIRECTORY) = FILE_ATTRIBUTE_DIRECTORY THEN
-'           ffn = fd.calternatefilename 'cfilename
-'           p = INSTR(ffn, CHR$(0))
-'           IF p > 0 THEN ffn = LEFT$(ffn, p - 1)
-'           IF LTRIM$(ffn) = "" THEN
-'             ffn = fd.cfilename
-'             p = INSTR(ffn, CHR$(0))
-'             IF p > 0 THEN ffn = LEFT$(ffn, p - 1)
-'           END IF
-'           IF ffn = "." THEN
-'           ELSEIF ffn = ".." THEN
-'           'ELSEIF UCASE$(ffn) = "$RECYCLE.BIN" THEN
-'           'ELSEIF INSTR(ffn, "System Volume Information") > 0 THEN
-'           ELSE
-'             array$(offset + index - 1) = ffn
-'             index = index + 1
-'           END IF
-'         END IF
-'       LOOP UNTIL FindNextFile(hFind, _OFFSET(fd)) = 0
-'       junk = FindClose(hFind)
-'     ELSE
-'       lastError& = GetLastError
-'       IF lastError& = ERROR_ACCESS_DENIED THEN
-'         ERROR 70 ' Permission denied
-'       ELSE
-'         'PRINT "{"; pattern; "}": WaitKeyS
-'         ERROR 75 ' Path/File access error
-'       END IF
-'     END IF
-'   ELSE
-'     ERROR 73 ' Advanced Feature / Feature Unavailable
-'   END IF
+  '   'pattern = array$(0) + CHR$(0)
+  '   pattern = array$(offset) + CHR$(0)
+  '   hFind = FindFirstFile(_OFFSET(pattern), _OFFSET(fd))
+  '   IF hFind <> INVALID_HANDLE_VALUE THEN
+  '     index = 1
+  '     DO
+  '       IF (fd.dwfileattributes AND FILE_ATTRIBUTE_DIRECTORY) = FILE_ATTRIBUTE_DIRECTORY THEN
+  '         ffn = fd.calternatefilename 'cfilename
+  '         p = INSTR(ffn, CHR$(0))
+  '         IF p > 0 THEN ffn = LEFT$(ffn, p - 1)
+  '         IF LTRIM$(ffn) = "" THEN
+  '           ffn = fd.cfilename
+  '           p = INSTR(ffn, CHR$(0))
+  '           IF p > 0 THEN ffn = LEFT$(ffn, p - 1)
+  '         END IF
+  '         IF ffn = "." THEN
+  '         ELSEIF ffn = ".." THEN
+  '         'ELSEIF UCASE$(ffn) = "$RECYCLE.BIN" THEN
+  '         'ELSEIF INSTR(ffn, "System Volume Information") > 0 THEN
+  '         ELSE
+  '           array$(offset + index - 1) = ffn
+  '           index = index + 1
+  '         END IF
+  '       END IF
+  '     LOOP UNTIL FindNextFile(hFind, _OFFSET(fd)) = 0
+  '     junk = FindClose(hFind)
+  '   ELSE
+  '     lastError& = GetLastError
+  '     IF lastError& = ERROR_ACCESS_DENIED THEN
+  '       ERROR 70 ' Permission denied
+  '     ELSE
+  '       'PRINT "{"; pattern; "}": WaitKeyS
+  '       ERROR 75 ' Path/File access error
+  '     END IF
+  '   END IF
+  ' ELSE
+    ERROR 73 ' Advanced Feature / Feature Unavailable
+  ' END IF
 
-' END SUB
+END SUB
 
-' ' FCount will report the number of file names that match a particular specification. 
-' FUNCTION FCount(fileSpec$)
+' ReadDirs - see READDIRS.BAS
 
-'   ' fileSpec$ holds a DOS file name or specification, and Count 
-'   ' receives the number of matching entries. 
+' ReadDirT obtains a list of directory names from disk, and loads 
+' them into a fixed-length string array in one operation. 
+SUB ReadDirT(spec As String, array As String Ptr)
 
-'   result = 0
+  ' Array$() has been dimensioned as a fixed-length string array, and 
+  ' Spec$ holds the search specification to tell which directory names 
+  ' are to be loaded. Subsequent array elements then receive each 
+  ' directory name. 
 
-'   IF INSTR(_OS$, "[WINDOWS]") THEN
-'     DIM pattern AS STRING
-'     DIM fd AS Win32_Find_Data
-'     DIM hFind AS _UNSIGNED _OFFSET
-'     DIM junk AS LONG
-'     pattern = fileSpec$ + CHR$(0)
-'     hFind = FindFirstFile(_OFFSET(pattern), _OFFSET(fd))
-'     IF hFind <> INVALID_HANDLE_VALUE THEN
-'       DO
-'         IF (fd.dwfileattributes AND FILE_ATTRIBUTE_DIRECTORY) = FILE_ATTRIBUTE_DIRECTORY THEN
-'         ELSE 
-'           result = result + 1
-'         END IF
-'       LOOP UNTIL FindNextFile(hFind, _OFFSET(fd)) = 0
-'       junk = FindClose(hFind)
-'     ELSE
-'       lastError& = GetLastError
-'       IF lastError& = ERROR_FILE_NOT_FOUND THEN
-'         ' no files available, result remains 0
-'       ELSEIF lastError& = ERROR_ACCESS_DENIED THEN
-'         ERROR 70 ' Permission denied
-'       ELSE
-'         PRINT lastError&
-'         ERROR 75 ' Path/File access error
-'       END IF
-'     END IF
-'   ELSE
-'     ERROR 73 ' Advanced Feature / Feature Unavailable
-'   END IF
+  ERROR 73 ' Feature Unavailable
 
-'   FCount = result
+END SUB
 
-' END FUNCTION
+' ReadFile obtains a list of file names from disk, and loads them into 
+' a conventional (not fixed-length) string array in one operation. 
+SUB ReadFile(array As String Ptr)
 
-' ' ReadFile obtains a list of file names from disk, and loads them into 
-' ' a conventional (not fixed-length) string array in one operation. 
-' SUB ReadFile(array$())
+  ' array$(0) holds the search specification to indicate which file names
+  ' are to be loaded, and subsequent array elements receive each name.
 
-'   ' array$(0) holds the search specification to indicate which file names
-'   ' are to be loaded, and subsequent array elements receive each name.
-
-'   IF INSTR(_OS$, "[WINDOWS]") THEN
+  ' IF INSTR(_OS$, "[WINDOWS]") THEN
     
-'     DIM pattern AS STRING
-'     DIM fd AS Win32_Find_Data
-'     DIM hFind AS _UNSIGNED _OFFSET
-'     DIM junk AS LONG
-'     DIM ffn AS STRING
-'     DIM p As Short
+  '   DIM pattern AS STRING
+  '   DIM fd AS Win32_Find_Data
+  '   DIM hFind AS _UNSIGNED _OFFSET
+  '   DIM junk AS LONG
+  '   DIM ffn AS STRING
+  '   DIM p As Short
 
-'     pattern = array$(0) + CHR$(0)
-'     hFind = FindFirstFile(_OFFSET(pattern), _OFFSET(fd))
-'     IF hFind <> INVALID_HANDLE_VALUE THEN
-'       index = 1
-'       DO
-'         IF (fd.dwfileattributes AND FILE_ATTRIBUTE_DIRECTORY) = FILE_ATTRIBUTE_DIRECTORY THEN
-'         ELSE 
-'           ffn = QPTrim$(fd.calternatefilename) 'cfilename
-'           IF ffn = "" THEN ffn = QPTrim$(fd.cfilename)
-'           IF LEN(ffn$) > 12 THEN ffn$ = LEFT$(ffn$, 9) + "..."
-'           array$(index) = LEFT$(ffn + SPACE$(12), 12)
-'           index = index + 1
-'         END IF
-'         fd.cfilename = SPACE$(MAX_PATH) ' clear the path for the next usage
-'         fd.calternatefilename = SPACE$(14)
-'       LOOP UNTIL FindNextFile(hFind, _OFFSET(fd)) = 0
-'       junk = FindClose(hFind)
-'     ELSE
-'       lastError& = GetLastError
-'       IF lastError& = ERROR_FILE_NOT_FOUND THEN
-'         ' no files available, result remains 0
-'       ELSEIF lastError& = ERROR_ACCESS_DENIED THEN
-'         ERROR 70 ' Permission denied
-'       ELSE
-'         PRINT lastError&
-'         ERROR 75 ' Path/File access error
-'       END IF
-'     END IF
-'   ELSE
-'     ERROR 73 ' Advanced Feature / Feature Unavailable
-'   END IF
+  '   pattern = array$(0) + CHR$(0)
+  '   hFind = FindFirstFile(_OFFSET(pattern), _OFFSET(fd))
+  '   IF hFind <> INVALID_HANDLE_VALUE THEN
+  '     index = 1
+  '     DO
+  '       IF (fd.dwfileattributes AND FILE_ATTRIBUTE_DIRECTORY) = FILE_ATTRIBUTE_DIRECTORY THEN
+  '       ELSE 
+  '         ffn = QPTrim$(fd.calternatefilename) 'cfilename
+  '         IF ffn = "" THEN ffn = QPTrim$(fd.cfilename)
+  '         IF LEN(ffn$) > 12 THEN ffn$ = LEFT$(ffn$, 9) + "..."
+  '         array$(index) = LEFT$(ffn + SPACE$(12), 12)
+  '         index = index + 1
+  '       END IF
+  '       fd.cfilename = SPACE$(MAX_PATH) ' clear the path for the next usage
+  '       fd.calternatefilename = SPACE$(14)
+  '     LOOP UNTIL FindNextFile(hFind, _OFFSET(fd)) = 0
+  '     junk = FindClose(hFind)
+  '   ELSE
+  '     lastError& = GetLastError
+  '     IF lastError& = ERROR_FILE_NOT_FOUND THEN
+  '       ' no files available, result remains 0
+  '     ELSEIF lastError& = ERROR_ACCESS_DENIED THEN
+  '       ERROR 70 ' Permission denied
+  '     ELSE
+  '       PRINT lastError&
+  '       ERROR 75 ' Path/File access error
+  '     END IF
+  '   END IF
+  ' ELSE
+    ERROR 73 ' Advanced Feature / Feature Unavailable
+  ' END IF
 
-' END SUB
+END SUB
 
-' ' ReadDirT obtains a list of directory names from disk, and loads 
-' ' them into a fixed-length string array in one operation. 
-' SUB ReadDirT(spec$, array(), offset)
-
-'   ' Array$() has been dimensioned as a fixed-length string array, and 
-'   ' Spec$ holds the search specification to tell which directory names 
-'   ' are to be loaded. Subsequent array elements then receive each 
-'   ' directory name. 
-
-'   ERROR 73 ' Feature Unavailable
-
-' END SUB
-
-' ' ReadFileI obtains a list of file names, sizes, dates, and times from 
-' ' disk, and then formats and loads them into a conventional (not 
-' ' fixed-length) string array in one operation. 
-' SUB ReadFileI(array$(), offset)
+' ReadFileI obtains a list of file names, sizes, dates, and times from 
+' disk, and then formats and loads them into a conventional (not 
+' fixed-length) string array in one operation. 
+SUB ReadFileI(array As String Ptr)
   
-'   ' Array$(0) holds the search specification to indicate which file 
-'   ' names are to be retrieved, and subsequent array elements receive 
-'   ' each file's name and related information.
+  ' Array$(0) holds the search specification to indicate which file 
+  ' names are to be retrieved, and subsequent array elements receive 
+  ' each file's name and related information.
   
-'   ' ReadFileI (Read File names with full Information) is similar to the 
-'   ' QuickPak Professional ReadFile routine, except it also obtains the 
-'   ' size, date, and time for each file. Before ReadFileI, the only way to 
-'   ' do this was to call the ReadFile routine, and then call Fileinfo 
-'   ' repeatedly for each file. Besides greatly simplifying the amount of 
-'   ' work you must do to obtain this information, ReadFileI is also 
-'   ' considerably faster. 
+  ' ReadFileI (Read File names with full Information) is similar to the 
+  ' QuickPak Professional ReadFile routine, except it also obtains the 
+  ' size, date, and time for each file. Before ReadFileI, the only way to 
+  ' do this was to call the ReadFile routine, and then call Fileinfo 
+  ' repeatedly for each file. Besides greatly simplifying the amount of 
+  ' work you must do to obtain this information, ReadFileI is also 
+  ' considerably faster. 
 
-'   ' It is up to you to assign each string to a length of 37 characters 
-'   ' before calling ReadFileI.
+  ' It is up to you to assign each string to a length of 37 characters 
+  ' before calling ReadFileI.
 
-'   ' 1234567890123456789012345678901234567 
-'   ' namename.ext sizesize mm-dd-yy hh:mm* <---- either "a" or "p" 
+  ' 1234567890123456789012345678901234567 
+  ' namename.ext sizesize mm-dd-yy hh:mm* <---- either "a" or "p" 
   
-'   ' - filename
-'   ' - size
-'   ' - modified date
-'   ' - modified time
+  ' - filename
+  ' - size
+  ' - modified date
+  ' - modified time
 
-'   ' resultLength = GetShortPathNameW(fullPath$, shortPath$, 255)
+  ' resultLength = GetShortPathNameW(fullPath$, shortPath$, 255)
 
-'   IF INSTR(_OS$, "[WINDOWS]") THEN
+  ' IF INSTR(_OS$, "[WINDOWS]") THEN
     
-'     DIM pattern AS STRING
-'     DIM fd AS Win32_Find_Data
-'     DIM hFind AS _UNSIGNED _OFFSET
-'     DIM junk AS LONG
-'     'DIM ffn AS STRING
-'     DIM fsize AS LONG
-'     DIM modDate AS STRING
-'     DIM modTime AS STRING
-'     DIM p As Short
+  '   DIM pattern AS STRING
+  '   DIM fd AS Win32_Find_Data
+  '   DIM hFind AS _UNSIGNED _OFFSET
+  '   DIM junk AS LONG
+  '   'DIM ffn AS STRING
+  '   DIM fsize AS LONG
+  '   DIM modDate AS STRING
+  '   DIM modTime AS STRING
+  '   DIM p As Short
 
-'     pattern = array$(offset) + CHR$(0)
-'     IF INSTR(pattern, "/") = 0 AND INSTR(pattern, "\") = 0 THEN
-'       pattern = _CWD$ + "/" + pattern
-'     END IF
-'     hFind = FindFirstFile(_OFFSET(pattern), _OFFSET(fd))
-'     IF hFind <> INVALID_HANDLE_VALUE THEN
-'       index = offset + 1
-'       DO
-'         IF (fd.dwfileattributes AND FILE_ATTRIBUTE_DIRECTORY) = FILE_ATTRIBUTE_DIRECTORY THEN
-'         ELSE 
-'           ffn$ = QPTrim$(fd.calternatefilename)
-'           IF ffn$ = "" THEN ffn$ = QPTrim$(fd.cfilename)
-'           IF LEN(ffn$) > 12 THEN ffn$ = LEFT$(ffn$, 9) + "..."
-'           fsize = (fd.nfilesizehigh * (&HFFFFFFFF + 1)) + fd.nfilesizelow
-'           array$(index) = LEFT$(ffn$ + SPACE$(12), 12) + " " + RIGHT$(SPACE$(8) + STR$(fsize), 8) + " " + "01-01-80" + " " + "00:00a"
-'           index = index + 1
-'         END IF
-'         fd.cfilename = SPACE$(MAX_PATH) ' clear the path for the next usage
-'         fd.calternatefilename = SPACE$(14)
-'       LOOP UNTIL FindNextFile(hFind, _OFFSET(fd)) = 0
-'       junk = FindClose(hFind)
-'     ELSE
-'       lastError& = GetLastError
-'       IF lastError& = ERROR_FILE_NOT_FOUND THEN
-'         ' no files available, result remains 0
-'       ELSEIF lastError& = ERROR_ACCESS_DENIED THEN
-'         ERROR 70 ' Permission denied
-'       ELSE
-'         PRINT lastError&
-'         ERROR 75 ' Path/File access error
-'       END IF
-'     END IF
-'   ELSE
-'     ERROR 73 ' Advanced Feature / Feature Unavailable
-'   END IF
+  '   pattern = array$(offset) + CHR$(0)
+  '   IF INSTR(pattern, "/") = 0 AND INSTR(pattern, "\") = 0 THEN
+  '     pattern = _CWD$ + "/" + pattern
+  '   END IF
+  '   hFind = FindFirstFile(_OFFSET(pattern), _OFFSET(fd))
+  '   IF hFind <> INVALID_HANDLE_VALUE THEN
+  '     index = offset + 1
+  '     DO
+  '       IF (fd.dwfileattributes AND FILE_ATTRIBUTE_DIRECTORY) = FILE_ATTRIBUTE_DIRECTORY THEN
+  '       ELSE 
+  '         ffn$ = QPTrim$(fd.calternatefilename)
+  '         IF ffn$ = "" THEN ffn$ = QPTrim$(fd.cfilename)
+  '         IF LEN(ffn$) > 12 THEN ffn$ = LEFT$(ffn$, 9) + "..."
+  '         fsize = (fd.nfilesizehigh * (&HFFFFFFFF + 1)) + fd.nfilesizelow
+  '         array$(index) = LEFT$(ffn$ + SPACE$(12), 12) + " " + RIGHT$(SPACE$(8) + STR$(fsize), 8) + " " + "01-01-80" + " " + "00:00a"
+  '         index = index + 1
+  '       END IF
+  '       fd.cfilename = SPACE$(MAX_PATH) ' clear the path for the next usage
+  '       fd.calternatefilename = SPACE$(14)
+  '     LOOP UNTIL FindNextFile(hFind, _OFFSET(fd)) = 0
+  '     junk = FindClose(hFind)
+  '   ELSE
+  '     lastError& = GetLastError
+  '     IF lastError& = ERROR_FILE_NOT_FOUND THEN
+  '       ' no files available, result remains 0
+  '     ELSEIF lastError& = ERROR_ACCESS_DENIED THEN
+  '       ERROR 70 ' Permission denied
+  '     ELSE
+  '       PRINT lastError&
+  '       ERROR 75 ' Path/File access error
+  '     END IF
+  '   END IF
+  ' ELSE
+    ERROR 73 ' Advanced Feature / Feature Unavailable
+  ' END IF
 
-' END SUB
+END SUB
 
-' SUB ReadFileT(spec$, array() AS STRING * 12, first)
-'   IF INSTR(_OS$, "[WINDOWS]") THEN
+SUB ReadFileT(spec As String, array As Any Ptr)
+  ' IF INSTR(_OS$, "[WINDOWS]") THEN
     
-'     DIM pattern AS STRING
-'     DIM fd AS Win32_Find_Data
-'     DIM hFind AS _UNSIGNED _OFFSET
-'     DIM junk AS LONG
-'     DIM ffn AS STRING
-'     DIM p As Short
+  '   DIM pattern AS STRING
+  '   DIM fd AS Win32_Find_Data
+  '   DIM hFind AS _UNSIGNED _OFFSET
+  '   DIM junk AS LONG
+  '   DIM ffn AS STRING
+  '   DIM p As Short
 
-'     pattern = spec$ 'array$(0) + CHR$(0)
-'     hFind = FindFirstFile(_OFFSET(pattern), _OFFSET(fd))
-'     IF hFind <> INVALID_HANDLE_VALUE THEN
-'       index = first ' 1
-'       DO
-'         IF (fd.dwfileattributes AND FILE_ATTRIBUTE_DIRECTORY) = FILE_ATTRIBUTE_DIRECTORY THEN
-'         ELSE 
-'           ffn = QPTrim$(fd.calternatefilename)
-'           IF ffn = "" THEN ffn = QPTrim$(fd.cfilename)
-'           IF LEN(ffn$) > 12 THEN ffn$ = LEFT$(ffn$, 9) + "..."
-'           LSET array(index) = ffn
-'           index = index + 1
-'         END IF
-'         fd.cfilename = SPACE$(MAX_PATH) ' clear the path for the next usage
-'         fd.calternatefilename = SPACE$(14)
-'       LOOP UNTIL FindNextFile(hFind, _OFFSET(fd)) = 0
-'       junk = FindClose(hFind)
-'     ELSE
-'       lastError& = GetLastError
-'       IF lastError& = ERROR_FILE_NOT_FOUND THEN
-'         ' no files available, result remains 0
-'       ELSEIF lastError& = ERROR_ACCESS_DENIED THEN
-'         ERROR 70 ' Permission denied
-'       ELSE
-'         PRINT lastError&
-'         ERROR 75 ' Path/File access error
-'       END IF
-'     END IF
-'   ELSE
-'     ERROR 73 ' Advanced Feature / Feature Unavailable
-'   END IF
-' END SUB
+  '   pattern = spec$ 'array$(0) + CHR$(0)
+  '   hFind = FindFirstFile(_OFFSET(pattern), _OFFSET(fd))
+  '   IF hFind <> INVALID_HANDLE_VALUE THEN
+  '     index = first ' 1
+  '     DO
+  '       IF (fd.dwfileattributes AND FILE_ATTRIBUTE_DIRECTORY) = FILE_ATTRIBUTE_DIRECTORY THEN
+  '       ELSE 
+  '         ffn = QPTrim$(fd.calternatefilename)
+  '         IF ffn = "" THEN ffn = QPTrim$(fd.cfilename)
+  '         IF LEN(ffn$) > 12 THEN ffn$ = LEFT$(ffn$, 9) + "..."
+  '         LSET array(index) = ffn
+  '         index = index + 1
+  '       END IF
+  '       fd.cfilename = SPACE$(MAX_PATH) ' clear the path for the next usage
+  '       fd.calternatefilename = SPACE$(14)
+  '     LOOP UNTIL FindNextFile(hFind, _OFFSET(fd)) = 0
+  '     junk = FindClose(hFind)
+  '   ELSE
+  '     lastError& = GetLastError
+  '     IF lastError& = ERROR_FILE_NOT_FOUND THEN
+  '       ' no files available, result remains 0
+  '     ELSEIF lastError& = ERROR_ACCESS_DENIED THEN
+  '       ERROR 70 ' Permission denied
+  '     ELSE
+  '       PRINT lastError&
+  '       ERROR 75 ' Path/File access error
+  '     END IF
+  '   END IF
+  ' ELSE
+    ERROR 73 ' Advanced Feature / Feature Unavailable
+  ' END IF
+END SUB
 
-' SUB ReadFileX(Spec$, DirSize&, Array() AS FullInfo, first)
-'   ERROR 73 ' Feature Unavailable
-' END SUB
+SUB ReadFileX(spec As String, Byref dirSize As Long, array As Any Ptr)
+  ERROR 73 ' Feature Unavailable
+END SUB
 
-' SUB ReadSect(Drive$, Info$, Sector)
-'   ERROR 73 ' Feature Unavailable
-' END SUB
+SUB ReadSect(drive As String, Byref info As String, sector As Short)
+  ERROR 73 ' Feature Unavailable
+END SUB
 
-' FUNCTION ReadTest(Drive$)
-'   ERROR 73 ' Feature Unavailable
-' END FUNCTION
+FUNCTION ReadTest(drive As String) As Short
+  ERROR 73 ' Feature Unavailable
+  ReadTest = 0
+END FUNCTION
 
-' FUNCTION Removable(Drive$)
-'   ERROR 73 ' Feature Unavailable
-' END FUNCTION
+FUNCTION Removable(drive As String) As Short
+  ERROR 73 ' Feature Unavailable
+  Removable = 0
+END FUNCTION
 
-' SUB SetAttr(FileName$, Attribute)
-'   ERROR 73 ' Feature Unavailable
-' END SUB
+' ScanFile - see SCANFILE.BAS
+' SearchPath - see SRCHPATH.BAS
 
-' SUB SetCmd(NewCommand$)
-'   ERROR 73 ' Feature Unavailable
-' END SUB
+SUB SetAttr(fileName As String, attribute As Short)
+  ERROR 73 ' Feature Unavailable
+END SUB
 
-' ' SetDrive allows changing the current default drive. 
-' SUB SetDrive(drive$)
-'   ' drive$ is either an upper or lower case letter of the drive to be 
-'   ' made the current default. 
-'   d$ = UCASE$(LEFT$(drive$, 1))
-'   IF ASC(d$) >= 65 AND ASC(d$) <= 90 THEN
-'     CHDIR d$ + ":"
-'   ELSE
-'     ERROR 5 ' Illegal Function Call
-'   END IF
-' END SUB
+SUB SetCmd(newCommand As String)
+  ERROR 73 ' Feature Unavailable
+END SUB
 
-' ' SetError allows a BASIC program to set or clear the DOSError and 
-' ' WhichError functions. 
-' SUB SetError(errNum)
+' SetDrive allows changing the current default drive. 
+SUB SetDrive(drive As String)
+  ' drive$ is either an upper or lower case letter of the drive to be 
+  ' made the current default. 
+  Var d = UCASE$(LEFT$(drive, 1))
+  IF ASC(d) >= 65 AND ASC(d) <= 90 THEN
+    CHDIR d + ":"
+  ELSE
+    ERROR 5 ' Illegal Function Call
+  END IF
+END SUB
 
-'   ' ErrCode % is either zero to clear DOSError and WhichError, or an 
-'   ' error value to place into WhichError. If ErrCode% is not zero, then 
-'   ' DOSError will be set to -1.
+' SetError allows a BASIC program to set or clear the DOSError and 
+' WhichError functions. 
+SUB SetError(errNum As Short)
 
-'   IF errNum = 0 THEN
-'     Pro_Internal_DosError = 0
-'     Pro_Internal_WhichError = 0
-'   ELSE
-'     Pro_Internal_DosError = -1
-'     Pro_Internal_WhichError = errNum
-'   END IF
+  ' ErrCode % is either zero to clear DOSError and WhichError, or an 
+  ' error value to place into WhichError. If ErrCode% is not zero, then 
+  ' DOSError will be set to -1.
 
-' END SUB
+  IF errNum = 0 THEN
+    Pro_Internal_DosError = 0
+    Pro_Internal_WhichError = 0
+  ELSE
+    Pro_Internal_DosError = -1
+    Pro_Internal_WhichError = errNum
+  END IF
 
-' SUB SetLevel(ErrValue)
-'   ERROR 73 ' Feature Unavailable
-' END SUB
+END SUB
 
-' FUNCTION ShareThere
-'   ERROR 73 ' Feature Unavailable
-' END FUNCTION
+SUB SetLevel(errValue As Short)
+  ERROR 73 ' Feature Unavailable
+END SUB
 
-' SUB SplitName (workName$, drive$, path$, fileName$, ext$) STATIC
+FUNCTION ShareThere As Short
+  ERROR 73 ' Feature Unavailable
+  ShareThere = 0
+END FUNCTION
 
-'   drive$ = ""                                    ' clear out any old junk
-'   path$ = ""
-'   fileName$ = ""
-'   ext$ = ""
+SUB SplitName (workName As String, Byref drive As String, Byref path As String, Byref fileName As String, Byref ext As String) REM STATIC
 
-'   IF LEN(workName$) = 0 THEN EXIT SUB            ' there's nothing to do, exit
-'   fileName$ = workName$                          ' assume there's a name only
+  drive = ""                                    ' clear out any old junk
+  path = ""
+  fileName = ""
+  ext = ""
 
-'   FOR x = LEN(workName$) TO 1 STEP -1           ' walk backwards
-'     thisChar = ASC(MID$(workName$, x))         ' isolate this character
-'     IF thisChar = 58 OR thisChar = 92 THEN       '   ":" or "\"
-'       path$ = LEFT$(workName$, X)               ' separate the path
-'       fileName$ = MID$(workName$, x + 1)        '    from the name
-'       EXIT FOR
-'     END IF
-'   NEXT
+  Dim x As Short
 
-'   IF MID$(path$, 2, 1) = ":" THEN                ' if there's a drive letter
-'     drive$ = LEFT$(path$, 1)                     ' isolate the drive
-'     path$ = MID$(path$, 3)                       ' and the path
-'   END IF
+  IF LEN(workName) = 0 THEN EXIT SUB            ' there's nothing to do, exit
+  fileName = workName                          ' assume there's a name only
 
-'   dot = INSTR(fileName$, ".")                   ' see if there's an extension
-'   IF dot THEN                                   ' there is
-'     ext$ = MID$(fileName$, dot)                 ' and the extension
-'     fileName$ = LEFT$(fileName$, dot - 1)       ' separate the name
-'   END IF
+  FOR x = LEN(workName) TO 1 STEP -1           ' walk backwards
+    Var thisChar = ASC(MID$(workName, x))         ' isolate this character
+    IF thisChar = 58 OR thisChar = 92 THEN       '   ":" or "\"
+      path = LEFT$(workName, X)               ' separate the path
+      fileName = MID$(workName, x + 1)        '    from the name
+      EXIT FOR
+    END IF
+  NEXT
 
-'   IF LEN(drive$) = 0 THEN                        ' if no drive use the default
-'     drive$ = CHR$(GetDrive)
-'   END IF
+  IF MID$(path, 2, 1) = ":" THEN                ' if there's a drive letter
+    drive = LEFT$(path, 1)                     ' isolate the drive
+    path = MID$(path, 3)                       ' and the path
+  END IF
 
-'   IF LEN(path$) = 0 THEN                         ' if no path use the default
-'     path$ = GetDir$(drive$)
-'     IF path$ <> "\" THEN path$ = path$ + "\"
-'   END IF
+  Var dot = INSTR(fileName, ".")                   ' see if there's an extension
+  IF dot THEN                                   ' there is
+    ext = MID$(fileName, dot)                 ' and the extension
+    fileName = LEFT$(fileName, dot - 1)       ' separate the name
+  END IF
 
-'   drive$ = drive$ + ":"                          ' add a trailing colon
+  IF LEN(drive) = 0 THEN                        ' if no drive use the default
+    drive = CHR$(GetDrive)
+  END IF
 
-' END SUB
+  IF LEN(path) = 0 THEN                         ' if no path use the default
+    path = GetDir(drive)
+    IF path <> "\" THEN path = path + "\"
+  END IF
 
-' SUB UnLockFile(Handle, Offset&, Length&)
-'   ERROR 73 ' Feature Unavailable
-' END SUB
+  drive = drive + ":"                          ' add a trailing colon
 
-' ' Valid examines a string to see if it could be a valid file name. 
-' FUNCTION Valid(fileName$)
+END SUB
 
-'   ' fileName$ contains the name of a file, and may optionally include a 
-'   ' drive letter and colon, as well as a path name. If the name is legal 
-'   ' according to the rules of DOS, Okay will receive -1. Otherwise 
-'   ' Okay will be set to zero. 
+' Unique - See UNIQUE.BAS
 
-'   IF LEFT$(fileName$, 1) = " " THEN Valid = 0: EXIT FUNCTION
-'   IF RIGHT$(fileName$, 1) = " " THEN Valid = 0: EXIT FUNCTION
+SUB UnLockFile(handle As Short, offset As Long, length As Long)
+  ERROR 73 ' Feature Unavailable
+END SUB
 
-'   index = 1
-'   character$ = "1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_$!%-@'^~#&{}`()."
-'   slashCount = 0
-'   DO
-'     ch$ = MID$(fileName$, index, 1)
-'     IF ch$ = "\" OR ch$ = "/" THEN
-'       slashCount = slashCount + 1
-'       IF index = 1 THEN
-'         ' OK
-'       ELSEIF index = 2 AND slashCount = 2 THEN
-'         ' OK
-'       ELSEIF slashCount = 1 THEN
-'         ' OK
-'       ELSE
-'         Valid = 0: EXIT FUNCTION
-'       END IF
-'     ELSEIF ch$ = ":" THEN
-'       IF index = 2 THEN
-'         IF slashCount > 0 THEN Valid = 0: EXIT FUNCTION 
-'       ELSE
-'         Valid = 0: EXIT FUNCTION
-'       END IF
-'       slashCount = 0
-'     ELSEIF INSTR(character$, ch$) > 0 THEN
-'       ' OK
-'       slashCount = 0
-'     ELSE
-'       Valid = 0: EXIT FUNCTION
-'     END IF
-'     index = index + 1
-'     IF index > LEN(fileName$) THEN EXIT DO
-'   LOOP
+' Valid examines a string to see if it could be a valid file name. 
+FUNCTION Valid(fileName As String) As Short
 
-'   Valid = -1 ' Valid
+  ' fileName$ contains the name of a file, and may optionally include a 
+  ' drive letter and colon, as well as a path name. If the name is legal 
+  ' according to the rules of DOS, Okay will receive -1. Otherwise 
+  ' Okay will be set to zero. 
 
-' END FUNCTION
+  IF LEFT$(fileName, 1) = " " THEN Valid = 0: EXIT FUNCTION
+  IF RIGHT$(fileName, 1) = " " THEN Valid = 0: EXIT FUNCTION
 
-' ' WhichError reports which error if any occurred during the last call 
-' ' to a QuickPak: Professional DOS routine.
-' FUNCTION WhichError
+  Var index = 1
+  Var character = "1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_$!%-@'^~#&{}`()."
+  var slashCount = 0
+  DO
+    Var ch = MID$(fileName, index, 1)
+    IF ch = "\" OR ch = "/" THEN
+      slashCount = slashCount + 1
+      IF index = 1 THEN
+        ' OK
+      ELSEIF index = 2 AND slashCount = 2 THEN
+        ' OK
+      ELSEIF slashCount = 1 THEN
+        ' OK
+      ELSE
+        Valid = 0: EXIT FUNCTION
+      END IF
+    ELSEIF ch = ":" THEN
+      IF index = 2 THEN
+        IF slashCount > 0 THEN Valid = 0: EXIT FUNCTION 
+      ELSE
+        Valid = 0: EXIT FUNCTION
+      END IF
+      slashCount = 0
+    ELSEIF INSTR(character, ch) > 0 THEN
+      ' OK
+      slashCount = 0
+    ELSE
+      Valid = 0: EXIT FUNCTION
+    END IF
+    index = index + 1
+    IF index > LEN(fileName) THEN EXIT DO
+  LOOP
+
+  Valid = -1 ' Valid
+
+END FUNCTION
+
+' WhichError reports which error if any occurred during the last call 
+' to a QuickPak: Professional DOS routine.
+FUNCTION WhichError As Short
   
-'   ' WhichError returns O if there was no error, or an error code if 
-'   ' there was. 
+  ' WhichError returns O if there was no error, or an error code if 
+  ' there was. 
 
-'   ' All of the QuickPak Professional routines assign a value to the 
-'   ' DOSError and WhichError functions to indicate their success or 
-'   ' failure. Rather than requiring you to set up a separate error 
-'   ' handling procedure and use ON ERROR, you can simply query 
-'   ' these functions after performing any QuickPak Professional DOS 
-'   ' operation. WhichError is discussed in the section entitled 
-'   ' "Eliminating ON ERROR". 
+  ' All of the QuickPak Professional routines assign a value to the 
+  ' DOSError and WhichError functions to indicate their success or 
+  ' failure. Rather than requiring you to set up a separate error 
+  ' handling procedure and use ON ERROR, you can simply query 
+  ' these functions after performing any QuickPak Professional DOS 
+  ' operation. WhichError is discussed in the section entitled 
+  ' "Eliminating ON ERROR". 
   
-'   ' The table on the following page shows all of the possible DOS 
-'   ' errors and the corresponding numbers that WhichError returns. 
+  ' The table on the following page shows all of the possible DOS 
+  ' errors and the corresponding numbers that WhichError returns. 
   
-'   ' Also see the complimentary function DOSError
+  ' Also see the complimentary function DOSError
 
-'   WhichError = Pro_Internal_WhichError 
+  WhichError = Pro_Internal_WhichError 
 
-' END FUNCTION
+END FUNCTION
 
-' SUB WriteSect(Drive$, Info$, Sector)
-'   ERROR 73 ' Feature Unavailable
-' END SUB
+SUB WriteSect(drive As String, Byref info As String, sector As Short)
+  ERROR 73 ' Feature Unavailable
+END SUB
 
-' SUB WriteSect2(Drive$, Info$, Sector)
-'   ERROR 73 ' Feature Unavailable
-' END SUB
+SUB WriteSect2(drive As String, Byref info As String, sector As Short)
+  ERROR 73 ' Feature Unavailable
+END SUB
 
-' FUNCTION WriteTest(Drive$)
-'   ERROR 73 ' Feature Unavailable
-' END FUNCTION
+FUNCTION WriteTest(drive As String) As Short
+  ERROR 73 ' Feature Unavailable
+  WriteTest = 0
+END FUNCTION
 
 ' ' ****************************************
 ' ' Chapter 4 - Functions
@@ -7359,3 +7451,11 @@ END SUB
 ' ' FUNCTION FRE(value$)
 ' '   RETURN 32768
 ' ' END FUNCTION
+
+FUNCTION IsWindows() AS Short
+  #IfDef __FB_WIN32__
+    IsWindows = 1
+  #Else
+    IsWindows = 0
+  #EndIf
+END FUNCTION
