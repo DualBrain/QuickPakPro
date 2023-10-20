@@ -1,6 +1,17 @@
 Dim Shared Pro_Internal_DosError As Short
 Dim Shared Pro_Internal_WhichError As Short
 
+TYPE FInfo 
+  Year As Short
+  Month As Short
+  Day As Short
+  Hour As Short
+  Minute As Short
+  Second As Short
+  Size As Long
+  Attrib As Short
+END TYPE 
+
 ' ****************************************
 ' Chapter 2 - Array Routines 
 ' ****************************************
@@ -110,7 +121,7 @@ DECLARE SUB FGetRT(handle As Short, destination As Any Ptr, recNumber As Long, r
 DECLARE SUB FGetRTA(handle As Short, destination As Any Ptr, recNumber As Long, recSize As Short)
 DECLARE SUB FGetT(handle As Short, destination As Any Ptr, numBytes As Short)
 DECLARE FUNCTION FileComp(file1 As String, file2 As String, Byref errCode As Short) As Short
-DECLARE SUB FileInfo(fileName As String, tVar As Any Ptr)
+DECLARE SUB FileInfo(fileName As String, Byref tVar As FInfo)
 DECLARE FUNCTION FileSize(fileName As String) As Long
 DECLARE FUNCTION FLInput(handle As Short, buffer As String) As String
 DECLARE FUNCTION FLoc(handle As Short) As Long
@@ -179,8 +190,13 @@ DECLARE FUNCTION WriteTest(drive As String) As Short
 DECLARE FUNCTION Bin2Num(binary As String) As Short
 DECLARE FUNCTION Num2Bin(number As Short) As String
 DECLARE FUNCTION Num2Bin2(number As Short) As String
-DECLARE FUNCTION QPHex OVERLOAD (value As Short, numDigits As Short) As String
-DECLARE FUNCTION QPHex OVERLOAD (value As Long, numDigits As Short) As String
+DECLARE FUNCTION QPHex OVERLOAD (value As Short, digits As Short) As String
+DECLARE FUNCTION QPHex OVERLOAD (value As Long, digits As Short) As String
+DECLARE FUNCTION QPHex OVERLOAD (value As UByte, digits As Short) As String
+DECLARE FUNCTION QPHex OVERLOAD (value As UShort, digits As Short) As String
+DECLARE FUNCTION QPHex OVERLOAD (value As ULong, digits As Short) As String
+DECLARE FUNCTION QPHex OVERLOAD (value As ULongInt, digits As Short) As String
+DECLARE FUNCTION QPHex OVERLOAD (value As Const Any Ptr, digits As Short) As String
 
 ' ****************************************
 ' Chapter 5 - Menu/Input Routines
@@ -209,9 +225,11 @@ DECLARE FUNCTION WaitKey AS SHORT
 
 DECLARE FUNCTION Date2Num (dat As String) As Short
 DECLARE FUNCTION DayName(d As Short) As String
+DECLARE SUB Empty(dummy As Short)
 DECLARE FUNCTION Factorial(number As Short) As Double
 DECLARE FUNCTION FudgeFactor As Long
 DECLARE FUNCTION GetCPU As Short
+DECLARE SUB GetEquip(Byref floppies As Short, Byref parallels As Short, Byref serials As Short)
 DECLARE SUB LockUp
 DECLARE FUNCTION MathChip As Short
 DECLARE FUNCTION MaxInt (num1 As Short, num2 As Short) As Short
@@ -224,6 +242,9 @@ DECLARE SUB Pause(ticks AS SHORT)
 ' Chapter 8 - String Manipulation Routines
 ' ****************************************
 
+DECLARE FUNCTION ASCII (ch As String) AS Short
+DECLARE FUNCTION FUsing(number As String, image As String) As String
+DECLARE FUNCTION InCount(source As String, searchValue As String) As Short
 DECLARE FUNCTION QInstr(startPosition As Short, sourceValue As String, searchValue As String) As Short
 DECLARE FUNCTION QInstr2(startPosition As Short, sourceValue As String, searchValue As String) As Short
 DECLARE SUB ReplaceString (Byref sourceValue As String, oldValue As String, newValue As String)
@@ -233,10 +254,30 @@ DECLARE SUB ReplaceString2 (Byref sourceValue As String, oldValue As String, new
 ' Chapter 9 - Video Routines
 ' ****************************************
 
+DECLARE FUNCTION ArraySize(ulRow As Short, ulCol As Short, lrRow As Short, lrCol As Short) As Short
+DECLARE SUB Box(ulRow As Short, ulCol As Short, lrRow As Short, lrCol As Short, char As Short, colr As Short, page As Short)
+DECLARE SUB Box0(ulRow As Short, ulCol As Short, lrRow As Short, lrCol As Short, char As Short, colr As Short)
+DECLARE SUB BPrint(text As String)
+DECLARE SUB ClearEOL(clr As Short)
+DECLARE SUB ClearScr (ulRow As Short, ulCol As Short, lrRow As Short, lrCol As Short, colr As Short, page As Short)
+DECLARE SUB ClearScr0 (ulRow As Short, ulCol As Short, lrRow As Short, lrCol As Short, colr As Short)
+DECLARE SUB FillScrn(ulRow As Short, ulCol As Short, lrRow As Short, lrCol As Short, colr As Short, char As Short, page As Short)
+DECLARE SUB FillScrn0(ulRow As Short, ulCol As Short, lrRow As Short, lrCol As Short, colr As Short, char As Short)
+DECLARE SUB GetVMode (Byref mode As Short, Byref page As Short, Byref pageSize As Short, Byref rows As Short, Byref columns As Short)
+DECLARE FUNCTION Monitor As Short
+DECLARE FUNCTION EGAMem As Short
+DECLARE SUB MPaintBox (ulRow As Short, ulCol As Short, lrRow As Short, lrCol As Short, colr As Short)
+DECLARE SUB MQPrint (txt As String, colr As Short)
 DECLARE FUNCTION OneColor (fg As Short, bg As Short) As Short
+DECLARE SUB PaintBox (ulRow As Short, ulCol As Short, lrRow As Short, lrCol As Short, colr As Short, page As Short)
+DECLARE SUB PaintBox0 (ulRow As Short, ulCol As Short, lrRow As Short, lrCol As Short, colr As Short)
+DECLARE SUB PUsing (number As String, image As String, color1 As Short, color2 As Short, page As Short, row As Short, column As Short)
 DECLARE SUB QPrint (text As String, colr As Short, page As Short)
 DECLARE SUB QPrint0 (text As String, colr As Short)
+DECLARE SUB QPrintAny (txt As String, clr As Short, monCode As Short, row As Short, column As Short)
 DECLARE SUB QPrintRC (txt As String, r As Short, c As Short, clr As Short)
+DECLARE SUB ReadScrn (row As Short, column As Short, x As String, page As Short)
+DECLARE SUB ReadScrn0 (row As Short, column As Short, x As String)
 DECLARE SUB SplitColor (colr As Short, Byref fg As Short, Byref bg As Short)
 
 ' ****************************************

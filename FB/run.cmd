@@ -1,3 +1,3 @@
 @echo off
-fbc32 dos.bas pro.bas
-REM dos.exe
+fbc32 fnspread.bas pro.bas
+REM fnspread.exe

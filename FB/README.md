@@ -35,7 +35,7 @@ This is a **work-in-progress project**. One of the desired goals with this proje
 |FILEINFO.BAS|         |   |FILESORT.BAS|         |   |FILEVIEW.BAS|         |
 |FILL.BAS    | EXE     |   |FILLSCRN.BAS|         |   |FIND.BAS    | EXE     |
 |FINDLAST.BAS|         |   |FINDT.BAS   | EXE     |   |FLINPUT.BAS |         |
-|FLUSH.BAS   |         |   |FNOTHER.BAS |         |   |FNSPREAD.BAS|         |
+|FLUSH.BAS   |         |   |FNOTHER.BAS | INCLUDE |   |FNSPREAD.BAS| INCLUDE |
 |FORMAT.BAS  |         |   |FULLNAME.BAS|         |   |GASGAUGE.BAS|         |
 |GET1STR.BAS |         |   |GETATTR.BAS |         |   |GETCMOS.BAS |         |
 |GETCOLOR.BAS|         |   |GETDIR.BAS  |         |   |GETEQUIP.BAS|         |

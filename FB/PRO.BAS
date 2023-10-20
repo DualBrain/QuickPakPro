@@ -10,6 +10,7 @@
 
 #INCLUDE ONCE "file.bi"
 #INCLUDE ONCE "dir.bi"
+#INCLUDE ONCE "vbcompat.bi"
 '#INCLUDE ONCE "windows.bi"
 '#INCLUDE ONCE "fbgfx.bi"
 
@@ -2222,7 +2223,7 @@ END FUNCTION
 ' FFlush will flush a file's data buffers to disk without requiring the 
 ' file to be closed. 
 SUB FFlush(handle As Short)
-  ERROR 73 ' Feature Unavailable
+  Var result = FileFlush(handle)
 END SUB
 
 ' FGet reads data from a disk file in a manner similar to BASIC's 
@@ -2318,48 +2319,28 @@ END FUNCTION
 ' FileCopy - see FILECOPY.BAS
 ' FileCrypt - see FILECRPT.BAS
 
-SUB FileInfo(fileName As String, tVar As Any Ptr)
+SUB FileInfo(fileName As String, Byref tVar As FInfo)
 
-  ERROR 73 ' Feature Unavailable
-
-  ' f$ = fileName$
-
-  ' IF RIGHT$(f$, 1) <> CHR$(0) THEN f$ = f$ + CHR$(0)
-
-  ' DIM createDate AS FILETIME
-  ' DIM modifyDate AS FILETIME
-  ' DIM accessDate AS FILETIME
-  ' DIM systime1 AS SYSTEMTIME
-  ' DIM fileHandle AS _OFFSET
-
-  ' fileHandle = CreateFileA%&(_OFFSET(f$), GENERIC_READ, FILE_SHARE_READ OR FILE_SHARE_WRITE, 0, OPEN_EXISTING, 0, 0)
-  ' IF fileHandle <> INVALID_HANDLE_VALUE THEN
-  '   IF GetFileTime&(fileHandle, _OFFSET(createDate), _OFFSET(modifyDate), _OFFSET(accessDate)) THEN
-  '     'PRINT HEX$(createDate.dwLowDateTime) + HEX$(createDate.dwHighDateTime)
-  '     'PRINT HEX$(modifyDate.dwLowDateTime) + HEX$(modifyDate.dwHighDateTime)
-  '     'PRINT HEX$(accessDate.dwLowDateTime) + HEX$(accessDate.dwHighDateTime)
-  '     IF FileTimeToSystemTime&(_OFFSET(createDate), _OFFSET(systime1)) THEN
-  '       tVar.Year = systime1.wYear
-  '       tVar.Month = systime1.wMonth
-  '       tVar.Day = systime1.wDay
-  '       tVar.Hour = systime1.wHour
-  '       tVar.Minute = systime1.wMinute
-  '       tVar.Second = systime1.wSecond
-  '     ELSE
-  '       'PRINT "FileTimeToSystemTime failed. Error: 0x" + LCASE$(HEX$(GetLastError&))
-  '     END IF
-  '   ELSE
-  '     'PRINT "GetFileTime failed. Error: 0x" + LCASE$(HEX$(GetLastError&))
-  '   END IF
-  '   IF CloseHandle&(fileHandle) = 0 THEN
-  '     'PRINT "CloseHandle failed. Error: 0x" + LCASE$(HEX$(GetLastError&))
-  '   END IF
-  ' ELSE
-  '   'PRINT "CreateFileA failed. Error: 0x" + LCASE$(HEX$(GetLastError&))
-  ' END IF
-
-  ' tVar.Size = FileSize(fileName$)
-  ' tVar.Attrib = GetFileAttributes(f$)
+  IF FileExists(fileName) Then
+    Var d = FileDateTime(fileName)
+    tVar.Year = YEAR(d)
+    tVar.Month = MONTH(d)
+    tVar.Day = DAY(d)
+    tVar.Hour = HOUR(d)
+    tVar.Minute = MINUTE(d)
+    tVar.Second = SECOND(d)
+    tVar.Size = FileLen(fileName)
+    tVar.Attrib = 0 'TODO: And this isn't FILEATTR; it's the file attribute(s).
+  ELSE
+    tVar.Year = 0
+    tVar.Month = 0
+    tVar.Day = 0
+    tVar.Hour = 0
+    tVar.Minute = 0
+    tVar.Second = 0
+    tVar.Size = 0
+    tVar.Attrib = 0
+  END If
 
 END SUB
 
@@ -2370,41 +2351,14 @@ FUNCTION FileSize(fileName As String) As Long
   ' bytes. If the file does not exist size is instead assigned a value of -1. 
 
   If Exist(fileName) Then
-    Var ff = Freefile
-    Open fileName For Binary As #ff
-    FileSize = Lof( ff )
-    Close #ff
+    ' Var ff = Freefile
+    ' Open fileName For Binary As #ff
+    ' FileSize = Lof( ff )
+    ' Close #ff
+    FileSize = FileLen(fileName)
   Else
     FileSize = -1
   End If
-
-  ' IF NOT _FileExists(fileName$) THEN
-  '   result& = -1
-  ' ELSE
-
-  '   IF INSTR(_OS$, "[WINDOWS]") THEN
-  '     DIM pattern AS STRING
-  '     DIM fd AS Win32_Find_Data
-  '     DIM hFind AS _UNSIGNED _OFFSET
-  '     DIM junk AS LONG
-  '     pattern = fileName$ + CHR$(0)
-  '     hFind = FindFirstFile(_OFFSET(pattern), _OFFSET(fd))
-  '     IF hFind <> INVALID_HANDLE_VALUE THEN
-  '       result& = fd.nfilesizelow
-  '       junk = FindClose(hFind)
-  '     ELSE
-  '       lastError& = GetLastError
-  '       IF lastError& = ERROR_ACCESS_DENIED THEN
-  '         ERROR 70 ' Permission denied
-  '       ELSE
-  '         ERROR 75 ' Path/File access error
-  '       END IF
-  '     END IF
-  '   ELSE
-  '     ERROR 73 ' Advanced Feature / Feature Unavailable
-  '   END IF
-
-  ' END IF
 
 END FUNCTION
 
@@ -2414,8 +2368,6 @@ END FUNCTION
 ' using the QuickPak Professional FOpen routine. 
 FUNCTION FLInput(handle As Short, buffer As String) As String
   
-  ERROR 73 ' Feature Unavailable
-
   ' Handle% is the file handle that was assigned when the file was first 
   ' opened, and Buffer$ is a temporary work string needed by FLinput 
   ' as it reads the file contents. 
@@ -2438,45 +2390,45 @@ FUNCTION FLInput(handle As Short, buffer As String) As String
 
   Var result = ""
 
-  ' cp = LOC(handle)
-  ' lf = LOF(handle)
-  ' lb = LEN(buffer$)
+  Var cp = LOC(handle)
+  Var lf = LOF(handle)
+  VAr lb = LEN(buffer)
 
-  ' IF (cp - 1) + lb => lf THEN
-  '   lb = lf - cp
-  ' END IF
+  IF (cp - 1) + lb >= lf THEN
+    lb = lf - cp
+  END IF
 
-  ' IF lb > 0 THEN
+  IF lb > 0 THEN
 
-  '   CALL FGet(handle, buffer$)
+    FGet handle, buffer
 
-  '   cr = INSTR(buffer$, CHR$(13))
-  '   feed = INSTR(buffer$, CHR$(10))
-  '   ef = INSTR(buffer$, CHR$(26))
+    Var cr = INSTR(buffer, CHR$(13))
+    Var feed = INSTR(buffer, CHR$(10))
+    Var ef = INSTR(buffer, CHR$(26))
 
-  '   IF cr > 0 THEN
-  '     result$ = LEFT$(buffer$, cr - 1)
-  '     IF cr + 1 = feed THEN
-  '       IF cp + feed + 1 < lf THEN
-  '         SEEK handle, cp + feed + 1
-  '       END IF
-  '     ELSE
-  '       IF cp + cr < lf THEN
-  '         SEEK handle, cp + cr
-  '       END IF
-  '     END IF
-  '   ELSEIF ef > 0 THEN
-  '     result$ = LEFT$(buffer$, ef - 1)
-  '     SEEK handle, cp + ef
-  '     SetError 62 ' End of File
-  '   ELSE
-  '     result$ = buffer$
-  '     SetError 83 ' Buffer too small
-  '   END IF
+    IF cr > 0 THEN
+      result = LEFT$(buffer, cr - 1)
+      IF cr + 1 = feed THEN
+        IF cp + feed + 1 < lf THEN
+          SEEK handle, cp + feed + 1
+        END IF
+      ELSE
+        IF cp + cr < lf THEN
+          SEEK handle, cp + cr
+        END IF
+      END IF
+    ELSEIF ef > 0 THEN
+      result = LEFT$(buffer, ef - 1)
+      SEEK handle, cp + ef
+      SetError 62 ' End of File
+    ELSE
+      result = buffer
+      SetError 83 ' Buffer too small
+    END IF
 
-  ' ELSE
-  '   SetError 62 ' End of File
-  ' END IF
+  ELSE
+    SetError 62 ' End of File
+  END IF
 
   FLInput = result
 
@@ -3438,16 +3390,26 @@ END FUNCTION
 
 ' QPHex is a fast replacement for BASIC's HEX$ function, and it 
 ' also returns a string padded to a specified number of digits. 
-FUNCTION QPHex(value As Short, numDigits As Short) As String
-  ERROR 73 ' Feature Unavailable
-  QPHex = ""
+FUNCTION QPHex(value As Short, digits As Short) As String
+  QPHex = Hex(value, digits)
 END FUNCTION
-
-' QPHex is a fast replacement for BASIC's HEX$ function, and it 
-' also returns a string padded to a specified number of digits. 
-FUNCTION QPHex(value As Long, numDigits As Short) As String
-  ERROR 73 ' Feature Unavailable
-  QPHex = ""
+FUNCTION QPHex(value As Long, digits As Short) As String
+  QPHex = Hex(value, digits)
+END FUNCTION
+FUNCTION QPHex(value As UByte, digits As Short) As String
+  QPHex = Hex(value, digits)
+END FUNCTION
+FUNCTION QPHex(value As UShort, digits As Short) As String
+  QPHex = Hex(value, digits)
+END FUNCTION
+FUNCTION QPHex(value As ULong, digits As Short) As String
+  QPHex = Hex(value, digits)
+END FUNCTION
+FUNCTION QPHex(value As ULongInt, digits As Short) As String
+  QPHex = Hex(value, digits)
+END FUNCTION
+FUNCTION QPHex(value As Const Any Ptr, digits As Short) As String
+  QPHex = Hex(value, digits)
 END FUNCTION
 
 ' Rand - see FNOTHER.BAS
@@ -4907,12 +4869,12 @@ END FUNCTION
 '   ERROR 73 ' Feature Unavailable
 ' END FUNCTION
 
-' ' As its name implies, Empty is an empty procedure that does absolutely
-' ' nothing. However, Empty is invaluable when timing BASIC functions, 
-' ' precisely because it takes such little time to execute. 
-' SUB Empty(dummy)
-'   ' do nothing.
-' END SUB
+' As its name implies, Empty is an empty procedure that does absolutely
+' nothing. However, Empty is invaluable when timing BASIC functions, 
+' precisely because it takes such little time to execute. 
+SUB Empty(dummy As Short)
+  ' do nothing.
+END SUB
 
 ' FUNCTION ENum2Date$(Days)
 '   ERROR 73 ' Feature Unavailable
@@ -5116,11 +5078,11 @@ END FUNCTION
 '   ERROR 73 ' Feature Unavailable
 ' END FUNCTION
 
-' SUB GetEquip(floppies, parallels, serials)
-'   floppies = 1  ' matches DOSBOX
-'   parallels = 3 ' matches DOSBOX
-'   serials = 2   ' matches DOSBOX
-' END SUB
+SUB GetEquip(Byref floppies As Short, Byref parallels As Short, Byref serials As Short)
+  floppies = 1  ' matches DOSBOX
+  parallels = 3 ' matches DOSBOX
+  serials = 2   ' matches DOSBOX
+END SUB
 
 SUB LockUp
   DO:LOOP
@@ -5939,13 +5901,13 @@ END SUB
 ' Chapter 8 - String Manipulation Routines
 ' ****************************************
 
-' ' ASCII obtains the ASCII value for a string exactly as BASIC's ASC 
-' ' function does, but it will not cause an "Illegal Function Call" error 
-' ' if the string is null. 
-' FUNCTION ASCII (char$)
-'   ' See ASCII.ASM
-'   IF LEN(char$) THEN ASCII = ASC(char$) ELSE ASCII = -1
-' END SUB
+' ASCII obtains the ASCII value for a string exactly as BASIC's ASC 
+' function does, but it will not cause an "Illegal Function Call" error 
+' if the string is null. 
+FUNCTION ASCII (ch As String) AS Short
+  ' See ASCII.ASM
+  IF LEN(ch) THEN ASCII = ASC(ch) ELSE ASCII = -1
+END FUNCTION
 
 ' ' Blanks will report the number of leading blanks in the specified 
 ' ' string. Both CHR$(32) and the CHR$(0) "null" character are recognized. 
@@ -6023,177 +5985,177 @@ END SUB
 '   ERROR 73 ' Feature Unavailable
 ' END FUNCTION
 
-' ' FUsing accepts an incoming number and image string, and returns 
-' ' it as a formatted string much like BASIC's PRINT USING would. 
-' FUNCTION FUsing$ (number$, image$)
+' FUsing accepts an incoming number and image string, and returns 
+' it as a formatted string much like BASIC's PRINT USING would. 
+FUNCTION FUsing(number As String, image As String) As String
   
-'   ' Number is any number whether integer, single, or double precision, 
-'   ' and Image$ indicates how the result is to be formatted. If the 
-'   ' number will not fit within the allotted space, the first digit of the 
-'   ' returned string will be replaced with a percent sign (  ) . 
+  ' Number is any number whether integer, single, or double precision, 
+  ' and Image$ indicates how the result is to be formatted. If the 
+  ' number will not fit within the allotted space, the first digit of the 
+  ' returned string will be replaced with a percent sign (  ) . 
 
-'   ' It is very important that you not include any blank spaces within the 
-'   ' image string. For example "##.##" is perfectly legal, while 
-'   ' "## .##" will not work as expected. 
+  ' It is very important that you not include any blank spaces within the 
+  ' image string. For example "##.##" is perfectly legal, while 
+  ' "## .##" will not work as expected. 
 
-'   ' The table below summarizes FUsing's capabilities: 
+  ' The table below summarizes FUsing's capabilities: 
 
-'   '     # represents each digit position 
-'   '     . specifies a decimal point 
-'   '     + causes the sign of the number ( + or -) to be added (the 
-'   '       sign must be the first character in the field) 
-'   '    ** replaces leading spaces in the field with asterisks
-'   '    $$ adds a dollar sign to the left of the number  
-'   '   **$ combines the effects of ** and $$ 
-'   '     , specifies that commas are to be added to the formatted string
+  '     # represents each digit position 
+  '     . specifies a decimal point 
+  '     + causes the sign of the number ( + or -) to be added (the 
+  '       sign must be the first character in the field) 
+  '    ** replaces leading spaces in the field with asterisks
+  '    $$ adds a dollar sign to the left of the number  
+  '   **$ combines the effects of ** and $$ 
+  '     , specifies that commas are to be added to the formatted string
   
-'   ' FUsing is demonstrated in the DEMOCM.BAS example program. 
+  ' FUsing is demonstrated in the DEMOCM.BAS example program. 
  
-'   ' Although BASIC accepts multiple commas in the image string, 
-'   ' FUsing requires only one. If there is a decimal point within the 
-'   ' string, the comma must be placed just before it. Otherwise, the 
-'   ' comma must be the last character. 
+  ' Although BASIC accepts multiple commas in the image string, 
+  ' FUsing requires only one. If there is a decimal point within the 
+  ' string, the comma must be placed just before it. Otherwise, the 
+  ' comma must be the last character. 
 
-'   result$ = ""
+  Var result = ""
 
-'   number# = VAL(number$)
-'   format$ = image$
+  Var number8 = VAL(number)
+  Var fmt = image
 
-'   IF INSTR(format$, "#") = 0 THEN using$ = format$ + "#"
+  IF INSTR(fmt, "#") = 0 THEN fmt = fmt + "#"
 
-'   leadingPlus = LEFT$(format$, 1) = "+"
-'   dollarSign = INSTR(format$, "$") > 0
-'   doubleDollarSign = INSTR(format$, "$$") > 0
-'   asteriskFillDollarSign = INSTR(format$, "**$") > 0
+  Var leadingPlus = LEFT$(fmt, 1) = "+"
+  VAr dollarSign = INSTR(fmt, "$") > 0
+  Var doubleDollarSign = INSTR(fmt, "$$") > 0
+  Var asteriskFill = INSTR(fmt, "**$") > 0
 
-'   exponential = INSTR(format$, "^^^^") > 0
-'   trailingMinus = RIGHT$(format$, 1) = "-"
-'   hundreds = INSTR(format$, ",") > 0
-'   float = INSTR(format$, ".") > 0
-'   precision = 0
+  Var exponential = INSTR(fmt, "^^^^") > 0
+  Var trailingMinus = RIGHT$(fmt, 1) = "-"
+  Var hundreds = INSTR(fmt, ",") > 0
+  Var float = INSTR(fmt, ".") > 0
+  Var precision = 0
 
-'   IF float THEN
-'     positionStart = INSTR(format$, ".")
-'     positionEnd = positionStart + 1
-'     DO
-'       SELECT CASE MID$(format$, positionEnd, 1)
-'         CASE "#": positionEnd = positionEnd + 1
-'         CASE ELSE
-'           positionEnd = positionEnd -1
-'           EXIT DO
-'       END SELECT
-'       IF positionEnd > LEN(format$) THEN
-'         positionEnd = positionEnd - 1
-'         EXIT DO
-'       END IF
-'     LOOP
-'     precision = positionEnd - positionStart
-'   END IF
+  IF float THEN
+    Var positionStart = INSTR(fmt, ".")
+    VAr positionEnd = positionStart + 1
+    DO
+      SELECT CASE MID$(fmt, positionEnd, 1)
+        CASE "#": positionEnd = positionEnd + 1
+        CASE ELSE
+          positionEnd = positionEnd -1
+          EXIT DO
+      END SELECT
+      IF positionEnd > LEN(fmt) THEN
+        positionEnd = positionEnd - 1
+        EXIT DO
+      END IF
+    LOOP
+    precision = positionEnd - positionStart
+  END IF
 
-'   length = _INSTRREV(format$, "#") - INSTR(format$, "#") + 1
-'   IF INSTR(format$, ".") > 0 AND INSTR(format$, ".") = INSTR(format$, "#") - 1 THEN
-'     ' Numeric format stars with a period...
-'     length = length + 1
-'   END IF
-'   IF asteriskFillDollarSign THEN
-'     length = length + 1
-'   ELSEIF asteriskFill THEN
-'     length = length + 2
-'   END IF
-'   IF exponential THEN length = length + 4
-'   IF NOT float THEN number# = CINT(number#)
-'   sign$ = " "
-'   IF number# < 0 THEN
-'     sign$ = "-"
-'   ELSEIF leadingPlus THEN
-'     sign$ = "+"
-'   END IF
-'   IF dollarSign THEN length = length + 1
+  Var length = INSTRREV(fmt, "#") - INSTR(fmt, "#") + 1
+  IF INSTR(fmt, ".") > 0 AND INSTR(fmt, ".") = INSTR(fmt, "#") - 1 THEN
+    ' Numeric format stars with a period...
+    length = length + 1
+  END IF
+  IF asteriskFill THEN
+    length = length + 1
+  ELSEIF asteriskFill THEN
+    length = length + 2
+  END IF
+  IF exponential THEN length = length + 4
+  IF NOT float THEN number8 = CINT(number8)
+  Var sign = " "
+  IF number8 < 0 THEN
+    sign = "-"
+  ELSEIF leadingPlus THEN
+    sign = "+"
+  END IF
+  IF dollarSign THEN length = length + 1
 
-'   value$ = LTRIM$(STR$(ABS(number#)))
+  Var value = LTRIM$(STR$(ABS(number8)))
 
-'   IF float THEN
-'     IF INSTR(value$, ".") = 0 THEN ' a whole number, just extend decimal place as desired
-'       value$ = value$ + "." + STRING$(precision, "0")
-'     ELSE
-'       DO
-'         SELECT CASE LEN(value$) - _INSTRREV(value$, ".") 
-'           CASE IS > precision
-'             value$ = LEFT$(value$, LEN(value$) - 1)
-'           CASE IS < precision
-'             value$ = value$ + "0"
-'           CASE ELSE
-'             EXIT DO
-'         END SELECT
-'       LOOP
-'     END IF
-'   END IF
-'   IF hundreds THEN
-'     index = INSTR(value$, ".")
-'     IF index = 0 THEN index = LEN(value$) ELSE index = index - 1
-'     DO
-'       index = index - 3
-'       IF index < 1 THEN EXIT DO
-'       IF MID$(value$, index, 1) <> "," THEN
-'         value$ = LEFT$(value$, index) + "," + RIGHT$(value$, LEN(value$) - index)
-'         index = index
-'       END IF
-'     LOOP
-'   END IF
+  IF float THEN
+    IF INSTR(value, ".") = 0 THEN ' a whole number, just extend decimal place as desired
+      value = value + "." + STRING$(precision, "0")
+    ELSE
+      DO
+        SELECT CASE LEN(value) - INSTRREV(value, ".") 
+          CASE IS > precision
+            value = LEFT$(value, LEN(value) - 1)
+          CASE IS < precision
+            value = value + "0"
+          CASE ELSE
+            EXIT DO
+        END SELECT
+      LOOP
+    END IF
+  END IF
+  IF hundreds THEN
+    Var index = INSTR(value, ".")
+    IF index = 0 THEN index = LEN(value) ELSE index = index - 1
+    DO
+      index = index - 3
+      IF index < 1 THEN EXIT DO
+      IF MID$(value, index, 1) <> "," THEN
+        value = LEFT$(value, index) + "," + RIGHT$(value, LEN(value) - index)
+        index = index
+      END IF
+    LOOP
+  END IF
 
-'   IF exponential THEN
-'     numericOnly$ = MID$(format$, INSTR(format$, "#"), _INSTRREV(format$, "#") - INSTR(format$, "#") + 1)
-'     CALL ReplaceString (numericOnly$, "#", "0")
-'     IF INSTR(format$, ".") > 0 AND INSTR(format$, ".") = INSTR(format$, "#") - 1 THEN
-'       numericOnly$ = "." + numericOnly$
-'     ELSE
-'       WHILE MID$(numericOnly$, 2, 1) = "0"
-'         numericOnly$ = MID$(numericOnly$, 2)
-'         IF LEN(numericOnly$) = 1 THEN EXIT WHILE
-'       WEND
-'     END IF
-'     value$ = LTRIM$(STR$(number#)) + "E+00"
-'   END IF
+  IF exponential THEN
+    Var numericOnly = MID$(fmt, INSTR(fmt, "#"), INSTRREV(fmt, "#") - INSTR(fmt, "#") + 1)
+    ReplaceString numericOnly, "#", "0"
+    IF INSTR(fmt, ".") > 0 AND INSTR(fmt, ".") = INSTR(fmt, "#") - 1 THEN
+      numericOnly = "." + numericOnly
+    ELSE
+      WHILE MID$(numericOnly, 2, 1) = "0"
+        numericOnly = MID$(numericOnly, 2)
+        IF LEN(numericOnly) = 1 THEN EXIT WHILE
+      WEND
+    END IF
+    value = LTRIM$(STR$(number8)) + "E+00"
+  END IF
 
-'   IF length < LEN(value$) THEN result$ = result$ + ""
+  IF length < LEN(value) THEN result = result + ""
 
-'   IF length > LEN(value$) THEN
-'     IF asteriskFill THEN
-'       IF sign$ <> " " THEN
-'         result$ = result$ + STRING$(length - LEN(value$) + 1, "*")
-'       ELSE
-'         result$ = result$ + STRING$(length - LEN(value$), "*")
-'       END IF
-'     ELSE
-'       result$ = result$ + STRING$(length - LEN(value$), " ")
-'     END IF
-'   END IF
-'   IF NOT trailingMinus AND sign$ <> " " THEN result$ = result$ + sign$
-'   IF dollarSign THEN result$ = result$ + "$"
-'   result$ = result$ + value$
-'   IF trailingMinus THEN result$ = result$ + sign$
+  IF length > LEN(value) THEN
+    IF asteriskFill THEN
+      IF sign <> " " THEN
+        result = result + STRING$(length - LEN(value) + 1, "*")
+      ELSE
+        result = result + STRING$(length - LEN(value), "*")
+      END IF
+    ELSE
+      result = result + STRING$(length - LEN(value), " ")
+    END IF
+  END IF
+  IF NOT trailingMinus AND sign <> " " THEN result = result + sign
+  IF dollarSign THEN result = result + "$"
+  result = result + value
+  IF trailingMinus THEN result = result + sign
 
-'   FUsing$ = result$
+  FUsing = result
 
-' END FUNCTION
+END FUNCTION
 
-' ' InCount will quickly report how many times one string occurs 
-' ' within another, and the case-sensitive search string may contain 
-' ' any number of "?" wild cards. 
-' FUNCTION InCount(Source$, SearchValue$)
-'   result = 0
-'   pos1 = 1
-'   DO
-'     p = QInstr(pos1, Source$, SearchValue$)
-'     IF p > 0 THEN
-'       result = result + 1
-'       pos1 = p + LEN(SearchValue$)
-'     ELSE
-'       EXIT DO
-'     END IF
-'   LOOP
-'   InCount = result
-' END FUNCTION
+' InCount will quickly report how many times one string occurs 
+' within another, and the case-sensitive search string may contain 
+' any number of "?" wild cards. 
+FUNCTION InCount(source As String, searchValue As String) As Short
+  Var result = 0
+  Var pos1 = 1
+  DO
+    VAr p = QInstr(pos1, source, searchValue)
+    IF p > 0 THEN
+      result = result + 1
+      pos1 = p + LEN(searchValue)
+    ELSE
+      EXIT DO
+    END IF
+  LOOP
+  InCount = result
+END FUNCTION
 
 ' ' InCount2 will quickly report how many times one string occurs 
 ' ' within another, and the case-insensitive search string may contain 
@@ -6852,94 +6814,94 @@ END SUB
 '   ERROR 73 ' Feature Unavailable
 ' END SUB
 
-' ' ArraySize will quickly calculate how many elements are needed in an
-' ' integer array that is intended to hold a portion of the display screen.
-' FUNCTION ArraySize(ulRow, ulCol, lrRow, lrCol)
-'   ArraySize = (lrRow - ulRow + 1) * (lrCol - ulCol + 1)
-' END FUNCTION
+' ArraySize will quickly calculate how many elements are needed in an
+' integer array that is intended to hold a portion of the display screen.
+FUNCTION ArraySize(ulRow As Short, ulCol As Short, lrRow As Short, lrCol As Short) As Short
+  ArraySize = (lrRow - ulRow + 1) * (lrCol - ulCol + 1)
+END FUNCTION
 
-' ' Box will quickly draw a box frame on the screen. 
-' SUB Box(ulRow, ulCol, lrRow, lrCol, char, colr, page)
-'   ' NOTE: page isn't currently implemented
-'   ' If page = -1 then use current active page.
-'   SELECT CASE char
-'     CASE 1 ' single line all around
-'       ' first row
-'       QPrintRC CHR$(218), ulRow, ulCol, colr
-'       QPrintRC STRING$((lrCol - ulCol) - 1, 196), ulRow, ulCol + 1, colr
-'       QPrintRC CHR$(191), ulRow, lrCol, colr
-'       ' middle
-'       FOR r = ulRow + 1 TO lrRow - 1
-'         QPrintRC CHR$(179), r, ulCol, colr
-'         QPrintRC CHR$(179), r, lrCol, colr
-'       NEXT
-'       ' last row
-'       QPrintRC CHR$(192), lrRow, ulCol, colr
-'       QPrintRC STRING$((lrCol - ulCol) - 1, 196), lrRow, ulCol + 1, colr
-'       QPrintRC CHR$(217), lrRow, lrCol, colr
-'     CASE 2 ' double line all around
-'       ' first row
-'       QPrintRC CHR$(201), ulRow, ulCol, colr
-'       QPrintRC STRING$((lrCol - ulCol) - 1, 205), ulRow, ulCol + 1, colr
-'       QPrintRC CHR$(187), ulRow, lrCol, colr
-'       ' middle
-'       FOR r = ulRow + 1 TO lrRow - 1
-'         QPrintRC CHR$(186), r, ulCol, colr
-'         QPrintRC CHR$(186), r, lrCol, colr
-'       NEXT
-'       ' last row
-'       QPrintRC CHR$(200), lrRow, ulCol, colr
-'       QPrintRC STRING$((lrCol - ulCol) - 1, 205), lrRow, ulCol + 1, colr
-'       QPrintRC CHR$(188), lrRow, lrCol, colr
-'     CASE 3 ' double line horizontally, single line vertically
-'       ' first row
-'       QPrintRC CHR$(213), ulRow, ulCol, colr
-'       QPrintRC STRING$((lrCol - ulCol) - 1, 205), ulRow, ulCol + 1, colr
-'       QPrintRC CHR$(184), ulRow, lrCol, colr
-'       ' middle
-'       FOR r = ulRow + 1 TO lrRow - 1
-'         QPrintRC CHR$(179), r, ulCol, colr
-'         QPrintRC CHR$(179), r, lrCol, colr
-'       NEXT
-'       ' last row
-'       QPrintRC CHR$(212), lrRow, ulCol, colr
-'       QPrintRC STRING$((lrCol - ulCol) - 1, 205), lrRow, ulCol + 1, colr
-'       QPrintRC CHR$(190), lrRow, lrCol, colr
-'     CASE 4 ' single line horizontally, double line vertically
-'       ' first row
-'       QPrintRC CHR$(214), ulRow, ulCol, colr
-'       QPrintRC STRING$((lrCol - ulCol) - 1, 196), ulRow, ulCol + 1, colr
-'       QPrintRC CHR$(183), ulRow, lrCol, colr
-'       ' middle
-'       FOR r = ulRow + 1 TO lrRow - 1
-'         QPrintRC CHR$(186), r, ulCol, colr
-'         QPrintRC CHR$(186), r, lrCol, colr
-'       NEXT
-'       ' last row
-'       QPrintRC CHR$(211), lrRow, ulCol, colr
-'       QPrintRC STRING$((lrCol - ulCol) - 1, 196), lrRow, ulCol + 1, colr
-'       QPrintRC CHR$(189), lrRow, lrCol, colr
-'     CASE ELSE ' ASCII character will be used for entire box
-'       ' first row
-'       QPrintRC CHR$(char), ulRow, ulCol, colr
-'       QPrintRC STRING$((lrCol - ulCol) - 1, char), ulRow, ulCol + 1, colr
-'       QPrintRC CHR$(char), ulRow, lrCol, colr
-'       ' middle
-'       FOR r = ulRow + 1 TO lrRow - 1
-'         QPrintRC CHR$(char), r, ulCol, colr
-'         QPrintRC CHR$(char), r, lrCol, colr
-'       NEXT
-'       ' last row
-'       QPrintRC CHR$(char), lrRow, ulCol, colr
-'       QPrintRC STRING$((lrCol - ulCol) - 1, char), lrRow, ulCol + 1, colr
-'       QPrintRC CHR$(char), lrRow, lrCol, colr
-'   END SELECT
-' END SUB
+' Box will quickly draw a box frame on the screen. 
+SUB Box(ulRow As Short, ulCol As Short, lrRow As Short, lrCol As Short, char As Short, colr As Short, page As Short)
+  ' NOTE: page isn't currently implemented
+  ' If page = -1 then use current active page.
+  SELECT CASE char
+    CASE 1 ' single line all around
+      ' first row
+      QPrintRC CHR$(218), ulRow, ulCol, colr
+      QPrintRC STRING$((lrCol - ulCol) - 1, 196), ulRow, ulCol + 1, colr
+      QPrintRC CHR$(191), ulRow, lrCol, colr
+      ' middle
+      FOR r As Short = ulRow + 1 TO lrRow - 1
+        QPrintRC CHR$(179), r, ulCol, colr
+        QPrintRC CHR$(179), r, lrCol, colr
+      NEXT
+      ' last row
+      QPrintRC CHR$(192), lrRow, ulCol, colr
+      QPrintRC STRING$((lrCol - ulCol) - 1, 196), lrRow, ulCol + 1, colr
+      QPrintRC CHR$(217), lrRow, lrCol, colr
+    CASE 2 ' double line all around
+      ' first row
+      QPrintRC CHR$(201), ulRow, ulCol, colr
+      QPrintRC STRING$((lrCol - ulCol) - 1, 205), ulRow, ulCol + 1, colr
+      QPrintRC CHR$(187), ulRow, lrCol, colr
+      ' middle
+      FOR r As Short = ulRow + 1 TO lrRow - 1
+        QPrintRC CHR$(186), r, ulCol, colr
+        QPrintRC CHR$(186), r, lrCol, colr
+      NEXT
+      ' last row
+      QPrintRC CHR$(200), lrRow, ulCol, colr
+      QPrintRC STRING$((lrCol - ulCol) - 1, 205), lrRow, ulCol + 1, colr
+      QPrintRC CHR$(188), lrRow, lrCol, colr
+    CASE 3 ' double line horizontally, single line vertically
+      ' first row
+      QPrintRC CHR$(213), ulRow, ulCol, colr
+      QPrintRC STRING$((lrCol - ulCol) - 1, 205), ulRow, ulCol + 1, colr
+      QPrintRC CHR$(184), ulRow, lrCol, colr
+      ' middle
+      FOR r As Short = ulRow + 1 TO lrRow - 1
+        QPrintRC CHR$(179), r, ulCol, colr
+        QPrintRC CHR$(179), r, lrCol, colr
+      NEXT
+      ' last row
+      QPrintRC CHR$(212), lrRow, ulCol, colr
+      QPrintRC STRING$((lrCol - ulCol) - 1, 205), lrRow, ulCol + 1, colr
+      QPrintRC CHR$(190), lrRow, lrCol, colr
+    CASE 4 ' single line horizontally, double line vertically
+      ' first row
+      QPrintRC CHR$(214), ulRow, ulCol, colr
+      QPrintRC STRING$((lrCol - ulCol) - 1, 196), ulRow, ulCol + 1, colr
+      QPrintRC CHR$(183), ulRow, lrCol, colr
+      ' middle
+      FOR r As Short = ulRow + 1 TO lrRow - 1
+        QPrintRC CHR$(186), r, ulCol, colr
+        QPrintRC CHR$(186), r, lrCol, colr
+      NEXT
+      ' last row
+      QPrintRC CHR$(211), lrRow, ulCol, colr
+      QPrintRC STRING$((lrCol - ulCol) - 1, 196), lrRow, ulCol + 1, colr
+      QPrintRC CHR$(189), lrRow, lrCol, colr
+    CASE ELSE ' ASCII character will be used for entire box
+      ' first row
+      QPrintRC CHR$(char), ulRow, ulCol, colr
+      QPrintRC STRING$((lrCol - ulCol) - 1, char), ulRow, ulCol + 1, colr
+      QPrintRC CHR$(char), ulRow, lrCol, colr
+      ' middle
+      FOR r As Short = ulRow + 1 TO lrRow - 1
+        QPrintRC CHR$(char), r, ulCol, colr
+        QPrintRC CHR$(char), r, lrCol, colr
+      NEXT
+      ' last row
+      QPrintRC CHR$(char), lrRow, ulCol, colr
+      QPrintRC STRING$((lrCol - ulCol) - 1, char), lrRow, ulCol + 1, colr
+      QPrintRC CHR$(char), lrRow, lrCol, colr
+  END SELECT
+END SUB
 
-' ' Box0 will quickly draw a box frame on the screen.
-' SUB Box0(ulRow, ulCol, lrRow, lrCol, char, colr)
-'   CALL Box(ulRow, ulCol, lrRow, lrCol, char, colr, 0)
-' END SUB
+' Box0 will quickly draw a box frame on the screen.
+SUB Box0(ulRow As Short, ulCol As Short, lrRow As Short, lrCol As Short, char As Short, colr As Short)
+  Box ulRow, ulCol, lrRow, lrCol, char, colr, 0
+END SUB
 
 ' BPrint will print either a conventional or fixed-length string at the 
 ' current cursor position through DOS. 
@@ -6952,17 +6914,19 @@ SUB BPrint(text As String)
   'IF prevControlChr THEN _CONTROLCHR OFF
 END SUB
 
-' ' ClearEOL (Clear to End of Line) erases the current screen line 
-' ' starting at the current cursor position. 
-' SUB ClearEOL(clr As Short)
-'   ' colr specifies the display color. 
-'   ' If -1 is used for Colr, the current screen 
-'   ' colors will be maintained. 
-'   Var r = CSRLIN
-'   Var c = POS(0)
-'   Var columns = _WIDTH
-'   QPrintRC Space$(columns - c), r, c, clr 
-' END SUB
+' ClearEOL (Clear to End of Line) erases the current screen line 
+' starting at the current cursor position. 
+SUB ClearEOL(clr As Short)
+  ' colr specifies the display color. 
+  ' If -1 is used for Colr, the current screen 
+  ' colors will be maintained. 
+  Var r = CSRLIN
+  Var c = POS(0)
+  Var w = LoWord(width)
+  Var h = HiWord(width)
+  Var columns = w
+  QPrintRC Space$(columns - c), r, c, clr 
+END SUB
 
 SUB ClearScr (ulRow As Short, ulCol As Short, lrRow As Short, lrCol As Short, colr As Short, page As Short)
   ' NOTE: page is currently not implemented.
@@ -6982,31 +6946,33 @@ SUB ClearScr0 (ulRow As Short, ulCol As Short, lrRow As Short, lrCol As Short, c
   NEXT
 END SUB
 
-' ' FillScrn will fill any rectangular portion of the display screen with 
-' ' the specified character. 
-' SUB FillScrn(ulRow, ulCol, lrRow, lrCol, colr, char, page)
-'   ' NOTE: page is currently not implemented.
-'   ' If page = -1 then current active page is used.
-'   FOR r = ulRow TO lrRow
-'     QPrintRC STRING$(lrCol - ulCol + 1, char), r, ulCol, colr
-'   NEXT
-' END SUB
+' FillScrn will fill any rectangular portion of the display screen with 
+' the specified character. 
+SUB FillScrn(ulRow As Short, ulCol As Short, lrRow As Short, lrCol As Short, colr As Short, char As Short, page As Short)
+  ' NOTE: page is currently not implemented.
+  ' If page = -1 then current active page is used.
+  FOR r As Short = ulRow TO lrRow
+    QPrintRC STRING$(lrCol - ulCol + 1, char), r, ulCol, colr
+  NEXT
+END SUB
 
-' ' Fil1Scrn0 will fill any rectangular portion of the display screen with 
-' ' the specified character. 
-' SUB FillScrn0(ulRow, ulCol, lrRow, lrCol, colr, char)
-'   CALL FillScrn (ulRow, ulCol, lrRow, lrCol, colr, char, 0)
-' END SUB
+' FillScrn0 will fill any rectangular portion of the display screen with 
+' the specified character. 
+SUB FillScrn0(ulRow As Short, ulCol As Short, lrRow As Short, lrCol As Short, colr As Short, char As Short)
+  FillScrn ulRow, ulCol, lrRow, lrCol, colr, char, 0
+END SUB
 
-' ' GetVMode will report the current video mode, the currently active 
-' ' display page, the page size, and the number of rows and columns. 
-' SUB GetVMode (mode, page, pageSize, rows, columns)
-'   mode = 3 ' matches DOSBOX
-'   page = 0 'TODO: Need to handle, but the default is 0.
-'   pageSize = 4096 ' matches DOSBOX
-'   columns = _WIDTH
-'   rows = _HEIGHT
-' END SUB
+' GetVMode will report the current video mode, the currently active 
+' display page, the page size, and the number of rows and columns. 
+SUB GetVMode (Byref mode As Short, Byref page As Short, Byref pageSize As Short, Byref rows As Short, Byref columns As Short)
+  mode = 3 ' matches DOSBOX
+  page = 0 'TODO: Need to handle, but the default is 0.
+  pageSize = 4096 ' matches DOSBOX
+  Var w = LoWord(width)
+  Var h = HiWord(width)
+  columns = w
+  rows = h
+END SUB
 
 FUNCTION Monitor As Short
   ' NOTE: The documentation for QPrintAny() and Monitor don't appear to align????
@@ -7028,34 +6994,34 @@ END FUNCTION
 '   NEXT
 ' END SUB
 
-' MakeMono will convert the colors on a text screen held in an 
-' integer array to those suitable for display on a monochrome monitor. 
-SUB MakeMono(array() As Short, element As Short, size As Short)
-  IF size < 1 THEN EXIT SUB
-  ' element is the location in the array() array where the screen 
-  ' begins, and size is the size of the screen in characters. 
-  FOR index As Short = element TO element + size - 1
-    ' clr = element(index) AND &H00FF ' split color
-    ' 'ch = ((element(index) AND &HFF00) \ 256) AND &H00FF ' split character
-    ' CALL SplitColor(clr, fg, bg)
+' ' MakeMono will convert the colors on a text screen held in an 
+' ' integer array to those suitable for display on a monochrome monitor. 
+' SUB MakeMono(array() As Short, element As Short, size As Short)
+'   IF size < 1 THEN EXIT SUB
+'   ' element is the location in the array() array where the screen 
+'   ' begins, and size is the size of the screen in characters. 
+'   FOR index As Short = element TO element + size - 1
+'     ' clr = element(index) AND &H00FF ' split color
+'     ' 'ch = ((element(index) AND &HFF00) \ 256) AND &H00FF ' split character
+'     ' CALL SplitColor(clr, fg, bg)
 
-    ' If the text foreground color is black (inverse), then the color is left unchanged.
-    ' Otherwise the background is cleared to black, and the 
-    ' foreground is set to white. However, the intensity and flashing color 
-    ' attributes are left unchanged. 
-    IF (array(index) AND 7) <> 0 THEN
-      array(index) = (array(index) AND 248) OR 7
-    END IF
-  NEXT
-END SUB
-
-' ' MPaintBox is similar to PaintBox, except it always turns off the 
-' ' mouse cursor before painting the screen. When it is finished the 
-' ' cursor is turned back on. 
-' SUB MPaintBox (ulRow, ulCol, lrRow, lrCol, colr)
-'   ' Paint a portion of the screen; leaving text intact (only change color).
-'   CALL PaintBox0 (ulRow, ulCol, lrRow, lrCol, colr)
+'     ' If the text foreground color is black (inverse), then the color is left unchanged.
+'     ' Otherwise the background is cleared to black, and the 
+'     ' foreground is set to white. However, the intensity and flashing color 
+'     ' attributes are left unchanged. 
+'     IF (array(index) AND 7) <> 0 THEN
+'       array(index) = (array(index) AND 248) OR 7
+'     END IF
+'   NEXT
 ' END SUB
+
+' MPaintBox is similar to PaintBox, except it always turns off the 
+' mouse cursor before painting the screen. When it is finished the 
+' cursor is turned back on. 
+SUB MPaintBox (ulRow As Short, ulCol As Short, lrRow As Short, lrCol As Short, colr As Short)
+  ' Paint a portion of the screen; leaving text intact (only change color).
+  PaintBox0 ulRow, ulCol, lrRow, lrCol, colr
+END SUB
 
 ' SUB MPRestore(ulRow, ulCol, lrRow, lrCol, originalWidth, element(), start)
 
@@ -7123,45 +7089,45 @@ FUNCTION OneColor (fg As Short, bg As Short) As Short
   OneColor = (f AND 16) * 8 + ((b AND 7) * 16) + (f AND 15)
 END FUNCTION
 
-' ' PaintBox will paint any rectangular area of the screen, without 
-' ' disturbing the text that is already present. 
-' SUB PaintBox (ulRow, ulCol, lrRow, lrCol, colr, page)
-'   ' NOTE: page isn't currently used.
-'   ' If page = -1 then current active screen should be used.
-'   IF _PIXELSIZE = 0 THEN
-'     FOR r = ulRow TO lrRow
-'       FOR c = ulCol TO lrCol
-'         ch = SCREEN(r, c)
-'         QPrintRC CHR$(ch), r, c, colr
-'       NEXT
-'     NEXT
-'   ELSE  
-'     ERROR 73 ' Feature Unavailable
-'   END IF
-' END SUB
+' PaintBox will paint any rectangular area of the screen, without 
+' disturbing the text that is already present. 
+SUB PaintBox (ulRow As Short, ulCol As Short, lrRow As Short, lrCol As Short, colr As Short, page As Short)
+  ' NOTE: page isn't currently used.
+  ' If page = -1 then current active screen should be used.
+  IF 1 THEN '_PIXELSIZE = 0 THEN
+    FOR r As Short = ulRow TO lrRow
+      FOR c As Short = ulCol TO lrCol
+        Var ch = SCREEN(r, c)
+        QPrintRC CHR$(ch), r, c, colr
+      NEXT
+    NEXT
+  ELSE  
+    ERROR 73 ' Feature Unavailable
+  END IF
+END SUB
 
-' ' PaintBox0 will paint any rectangular area of the screen, without 
-' ' disturbing the text that is already present. 
-' SUB PaintBox0 (ulRow, ulCol, lrRow, lrCol, colr)
-'   CALL PaintBox (ulRow, ulCol, lrRow, lrCol, colr, 0)
-' END SUB
+' PaintBox0 will paint any rectangular area of the screen, without 
+' disturbing the text that is already present. 
+SUB PaintBox0 (ulRow As Short, ulCol As Short, lrRow As Short, lrCol As Short, colr As Short)
+  PaintBox ulRow, ulCol, lrRow, lrCol, colr, 0
+END SUB
 
-' SUB PUsing (number$, image$, color1, color2, page, row, column)
-'   ' number$ is any number whether integer, single, or double precision, 
-'   ' and image$ indicates how the result is to be formatted. Image$ may 
-'   ' contain both leading and trailing text as shown below.
-'   ' color1 and color2 indicate the colors for the text and numeric 
-'   ' portions of image$ respectively. Either color may be set to -1 to 
-'   ' maintain the current screen colors.   
-'   ' page tells PUsing what screen page to print to, which may 
-'   ' optionally be given as -1 to use the current page. 
-'   ' row and column specify where the printing is to be located on 
-'   ' the screen. 
-'   CALL QPrintRC (FUsing$(number$, image$), row, column, color2)
-'   'TODO: page is currently not honored.
-'   'TODO: color1 needs to be implemented.
-'   'TODO: "raw text" (non formatted) is currently not printed (ignored by FUsing$)
-' END SUB
+SUB PUsing (number As String, image As String, color1 As Short, color2 As Short, page As Short, row As Short, column As Short)
+  ' number$ is any number whether integer, single, or double precision, 
+  ' and image$ indicates how the result is to be formatted. Image$ may 
+  ' contain both leading and trailing text as shown below.
+  ' color1 and color2 indicate the colors for the text and numeric 
+  ' portions of image$ respectively. Either color may be set to -1 to 
+  ' maintain the current screen colors.   
+  ' page tells PUsing what screen page to print to, which may 
+  ' optionally be given as -1 to use the current page. 
+  ' row and column specify where the printing is to be located on 
+  ' the screen. 
+  QPrintRC FUsing(number, image), row, column, color2
+  'TODO: page is currently not honored.
+  'TODO: color1 needs to be implemented.
+  'TODO: "raw text" (non formatted) is currently not printed (ignored by FUsing$)
+END SUB
 
 SUB QPrint (text As String, colr As Short, page As Short)
   Dim ofg As Long = -1: Dim obg As Long = -1
@@ -7211,33 +7177,35 @@ SUB QPrint0 (text As String, colr As Short)
   END IF
 END SUB
 
-' ' QPrintAny provides a simple way for a BASIC program to utilize 
-' ' two monitors at the same time. 
-' SUB QPrintAny (txt$, clr, monCode, row, column)
-'   ' NOTE: monCode is currently not active.
-'   '       1 - Monochrome monitor at segment &HB000
-'   '       2 - CGA monitor at segment &HB800
-'   '       3 - EGA or VGA monitor at segment &HB800
-'   ofg = -1: obg = -1
-'   IF clr = -1 THEN
-'     ' Maintain existing color...
-'   ELSE
-'      ofg = _DEFAULTCOLOR: obg = _BACKGROUNDCOLOR
-'      SplitColor clr, fg%, bg%
-'      COLOR fg%, bg%
-'   END IF
-'   pr = CSRLIN
-'   pc = POS(0)
-'   LOCATE row, column
-'   prevControlChr = _CONTROLCHR ' <----------- QB64 definately get's this wrong...
-'   IF NOT prevControlChr THEN _CONTROLCHR OFF
-'   PRINT txt$;
-'   IF NOT prevControlChr THEN _CONTROLCHR ON
-'   LOCATE pr, pc
-'   IF ofg <> -1 AND obg <> -1 THEN
-'     COLOR ofg, obg
-'   END IF
-' END SUB
+' QPrintAny provides a simple way for a BASIC program to utilize 
+' two monitors at the same time. 
+SUB QPrintAny (txt As String, clr As Short, monCode As Short, row As Short, column As Short)
+  ' NOTE: monCode is currently not active.
+  '       1 - Monochrome monitor at segment &HB000
+  '       2 - CGA monitor at segment &HB800
+  '       3 - EGA or VGA monitor at segment &HB800
+  Var ofg = -1: Var obg = -1
+  IF clr = -1 THEN
+    ' Maintain existing color...
+  ELSE
+     Var c = COLOR()
+     ofg = LoWord(c): obg = HiWord(c)
+     Dim fg As Short: Dim bg As Short
+     SplitColor clr, fg, bg
+     COLOR fg, bg
+  END IF
+  Var pr = CSRLIN
+  Var pc = POS(0)
+  LOCATE row, column
+  'prevControlChr = _CONTROLCHR ' <----------- QB64 definately get's this wrong...
+  'IF NOT prevControlChr THEN _CONTROLCHR OFF
+  PRINT txt;
+  'IF NOT prevControlChr THEN _CONTROLCHR ON
+  LOCATE pr, pc
+  IF ofg <> -1 AND obg <> -1 THEN
+    COLOR ofg, obg
+  END IF
+END SUB
 
 SUB QPrintRC (txt As String, r As Short, c As Short, clr As Short)
   IF r < 1 OR r > 25 OR c < 1 OR c > 80 THEN EXIT SUB
@@ -7264,27 +7232,27 @@ SUB QPrintRC (txt As String, r As Short, c As Short, clr As Short)
   END IF
 END SUB
 
-' ' ReadScrn will quickly read characters from the display screen, and 
-' ' store them in a specified string variable. 
-' SUB ReadScrn (row, column, x$, page)
-'   ' row and column tell ReadScrn where on the screen the 
-'   ' characters are located, x$ receives the screen contents, and page 
-'   ' indicates which video page to read. If Page is set to -1, then 
-'   ' ReadScrn will read from the currently active screen page. 
-'   ' The number of characters to be read is specified by the length of X$.
-'   FOR c = column TO column + LEN(x$) - 1
-'     MID$(x$, c - column + 1, 1) = CHR$(SCREEN(row, c))
-'   NEXT
-' END SUB
+' ReadScrn will quickly read characters from the display screen, and 
+' store them in a specified string variable. 
+SUB ReadScrn (row As Short, column As Short, x As String, page As Short)
+  ' row and column tell ReadScrn where on the screen the 
+  ' characters are located, x$ receives the screen contents, and page 
+  ' indicates which video page to read. If Page is set to -1, then 
+  ' ReadScrn will read from the currently active screen page. 
+  ' The number of characters to be read is specified by the length of X$.
+  FOR c As Short = column TO column + LEN(x) - 1
+    MID$(x, c - column + 1, 1) = CHR$(SCREEN(row, c))
+  NEXT
+END SUB
 
-' ' ReadScrn0 will quickly read characters from the display screen, 
-' ' and store them in a specified string variable. 
-' SUB ReadScrn0 (row, column, x$)
-'   ' Row and Column tell ReadScrn0 where on the screen the 
-'   ' characters are located, and X$ receives the screen contents. 
-'   ' The number of characters to read is specified by the length of X$. 
-'   CALL ReadScrn (row, column, x$, 0)
-' END SUB
+' ReadScrn0 will quickly read characters from the display screen, 
+' and store them in a specified string variable. 
+SUB ReadScrn0 (row As Short, column As Short, x As String)
+  ' Row and Column tell ReadScrn0 where on the screen the 
+  ' characters are located, and X$ receives the screen contents. 
+  ' The number of characters to read is specified by the length of X$. 
+  ReadScrn row, column, x, 0
+END SUB
 
 ' ' ScrnRest will restore a screen that had previously been saved with 
 ' ' ScrnSave or ScrnSave0. 
