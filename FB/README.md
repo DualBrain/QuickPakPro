@@ -6,7 +6,7 @@ This is a **work-in-progress project**. One of the desired goals with this proje
 
 | File       |         |   | File       |         |   | File       |         |
 | ---------- | ------- | - | ---------- | ------- | - | ---------- | ------- |
-|AMENU.BAS   |         |   |APRINT.BAS  |         |   |APRINTT.BAS |         |
+|AMENU.BAS   | EXE     |   |APRINT.BAS  |         |   |APRINTT.BAS |         |
 |ASCCHART.BAS|         |   |ASCIIPIK.BAS|         |   |ASSEMBLY.BAS|         |
 |BCOPYT.BAS  |         |   |BIGPRINT.BAS|         |   |BITS.BAS    | EXE     |
 |BLPRINT.BAS |         |   |BPRINT.BAS  |         |   |CALC.BAS    |         |

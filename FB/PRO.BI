@@ -202,7 +202,8 @@ DECLARE FUNCTION QPHex OVERLOAD (value As Const Any Ptr, digits As Short) As Str
 ' Chapter 5 - Menu/Input Routines
 ' ****************************************
 
-DECLARE SUB AMenu (address As String Ptr, startItem As Short, count As Short, scanCode As Short, normColor As Short, hiLiteColor As Short, numRows As Short, numCols As Short, gap As Short, ulRow As Short, ulCol As Short)
+DECLARE SUB AMenu (address As String Ptr, startItem As Short, Byref count As Short, Byref scanCode As Short, normColor As Short, hiLiteColor As Short, numRows As Short, numCols As Short, gap As Short, ulRow As Short, ulCol As Short)
+DECLARE FUNCTION MGetKey(Byref row As Short, Byref col As Short) As Short
 
 ' ****************************************
 ' Chapter 6 - Keyboard/Mouse Routines
@@ -213,7 +214,6 @@ DECLARE FUNCTION CapsLock As Short
 DECLARE SUB ClearBuf
 DECLARE FUNCTION CtrlKey As Short
 DECLARE SUB InitMouse(Byref there As Short)
-DECLARE FUNCTION MGetKey(row As Short, col As Short) As Short
 DECLARE FUNCTION NumLock As Short
 DECLARE FUNCTION ScrlLock As Short
 DECLARE FUNCTION ShiftKey As Short

@@ -3459,8 +3459,84 @@ END FUNCTION
 ' list of choices in a conventional (not fixed-length) string array. A 
 ' selection is made by moving the cursor bar to the desired choice, 
 ' and then pressing Enter. 
-SUB AMenu (address As String Ptr, startItem As Short, count As Short, scanCode As Short, normColor As Short, hiLiteColor As Short, numRows As Short, numCols As Short, gap As Short, ulRow As Short, ulCol As Short)
-  ERROR 73
+SUB AMenu (address As String Ptr, startItem As Short, Byref count As Short, Byref scanCode As Short, normColor As Short, hiLiteColor As Short, numRows As Short, numCols As Short, gap As Short, ulRow As Short, ulCol As Short)
+
+  ' Notes:
+  '  - startItem is 1-based
+  '  - array (address) is 1 to count
+  '  - count should always (on entry) contain the array count (1-based)
+
+  'TODO: Fix "tagging" functionality - see DEMOCM.BAS for example of functionality.
+  Var value = *address
+  Var w = LEN(value)                ' width of each column.
+
+  Var first = 0
+
+  IF scanCode <> 3 THEN
+    DO
+      IF startItem > first + ((numRows * numCols) - 1) THEN
+        first = first + (numRows * numCols)
+      ELSE
+        EXIT DO
+      END IF
+    LOOP
+  END IF
+  DO
+    DO
+      IF startItem < first THEN                ' current item before the display range?
+        first = first - numRows          ' scroll display to the left.
+      ELSEIF startItem > first + ((numRows * numCols) - 1) THEN ' current item beyond the display range?
+        first = first + numRows          ' scroll display to the right.
+      ELSE
+        EXIT DO
+      END IF
+    LOOP
+    FOR rr As Short = 0 TO numRows - 1         ' for each display row,
+      FOR cc As Short = 0 TO numCols - 1       ' for each display column,
+        Dim index As Short, clr As Short, text As String
+        index = (first + rr + (cc * numRows)) + 1 ' determine element index,
+        IF index = startItem THEN clr = hiLiteColor ELSE clr = normColor ' determine color,
+        IF index <= count THEN text = *(address + (index - 1)) ELSE text = SPACE$(w) ' determine text (can be blank),
+        QPrintRC text, ulRow + rr, ulCol + (cc * (w + gap)), clr ' render text.
+      NEXT
+    NEXT
+    IF scanCode = 9999 THEN EXIT SUB 'TODO: For testing...
+    WHILE inkey$ <> "": WEND              ' not sure needed.
+    DO
+      Dim row As Short, col As Short
+      scanCode = MGetKey(row, col)     ' scanCode might be returned to caller.
+      SELECT CASE scanCode
+        CASE -72 ' Up
+          IF startItem > 1 THEN               ' if current more than min,
+            startItem = startItem - 1             ' decrement.
+          END IF
+          EXIT DO
+        CASE -80 ' Down
+          IF startItem < count THEN  ' if current less than max,
+            startItem = startItem + 1             ' increment.
+          END IF
+          EXIT DO
+        CASE -75 ' Left
+          IF startItem - numRows > 0 THEN    ' more columns to the left?
+            startItem = startItem - numRows      ' shift columns right.
+          ELSEIF startItem > 1 THEN           ' if not shifted (above),
+            startItem = 1                     ' set current item to first.
+          END IF
+          EXIT DO
+        CASE -77 ' Right
+          IF startItem + numRows <= count THEN ' more columns to the right?
+            startItem = startItem + numRows                 ' shift columns left.
+          ELSEIF startItem < count THEN         ' if not shifted (above),
+            startItem = count                   ' set current item to last.
+          END IF
+          EXIT DO
+        CASE ELSE                         ' any other key,
+          count = startItem                  ' set count on exit to be the currently highlighted item,
+          EXIT SUB                        ' return to caller.
+      END SELECT
+    LOOP
+  LOOP
+
 END SUB
 
 ' SUB AMenu(array$(), first, item, count, scanCode, normColor, hiLiteColor, numRows, numCols, gap, ulRow, ulCol)
@@ -3960,21 +4036,21 @@ END SUB
 ' MGetKey first clears the keyboard buffer of any pending keys, and 
 ' then waits until either a key or mouse button has been pressed. This 
 ' is a "mouse-aware" version of the QuickPak Professional WaitKey routine. 
-FUNCTION MGetKey(row As Short, col As Short) As Short
+FUNCTION MGetKey(Byref row As Short, Byref col As Short) As Short
+
   ' scanCode is returned holding the key or mouse button that was 
   ' pressed, and row and col indicate the location of the 
   ' mouse cursor at the time the mouse button was pressed. 
   WHILE INKEY$ <> "": WEND
-  'DO: CALL GetCursor(x, y, button): LOOP UNTIL button = 0
   DO
-    'CALL GetCursor(x, y, button)
-    'IF _PIXELSIZE = 0 THEN
-    '  col = (x \ 8) + 1
-    '  row = (y \ 8) + 1
-    'END IF
-    'IF (button AND 1) = 1 THEN MGetKey = 1000: EXIT DO
-    'IF (button AND 2) = 2 THEN MGetKey = 1001: EXIT DO
-    'IF (button AND 4) = 4 THEN MGetKey = 1002: EXIT DO
+    Dim mr As Long, x As Long, y As Long, wheel As Long, buttons As Long, clip As Long
+    mr = GetMouse(x, y, wheel, buttons, clip)
+    If mr = 0 Then ' Success
+      row = y: col = x
+      IF (buttons AND 1) = 1 THEN MGetKey = 1000: EXIT DO ' Left
+      IF (buttons AND 2) = 2 THEN MGetKey = 1001: EXIT DO ' Right
+      IF (buttons AND 4) = 4 THEN MGetKey = 1002: EXIT DO ' Middle
+    End If
     VAR a = INKEY$
     IF a <> "" THEN
       IF LEN(a) = 1 THEN

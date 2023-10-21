@@ -1,3 +1,3 @@
 @echo off
-fbc32 fnspread.bas pro.bas
-REM fnspread.exe
+fbc32 amenu.bas pro.bas
+REM amenu.exe
