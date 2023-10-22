@@ -1,3 +1,3 @@
 @echo off
-fbc32 bigprint.bas pro.bas
-REM asciipik.exe
+fbc32 assembly.bas pro.bas
+REM bcopyt.exe

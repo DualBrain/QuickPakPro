@@ -7,9 +7,9 @@ This is a **work-in-progress project**. One of the desired goals with this proje
 | File       |         |   | File       |         |   | File       |         |
 | ---------- | ------- | - | ---------- | ------- | - | ---------- | ------- |
 |AMENU.BAS   | EXE     |   |APRINT.BAS  | EXE     |   |APRINTT.BAS | EXE     |
-|ASCCHART.BAS| LINK    |   |ASCIIPIK.BAS| EXE     |   |ASSEMBLY.BAS|         |
-|BCOPYT.BAS  |         |   |BIGPRINT.BAS| EXE     |   |BITS.BAS    | EXE     |
-|BLPRINT.BAS |         |   |BPRINT.BAS  |         |   |CALC.BAS    | LINK    |
+|ASCCHART.BAS| LINK    |   |ASCIIPIK.BAS| EXE     |   |ASSEMBLY.BAS| EXE     |
+|BCOPYT.BAS  | EXE     |   |BIGPRINT.BAS| EXE     |   |BITS.BAS    | EXE     |
+|BLPRINT.BAS | N/A*    |   |BPRINT.BAS  | EXE     |   |CALC.BAS    | LINK    |
 |CALENDAR.BAS| LINK    |   |CAPNUM.BAS  |         |   |CLEARSCR.BAS|         |
 |COLORPIK.BAS|         |   |COLORS.BAS  |         |   |COMPARE.BAS |         |
 |DATA.BAS    |         |   |DATE2DAY.BAS|         |   |DATEIN.BAS  |         |

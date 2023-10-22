@@ -2943,46 +2943,22 @@ SUB ReadFile(array As String Ptr)
   ' array$(0) holds the search specification to indicate which file names
   ' are to be loaded, and subsequent array elements receive each name.
 
-  ' IF INSTR(_OS$, "[WINDOWS]") THEN
-    
-  '   DIM pattern AS STRING
-  '   DIM fd AS Win32_Find_Data
-  '   DIM hFind AS _UNSIGNED _OFFSET
-  '   DIM junk AS LONG
-  '   DIM ffn AS STRING
-  '   DIM p As Short
+  ' fileSpec$ holds a DOS file name or specification, and Count 
+  ' receives the number of matching entries. 
 
-  '   pattern = array$(0) + CHR$(0)
-  '   hFind = FindFirstFile(_OFFSET(pattern), _OFFSET(fd))
-  '   IF hFind <> INVALID_HANDLE_VALUE THEN
-  '     index = 1
-  '     DO
-  '       IF (fd.dwfileattributes AND FILE_ATTRIBUTE_DIRECTORY) = FILE_ATTRIBUTE_DIRECTORY THEN
-  '       ELSE 
-  '         ffn = QPTrim$(fd.calternatefilename) 'cfilename
-  '         IF ffn = "" THEN ffn = QPTrim$(fd.cfilename)
-  '         IF LEN(ffn$) > 12 THEN ffn$ = LEFT$(ffn$, 9) + "..."
-  '         array$(index) = LEFT$(ffn + SPACE$(12), 12)
-  '         index = index + 1
-  '       END IF
-  '       fd.cfilename = SPACE$(MAX_PATH) ' clear the path for the next usage
-  '       fd.calternatefilename = SPACE$(14)
-  '     LOOP UNTIL FindNextFile(hFind, _OFFSET(fd)) = 0
-  '     junk = FindClose(hFind)
-  '   ELSE
-  '     lastError& = GetLastError
-  '     IF lastError& = ERROR_FILE_NOT_FOUND THEN
-  '       ' no files available, result remains 0
-  '     ELSEIF lastError& = ERROR_ACCESS_DENIED THEN
-  '       ERROR 70 ' Permission denied
-  '     ELSE
-  '       PRINT lastError&
-  '       ERROR 75 ' Path/File access error
-  '     END IF
-  '   END IF
-  ' ELSE
-    ERROR 73 ' Advanced Feature / Feature Unavailable
-  ' END IF
+  ' Dim attr As UInteger
+  ' Dim offset As Short = 1
+  ' VAR nm = Dir(*address, fbNormal Or fbHidden or fbSystem, attr)
+  ' Do Until Len(nm) = 0
+  '   If nm <> "." And nm <> ".." Then
+  '     If (attr And fbDirectory) = 0 Then 
+  '       *(address + offset) = nm
+  '     End If
+  '   End If
+  '   nm = Dir(attr)
+  ' Loop
+
+  ERROR 73 ' Advanced Feature / Feature Unavailable
 
 END SUB
 
@@ -3067,46 +3043,27 @@ SUB ReadFileI(array As String Ptr)
 END SUB
 
 SUB ReadFileT(spec As String, array As Any Ptr)
-  ' IF INSTR(_OS$, "[WINDOWS]") THEN
-    
-  '   DIM pattern AS STRING
-  '   DIM fd AS Win32_Find_Data
-  '   DIM hFind AS _UNSIGNED _OFFSET
-  '   DIM junk AS LONG
-  '   DIM ffn AS STRING
-  '   DIM p As Short
 
-  '   pattern = spec$ 'array$(0) + CHR$(0)
-  '   hFind = FindFirstFile(_OFFSET(pattern), _OFFSET(fd))
-  '   IF hFind <> INVALID_HANDLE_VALUE THEN
-  '     index = first ' 1
-  '     DO
-  '       IF (fd.dwfileattributes AND FILE_ATTRIBUTE_DIRECTORY) = FILE_ATTRIBUTE_DIRECTORY THEN
-  '       ELSE 
-  '         ffn = QPTrim$(fd.calternatefilename)
-  '         IF ffn = "" THEN ffn = QPTrim$(fd.cfilename)
-  '         IF LEN(ffn$) > 12 THEN ffn$ = LEFT$(ffn$, 9) + "..."
-  '         LSET array(index) = ffn
-  '         index = index + 1
-  '       END IF
-  '       fd.cfilename = SPACE$(MAX_PATH) ' clear the path for the next usage
-  '       fd.calternatefilename = SPACE$(14)
-  '     LOOP UNTIL FindNextFile(hFind, _OFFSET(fd)) = 0
-  '     junk = FindClose(hFind)
-  '   ELSE
-  '     lastError& = GetLastError
-  '     IF lastError& = ERROR_FILE_NOT_FOUND THEN
-  '       ' no files available, result remains 0
-  '     ELSEIF lastError& = ERROR_ACCESS_DENIED THEN
-  '       ERROR 70 ' Permission denied
-  '     ELSE
-  '       PRINT lastError&
-  '       ERROR 75 ' Path/File access error
-  '     END IF
-  '   END IF
-  ' ELSE
-    ERROR 73 ' Advanced Feature / Feature Unavailable
-  ' END IF
+  ' fileSpec$ holds a DOS file name or specification, and Count 
+  ' receives the number of matching entries. 
+
+  Dim attr As UInteger
+  Dim index As Short
+  VAR nm = Dir(spec, fbNormal Or fbHidden or fbSystem, attr)
+  Do Until Len(nm) = 0
+    If nm <> "." And nm <> ".." Then
+      If (attr And fbDirectory) = 0 Then 
+        Var offset = index * 13 ' 12 + 1 due to FB adding a NULL
+        Var l = LEN(nm): If l > 12 Then l = 12
+        Var dest = array + offset
+        Var src = StrPtr(nm)
+        Var startAddress = FB_MEMCOPY (byval dest, Byval src, l)
+        index += 1
+      End If
+    End If
+    nm = Dir(attr)
+  Loop
+
 END SUB
 
 SUB ReadFileX(spec As String, Byref dirSize As Long, array As Any Ptr)
@@ -3606,71 +3563,83 @@ END SUB
 '   LOOP
 ' END SUB
 
-' SUB AMenuT(array() AS STRING * 12, first, item, length, count, scanCode, normColor, hiLiteColor, numRows, numCols, gap, ulRow, ulCol)
-'   w = length 'LEN(array$(first))                ' width of each column.
-'   IF scanCode <> 3 THEN
-'     DO
-'       IF item > first + ((numRows * numCols) - 1) THEN
-'         first = first + (numRows * numCols)
-'       ELSE
-'         EXIT DO
-'       END IF
-'     LOOP
-'   END IF
-'   DO
-'     DO
-'       IF item < first THEN                ' current item before the display range?
-'         first = first - numRows          ' scroll display to the left.
-'       ELSEIF item > first + ((numRows * numCols) - 1) THEN ' current item beyond the display range?
-'         first = first + numRows          ' scroll display to the right.
-'       ELSE
-'         EXIT DO
-'       END IF
-'     LOOP
-'     FOR rr = 0 TO numRows - 1         ' for each display row,
-'       FOR cc = 0 TO numCols - 1       ' for each display column,
-'         index = first + rr + (cc * numRows) ' determine element index,
-'         IF index = item THEN clr = hiLiteColor ELSE clr = normColor ' determine color,
-'         IF index <= UBOUND(array$) THEN text$ = array$(index) ELSE text$ = SPACE$(w) ' determine text (can be blank),
-'         QPrintRC text$, ulRow + rr, ulCol + (cc * (w + gap)), clr ' render text.
-'       NEXT
-'     NEXT
-'     IF scanCode = 9999 THEN EXIT SUB 'TODO: For testing...
-'     WHILE inkey$ <> "": WEND              ' not sure needed.
-'     DO
-'       scanCode = MGetKey(row, col)     ' scanCode might be returned to caller.
-'       SELECT CASE scanCode
-'         CASE -72 ' Up
-'           IF item > 1 THEN               ' if current more than min,
-'             item = item - 1             ' decrement.
-'           END IF
-'           EXIT DO
-'         CASE -80 ' Down
-'           IF item < UBOUND(array$) THEN  ' if current less than max,
-'             item = item + 1             ' increment.
-'           END IF
-'           EXIT DO
-'         CASE -75 ' Left
-'           IF item - numRows > 0 THEN    ' more columns to the left?
-'             item = item - numRows      ' shift columns right.
-'           ELSEIF item > 1 THEN           ' if not shifted (above),
-'             item = 1                     ' set current item to first.
-'           END IF
-'           EXIT DO
-'         CASE -77 ' Right
-'           IF item + numRows <= UBOUND(array$) THEN ' more columns to the right?
-'             item = item + numRows                 ' shift columns left.
-'           ELSEIF item < UBOUND(array$) THEN         ' if not shifted (above),
-'             item = UBOUND(array$)                   ' set current item to last.
-'           END IF
-'           EXIT DO
-'         CASE ELSE                         ' any other key,
-'           count = item                  ' set count on exit to be the currently highlighted item,
-'           EXIT SUB                        ' return to caller.
-'       END SELECT
-'     LOOP
-'   LOOP
-' END SUB
+SUB AMenuT(array As Any Ptr, item As Short, length As Short, Byref count As Short, Byref scanCode As Short, normColor As Short, hiLiteColor As Short, numRows As Short, numCols As Short, gap As Short, ulRow As Short, ulCol As Short)
+  Dim first As Short = 0
+  Var w = length 'LEN(array$(first))                ' width of each column.
+  IF scanCode <> 3 THEN
+    DO
+      IF item - 1 > first + ((numRows * numCols) - 1) THEN
+        first = first + (numRows * numCols)
+      ELSE
+        EXIT DO
+      END IF
+    LOOP
+  END IF
+  DO
+    DO
+      IF item - 1 < first THEN                ' current item before the display range?
+        first = first - numRows          ' scroll display to the left.
+      ELSEIF item - 1 > first + ((numRows * numCols) - 1) THEN ' current item beyond the display range?
+        first = first + numRows          ' scroll display to the right.
+      ELSE
+        EXIT DO
+      END IF
+    LOOP
+    FOR rr As Short = 0 TO numRows - 1         ' for each display row,
+      FOR cc As Short  = 0 TO numCols - 1       ' for each display column,
+        Dim index As Short = first + rr + (cc * numRows) ' determine element index,
+        Dim clr As Short
+        IF index = item - 1 THEN clr = hiLiteColor ELSE clr = normColor ' determine color,
+        Dim text As String
+        IF index <= count - 1 THEN 
+          Var offset = array + (index * (length + 1))
+          Dim bytes(length - 1) As Byte
+          Var dest = @bytes(0)
+          Var startAddress = FB_MEMCOPY (Byval dest, Byval offset, length)
+          text = Bytes2String(bytes())
+        ELSE 
+          text = SPACE$(w) ' determine text (can be blank),
+        End If
+        QPrintRC text, ulRow + rr, ulCol + (cc * (w + gap)), clr ' render text.
+      NEXT
+    NEXT
+    IF scanCode = 9999 THEN EXIT SUB 'TODO: For testing...
+    WHILE inkey$ <> "": WEND              ' not sure needed.
+    DO
+      Dim row As Short, col As Short
+      scanCode = MGetKey(row, col)     ' scanCode might be returned to caller.
+      SELECT CASE scanCode
+        CASE -72 ' Up
+          IF item > 1 THEN               ' if current more than min,
+            item = item - 1             ' decrement.
+          END IF
+          EXIT DO
+        CASE -80 ' Down
+          IF item < count THEN  ' if current less than max,
+            item = item + 1             ' increment.
+          END IF
+          EXIT DO
+        CASE -75 ' Left
+          IF item - numRows > 0 THEN    ' more columns to the left?
+            item = item - numRows      ' shift columns right.
+          ELSEIF item > 1 THEN           ' if not shifted (above),
+            item = 1                     ' set current item to first.
+          END IF
+          EXIT DO
+        CASE -77 ' Right
+          IF item + numRows <= count THEN ' more columns to the right?
+            item = item + numRows                 ' shift columns left.
+          ELSEIF item < count THEN         ' if not shifted (above),
+            item = count                   ' set current item to last.
+          END IF
+          EXIT DO
+        CASE ELSE                         ' any other key,
+          count = item                  ' set count on exit to be the currently highlighted item,
+          EXIT SUB                        ' return to caller.
+      END SELECT
+    LOOP
+  LOOP
+END SUB
 
 SUB ASCIIPick(Byref char As Short, color1 As Short, color2 As Short, Byref exitCode As Short)
 
@@ -3865,97 +3834,101 @@ END SUB
 
 ' END SUB
 
-' SUB Editor(ed$, activeLength, scanCode, numOnly, isCapsOn, normalColor, editColor, row, column) STATIC
-'   'TODO: Handle numOnly
-'   'TODO: Handle isCapsOn
-'   IF scanCode = 1 THEN
-'     'p = *what is was at last exit*
-'   ELSEIF scanCode = 2 THEN
-'     p = column
-'   ELSE
-'     p = 1
-'     ulRow = row
-'     ulCol = column
-'     originalEd$ = ed$
-'   END IF
-'   insert = 0
-'   LOCATE , , 1, 7, 7 ' single line cursor, on.
-'   DO
-'     LOCATE ulRow, ulCol + p - 1
-'     QPrintRC ed$, ulRow, ulCol, editColor
-'     WHILE INKEY$ <> "": WEND              ' not sure needed.
-'     DO
-'       scanCode = MGetKey(row, column) ' scanCode might be returned to caller.
-'       SELECT CASE scanCode
-'         CASE -83 ' Del
-'           ed$ = LEFT$(ed$, p - 1) + MID$(ed$, p + 1) + " "
-'           EXIT DO
-'         CASE -82 ' Ins
-'           insert = NOT insert
-'           IF insert THEN
-'             'LOCATE , , 1, 5, 7 ' quarter height cursor, on.
-'             LOCATE , , 1, 3, 7 ' half height cursor, on.
-'           ELSE
-'             LOCATE , , 1, 7, 7 ' single line cursor, on.
-'           END IF
-'         CASE 8 ' Backspace
-'           IF p = 1 THEN ' If pressed at beginning of the line, exit.
-'             QPrintRC ed$, ulRow, ulCol, normalColor
-'             activeLength = LEN(RTRIM$(ed$))
-'             LOCATE , , 0
-'             EXIT SUB
-'           END IF
-'           p = p -1: ed$ = LEFT$(ed$, p - 1) + MID$(ed$, p + 1) + " ": EXIT DO
-'         CASE -46 ' ALT+C
-'           p = 1: ed$ = SPACE$(LEN(ed$)): EXIT DO
-'         CASE -19 ' ALT+R
-'           ed$ = originalEd$
-'           ' IF LEN(RTRIM$(ed$)) > 0 THEN p = LEN(RTRIM$(ed$)) + 1 ELSE p = 1
-'           ' Removed the above line as it appears the original does not reset the cursor position.
-'           EXIT DO
-'         CASE -71 ' Home
-'           p = 1: EXIT DO
-'         CASE -79 ' End
-'           IF LEN(RTRIM$(ed$)) > 0 THEN p = LEN(RTRIM$(ed$)) + 1
-'           EXIT DO
-'         CASE -75 ' Left
-'           p = p - 1: EXIT DO
-'         CASE -77 ' Right
-'           p = p + 1: EXIT DO
-'         CASE 32 TO 126
-'           ch$ = CHR$(scanCode)
-'           IF numOnly THEN
-'             SELECT CASE scanCode
-'               CASE 45
-'               CASE 46
-'               CASE 48 TO 57
-'               CASE ELSE
-'                 ch$ = ""
-'             END SELECT
-'           END IF
-'           IF ch$ <> "" THEN
-'             IF insert THEN ' insert
-'               ed$ = LEFT$(LEFT$(ed$, p - 1) + ch$ + MID$(ed$, p), LEN(originalEd$))
-'             ELSE ' overwrite
-'               MID$(ed$, p, 1) = ch$
-'             END IF
-'             p = p + 1
-'             EXIT DO
-'           END IF
-'         'CASE 13, 27 ' Enter, Esc
-'         CASE ELSE
-'           'QPrintRC STR$(scanCode) + "   ", 1, 1, 7
-'           QPrintRC ed$, ulRow, ulCol, normalColor
-'           activeLength = LEN(RTRIM$(ed$))
-'           LOCATE , , 0
-'           EXIT SUB
-'       END SELECT
-'     LOOP
-'     IF p < 1 THEN p = 1     
-'     IF p > LEN(ed$) THEN p = LEN(ed$)
-'     'QPrintRC STR$(p) + "   ", 2, 1, 7
-'   LOOP
-' END SUB
+SUB Editor(Byref ed As String, Byref activeLength As Short, Byref scanCode As Short, numOnly As Short, isCapsOn As Short, normalColor As Short, editColor As Short, row As Short, column As Short) STATIC
+  
+  Dim p As Short, ulRow As Short, ulCol As Short, originalEd As String
+  Dim insert As Short, ch As String
+  
+  'TODO: Handle numOnly
+  'TODO: Handle isCapsOn
+  IF scanCode = 1 THEN
+    'p = *what is was at last exit*
+  ELSEIF scanCode = 2 THEN
+    p = column
+  ELSE
+    p = 1
+    ulRow = row
+    ulCol = column
+    originalEd = ed
+  END IF
+  insert = 0
+  LOCATE , , 1, 7, 7 ' single line cursor, on.
+  DO
+    LOCATE ulRow, ulCol + p - 1
+    QPrintRC ed, ulRow, ulCol, editColor
+    WHILE INKEY$ <> "": WEND              ' not sure needed.
+    DO
+      scanCode = MGetKey(row, column) ' scanCode might be returned to caller.
+      SELECT CASE scanCode
+        CASE -83 ' Del
+          ed = LEFT$(ed, p - 1) + MID$(ed, p + 1) + " "
+          EXIT DO
+        CASE -82 ' Ins
+          insert = NOT insert
+          IF insert THEN
+            'LOCATE , , 1, 5, 7 ' quarter height cursor, on.
+            LOCATE , , 1, 3, 7 ' half height cursor, on.
+          ELSE
+            LOCATE , , 1, 7, 7 ' single line cursor, on.
+          END IF
+        CASE 8 ' Backspace
+          IF p = 1 THEN ' If pressed at beginning of the line, exit.
+            QPrintRC ed, ulRow, ulCol, normalColor
+            activeLength = LEN(RTRIM$(ed))
+            LOCATE , , 0
+            EXIT SUB
+          END IF
+          p = p -1: ed = LEFT$(ed, p - 1) + MID$(ed, p + 1) + " ": EXIT DO
+        CASE -46 ' ALT+C
+          p = 1: ed = SPACE$(LEN(ed)): EXIT DO
+        CASE -19 ' ALT+R
+          ed = originalEd
+          ' IF LEN(RTRIM$(ed$)) > 0 THEN p = LEN(RTRIM$(ed$)) + 1 ELSE p = 1
+          ' Removed the above line as it appears the original does not reset the cursor position.
+          EXIT DO
+        CASE -71 ' Home
+          p = 1: EXIT DO
+        CASE -79 ' End
+          IF LEN(RTRIM$(ed)) > 0 THEN p = LEN(RTRIM$(ed)) + 1
+          EXIT DO
+        CASE -75 ' Left
+          p = p - 1: EXIT DO
+        CASE -77 ' Right
+          p = p + 1: EXIT DO
+        CASE 32 TO 126
+          ch = CHR$(scanCode)
+          IF numOnly THEN
+            SELECT CASE scanCode
+              CASE 45
+              CASE 46
+              CASE 48 TO 57
+              CASE ELSE
+                ch = ""
+            END SELECT
+          END IF
+          IF ch <> "" THEN
+            IF insert THEN ' insert
+              ed = LEFT$(LEFT$(ed, p - 1) + ch + MID$(ed, p), LEN(originalEd))
+            ELSE ' overwrite
+              MID$(ed, p, 1) = ch
+            END IF
+            p = p + 1
+            EXIT DO
+          END IF
+        'CASE 13, 27 ' Enter, Esc
+        CASE ELSE
+          'QPrintRC STR$(scanCode) + "   ", 1, 1, 7
+          QPrintRC ed, ulRow, ulCol, normalColor
+          activeLength = LEN(RTRIM$(ed))
+          LOCATE , , 0
+          EXIT SUB
+      END SELECT
+    LOOP
+    IF p < 1 THEN p = 1     
+    IF p > LEN(ed) THEN p = LEN(ed)
+    'QPrintRC STR$(p) + "   ", 2, 1, 7
+  LOOP
+END SUB
 
 ' ' MAMenu is a full-featured multi-column menu routine, which allows
 ' ' selecting items either with the keyboard or a mouse. This is a mouse-aware
@@ -4636,109 +4609,80 @@ END FUNCTION
 
 ' END SUB
 
-' ' BCopyT will copy one or more elements in a TYPE array to 
-' ' another array, or to any location in memory. Alternately, BCopyT 
-' ' can be used to move any contiguous block of memory, even if the 
-' ' number of bytes exceeds 65536. 
-' SUB BCopyT(src AS _MEM, dest AS _MEM, elSize, numEls)
-' 'SUB BCopyT(SEG fromEl, SEG toEl, elSize, numEls) 
-' 'SUB BCopyT(fromSeg, fromAdr, toSeg, toAdr%, numBytes, numEls) 
-' 'SUB BCopyT(src AS _MEM, srcEl, dest AS _MEM, destEl, elSize, numEls)
+' BCopyT will copy one or more elements in a TYPE array to 
+' another array, or to any location in memory. Alternately, BCopyT 
+' can be used to move any contiguous block of memory, even if the 
+' number of bytes exceeds 65536. 
+SUB BCopyT(fromEl As Any Ptr, toEl As Any Ptr, elSize As Short, numEls As Short) 
 
-'   ' FromEl is the starting element of the source array and ToEl is the 
-'   ' starting element in the destination array. El Size% is the size of each 
-'   ' element in bytes, or a special code (see below). NumEls% is the 
-'   ' number of elements to be copied. 
-'   '
-'   ' With the alternate call form, FromSeg%, FromAdr%, ToSeg%, and 
-'   ' ToAdr% define the source and destination segments and addresses. 
-'   ' NumBytes % then tells how many bytes are to be copied. 
+  ' FromEl is the starting element of the source array and ToEl is the 
+  ' starting element in the destination array. El Size% is the size of each 
+  ' element in bytes, or a special code (see below). NumEls% is the 
+  ' number of elements to be copied. 
+  '
+  ' With the alternate call form, FromSeg%, FromAdr%, ToSeg%, and 
+  ' ToAdr% define the source and destination segments and addresses. 
+  ' NumBytes % then tells how many bytes are to be copied. 
 
-'   ' PRINT v.OFFSET; " the beginning of the memory block as _OFFSET"
-'   ' PRINT v.SIZE; " the largest available region of memory of the ELEMENT in bytes as _OFFSET"
-'   ' PRINT v.ELEMENTSIZE; " the byte size of the elements within the blocks AS _OFFSET"
-'   ' PRINT "     ^----- represents the memory block 'left', from the current element to max"
+  Dim size As Short
+  SELECT CASE elSize
+    CASE -1 : size = 2 ' 2-byte integer 
+    CASE -2 : size = 4 ' 4-byte long integer
+    CASE -3 : size = 4 ' 4-byte single precision
+    CASE -4 : size = 8 ' 8-byte double precision
+    CASE IS > 0: size = elSize
+    CASE ELSE
+      EXIT SUB
+  END SELECT
 
-'   ' PRINT v.TYPE; " the type (represented as bits combined to form a value"
-'   ' IF v.TYPE AND 1 THEN PRINT "   BIT 01: _BYTE"
-'   ' IF v.TYPE AND 2 THEN PRINT "   BIT 02: INTEGER"
-'   ' IF v.TYPE AND 4 THEN PRINT "   BIT 03: LONG or SINGLE"
-'   ' IF v.TYPE AND 8 THEN PRINT "   BIT 04: DOUBLE or _INTEGER64"
-'   ' IF v.TYPE AND 16 THEN PRINT "   BIT 05: Not Defined"
-'   ' IF v.TYPE AND 32 THEN PRINT "   BIT 06: _FLOAT"
-'   ' IF v.TYPE AND 64 THEN PRINT "   BIT 07: Not Defined"
-'   ' IF v.TYPE AND 128 THEN PRINT "   BIT 08: 'integer type'"
-'   ' IF v.TYPE AND 256 THEN PRINT "   BIT 09: 'floating point type'"
-'   ' IF v.TYPE AND 512 THEN PRINT "   BIT 10: string (fixed or variable length)"
-'   ' IF v.TYPE AND 1024 THEN PRINT "   BIT 11: _UNSIGNED"
-'   ' IF v.TYPE AND 2048 THEN PRINT "   BIT 12: _MEMIMAGE"
-'   ' IF v.TYPE AND 4096 THEN PRINT "   BIT 13: _MEM TYPE structure"
-'   ' IF v.TYPE AND 8192 THEN PRINT "   BIT 14: _OFFSET"
-'   ' IF v.TYPE AND 16384 THEN PRINT "   BIT 15: _MEMNEW(size) or _MEMNEW(offset_size)"
-'   ' IF v.TYPE AND 32768 THEN PRINT "   BIT 16: UDT (TYPE...END TYPE)"
-'   ' IF v.TYPE AND 65536 THEN PRINT "   BIT 17: an array of data"
+  DIM bytes AS ULong: bytes = numEls * size
+  Var startAddress = FB_MEMMOVE (Byval toEl, Byval fromEl, bytes)
 
-'   SELECT CASE elSize
-'     CASE -1 : size = 2 ' 2-byte integer 
-'     CASE -2 : size = 4 ' 4-byte long integer
-'     CASE -3 : size = 4 ' 4-byte single precision
-'     CASE -4 : size = 8 ' 8-byte double precision
-'     CASE IS > 0: size = elSize
-'     CASE ELSE
-'       EXIT SUB
-'   END SELECT
-
-'   'DIM srcOffset AS _OFFSET: srcOffset = src.OFFSET + ((srcEl - 1) * size)
-'   'DIM destOffset AS _OFFSET: destOffset = dest.OFFSET + ((destEl - 1) * size)
-'   DIM totalSize AS _OFFSET: totalSize = numEls * size
-  
-'   _MEMCOPY src, src.OFFSET, totalSize TO dest, dest.OFFSET
-
-' END SUB
+END SUB
 
 ' SUB BLPrint(LPTNumber, X$, ErrorCount)
 '   ERROR 73 ' Feature Unavailable
 ' END SUB
 
-' ' Chime provides five different types of beep tones, and five short 
-' ' attention-getting trill sounds.
-' SUB Chime(number)
+' Chime provides five different types of beep tones, and five short 
+' attention-getting trill sounds.
+SUB Chime(number As Short)
 
-'   SELECT CASE number
-'     CASE 1: QPSound 100, 5
-'     CASE 2: QPSound 200, 5
-'     CASE 3: QPSound 400, 5
-'     CASE 4: QPSound 800, 5
-'     CASE 5: QPSound 1600, 5
-'     CASE 6
-'       QPSound 659, 1
-'       QPSound 523, 1
-'       QPSound 659, 1
-'       QPSound 523, 1
-'     CASE 7
-'       FOR i = 300 TO 750 STEP 50
-'         QPSound i, 1
-'       NEXT
-'     CASE 8
-'       FOR i = 1000 TO 1700 STEP 100
-'         QPSound i, 1
-'       NEXT
-'     CASE 9
-'       FOR i = 1 TO 6
-'         QPSound 200 * i, 1
-'       NEXT
-'     CASE 10
-'       QPSound 220, 1
-'       QPSound 330, 1
-'       QPSound 440, 1
-'       QPSound 660, 1
-'       QPSound 880, 1
-'       QPSound 1319, 1
-'       QPSound 1760, 1
-'     CASE ELSE
-'   END SELECT
+  SELECT CASE number
+    CASE 1: 'QPSound 100, 5
+    CASE 2: 'QPSound 200, 5
+    CASE 3: 'QPSound 400, 5
+    CASE 4: 'QPSound 800, 5
+    CASE 5: 'QPSound 1600, 5
+    CASE 6
+      'QPSound 659, 1
+      'QPSound 523, 1
+      'QPSound 659, 1
+      'QPSound 523, 1
+    CASE 7
+      FOR i As Short = 300 TO 750 STEP 50
+        'QPSound i, 1
+      NEXT
+    CASE 8
+      FOR i As Short = 1000 TO 1700 STEP 100
+        'QPSound i, 1
+      NEXT
+    CASE 9
+      FOR i As Short = 1 TO 6
+        'QPSound 200 * i, 1
+      NEXT
+    CASE 10
+      'QPSound 220, 1
+      'QPSound 330, 1
+      'QPSound 440, 1
+      'QPSound 660, 1
+      'QPSound 880, 1
+      'QPSound 1319, 1
+      'QPSound 1760, 1
+    CASE ELSE
+  END SELECT
 
-' END SUB
+END SUB
 
 ' ' Clock provides a continual display of the current time, but without 
 ' ' having to loop repeatedly in the BASIC program.
@@ -5744,28 +5688,28 @@ END SUB
 '   PDQTimer& = INT(TIMER * 10)
 ' END FUNCTION
 
-' FUNCTION Peek1(segment, address)
-'   SELECT CASE segment
-'     CASE 0
-'       SELECT CASE address
-'         CASE &H463 ' Color Monitor?
-'           ' IF Peek1(0, &H463) <> &HB4 THEN ColorMon = 1   ' see what monitor is active
-'         CASE &H417 ' Capslock and Numlock status?
-'           result = 0
-'           IF _CAPSLOCK THEN result = result + &H40
-'           IF _NUMLOCK THEN result = result + &H20
-'           Peek1 = result
-'           ' CapStatus = Peek1(0, &H417) AND &H40        'get BIOS status of Caps Lock
-'           ' NumStatus = Peek1(0, &H417) AND &H20        'get BIOS status of Num Lock
-'           ' &H40 Capslock Active
-'           ' &H20 Numlock Active
-'         CASE ELSE
-'           ERROR 73 ' Feature Unavailable
-'       END SELECT
-'     CASE ELSE
-'       ERROR 73 ' Feature Unavailable
-'   END SELECT
-' END FUNCTION
+FUNCTION Peek1(segment As Short, address As Short) As Short
+  SELECT CASE segment
+    CASE 0
+      SELECT CASE address
+        CASE &H463 ' Color Monitor?
+          ' IF Peek1(0, &H463) <> &HB4 THEN ColorMon = 1   ' see what monitor is active
+        CASE &H417 ' Capslock and Numlock status?
+          Var result = 0
+          'IF _CAPSLOCK THEN result = result + &H40
+          'IF _NUMLOCK THEN result = result + &H20
+          Peek1 = result
+          ' CapStatus = Peek1(0, &H417) AND &H40        'get BIOS status of Caps Lock
+          ' NumStatus = Peek1(0, &H417) AND &H20        'get BIOS status of Num Lock
+          ' &H40 Capslock Active
+          ' &H20 Numlock Active
+        CASE ELSE
+          ERROR 73 ' Feature Unavailable
+      END SELECT
+    CASE ELSE
+      ERROR 73 ' Feature Unavailable
+  END SELECT
+END FUNCTION
 
 ' FUNCTION Peek2(Segment, Address)
 '   ERROR 73 ' Feature Unavailable
@@ -6590,74 +6534,74 @@ END FUNCTION
 '   ERROR 73 ' Feature Unavailable
 ' END SUB
 
-' FUNCTION QPLeft$(text$, numChars)
-'   QPLeft$ = LEFT$(text$, numChars)
-' END FUNCTION
+FUNCTION QPLeft(text As String, numChars As Short) As String
+  QPLeft = LEFT$(text, numChars)
+END FUNCTION
 
-' FUNCTION QPMid$(text$, startChar, numChars)
-'   IF numChars = -1 THEN
-'     QPMid$ = MID$(text$, startChar)
-'   ELSE
-'     QPMid$ = MID$(text$, startChar, numChars)
-'   END IF
-' END FUNCTION
+FUNCTION QPMid(text As String, startChar As Short, numChars As Short) As String
+  IF numChars = -1 THEN
+    QPMid = MID$(text, startChar)
+  ELSE
+    QPMid = MID$(text, startChar, numChars)
+  END IF
+END FUNCTION
 
-' FUNCTION QPRight$(text$, numChars)
-'   QPRight$ = RIGHT$(text$, numChars)
-' END FUNCTION
+FUNCTION QPRight(text As String, numChars As Short) As String
+  QPRight = RIGHT$(text, numChars)
+END FUNCTION
 
-' ' QPLen serves the same purpose as BASIC's LEN function, but it is considerably faster.
-' FUNCTION QPLen(text$)
-'   QPLen = LEN(text$)
-' END FUNCTION
+' QPLen serves the same purpose as BASIC's LEN function, but it is considerably faster.
+FUNCTION QPLen(text As String) As Short
+  QPLen = LEN(text)
+END FUNCTION
 
 ' FUNCTION QPSadd(Work$)
 '   ERROR 73 ' Feature Unavailable
 ' END FUNCTION
 
-' FUNCTION QPStrI$(IntVar)
-'   QPStrI$ = LTRIM$(STR$(IntVar))
-' END FUNCTION
+FUNCTION QPStrI(value As Short) As String
+  QPStrI = LTRIM$(STR$(value))
+END FUNCTION
 
-' FUNCTION QPStrL$(LongInt&)
-'   QPStrL$ = LTRIM$(STR$(LongInt&))
-' END FUNCTION
+FUNCTION QPStrL(value As Long) As String
+  QPStrL = LTRIM$(STR$(value))
+END FUNCTION
 
-' FUNCTION QPTrim$(inputValue$)
-'   QPTrim$ = QPLTrim$(QPRTrim$(inputValue$))
-' END FUNCTION
+FUNCTION QPTrim(value As String) As String
+  QPTrim = QPLTrim(QPRTrim(value))
+END FUNCTION
 
-' FUNCTION QPLTrim$(inputValue$)
-'   result$ = inputvalue$
-'   DO
-'     IF LEN(result$) = 0 THEN EXIT DO
-'     ch$ = LEFT$(result$, 1)
-'     SELECT CASE ch$
-'       CASE CHR$(0), " " ', CHR$(9), CHR$(13), CHR$(10)
-'         result$ = RIGHT$(result$, LEN(result$) - 1)
-'       CASE ELSE: EXIT DO
-'     END SELECT
-'   LOOP
-'   QPLTrim$ = result$
-' END FUNCTION
+FUNCTION QPLTrim(value As String) As String
+  Var result = value
+  DO
+    IF LEN(result) = 0 THEN EXIT DO
+    Var ch = LEFT$(result, 1)
+    SELECT CASE ch
+      CASE CHR$(0), " " ', CHR$(9), CHR$(13), CHR$(10)
+        result = RIGHT$(result, LEN(result) - 1)
+      CASE ELSE: EXIT DO
+    END SELECT
+  LOOP
+  QPLTrim = result
+END FUNCTION
 
-' FUNCTION QPRTrim$(inputValue$)
-'   result$ = inputvalue$
-'   DO
-'     IF LEN(result$) = 0 THEN EXIT DO
-'     ch$ = RIGHT$(result$, 1)
-'     SELECT CASE ch$
-'       CASE CHR$(0), " " ', CHR$(9), CHR$(13), CHR$(10)
-'         result$ = LEFT$(result$, LEN(result$) - 1)
-'       CASE ELSE: EXIT DO
-'     END SELECT
-'   LOOP
-'   QPRTrim$ = result$
-' END FUNCTION
+FUNCTION QPRTrim(value As String) As String
+  Var result = value
+  DO
+    IF LEN(result) = 0 THEN EXIT DO
+    Var ch = RIGHT$(result, 1)
+    SELECT CASE ch
+      CASE CHR$(0), " " ', CHR$(9), CHR$(13), CHR$(10)
+        result = LEFT$(result, LEN(result) - 1)
+      CASE ELSE: EXIT DO
+    END SELECT
+  LOOP
+  QPRTrim = result
+END FUNCTION
 
-' FUNCTION QPValI (X$)
-'   QPValI = VAL(X$)
-' END FUNCTION
+FUNCTION QPValI (value As String) As Short
+  QPValI = VAL(value)
+END FUNCTION
 
 ' FUNCTION QPValL&(Work$)
 '   ERROR 73 ' Feature Unavailable

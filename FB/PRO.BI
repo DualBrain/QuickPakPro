@@ -203,8 +203,10 @@ DECLARE FUNCTION QPHex OVERLOAD (value As Const Any Ptr, digits As Short) As Str
 ' ****************************************
 
 DECLARE SUB AMenu (address As String Ptr, startItem As Short, Byref count As Short, Byref scanCode As Short, normColor As Short, hiLiteColor As Short, numRows As Short, numCols As Short, gap As Short, ulRow As Short, ulCol As Short)
+DECLARE SUB AMenuT(array As Any Ptr, item As Short, length As Short, Byref count As Short, Byref scanCode As Short, normColor As Short, hiLiteColor As Short, numRows As Short, numCols As Short, gap As Short, ulRow As Short, ulCol As Short)
 DECLARE SUB ASCIIPick(Byref char As Short, color1 As Short, color2 As Short, Byref exitCode As Short)
 DECLARE SUB MASCIIPick(Byref char As Short, color1 As Short, color2 As Short, Byref exitCode As Short)
+DECLARE SUB Editor(Byref ed As String, Byref activeLength As Short, Byref scanCode As Short, numOnly As Short, isCapsOn As Short, normalColor As Short, editColor As Short, row As Short, column As Short)
 DECLARE FUNCTION MGetKey(Byref row As Short, Byref col As Short) As Short
 
 ' ****************************************
@@ -229,6 +231,8 @@ DECLARE FUNCTION WaitKey AS SHORT
 ' Chapter 7 - Miscellaneous Routines
 ' ****************************************
 
+DECLARE SUB BCopyT(fromEl As Any Ptr, toEl As Any Ptr, elSize As Short, numEls As Short) 
+DECLARE SUB Chime(number As Short)
 DECLARE FUNCTION Date2Num (dat As String) As Short
 DECLARE FUNCTION DayName(d As Short) As String
 DECLARE SUB Empty(dummy As Short)
@@ -243,6 +247,7 @@ DECLARE FUNCTION MaxLong (Num1 As Long, Num2 As Long) As Long
 DECLARE FUNCTION MinInt (num1 As Short, num2 As Short) As Short
 DECLARE FUNCTION MinLong (num1 As Long, num2 As Long) As Long
 DECLARE SUB Pause(ticks AS SHORT)
+DECLARE FUNCTION Peek1(segment As Short, address As Short) As Short
 DECLARE FUNCTION PRNReady(lptNumber As Short) As Short
 
 ' ****************************************
@@ -254,6 +259,16 @@ DECLARE FUNCTION FUsing(number As String, image As String) As String
 DECLARE FUNCTION InCount(source As String, searchValue As String) As Short
 DECLARE FUNCTION QInstr(startPosition As Short, sourceValue As String, searchValue As String) As Short
 DECLARE FUNCTION QInstr2(startPosition As Short, sourceValue As String, searchValue As String) As Short
+DECLARE FUNCTION QPLeft(text As String, numChars As Short) As String
+DECLARE FUNCTION QPMid(text As String, startChar As Short, numChars As Short) As String
+DECLARE FUNCTION QPRight(text As String, numChars As Short) As String
+DECLARE FUNCTION QPLen(text As String) As Short
+DECLARE FUNCTION QPStrI(value As Short) As String
+DECLARE FUNCTION QPStrL(value As Long) As String
+DECLARE FUNCTION QPTrim(value As String) As String
+DECLARE FUNCTION QPLTrim(value As String) As String
+DECLARE FUNCTION QPRTrim(value As String) As String
+DECLARE FUNCTION QPValI (value As String) As Short
 DECLARE SUB ReplaceString (Byref sourceValue As String, oldValue As String, newValue As String)
 DECLARE SUB ReplaceString2 (Byref sourceValue As String, oldValue As String, newValue As String)
 
