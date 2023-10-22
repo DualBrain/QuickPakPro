@@ -203,6 +203,8 @@ DECLARE FUNCTION QPHex OVERLOAD (value As Const Any Ptr, digits As Short) As Str
 ' ****************************************
 
 DECLARE SUB AMenu (address As String Ptr, startItem As Short, Byref count As Short, Byref scanCode As Short, normColor As Short, hiLiteColor As Short, numRows As Short, numCols As Short, gap As Short, ulRow As Short, ulCol As Short)
+DECLARE SUB ASCIIPick(Byref char As Short, color1 As Short, color2 As Short, Byref exitCode As Short)
+DECLARE SUB MASCIIPick(Byref char As Short, color1 As Short, color2 As Short, Byref exitCode As Short)
 DECLARE FUNCTION MGetKey(Byref row As Short, Byref col As Short) As Short
 
 ' ****************************************
@@ -215,8 +217,12 @@ DECLARE SUB ClearBuf
 DECLARE FUNCTION CtrlKey As Short
 DECLARE SUB InitMouse(Byref there As Short)
 DECLARE FUNCTION NumLock As Short
+DECLARE SUB NumOff
+DECLARE SUB NumOn
 DECLARE FUNCTION ScrlLock As Short
 DECLARE FUNCTION ShiftKey As Short
+DECLARE SUB ShowCursor
+DECLARE SUB TextCursor(fg As Short, bg As Short)
 DECLARE FUNCTION WaitKey AS SHORT
 
 ' ****************************************
@@ -237,6 +243,7 @@ DECLARE FUNCTION MaxLong (Num1 As Long, Num2 As Long) As Long
 DECLARE FUNCTION MinInt (num1 As Short, num2 As Short) As Short
 DECLARE FUNCTION MinLong (num1 As Long, num2 As Long) As Long
 DECLARE SUB Pause(ticks AS SHORT)
+DECLARE FUNCTION PRNReady(lptNumber As Short) As Short
 
 ' ****************************************
 ' Chapter 8 - String Manipulation Routines
@@ -254,6 +261,10 @@ DECLARE SUB ReplaceString2 (Byref sourceValue As String, oldValue As String, new
 ' Chapter 9 - Video Routines
 ' ****************************************
 
+DECLARE SUB APrint(array As String Ptr, numEls As Short, firstChar As Short, numChars As Short, colr As Short, page As Short)
+DECLARE SUB APrint0(array As String Ptr, numEls As Short, firstChar As Short, numChars As Short, colr As Short)
+DECLARE SUB APrintT(array AS Any Ptr, elSize As Short, numEls As Short, firstChar As Short, numChars As Short, colr As Short, page As Short)
+DECLARE SUB APrintT0(array AS Any Ptr, elSize As Short, numEls As Short, firstChar As Short, numChars As Short, colr As Short)
 DECLARE FUNCTION ArraySize(ulRow As Short, ulCol As Short, lrRow As Short, lrCol As Short) As Short
 DECLARE SUB Box(ulRow As Short, ulCol As Short, lrRow As Short, lrCol As Short, char As Short, colr As Short, page As Short)
 DECLARE SUB Box0(ulRow As Short, ulCol As Short, lrRow As Short, lrCol As Short, char As Short, colr As Short)
@@ -268,6 +279,8 @@ DECLARE FUNCTION Monitor As Short
 DECLARE FUNCTION EGAMem As Short
 DECLARE SUB MPaintBox (ulRow As Short, ulCol As Short, lrRow As Short, lrCol As Short, colr As Short)
 DECLARE SUB MQPrint (txt As String, colr As Short)
+DECLARE SUB MScrnRest (ulRow As Short, ulCol As Short, lrRow As Short, lrCol As Short, scrn As Short Ptr)
+DECLARE SUB MScrnSave (ulRow As Short, ulCol As Short, lrRow As Short, lrCol As Short, scrn As Short Ptr)
 DECLARE FUNCTION OneColor (fg As Short, bg As Short) As Short
 DECLARE SUB PaintBox (ulRow As Short, ulCol As Short, lrRow As Short, lrCol As Short, colr As Short, page As Short)
 DECLARE SUB PaintBox0 (ulRow As Short, ulCol As Short, lrRow As Short, lrCol As Short, colr As Short)
@@ -278,6 +291,14 @@ DECLARE SUB QPrintAny (txt As String, clr As Short, monCode As Short, row As Sho
 DECLARE SUB QPrintRC (txt As String, r As Short, c As Short, clr As Short)
 DECLARE SUB ReadScrn (row As Short, column As Short, x As String, page As Short)
 DECLARE SUB ReadScrn0 (row As Short, column As Short, x As String)
+DECLARE SUB ScrnRest (ulRow As Short, ulCol As Short, lrRow As Short, lrCol As Short, scrn As Short Ptr, page As Short)
+DECLARE SUB ScrnRest0 (ulRow As Short, ulCol As Short, lrRow As Short, lrCol As Short, scrn As Short Ptr)
+DECLARE SUB ScrnSave (ulRow As Short, ulCol As Short, lrRow As Short, lrCol As Short, scrn As Short Ptr, page As Short)
+DECLARE SUB ScrnSave0 (ulRow As Short, ulCol As Short, lrRow As Short, lrCol As Short, scrn AS Short Ptr)
+DECLARE SUB ScrollD(ulRow As Short, ulCol As Short, lrRow As Short, lrCol As Short, lines As Short, page As Short)
+DECLARE SUB ScrollL(ulRow As Short, ulCol As Short, lrRow As Short, lrCol As Short, columns As Short, page As Short)
+DECLARE SUB ScrollR(ulRow As Short, ulCol As Short, lrRow As Short, lrCol As Short, columns As Short, page As Short)
+DECLARE SUB ScrollU(ulRow As Short, ulCol As Short, lrRow As Short, lrCol As Short, lines As Short, page As Short)
 DECLARE SUB SplitColor (colr As Short, Byref fg As Short, Byref bg As Short)
 
 ' ****************************************

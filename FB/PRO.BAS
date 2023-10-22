@@ -3672,81 +3672,90 @@ END SUB
 '   LOOP
 ' END SUB
 
-' SUB ASCIIPick(char, color1, color2, exitCode)
+SUB ASCIIPick(Byref char As Short, color1 As Short, color2 As Short, Byref exitCode As Short)
 
-'   prevChar = char
+  Dim r As Short, c As Short, chs As String
 
-'   ulRow = CSRLIN
-'   ulCol = POS(0)
-'   lrRow = ulRow + 17
-'   lrCol = ulCol + 34
-'   CALL Box0(ulRow, ulCol, lrRow, lrCol, 2, color1)
+  Var prevChar = char
 
-'   DO
+  Var ulRow = CSRLIN
+  Var ulCol = POS(0)
+  Var lrRow = ulRow + 17
+  Var lrCol = ulCol + 34
+  Box0 ulRow, ulCol, lrRow, lrCol, 2, color1
 
-'     d$ = RIGHT$("00" + LTRIM$(STR$(char)), 2)
-'     h$ = RIGHT$("0" + HEX$(char), 2)
-'     CALL QPrintRC(CHR$(181) + " ASCII Code: Dec  " + d$ + "  Hex  " + h$ + " " + CHR$(198), ulRow + 17, ulCol + 1, color1)
+  DO
 
-'     'prevControlChr = _CONTROLCHR ' <----------- QB64 definately get's this wrong...
-'     'IF NOT prevControlChr THEN _CONTROLCHR OFF
-'     FOR r = 1 TO 16
-'       FOR c = 1 TO 16
-'         ch = ((r - 1) * 16) + (c - 1)
-'         ch$ = CHR$(ch)
-'         IF char = ch THEN clr = color2 ELSE clr = color1
-'         CALL QPrintRC(ch$, ulRow + r, ulCol + (c * 2), clr)
-'       NEXT
-'     NEXT
-'     'IF NOT prevControlChr THEN _CONTROLCHR ON
+    Var ds = RIGHT$("00" + LTRIM$(STR$(char)), 2)
+    Var hs = RIGHT$("0" + HEX$(char), 2)
+    QPrintRC CHR$(181) + " ASCII Code: Dec  " + ds + "  Hex  " + hs + " " + CHR$(198), ulRow + 17, ulCol + 1, color1
 
-'     IF exitCode = -1 THEN EXIT SUB
+    'prevControlChr = _CONTROLCHR ' <----------- QB64 definately get's this wrong...
+    'IF NOT prevControlChr THEN _CONTROLCHR OFF
+    FOR r = 1 TO 16
+      FOR c = 1 TO 16
+        Var ch = ((r - 1) * 16) + (c - 1)
+        Select Case ch
+          Case 7,8,9,10,13
+            chs = " "
+          Case Else
+            chs = CHR$(ch)
+        End Select
+        Dim clr As Short
+        IF char = ch THEN clr = color2 ELSE clr = color1
+        QPrintRC chs, ulRow + r, ulCol + (c * 2), clr
+      NEXT
+    NEXT
+    'IF NOT prevControlChr THEN _CONTROLCHR ON
 
-'     DO
+    IF exitCode = -1 THEN EXIT SUB
 
-'       scanCode = MGetKey(row, col) ' scanCode might be returned to caller.
+    DO
+
+      Dim row As Short, col As Short
+      Var scanCode = MGetKey(row, col) ' scanCode might be returned to caller.
     
-'       SELECT CASE scanCode
-'         CASE -72 ' Up
-'           char = char - 16: EXIT DO
-'         CASE -80 ' Down
-'           char = char + 16: EXIT DO
-'         CASE -75 ' Left
-'           char = char - 1: EXIT DO
-'         CASE -77 ' Right
-'           char = char + 1: EXIT DO
-'         CASE -71 ' Home ' Diagonal UL
-'           char = char - 17: EXIT DO
-'         CASE -79 ' End  ' Diagonal DL
-'           char = char + 15: EXIT DO
-'         CASE -73 ' PgUp ' Diagonal UR
-'           char = char - 15: EXIT DO
-'         CASE -81 ' PgDn ' Diagonal DR
-'           char = char + 17: EXIT DO
-'         CASE 8, 9, 32 TO 126
-'           char = scanCode: EXIT DO
-'         CASE 13 ' Enter
-'           exitCode = 0: EXIT SUB
-'         CASE 1000 ' Mouse click
-'           r = row - (ulRow + 1): c = (col - ulCol) \ 2
-'           char = ((r * 16) + c) - 1
-'           exitCode = 2: EXIT SUB
-'         CASE 27
-'           char = prevChar: exitCode = 2: EXIT SUB
-'         CASE ELSE                         ' any other key,
-'       END SELECT
-'     LOOP
+      SELECT CASE scanCode
+        CASE -72 ' Up
+          char = char - 16: EXIT DO
+        CASE -80 ' Down
+          char = char + 16: EXIT DO
+        CASE -75 ' Left
+          char = char - 1: EXIT DO
+        CASE -77 ' Right
+          char = char + 1: EXIT DO
+        CASE -71 ' Home ' Diagonal UL
+          char = char - 17: EXIT DO
+        CASE -79 ' End  ' Diagonal DL
+          char = char + 15: EXIT DO
+        CASE -73 ' PgUp ' Diagonal UR
+          char = char - 15: EXIT DO
+        CASE -81 ' PgDn ' Diagonal DR
+          char = char + 17: EXIT DO
+        CASE 8, 9, 32 TO 126
+          char = scanCode: EXIT DO
+        CASE 13 ' Enter
+          exitCode = 0: EXIT SUB
+        CASE 1000 ' Mouse click
+          r = row - (ulRow + 1): c = (col - ulCol) \ 2
+          char = ((r * 16) + c) - 1
+          exitCode = 2: EXIT SUB
+        CASE 27
+          char = prevChar: exitCode = 2: EXIT SUB
+        CASE ELSE                         ' any other key,
+      END SELECT
+    LOOP
 
-'     IF char < 0 THEN char = char + 256
-'     IF char > 255 THEN char = char - 256
+    IF char < 0 THEN char = char + 256
+    IF char > 255 THEN char = char - 256
 
-'   LOOP
+  LOOP
 
-' END SUB
+END SUB
 
-' SUB MASCIIPick(char, color1, color2, exitCode)
-'   CALL ASCIIPick(char, color1, color2, exitCode)
-' END SUB
+SUB MASCIIPick(Byref char As Short, color1 As Short, color2 As Short, Byref exitCode As Short)
+  ASCIIPick char, color1, color2, exitCode
+END SUB
 
 ' SUB ColorPick(colr, boxColor, exitCode)
 
@@ -4513,15 +4522,17 @@ FUNCTION NumLock As Short
   NumLock = MultiKey(&h45) 'FB.SC_NUMLOCK)
 END FUNCTION
 
-' ' NumOff turns off the NumLock key status. 
-' SUB NumOff
-'   _NUMLOCK OFF
-' END SUB
+' NumOff turns off the NumLock key status. 
+SUB NumOff
+  ERROR 73 ' Feature Unavailable
+  '_NUMLOCK OFF
+END SUB
 
-' ' NumOn turns on the NumLock key status. 
-' SUB NumOn
-'   _NUMLOCK ON
-' END SUB
+' NumOn turns on the NumLock key status. 
+SUB NumOn
+  ERROR 73 ' Feature Unavailable
+  '_NUMLOCK ON
+END SUB
 
 ' ' PeekBuf provides a handy way to determine what key if any is the 
 ' ' next one pending in the keyboard buffer, without actually removing 
@@ -4553,21 +4564,21 @@ FUNCTION ShiftKey As Short
   ShiftKey = MultiKey(&h2a) OR MultiKey(&h36)
 END FUNCTION
 
-' SUB ShowCursor
-'   _MOUSESHOW
-' END SUB
+SUB ShowCursor
+  '_MOUSESHOW
+END SUB
 
 ' SUB StuffBuf(X$)
 '   ' User32 (Windows) SendInput https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-sendinput API
 '   'ERROR 73 ' Feature Unavailable
 ' END SUB
 
-' ' TextCursor provides an easy way to initialize the mouse cursor in 
-' ' text mode, and define its color. 
-' SUB TextCursor(FG, BG)
-'   ' NOTE: I'm not sure that this is required (or is even possible)
-'   '       within the context of QB64 - for now, just stub.
-' END SUB
+' TextCursor provides an easy way to initialize the mouse cursor in 
+' text mode, and define its color. 
+SUB TextCursor(fg As Short, bg As Short)
+  ' NOTE: I'm not sure that this is required (or is even possible)
+  '       within the context of QB64 - for now, just stub.
+END SUB
 
 FUNCTION WaitKey AS SHORT
   WHILE INKEY$ <> "": WEND ' Clear any pending key strokes.
@@ -5776,9 +5787,10 @@ END SUB
 '   Power2 = 2 ^ N
 ' END FUNCTION
 
-' FUNCTION PRNReady(LPTNumber)
-'   ERROR 73 ' Feature Unavailable
-' END FUNCTION
+FUNCTION PRNReady(lptNumber As Short) As Short
+  ERROR 73 ' Feature Unavailable
+  PRNReady = -1
+END FUNCTION
 
 ' SUB PSwap
 '   ERROR 73 ' Feature Unavailable
@@ -6808,87 +6820,81 @@ END SUB
 ' Chapter 9 - Video Routines
 ' ****************************************
 
-' ' APrint will quickly print any portion of a conventional (not 
-' ' fixed-length) string array, and contain the display within a specified 
-' ' area of the screen. 
-' SUB APrint(array$(), first, numEls, firstChar, numChars, colr, page)
-'   'BUG: The VERTMENU.BAS file makes a call where colr is -1;
-'   '     however, it appears to be not using the current "basic" fg/bg but
-'   '     the value from "somewhere else". Testing combined with COLOR, PRINT
-'   '     MQPrint, QPrintRC, etc. and -1 for colr does not seem to be affected
-'   '     by any of these. COLOR, for example, seems to be completely ignored 
-'   '     which doesn't seem to match what the documentation states.
-'   ' NOTE: page is currently not implemented.
-'   ' If page is -1, use current page.
-'   IF page > -1 THEN SCREEN , , page, page
-'   row = CSRLIN
-'   col = POS(0)
-'   FOR element = first to first + numEls - 1
-'     value$ = MID$(array$(element), firstChar, numChars)
-'     QPrintRC value$ + SPACE$(numChars - LEN(value$)), row, col, colr
-'     row = row + 1
-'   NEXT
-' END SUB
+' APrint will quickly print any portion of a conventional (not 
+' fixed-length) string array, and contain the display within a specified 
+' area of the screen. 
+SUB APrint(array As String Ptr, numEls As Short, firstChar As Short, numChars As Short, colr As Short, page As Short)
+  'BUG: The VERTMENU.BAS file makes a call where colr is -1;
+  '     however, it appears to be not using the current "basic" fg/bg but
+  '     the value from "somewhere else". Testing combined with COLOR, PRINT
+  '     MQPrint, QPrintRC, etc. and -1 for colr does not seem to be affected
+  '     by any of these. COLOR, for example, seems to be completely ignored 
+  '     which doesn't seem to match what the documentation states.
+  ' NOTE: page is currently not implemented.
+  ' If page is -1, use current page.
+  'IF page > -1 THEN SCREEN , , page, page
+  IF page > -1 THEN SCREEN , page, page
+  Var row = CSRLIN
+  Var col = POS(0)
+  FOR element As Short = 0 to numEls - 1
+    Var value = MID$(*(array + element), firstChar, numChars)
+    QPrintRC value + SPACE$(numChars - LEN(value)), row, col, colr
+    row = row + 1
+  NEXT
+END SUB
 
-' ' APrint0 will quickly print any portion of a conventional (not 
-' ' fixed-length) string array, and contain the display within a specified 
-' ' area of the screen. 
-' SUB APrint0(array$(), first, numEls, firstChar, numChars, colr)
-'   CALL APrint(array$(), first, numEls, firstChar, numChars, colr, 0)
-' END SUB
+' APrint0 will quickly print any portion of a conventional (not 
+' fixed-length) string array, and contain the display within a specified 
+' area of the screen. 
+SUB APrint0(array As String Ptr, numEls As Short, firstChar As Short, numChars As Short, colr As Short)
+  APrint array, numEls, firstChar, numChars, colr, 0
+END SUB
 
-' ' APrintT will quickly print any portion of a fixed-length string array 
-' ' or the string component of a TYPE array, and contain the display 
-' ' within a specified area of the screen. 
-' 'SUB APrintT(array() AS FLen, first, elSize, numEls, firstChar, numChars, colr, page)
-' SUB APrintT(src AS _MEM, elSize, numEls, firstChar, numChars, colr, page)
+' APrintT will quickly print any portion of a fixed-length string array 
+' or the string component of a TYPE array, and contain the display 
+' within a specified area of the screen. 
+'SUB APrintT(array() AS FLen, first, elSize, numEls, firstChar, numChars, colr, page)
+SUB APrintT(array AS Any Ptr, elSize As Short, numEls As Short, firstChar As Short, numChars As Short, colr As Short, page As Short)
 
-'   ' array$(first) is the first element to be included, and elSize% is the 
-'   ' total length in bytes of each element. 
-'   '
-'   ' numEls% is the total number of elements to print, firstChar% is 
-'   ' the first character in each string to be displayed, and numChars% 
-'   ' is the number of characters to print. 
-'   '
-'   ' colr% specifies the display color, coded in the format used by 
-'   ' QuickPak Professional. If -1 is used for colr%, the current screen 
-'   ' colors will be maintained. 
-'   ' 
-'   ' page% indicates the video page to write to, which is relevant only 
-'   ' when a color monitor is installed. If page% is set to -1, APrintT 
-'   ' will use the current page. 
-'   '
-'   ' Printing always begins at the current cursor location.
+  ' array$(first) is the first element to be included, and elSize% is the 
+  ' total length in bytes of each element. 
+  '
+  ' numEls% is the total number of elements to print, firstChar% is 
+  ' the first character in each string to be displayed, and numChars% 
+  ' is the number of characters to print. 
+  '
+  ' colr% specifies the display color, coded in the format used by 
+  ' QuickPak Professional. If -1 is used for colr%, the current screen 
+  ' colors will be maintained. 
+  ' 
+  ' page% indicates the video page to write to, which is relevant only 
+  ' when a color monitor is installed. If page% is set to -1, APrintT 
+  ' will use the current page. 
+  '
+  ' Printing always begins at the current cursor location.
 
-'   DIM offset AS _OFFSET: offset = src.OFFSET
-'   'DIM s AS STRING ' * elSize
+  IF page > -1 THEN SCREEN , page, page
+  Var row = CSRLIN
+  Var col = POS(0)
+  FOR x As Short = 0 TO numEls - 1
+    Var offset = array + (x * elSize)
+    Dim bytes(elSize - 1) As Byte
+    Var dest = @bytes(0)
+    Var startAddress = FB_MEMCOPY (Byval dest, Byval offset, elSize)
+    Var s = Bytes2String(bytes())
+    Var value = MID$(s, firstChar, numChars)
+    QPrintRC value + SPACE$(numChars - LEN(value)), row, col, colr
+    row = row + 1
+  NEXT
 
-'   IF page > -1 THEN SCREEN , , page, page
-'   row = CSRLIN
-'   col = POS(0)
-'   FOR x = 1 TO numEls
-'     s$ = SPACE$(elSize)
-'     _MEMGET src, offset, s$
-'     value$ = MID$(s$, firstChar, numChars)
-'     QPrintRC value$ + SPACE$(numChars - LEN(value$)), row, col, colr
-'     row = row + 1
-'     offset = offset + elSize
-'   NEXT
+END SUB
 
-'   ' DIM s$(LBOUND(array) TO UBOUND(array))
-'   ' FOR x = LBOUND(array) TO UBOUND(array)
-'   '   s$(x) = array(x).S
-'   ' NEXT
-'   ' CALL APrint(s$(), first, numEls, firstChar, numChars, colr, page)
-
-' END SUB
-
-' ' APrintT0 will quickly print any portion of a fixed-length string 
-' ' array or the string component of a TYPE array, and contain the 
-' ' display within a specified area of the screen. 
-' SUB APrintT0(block AS _MEM, elSize, numEls, firstChar, numChars, colr)
-'   ERROR 73 ' Feature Unavailable
-' END SUB
+' APrintT0 will quickly print any portion of a fixed-length string 
+' array or the string component of a TYPE array, and contain the 
+' display within a specified area of the screen. 
+SUB APrintT0(array AS Any Ptr, elSize As Short, numEls As Short, firstChar As Short, numChars As Short, colr As Short)
+  APrintT array, elSize, numEls, firstChar, numChars, colr, 0
+END SUB
 
 ' ArraySize will quickly calculate how many elements are needed in an
 ' integer array that is intended to hold a portion of the display screen.
@@ -7146,18 +7152,17 @@ SUB MQPrint (txt As String, colr As Short)
   END IF
 END SUB
 
-' ' MScrnRest is similar to ScrnRest, except it always turn off 
-' ' the mouse cursor while it is working. 
-' SUB MScrnRest (ulRow, ulCol, lrRow, lrCol, element())
-'   ScrnRest0 ulRow, ulCol, lrRow, lrCol, element()
-' END SUB
+' MScrnRest is similar to ScrnRest, except it always turn off 
+' the mouse cursor while it is working. 
+SUB MScrnRest (ulRow As Short, ulCol As Short, lrRow As Short, lrCol As Short, scrn As Short Ptr)
+  ScrnRest0 ulRow, ulCol, lrRow, lrCol, scrn
+END SUB
 
-' ' MScrnSave is similar to ScrnSave, except it always turn off 
-' ' the mouse cursor while it is working. 
-' SUB MScrnSave (ulRow, ulCol, lrRow, lrCol, element())
-'   'TODO: Capture the region for restoration later.
-'   ScrnSave0 ulRow, ulCol, lrRow, lrCol, element()
-' END SUB
+' MScrnSave is similar to ScrnSave, except it always turn off 
+' the mouse cursor while it is working. 
+SUB MScrnSave (ulRow As Short, ulCol As Short, lrRow As Short, lrCol As Short, scrn As Short Ptr)
+  ScrnSave0 ulRow, ulCol, lrRow, lrCol, scrn
+END SUB
 
 FUNCTION OneColor (fg As Short, bg As Short) As Short
   Dim f As Short = fg
@@ -7330,141 +7335,141 @@ SUB ReadScrn0 (row As Short, column As Short, x As String)
   ReadScrn row, column, x, 0
 END SUB
 
-' ' ScrnRest will restore a screen that had previously been saved with 
-' ' ScrnSave or ScrnSave0. 
-' SUB ScrnRest (ulRow, ulCol, lrRow, lrCol, element(), page)
-'   ' NOTE: page is currently not implemented
-'   IF _PIXELSIZE = 0 THEN
-'     rows = (lrRow - ulRow) + 1
-'     cols = (lrCol - ulCol) + 1
-'     FOR r = 0 TO rows - 1
-'       FOR c = 0 TO cols - 1
-'         index = LBOUND(element) + ((r * cols) + c)
-'         ' clr = element(index) AND &H00FF ' split color
-'         ' ch = ((element(index) AND &HFF00) \ 256) AND &H00FF ' split character
-'         ch = element(index) AND &H00FF ' split color
-'         clr = ((element(index) AND &HFF00) \ 256) AND &H00FF ' split character
-'         QPrintRC CHR$(ch), ulRow + r, ulCol + c, clr
-'       NEXT
-'     NEXT
-'   ELSE
-'     ERROR 73 ' Feature Unavailable
-'   END IF
-' END SUB
+' ScrnRest will restore a screen that had previously been saved with 
+' ScrnSave or ScrnSave0. 
+SUB ScrnRest (ulRow As Short, ulCol As Short, lrRow As Short, lrCol As Short, scrn As Short Ptr, page As Short)
+  ' NOTE: page is currently not implemented
+  IF 1 THEN '_PIXELSIZE = 0 THEN
+    Var rows = (lrRow - ulRow) + 1
+    Var cols = (lrCol - ulCol) + 1
+    FOR r As Short = 0 TO rows - 1
+      FOR c As Short = 0 TO cols - 1
+        Var index = 0 + ((r * cols) + c)
+        ' clr = scrn(index) AND &H00FF ' split color
+        ' ch = ((scrn(index) AND &HFF00) \ 256) AND &H00FF ' split character
+        Var ch = *(scrn + index) AND &H00FF ' split color
+        Var clr = ((*(scrn + index) AND &HFF00) \ 256) AND &H00FF ' split character
+        QPrintRC CHR$(ch), ulRow + r, ulCol + c, clr
+      NEXT
+    NEXT
+  ELSE
+    ERROR 73 ' Feature Unavailable
+  END IF
+END SUB
 
-' ' ScrnRest0 will restore a screen that had previously been saved with 
-' ' ScrnSave or ScrnSave0. 
-' SUB ScrnRest0 (ulRow, ulCol, lrRow, lrCol, element())
-'   ScrnRest ulRow, ulCol, lrRow, lrCol, element(), 0
-' END SUB
+' ScrnRest0 will restore a screen that had previously been saved with 
+' ScrnSave or ScrnSave0. 
+SUB ScrnRest0 (ulRow As Short, ulCol As Short, lrRow As Short, lrCol As Short, scrn As Short Ptr)
+  ScrnRest ulRow, ulCol, lrRow, lrCol, scrn, 0
+END SUB
 
-' ' ScrnSave will save all or part of a text screen into an integer array, 
-' ' to allow restoring it again at a later time. 
-' SUB ScrnSave (ulRow, ulCol, lrRow, lrCol, element(), page)
-'   ' NOTE: page is currently not implemented
-'   IF _PIXELSIZE = 0 THEN
-'     rows = (lrRow - ulRow) + 1
-'     cols = (lrCol - ulCol) + 1
-'     FOR r = 0 TO rows - 1
-'       FOR c = 0 TO cols - 1
-'         index = LBOUND(element) + ((r * cols) + c)
-'         ' ch = SCREEN(ulRow + r, ulCol + c, 0)
-'         ' clr = SCREEN(ulRow + r, ulCol + c, 1)
-'         clr = SCREEN(ulRow + r, ulCol + c, 0)
-'         ch = SCREEN(ulRow + r, ulCol + c, 1)
-'         element(index) = (ch * 256) + clr ' combine
-'       NEXT
-'     NEXT
-'   ELSE
-'     ERROR 73 ' Feature Unavailable
-'   END IF
-' END SUB
+' ScrnSave will save all or part of a text screen into an integer array, 
+' to allow restoring it again at a later time. 
+SUB ScrnSave (ulRow As Short, ulCol As Short, lrRow As Short, lrCol As Short, scrn As Short Ptr, page As Short)
+  ' NOTE: page is currently not implemented
+  IF 1 THEN '_PIXELSIZE = 0 THEN
+    Var rows = (lrRow - ulRow) + 1
+    Var cols = (lrCol - ulCol) + 1
+    FOR r As Short = 0 TO rows - 1
+      FOR c As Short = 0 TO cols - 1
+        Var index = 0 + ((r * cols) + c)
+        ' ch = SCREEN(ulRow + r, ulCol + c, 0)
+        ' clr = SCREEN(ulRow + r, ulCol + c, 1)
+        Var clr = SCREEN(ulRow + r, ulCol + c, 0)
+        Var ch = SCREEN(ulRow + r, ulCol + c, 1)
+        *(scrn + index) = (ch * 256) + clr ' combine
+      NEXT
+    NEXT
+  ELSE
+    ERROR 73 ' Feature Unavailable
+  END IF
+END SUB
 
-' ' ScrnSave will save all or part of a text screen into an integer array, 
-' ' to allow restoring it again at a later time. 
-' SUB ScrnSave0 (ulRow, ulCol, lrRow, lrCol, element())
-'   ScrnSave ulRow, ulCol, lrRow, lrCol, element(), 0
-' END SUB
+' ScrnSave will save all or part of a text screen into an integer array, 
+' to allow restoring it again at a later time. 
+SUB ScrnSave0 (ulRow As Short, ulCol As Short, lrRow As Short, lrCol As Short, scrn AS Short Ptr)
+  ScrnSave ulRow, ulCol, lrRow, lrCol, scrn, 0
+END SUB
 
-' ' ScrollD will scroll any portion of the display screen down a 
-' ' specified number of lines.
-' SUB ScrollD(ulRow, ulCol, lrRow, lrCol, lines, page)
+' ScrollD will scroll any portion of the display screen down a 
+' specified number of lines.
+SUB ScrollD(ulRow As Short, ulCol As Short, lrRow As Short, lrCol As Short, lines As Short, page As Short)
   
-'   ' NOTE: page is currently not implemented.
-'   ' If page = -1 then current screen will be scrolled.
+  ' NOTE: page is currently not implemented.
+  ' If page = -1 then current screen will be scrolled.
 
-'   tr = (lrRow - ulRow) + 1
-'   IF tr < lines THEN
-'     ' If the number of lines to scroll is greater than the area to scroll, just clear.
-'     CALL ClearScr (ulRow, ulCol, lrRow, lrCol, -1, page)
-'   ELSE
-'     DIM array(ArraySize(ulRow + lines, ulCol, lrRow, lrCol))
-'     CALL ScrnSave (ulRow, ulCol, lrRow - lines, lrCol, array(), page)
-'     CALL ScrnRest (ulRow + lines, ulCol, lrRow, lrCol, array(), page)
-'     CALL ClearScr (ulRow, ulCol, ulRow + (lines - 1), lrCol, -1, page)
-'   END IF
+  Var tr = (lrRow - ulRow) + 1
+  IF tr < lines THEN
+    ' If the number of lines to scroll is greater than the area to scroll, just clear.
+    ClearScr ulRow, ulCol, lrRow, lrCol, -1, page
+  ELSE
+    DIM scrn(ArraySize(ulRow + lines, ulCol, lrRow, lrCol)) As Short
+    ScrnSave ulRow, ulCol, lrRow - lines, lrCol, @scrn(0), page
+    ScrnRest ulRow + lines, ulCol, lrRow, lrCol, @scrn(0), page
+    ClearScr ulRow, ulCol, ulRow + (lines - 1), lrCol, -1, page
+  END IF
 
-' END SUB
+END SUB
 
-' ' ScrollL will scroll any portion of the display screen left a 
-' ' specified number of columns.
-' SUB ScrollL(ulRow, ulCol, lrRow, lrCol, columns, page)
+' ScrollL will scroll any portion of the display screen left a 
+' specified number of columns.
+SUB ScrollL(ulRow As Short, ulCol As Short, lrRow As Short, lrCol As Short, columns As Short, page As Short)
 
-'   ' NOTE: page is currently not implemented.
-'   ' If page = -1 then current screen will be scrolled.
+  ' NOTE: page is currently not implemented.
+  ' If page = -1 then current screen will be scrolled.
 
-'   tc = (lrCol - ulCol) + 1
-'   IF tc < columns THEN
-'     ' If the number of columns to scroll is greater than the area to scroll, just clear.
-'     CALL ClearScr (ulRow, ulCol, lrRow, lrCol, -1, page)
-'   ELSE
-'     DIM array(ArraySize(ulRow, ulCol + columns, lrRow, lrCol))
-'     CALL ScrnSave (ulRow, ulCol + columns, lrRow, lrCol, array(), page)
-'     CALL ScrnRest (ulRow, ulCol, lrRow, lrCol - columns, array(), page)
-'     CALL ClearScr (ulRow, lrCol - (columns - 1), lrRow, lrCol, -1, page)
-'   END IF
+  Var tc = (lrCol - ulCol) + 1
+  IF tc < columns THEN
+    ' If the number of columns to scroll is greater than the area to scroll, just clear.
+    ClearScr ulRow, ulCol, lrRow, lrCol, -1, page
+  ELSE
+    DIM scrn(ArraySize(ulRow, ulCol + columns, lrRow, lrCol)) As Short
+    ScrnSave ulRow, ulCol + columns, lrRow, lrCol, @scrn(0), page
+    ScrnRest ulRow, ulCol, lrRow, lrCol - columns, @scrn(0), page
+    ClearScr ulRow, lrCol - (columns - 1), lrRow, lrCol, -1, page
+  END IF
 
-' END SUB
+END SUB
 
-' ' ScrollR will scroll any portion of the display screen right a 
-' ' specified number of columns.
-' SUB ScrollR(ulRow, ulCol, lrRow, lrCol, columns, page)
+' ScrollR will scroll any portion of the display screen right a 
+' specified number of columns.
+SUB ScrollR(ulRow As Short, ulCol As Short, lrRow As Short, lrCol As Short, columns As Short, page As Short)
 
-'   ' NOTE: page is currently not implemented.
-'   ' If page = -1 then current screen will be scrolled.
+  ' NOTE: page is currently not implemented.
+  ' If page = -1 then current screen will be scrolled.
 
-'   tc = (lrCol - ulCol) + 1
-'   IF tc < columns THEN
-'     ' If the number of columns to scroll is greater than the area to scroll, just clear.
-'     CALL ClearScr (ulRow, ulCol, lrRow, lrCol, -1, page)
-'   ELSE
-'     DIM array(ArraySize(ulRow, ulCol, lrRow, lrCol - columns))
-'     CALL ScrnSave (ulRow, ulCol, lrRow, lrCol - columns, array(), page)
-'     CALL ScrnRest (ulRow, ulCol + columns, lrRow, lrCol, array(), page)
-'     CALL ClearScr (ulRow, ulCol, lrRow, ulCol + (columns - 1), -1, page)
-'   END IF
+  Var tc = (lrCol - ulCol) + 1
+  IF tc < columns THEN
+    ' If the number of columns to scroll is greater than the area to scroll, just clear.
+    ClearScr ulRow, ulCol, lrRow, lrCol, -1, page
+  ELSE
+    DIM scrn(ArraySize(ulRow, ulCol, lrRow, lrCol - columns)) As Short
+    ScrnSave ulRow, ulCol, lrRow, lrCol - columns, @scrn(0), page
+    ScrnRest ulRow, ulCol + columns, lrRow, lrCol, @scrn(0), page
+    ClearScr ulRow, ulCol, lrRow, ulCol + (columns - 1), -1, page
+  END IF
 
-' END SUB
+END SUB
 
-' ' ScrollU will scroll any portion of the display screen up a 
-' ' specified number of lines.
-' SUB ScrollU(ulRow, ulCol, lrRow, lrCol, lines, page)
+' ScrollU will scroll any portion of the display screen up a 
+' specified number of lines.
+SUB ScrollU(ulRow As Short, ulCol As Short, lrRow As Short, lrCol As Short, lines As Short, page As Short)
 
-'   ' NOTE: page is currently not implemented.
-'   ' If page = -1 then current screen will be scrolled.
+  ' NOTE: page is currently not implemented.
+  ' If page = -1 then current screen will be scrolled.
 
-'   tr = (lrRow - ulRow) + 1
-'   IF tr < lines THEN
-'     ' If the number of lines to scroll is greater than the area to scroll, just clear.
-'     CALL ClearScr (ulRow, ulCol, lrRow, lrCol, -1, page)
-'   ELSE
-'     DIM array(ArraySize(ulRow, ulCol, lrRow - lines, lrCol))
-'     CALL ScrnSave (ulRow + lines, ulCol, lrRow, lrCol, array(), page)
-'     CALL ScrnRest (ulRow, ulCol, lrRow - lines, lrCol, array(), page)
-'     CALL ClearScr (lrRow - (lines - 1), ulCol, lrRow, lrCol, -1, page)
-'   END IF
+  Var tr = (lrRow - ulRow) + 1
+  IF tr < lines THEN
+    ' If the number of lines to scroll is greater than the area to scroll, just clear.
+     ClearScr  ulRow, ulCol, lrRow, lrCol, -1, page
+  ELSE
+    DIM scrn(ArraySize(ulRow, ulCol, lrRow - lines, lrCol)) As Short
+    ScrnSave ulRow + lines, ulCol, lrRow, lrCol, @scrn(0), page
+    ScrnRest ulRow, ulCol, lrRow - lines, lrCol, @scrn(0), page
+    ClearScr lrRow - (lines - 1), ulCol, lrRow, lrCol, -1, page
+  END IF
 
-' END SUB
+END SUB
 
 SUB SplitColor (colr As Short, Byref fg As Short, Byref bg As Short)
   fg = (colr AND 128) \ 8 + (colr AND 15) 

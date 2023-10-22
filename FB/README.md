@@ -6,11 +6,11 @@ This is a **work-in-progress project**. One of the desired goals with this proje
 
 | File       |         |   | File       |         |   | File       |         |
 | ---------- | ------- | - | ---------- | ------- | - | ---------- | ------- |
-|AMENU.BAS   | EXE     |   |APRINT.BAS  |         |   |APRINTT.BAS |         |
-|ASCCHART.BAS|         |   |ASCIIPIK.BAS|         |   |ASSEMBLY.BAS|         |
-|BCOPYT.BAS  |         |   |BIGPRINT.BAS|         |   |BITS.BAS    | EXE     |
-|BLPRINT.BAS |         |   |BPRINT.BAS  |         |   |CALC.BAS    |         |
-|CALENDAR.BAS|         |   |CAPNUM.BAS  |         |   |CLEARSCR.BAS|         |
+|AMENU.BAS   | EXE     |   |APRINT.BAS  | EXE     |   |APRINTT.BAS | EXE     |
+|ASCCHART.BAS| LINK    |   |ASCIIPIK.BAS| EXE     |   |ASSEMBLY.BAS|         |
+|BCOPYT.BAS  |         |   |BIGPRINT.BAS| EXE     |   |BITS.BAS    | EXE     |
+|BLPRINT.BAS |         |   |BPRINT.BAS  |         |   |CALC.BAS    | LINK    |
+|CALENDAR.BAS| LINK    |   |CAPNUM.BAS  |         |   |CLEARSCR.BAS|         |
 |COLORPIK.BAS|         |   |COLORS.BAS  |         |   |COMPARE.BAS |         |
 |DATA.BAS    |         |   |DATE2DAY.BAS|         |   |DATEIN.BAS  |         |
 |DAYNAME.BAS |         |   |DECLARE.BAS |         |   |DEFCNF.BI   |         |
@@ -22,7 +22,7 @@ This is a **work-in-progress project**. One of the desired goals with this proje
 |DEMOGAS.BAS |         |   |DEMOIN.BAS  |         |   |DEMOLTS.BAS |         |
 |DEMOMAIN.BAS|         |   |DEMOMASK.BAS|         |   |DEMOMENU.BAS|         |
 |DEMOMGR.BAS |         |   |DEMOPICK.BAS|         |   |DEMOPLMS.BAS|         |
-|DEMOPOP.BAS |         |   |DEMOPULL.BAS|         |   |DEMORK.BAS  |         |
+|DEMOPOP.BAS | EXE     |   |DEMOPULL.BAS|         |   |DEMORK.BAS  |         |
 |DEMOSCAN.BAS|         |   |DEMOSCRL.BAS|         |   |DEMOSECT.BAS|         |
 |DEMOSORT.BAS|         |   |DEMOSS.BAS  |         |   |DEMOSTR.BAS |         |
 |DEMOTSRT.BAS|         |   |DEMOVERT.BAS|         |   |DEMOVIEW.BAS|         |
@@ -51,7 +51,7 @@ This is a **work-in-progress project**. One of the desired goals with this proje
 |MAKEQLB.BAS |         |   |MARQUEE.BAS |         |   |MASKIN.BAS  |         |
 |MIDSTRSR.BAS|         |   |MINMAX.BAS  |         |   |MONITOR.BAS |         |
 |MOUSE.BAS   |         |   |MOUSECM.BAS |         |   |MPREST.BAS  |         |
-|MRANGE.BAS  |         |   |MRANGEG.BAS |         |   |MSGBOX.BAS  |         |
+|MRANGE.BAS  |         |   |MRANGEG.BAS |         |   |MSGBOX.BAS  | LINK    |
 |NUMIN.BAS   |         |   |PAINTBOX.BAS|         |   |PARSE.BAS   |         |
 |PARSESTR.BAS|         |   |PAUSE3.BAS  |         |   |PICKLIST.BAS|         |
 |PRO.BAS     | PRO.LIB |   |PRO.BI      | PRO.LIB |   |PRTSC.BAS   |         |

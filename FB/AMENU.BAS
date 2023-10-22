@@ -1,6 +1,6 @@
 ' **** AMENU.BAS - demonstrates AMenu                        (4/1/1989)
 ' Copyright (c) 1989 Chris May
-' Modifications (c) 2022 Cory Smith
+' Modifications (c) 2023 Cory Smith
 
 #INCLUDE "PRO.BI"
      

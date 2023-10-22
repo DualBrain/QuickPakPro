@@ -1,3 +1,3 @@
 @echo off
-fbc32 amenu.bas pro.bas
-REM amenu.exe
+fbc32 bigprint.bas pro.bas
+REM asciipik.exe
