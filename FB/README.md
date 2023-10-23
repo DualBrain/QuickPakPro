@@ -10,8 +10,8 @@ This is a **work-in-progress project**. One of the desired goals with this proje
 |ASCCHART.BAS| LINK    |   |ASCIIPIK.BAS| EXE     |   |ASSEMBLY.BAS| EXE     |
 |BCOPYT.BAS  | EXE     |   |BIGPRINT.BAS| EXE     |   |BITS.BAS    | EXE     |
 |BLPRINT.BAS | N/A*    |   |BPRINT.BAS  | EXE     |   |CALC.BAS    | LINK    |
-|CALENDAR.BAS| LINK    |   |CAPNUM.BAS  |         |   |CLEARSCR.BAS|         |
-|COLORPIK.BAS|         |   |COLORS.BAS  |         |   |COMPARE.BAS |         |
+|CALENDAR.BAS| LINK    |   |CAPNUM.BAS  | LINK*   |   |CLEARSCR.BAS| EXE     |
+|COLORPIK.BAS| EXE     |   |COLORS.BAS  | EXE     |   |COMPARE.BAS | EXE     |
 |DATA.BAS    |         |   |DATE2DAY.BAS|         |   |DATEIN.BAS  |         |
 |DAYNAME.BAS |         |   |DECLARE.BAS |         |   |DEFCNF.BI   |         |
 |DEMO123.BAS |         |   |DEMOCM.BAS  |         |   |DEMOCOMP.BAS|         |

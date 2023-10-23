@@ -3726,85 +3726,91 @@ SUB MASCIIPick(Byref char As Short, color1 As Short, color2 As Short, Byref exit
   ASCIIPick char, color1, color2, exitCode
 END SUB
 
-' SUB ColorPick(colr, boxColor, exitCode)
+SUB ColorPick(Byref colr As Short, boxColor As Short, Byref exitCode As Short)
 
-'   prevClr = colr
+  Dim prevClr As Short, ulRow As Short, ulCol As Short, lrRow As Short, lrCol As Short 
+  Dim r As Short, c As Short, fg As Short, bg As Short, arrowColr As Short
+  Dim temp As Short, scanCode As Short, row As Short, column As Short
 
-'   ulRow = CSRLIN
-'   ulCol = POS(0)
-'   lrRow = ulRow + 17
-'   lrCol = ulCol + 33
+  prevClr = colr
 
-'   CALL MPaintBox (ulRow, ulCol, lrRow, lrCol, boxColor)
-'   CALL Box0 (ulRow, ulCol, lrRow, lrCol, 2, boxColor)
+  ulRow = CSRLIN
+  ulCol = POS(0)
+  lrRow = ulRow + 17
+  lrCol = ulCol + 33
 
-'   DO
+  MPaintBox ulRow, ulCol, lrRow, lrCol, boxColor
+  Box0 ulRow, ulCol, lrRow, lrCol, 2, boxColor
 
-'     FOR r = 1 TO 16
-'       FOR c = 1 TO 8
-'         CALL QPrintRC (CHR$(177), ulRow + r, ulCol + (c * 4), boxColor)
-'       NEXT
-'     NEXT
+  DO
 
-'     CALL SplitColor(boxColor, fg%, bg%)
-'     arrowColr = OneColor(0, bg%)    
+    FOR r = 1 TO 16
+      FOR c = 1 TO 8
+        QPrintRC CHR$(177), ulRow + r, ulCol + (c * 4), boxColor
+      NEXT
+    NEXT
 
-'     FOR c = 1 TO 8
-'       FOR r = 1 TO 16
-'         temp = (((c - 1) * 16) + r) - 1
-'         CALL QPrintRC (RIGHT$("  " + STR$(temp), 3), ulRow + r, ulCol + (c * 4) - 3, temp)
-'         IF temp = colr THEN
-'           CALL QPrintRC (RIGHT$("  " + STR$(temp), 3), ulRow + r, ulCol + (c * 4) - 3, temp + 128)
-'           CALL QPrintRC (CHR$(17), ulRow + r, ulCol + (c * 4), arrowColr)
-'         END IF
-'       NEXT
-'     NEXT
+    SplitColor boxColor, fg, bg
+    arrowColr = OneColor(0, bg)    
 
-'     WHILE INKEY$ <> "": WEND              ' not sure needed.
-'     DO
+    FOR c = 1 TO 8
+      FOR r = 1 TO 16
+        temp = (((c - 1) * 16) + r) - 1
+        QPrintRC  RIGHT$("  " + STR$(temp), 3), ulRow + r, ulCol + (c * 4) - 3, temp
+        IF temp = colr THEN
+          QPrintRC  RIGHT$("  " + STR$(temp), 3), ulRow + r, ulCol + (c * 4) - 3, temp + 128
+          QPrintRC  CHR$(17), ulRow + r, ulCol + (c * 4), arrowColr
+        END IF
+      NEXT
+    NEXT
 
-'       scanCode = MGetKey(row, column) ' scanCode might be returned to caller.
+    WHILE INKEY$ <> "": WEND              ' not sure needed.
+    DO
 
-'       SELECT CASE scanCode
-'         CASE -72 ' Up
-'           colr = colr - 1: EXIT DO
-'         CASE -80 ' Down
-'           colr = colr + 1: EXIT DO
-'         CASE -75 ' Left
-'           colr = colr - 16: EXIT DO
-'         CASE -77 ' Right
-'           colr = colr + 16: EXIT DO
-'         CASE -71 ' Home
-'           colr = 0: EXIT DO
-'         CASE -79 ' End
-'           colr = 127: EXIT DO
-'         CASE -73 ' PgUp
-'           colr = colr - (colr MOD 16): EXIT DO
-'         CASE -81 ' PgDn
-'           colr = colr - (colr MOD 16) + 15: EXIT DO
-'         CASE 13 ' Enter
-'           exitCode = 0: EXIT SUB
-'         ' CASE 1000 ' Mouse click
-'         '   r = row - (ulRow + 1): c = (col - ulCol) \ 2
-'         '   colr = ((r * 16) + c) - 1
-'         '   exitCode = 2: EXIT SUB
-'         CASE 27
-'           colr = prevClr: exitCode = 2: EXIT SUB
-'         CASE ELSE                         ' any other key,
-'       END SELECT
+      scanCode = MGetKey(row, column) ' scanCode might be returned to caller.
 
-'     LOOP
+      SELECT CASE scanCode
+        CASE -72 ' Up
+          colr = colr - 1: EXIT DO
+        CASE -80 ' Down
+          colr = colr + 1: EXIT DO
+        CASE -75 ' Left
+          colr = colr - 16: EXIT DO
+        CASE -77 ' Right
+          colr = colr + 16: EXIT DO
+        CASE -71 ' Home
+          colr = 0: EXIT DO
+        CASE -79 ' End
+          colr = 127: EXIT DO
+        CASE -73 ' PgUp
+          colr = colr - (colr MOD 16): EXIT DO
+        CASE -81 ' PgDn
+          colr = colr - (colr MOD 16) + 15: EXIT DO
+        CASE 13 ' Enter
+          exitCode = 0: EXIT SUB
+        CASE 1000 ' Mouse click
+          r = row - ulRow: c = (column - ulCol) \ 4
+          IF r > -1 AndAlso r < 16 AndAlso c > -1 AndAlso c < 8 Then
+            colr = ((c * 16) + r)
+            exitCode = 0: EXIT SUB
+          END IF
+        CASE 27
+          colr = prevClr: exitCode = 2: EXIT SUB
+        CASE ELSE                         ' any other key,
+      END SELECT
 
-'     IF colr < 0 THEN colr = colr + 128
-'     IF colr > 127 THEN colr = colr - 128
+    LOOP
 
-'   LOOP
+    IF colr < 0 THEN colr = colr + 128
+    IF colr > 127 THEN colr = colr - 128
 
-' END SUB
+  LOOP
 
-' SUB MColorPick(colr, boxColor, exitCode)
-'   CALL ColorPick(colr, boxColor, exitCode)
-' END SUB
+END SUB
+
+SUB MColorPick(Byref colr As Short, boxColor As Short, Byref exitCode As Short)
+  ColorPick colr, boxColor, exitCode
+END SUB
 
 ' SUB DirFile(array$(), first, count, scanCode, msgColor, fileColor, hiLiteColor, boxColor)
 
@@ -4767,34 +4773,53 @@ END SUB
 '   QPrintRC display$, ClockMethodRow, ClockMethodCol, ClockMethodColr
 ' END SUB
 
-' ' Compare will compare any two blocks of memory, and report if they are the same. 
-' FUNCTION Compare(segAdr1 AS _MEM, segAdr2 AS _MEM, numBytes)
-' 'FUNCTION Compare(Seg1, Adr1, Seg2, Adr2, NumBytes)
+' Compare will compare any two blocks of memory, and report if they are the same. 
+FUNCTION Compare(addr1 AS Any Ptr, addr2 AS Any Ptr, numBytes As Short) As Short
 
-'   SELECT CASE numBytes
-'     CASE -1: size = 2
-'     CASE -2: size = 4
-'     CASE -3: size = 4
-'     CASE -4: size = 8
-'     CASE ELSE: size = numBytes
-'   END SELECT
+  Dim size As Short
+  SELECT CASE numBytes
+    CASE -1: size = 2
+    CASE -2: size = 4
+    CASE -3: size = 4
+    CASE -4: size = 8
+    CASE ELSE: size = numBytes
+  END SELECT
 
-'   s1$ = SPACE$(size)
-'   s2$ = SPACE$(size)
-'   _MEMGET segAdr1, segAdr1.OFFSET, s1$
-'   _MEMGET segAdr2, segAdr2.OFFSET, s2$
-'   Compare = (s1$ = s2$)
+  Dim bytes(size - 1) As Byte
+  Var dest = @bytes(0)
+  Var startAddress = FB_MEMCOPY (Byval dest, Byval addr1, size)
+  Var s1 = Bytes2String(bytes())
 
-' END FUNCTION
+  startAddress = FB_MEMCOPY (Byval dest, Byval addr2, size)
+  Var s2 = Bytes2String(bytes())
 
-' ' CompareT will compare any two TYPE variables, and report if they are the same. 
-' FUNCTION CompareT(block1 AS _MEM, block2 AS _MEM, numBytes)
-'   s1$ = SPACE$(numBytes)
-'   s2$ = SPACE$(numBytes)
-'   _MEMGET block1, block1.OFFSET, s1$
-'   _MEMGET block2, block2.OFFSET, s2$
-'   CompareT = (s1$ = s2$)
-' END FUNCTION
+  Compare = (s1 = s2)
+
+END FUNCTION
+
+' CompareT will compare any two TYPE variables, and report if they are the same. 
+FUNCTION CompareT(addr1 AS Any Ptr, addr2 AS Any Ptr, numBytes As Short) As Short
+
+  Dim size As Short
+  SELECT CASE numBytes
+    CASE -1: size = 2
+    CASE -2: size = 4
+    CASE -3: size = 4
+    CASE -4: size = 8
+    CASE ELSE: size = numBytes
+  END SELECT
+
+  Dim bytes(size - 1) As Byte
+  Var dest = @bytes(0)
+  Var startAddress = FB_MEMCOPY (Byval dest, Byval addr1, size)
+  Var s1 = Bytes2String(bytes())
+
+  startAddress = FB_MEMCOPY (Byval dest, Byval addr2, size)
+  Var s2 = Bytes2String(bytes())
+
+  CompareT = (s1 = s2)
+
+END FUNCTION
 
 ' Date2Num converts a date in string form to an equivalent integer variable. 
 FUNCTION Date2Num (dat As String) As Short 'STATIC

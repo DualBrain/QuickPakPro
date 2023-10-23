@@ -206,6 +206,8 @@ DECLARE SUB AMenu (address As String Ptr, startItem As Short, Byref count As Sho
 DECLARE SUB AMenuT(array As Any Ptr, item As Short, length As Short, Byref count As Short, Byref scanCode As Short, normColor As Short, hiLiteColor As Short, numRows As Short, numCols As Short, gap As Short, ulRow As Short, ulCol As Short)
 DECLARE SUB ASCIIPick(Byref char As Short, color1 As Short, color2 As Short, Byref exitCode As Short)
 DECLARE SUB MASCIIPick(Byref char As Short, color1 As Short, color2 As Short, Byref exitCode As Short)
+DECLARE SUB ColorPick(Byref colr As Short, boxColor As Short, Byref exitCode As Short)
+DECLARE SUB MColorPick(Byref colr As Short, boxColor As Short, Byref exitCode As Short)
 DECLARE SUB Editor(Byref ed As String, Byref activeLength As Short, Byref scanCode As Short, numOnly As Short, isCapsOn As Short, normalColor As Short, editColor As Short, row As Short, column As Short)
 DECLARE FUNCTION MGetKey(Byref row As Short, Byref col As Short) As Short
 
@@ -233,6 +235,8 @@ DECLARE FUNCTION WaitKey AS SHORT
 
 DECLARE SUB BCopyT(fromEl As Any Ptr, toEl As Any Ptr, elSize As Short, numEls As Short) 
 DECLARE SUB Chime(number As Short)
+DECLARE FUNCTION Compare(addr1 AS Any Ptr, addr2 AS Any Ptr, numBytes As Short) As Short
+DECLARE FUNCTION CompareT(addr1 AS Any Ptr, addr2 AS Any Ptr, numBytes As Short) As Short
 DECLARE FUNCTION Date2Num (dat As String) As Short
 DECLARE FUNCTION DayName(d As Short) As String
 DECLARE SUB Empty(dummy As Short)
