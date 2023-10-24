@@ -12,8 +12,8 @@ This is a **work-in-progress project**. One of the desired goals with this proje
 |BLPRINT.BAS | N/A*    |   |BPRINT.BAS  | EXE     |   |CALC.BAS    | LINK    |
 |CALENDAR.BAS| LINK    |   |CAPNUM.BAS  | LINK*   |   |CLEARSCR.BAS| EXE     |
 |COLORPIK.BAS| EXE     |   |COLORS.BAS  | EXE     |   |COMPARE.BAS | EXE     |
-|DATA.BAS    |         |   |DATE2DAY.BAS|         |   |DATEIN.BAS  |         |
-|DAYNAME.BAS |         |   |DECLARE.BAS |         |   |DEFCNF.BI   |         |
+|DATA.BAS    | N/A     |   |DATE2DAY.BAS| LINK    |   |DATEIN.BAS  | LINK    |
+|DAYNAME.BAS | EXE     |   |DECLARE.BAS | PRO.BI  |   |DEFCNF.BI   | INCLUDE |
 |DEMO123.BAS |         |   |DEMOCM.BAS  |         |   |DEMOCOMP.BAS|         |
 |DEMOCOPY.BAS|         |   |DEMOCRPT.BAS|         |   |DEMODATE.BAS|         |
 |DEMODIA2.BAS|         |   |DEMODIAL.BAS|         |   |DEMODIAP.BAS|         |
@@ -21,7 +21,7 @@ This is a **work-in-progress project**. One of the desired goals with this proje
 |DEMOEVAL.BAS|         |   |DEMOFAST.BAS|         |   |DEMOFC.BAS  |         |
 |DEMOGAS.BAS |         |   |DEMOIN.BAS  |         |   |DEMOLTS.BAS |         |
 |DEMOMAIN.BAS|         |   |DEMOMASK.BAS|         |   |DEMOMENU.BAS|         |
-|DEMOMGR.BAS |         |   |DEMOPICK.BAS|         |   |DEMOPLMS.BAS|         |
+|DEMOMGR.BAS | EXE     |   |DEMOPICK.BAS|         |   |DEMOPLMS.BAS|         |
 |DEMOPOP.BAS | EXE     |   |DEMOPULL.BAS|         |   |DEMORK.BAS  |         |
 |DEMOSCAN.BAS|         |   |DEMOSCRL.BAS|         |   |DEMOSECT.BAS|         |
 |DEMOSORT.BAS|         |   |DEMOSS.BAS  |         |   |DEMOSTR.BAS |         |
@@ -74,8 +74,8 @@ This is a **work-in-progress project**. One of the desired goals with this proje
 |TEXTSORT.BAS|         |   |TIME.BAS    |         |   |TRANSLAT.BAS|         |
 |UNIQUE.BAS  |         |   |VALID.BAS   |         |   |VERTMENT.BAS|         |
 |VERTMENU.BAS|         |   |VIEWFILE.BAS|         |   |VIRTUAL.BAS |         |
-|VLONG.BAS   |         |   |WEEKDAY.BAS |         |   |WINDOMGR.BAS|         |
-|WINDOW.BAS  |         |   |WIPES.BAS   |         |   |WORDWRAP.BAS|         |
+|VLONG.BAS   |         |   |WEEKDAY.BAS |         |   |WINDOMGR.BAS| LINK    |
+|WINDOW.BAS  |         |   |WIPES.BAS   | EXE     |   |WORDWRAP.BAS|         |
 |YESNOB.BAS  |         |   |            |         |   |            |         |
 
 Files marked with *INCLUDE* are meant to be included, while files marked as *EXE* are to be compiled as an executable (stand-alone example). The replacement of the PRO.LIB functionality is implemented in the *PRO.BAS* and *PRO.BI* source files. (Files marked with *N/A* are either hardware specific and/or simply "not possible" with the current release of FB. If you disagree, please discuss. Items marked with an asterisks *most likely need additional testing/improvements*.)

@@ -6,8 +6,11 @@
 
 ' Copyright (c) 2023 Cory Smith
 
+'https://www.freebasic.net/forum/viewtopic.php?t=14158
+
 #INCLUDE ONCE "PRO.BI"
 
+'#INCLUDE ONCE "crt/stdio.bi"
 #INCLUDE ONCE "file.bi"
 #INCLUDE ONCE "dir.bi"
 #INCLUDE ONCE "vbcompat.bi"
@@ -4594,26 +4597,20 @@ END FUNCTION
 '   ERROR 73 ' Feature Unavailable
 ' END FUNCTION
 
-' SUB BCopy(src AS _MEM, dest AS _MEM, numBytes, direction)
-' 'SUB BCopy(fromSeg, fromAddr, toSeg, toAddr, numBytes, direction)
+SUB BCopy(src As Any Ptr, dest As Any Ptr, numBytes As Short, direction As Short)
 
-'   ' FromSeg% and FromAddr% indicate the source location of the 
-'   ' block, and ToSeg% and ToAddr% tell where to copy it to. 
-'   ' NumBytes% is, well, you can figure that one out. Direction% is 
-'   ' either O to copy in the forward direction, or -1 to copy backwards. 
+  ' FromSeg% and FromAddr% indicate the source location of the 
+  ' block, and ToSeg% and ToAddr% tell where to copy it to. 
+  ' NumBytes% is, well, you can figure that one out. Direction% is 
+  ' either O to copy in the forward direction, or -1 to copy backwards. 
 
-'   DIM totalSize AS _OFFSET: totalSize = numEls * size
-  
-'   IF direction = 0 THEN
-'     _MEMCOPY src, src.OFFSET, totalSize TO dest, dest.OFFSET
-'   ELSE
-'     ' Not really sure what this means.
-'     ' Also, of the included examples that use BCopy, 
-'     ' **ALL** of them are passing a 0 for this param.
-'     ERROR 73 ' Feature Unavailable
-'   END IF
+  IF direction = 0 THEN
+    Var startAddress = FB_MEMCOPY (Byval dest, Byval src, numBytes)
+  ELSE
+    Var startAddress = FB_MEMCOPY (Byval src, Byval dest, numBytes)
+  END IF
 
-' END SUB
+END SUB
 
 ' BCopyT will copy one or more elements in a TYPE array to 
 ' another array, or to any location in memory. Alternately, BCopyT 
@@ -5664,17 +5661,17 @@ END FUNCTION
 
 ' END FUNCTION
 
-' FUNCTION Num2Day(d)
-'   dd = d
-'                                       ' 12/31/1979 (0) was a Monday (2)
-'   dd = dd + 1                       ' adjust for the turnover point is
-'   dd = dd MOD 7                     ' modulus 7
-'   IF dd < 0 THEN                     ' is it a negative value?  
-'     dd = 7 + dd                     ' add this fudge
-'   END IF
-'   dd = dd + 1                       ' adjust 0-6 to 1-7
-'   Num2Day = dd                      ' return result
-' END FUNCTION
+FUNCTION Num2Day(d As Short) As Short
+  Var dd = d
+                                    ' 12/31/1979 (0) was a Monday (2)
+  dd = dd + 1                       ' adjust for the turnover point is
+  dd = dd MOD 7                     ' modulus 7
+  IF dd < 0 THEN                    ' is it a negative value?  
+    dd = 7 + dd                     ' add this fudge
+  END IF
+  dd = dd + 1                       ' adjust 0-6 to 1-7
+  Num2Day = dd                      ' return result
+END FUNCTION
 
 ' ' Time2Num converts a time in string form to an equivalent number 
 ' ' of seconds after midnight. 
@@ -5698,13 +5695,13 @@ END SUB
 '   _DELAY microseconds / 1000000
 ' END SUB
 
-' ' Pause3 provides a simple method for obtaining delays with a resolution
-' ' of 1 millisecond, without having to reprogram the PC's timer chips
-' SUB Pause3 (milliseconds, fudg&)
-'   ' milliseconds is the desired number of milliseconds to delay, 
-'   ' and fudg& was previously obtained using the FudgeFactor function. 
-'   _DELAY milliseconds / 1000
-' END SUB
+' Pause3 provides a simple method for obtaining delays with a resolution
+' of 1 millisecond, without having to reprogram the PC's timer chips
+SUB Pause3 (milliseconds As Short, fudg As long)
+  ' milliseconds is the desired number of milliseconds to delay, 
+  ' and fudg& was previously obtained using the FudgeFactor function. 
+  Sleep milliseconds, 1
+END SUB
 
 ' ' PDQTimer is an integer-only TIMER replacement that avoids the 
 ' ' inclusion of BASIC's floating point code in your programs. 
@@ -5917,12 +5914,12 @@ END FUNCTION
 '   ERROR 73 ' Feature Unavailable
 ' END FUNCTION
 
-' ' Traplnt will constrain an incoming value to within a specified upper and lower limit. 
-' FUNCTION TrapInt(value, loLimit, hiLimit)
-'   IF value < loLimit THEN TrapInt = loLimit: EXIT FUNCTION
-'   IF value > hiLimit THEN TrapInt = hiLimit: EXIT FUNCTION
-'   TrapInt = value
-' END FUNCTION
+' Traplnt will constrain an incoming value to within a specified upper and lower limit. 
+FUNCTION TrapInt(value As Short, loLimit As Short, hiLimit As Short) As Short
+  IF value < loLimit THEN TrapInt = loLimit: EXIT FUNCTION
+  IF value > hiLimit THEN TrapInt = hiLimit: EXIT FUNCTION
+  TrapInt = value
+END FUNCTION
 
 ' SUB VLAdd(Value1#, Value2#, Sum#, ErrFlag)
 '   ERROR 73 ' Feature Unavailable
@@ -6559,6 +6556,10 @@ END FUNCTION
 '   ERROR 73 ' Feature Unavailable
 ' END SUB
 
+FUNCTION QPGetLenI As Short
+  QPGetLenI = 2
+END FUNCTION
+
 FUNCTION QPLeft(text As String, numChars As Short) As String
   QPLeft = LEFT$(text, numChars)
 END FUNCTION
@@ -7034,37 +7035,22 @@ FUNCTION EGAMem As Short
   EGAMem = 4 ' Assuming VGA and matching what is reported in DOSBOX.
 END FUNCTION
 
-' ChatGPT conversion????
-' SUB MakeMono(ArrayAdr AS LONG, NumEls AS LONG)
-'   DIM Array(NumEls)
-'   FOR i = 1 TO NumEls
-'   Array(i) = PEEK(ArrayAdr + i - 1)
-'   IF (Array(i) AND 7) <> 0 THEN
-'   Array(i) = (Array(i) AND 248) OR 7
-'   END IF
-'   NEXT
-' END SUB
-
-' ' MakeMono will convert the colors on a text screen held in an 
-' ' integer array to those suitable for display on a monochrome monitor. 
-' SUB MakeMono(array() As Short, element As Short, size As Short)
-'   IF size < 1 THEN EXIT SUB
-'   ' element is the location in the array() array where the screen 
-'   ' begins, and size is the size of the screen in characters. 
-'   FOR index As Short = element TO element + size - 1
-'     ' clr = element(index) AND &H00FF ' split color
-'     ' 'ch = ((element(index) AND &HFF00) \ 256) AND &H00FF ' split character
-'     ' CALL SplitColor(clr, fg, bg)
-
-'     ' If the text foreground color is black (inverse), then the color is left unchanged.
-'     ' Otherwise the background is cleared to black, and the 
-'     ' foreground is set to white. However, the intensity and flashing color 
-'     ' attributes are left unchanged. 
-'     IF (array(index) AND 7) <> 0 THEN
-'       array(index) = (array(index) AND 248) OR 7
-'     END IF
-'   NEXT
-' END SUB
+' MakeMono will convert the colors on a text screen held in an 
+' integer array to those suitable for display on a monochrome monitor. 
+SUB MakeMono(array As Short Ptr, size As Short)
+  IF size < 1 THEN EXIT SUB
+  ' element is the location in the array() array where the screen 
+  ' begins, and size is the size of the screen in characters. 
+  FOR index As Short = 0 TO size - 1
+    ' If the text foreground color is black (inverse), then the color is left unchanged.
+    ' Otherwise the background is cleared to black, and the 
+    ' foreground is set to white. However, the intensity and flashing color 
+    ' attributes are left unchanged. 
+    IF (*(array + index) AND 7) <> 0 THEN
+      *(array + index) = (*(array + index) AND 248) OR 7
+    END IF
+  NEXT
+END SUB
 
 ' MPaintBox is similar to PaintBox, except it always turns off the 
 ' mouse cursor before painting the screen. When it is finished the 
@@ -7074,27 +7060,23 @@ SUB MPaintBox (ulRow As Short, ulCol As Short, lrRow As Short, lrCol As Short, c
   PaintBox0 ulRow, ulCol, lrRow, lrCol, colr
 END SUB
 
-' SUB MPRestore(ulRow, ulCol, lrRow, lrCol, originalWidth, element(), start)
+SUB MPRestore(ulRow As Short, ulCol As Short, lrRow As Short, lrCol As Short, originalWidth As Short, element As Short Ptr)
 
-'   w = lrCol - ulCol + 1
-'   h = lrRow - ulRow + 1
+  Var w = lrCol - ulCol + 1
+  Var h = lrRow - ulRow + 1
 
-'   index = start '+ LBOUND(element)  ' not really sure why the +1 is needed???
-'                                       ' but I've verified that index of 1 is the correct starting
-'                                       ' element for a saved array.
-'   r = 0
-'   DO
-'     FOR c = 0 TO w - 1
-'       ' clr = element(index + c) AND &H00FF ' split color
-'       ' ch = ((element(index + c) AND &HFF00) \ 256) AND &H00FF ' split character
-'       ch = element(index + c) AND &H00FF ' split color
-'       clr = ((element(index + c) AND &HFF00) \ 256) AND &H00FF ' split character
-'       QPrintRC CHR$(ch), ulRow + r, ulCol + c, clr
-'     NEXT
-'     r = r + 1: index = index + originalWidth
-'   LOOP UNTIL r => h OR index => UBOUND(element)
+  VAr index = 0
+  Var r = 0
+  DO
+    FOR c As Short = 0 TO w - 1
+      Var ch = *(element + index + c) AND &H00FF ' split color
+      VAr clr = ((*(element + index + c) AND &HFF00) \ 256) AND &H00FF ' split character
+      QPrintRC CHR$(ch), ulRow + r, ulCol + c, clr
+    NEXT
+    r = r + 1: index = index + originalWidth
+  LOOP UNTIL r >= h
 
-' END SUB
+END SUB
 
 ' MQPrint is similar to QPrint, except it always turns off the mouse cursor
 ' before printing. When it is finished the cursor is turned back on. 
@@ -7448,6 +7430,45 @@ END SUB
 ' ****************************************
 ' Chapter Next
 ' ****************************************
+
+SUB BLOADA(filename As String, array As Short Ptr)
+
+  If Exist(filename) Then
+
+    ' /* a Microsoft compatible bsaved memory text image format descriptor */ 
+    ' unsigned char BSV_header[7]={ '\xfd', /* ID Flag = file descriptor identifier bsaved file */ 
+    '                               '\x00', 
+    '                               '\xb8', /* base address = LSB | MSB original segment */ 
+    '                               '\x00', 
+    '                               '\x00', /* offset from base = LSB | MSB original offset */ 
+    '                               '\xA0', 
+    '                               '\x0F' /* data size = LSB | MSB of bytes to be loaded + */ }; 
+    ' unsigned char BSV_image[4000]; 
+    ' unsigned char BSV_tailer[1]={ '\x1A' /* traditionally used by BASIC */ }; 
+    ' /* as a terminator */
+
+    Dim ff As Short
+    ff = FREEFILE
+    OPEN filename FOR BINARY ACCESS READ SHARED AS ff
+
+    Dim hdr As Byte
+    Dim segment As Short
+    Dim offset As Short
+    Dim size As Short
+
+    GET #ff, , hdr
+    GET #ff, , segment
+    GET #ff, , offset
+    GET #ff, , size
+    DIM bytes(size - 1) AS BYTE
+    GET #ff, , bytes()
+    CLOSE ff
+    Var startAddress = FB_MEMCOPY (byval array, byval @bytes(0), size)
+    ERASE bytes
+
+  End If
+
+END SUB
 
 FUNCTION BitShift (value As Short, cmd As String, bits As Short) As Short
   Var mult = 2

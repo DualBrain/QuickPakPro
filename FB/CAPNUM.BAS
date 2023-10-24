@@ -5,6 +5,8 @@
 
 #INCLUDE "PRO.BI" ' Peek1, QPrint
 
+DECLARE SUB CapNum
+
 SUB CapNum STATIC
 
   Dim capStatus As Short, numStatus As Short, h As Short, v As Short, cap As Short, num As Short

@@ -233,6 +233,7 @@ DECLARE FUNCTION WaitKey AS SHORT
 ' Chapter 7 - Miscellaneous Routines
 ' ****************************************
 
+DECLARE SUB BCopy(src As Any Ptr, dest As Any Ptr, numBytes As Short, direction As Short)
 DECLARE SUB BCopyT(fromEl As Any Ptr, toEl As Any Ptr, elSize As Short, numEls As Short) 
 DECLARE SUB Chime(number As Short)
 DECLARE FUNCTION Compare(addr1 AS Any Ptr, addr2 AS Any Ptr, numBytes As Short) As Short
@@ -250,9 +251,12 @@ DECLARE FUNCTION MaxInt (num1 As Short, num2 As Short) As Short
 DECLARE FUNCTION MaxLong (Num1 As Long, Num2 As Long) As Long
 DECLARE FUNCTION MinInt (num1 As Short, num2 As Short) As Short
 DECLARE FUNCTION MinLong (num1 As Long, num2 As Long) As Long
+DECLARE FUNCTION Num2Day(d As Short) As Short
 DECLARE SUB Pause(ticks AS SHORT)
+DECLARE SUB Pause3 (milliseconds As Short, fudg As long)
 DECLARE FUNCTION Peek1(segment As Short, address As Short) As Short
 DECLARE FUNCTION PRNReady(lptNumber As Short) As Short
+DECLARE FUNCTION TrapInt(value As Short, loLimit As Short, hiLimit As Short) As Short
 
 ' ****************************************
 ' Chapter 8 - String Manipulation Routines
@@ -296,7 +300,9 @@ DECLARE SUB FillScrn0(ulRow As Short, ulCol As Short, lrRow As Short, lrCol As S
 DECLARE SUB GetVMode (Byref mode As Short, Byref page As Short, Byref pageSize As Short, Byref rows As Short, Byref columns As Short)
 DECLARE FUNCTION Monitor As Short
 DECLARE FUNCTION EGAMem As Short
+DECLARE SUB MakeMono(array As Short Ptr, size As Short)
 DECLARE SUB MPaintBox (ulRow As Short, ulCol As Short, lrRow As Short, lrCol As Short, colr As Short)
+DECLARE SUB MPRestore(ulRow As Short, ulCol As Short, lrRow As Short, lrCol As Short, originalWidth As Short, element As Short Ptr)
 DECLARE SUB MQPrint (txt As String, colr As Short)
 DECLARE SUB MScrnRest (ulRow As Short, ulCol As Short, lrRow As Short, lrCol As Short, scrn As Short Ptr)
 DECLARE SUB MScrnSave (ulRow As Short, ulCol As Short, lrRow As Short, lrCol As Short, scrn As Short Ptr)
@@ -324,6 +330,7 @@ DECLARE SUB SplitColor (colr As Short, Byref fg As Short, Byref bg As Short)
 ' Chapter Next
 ' ****************************************
 
+DECLARE SUB BLOADA(filename As String, array As Short Ptr)
 DECLARE FUNCTION BitShift (value As Short, cmd As String, bits As Short) As Short
 REM DECLARE FUNCTION FRE OVERLOAD (value As String) As Short
 DECLARE FUNCTION IsWindows() AS Short

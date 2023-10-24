@@ -1,3 +1,3 @@
 @echo off
-fbc32 capnum.bas pro.bas
+fbc32 wipes.bas pro.bas
 REM bcopyt.exe
