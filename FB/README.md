@@ -18,7 +18,7 @@ This is a **work-in-progress project**. One of the desired goals with this proje
 |DEMOCOPY.BAS|         |   |DEMOCRPT.BAS|         |   |DEMODATE.BAS|         |
 |DEMODIA2.BAS|         |   |DEMODIAL.BAS|         |   |DEMODIAP.BAS|         |
 |DEMOEDIT.BAS|         |   |DEMOEMS.BAS |         |   |DEMOEMS2.BAS|         |
-|DEMOEVAL.BAS|         |   |DEMOFAST.BAS|         |   |DEMOFC.BAS  |         |
+|DEMOEVAL.BAS|         |   |DEMOFAST.BAS| EXE     |   |DEMOFC.BAS  |         |
 |DEMOGAS.BAS |         |   |DEMOIN.BAS  |         |   |DEMOLTS.BAS |         |
 |DEMOMAIN.BAS|         |   |DEMOMASK.BAS|         |   |DEMOMENU.BAS|         |
 |DEMOMGR.BAS | EXE     |   |DEMOPICK.BAS|         |   |DEMOPLMS.BAS|         |
@@ -26,16 +26,16 @@ This is a **work-in-progress project**. One of the desired goals with this proje
 |DEMOSCAN.BAS|         |   |DEMOSCRL.BAS|         |   |DEMOSECT.BAS|         |
 |DEMOSORT.BAS|         |   |DEMOSS.BAS  |         |   |DEMOSTR.BAS |         |
 |DEMOTSRT.BAS|         |   |DEMOVERT.BAS|         |   |DEMOVIEW.BAS|         |
-|DEMOVRTT.BAS|         |   |DEMOXMS.BAS |         |   |DIALOG.BAS  |         |
-|DIRTREE.BAS |         |   |DISKINFO.BAS|         |   |EDIT.BAS    |         |
+|DEMOVRTT.BAS|         |   |DEMOXMS.BAS |         |   |DIALOG.BAS  | *       |
+|DIRTREE.BAS |         |   |DISKINFO.BAS|         |   |EDIT.BAS    | *       |
 |EGABSAVE.BAS|         |   |EVALUATE.BAS|         |   |EXENAME.BAS |         |
-|EXIST.BAS   |         |   |FAPPEND.BAS |         |   |FASTFILE.BAS|         |
+|EXIST.BAS   |         |   |FAPPEND.BAS |         |   |FASTFILE.BAS| LINK    |
 |FGETAH.BAS  |         |   |FGETR.BAS   |         |   |FGETRT.BAS  |         |
 |FILECOMP.BAS|         |   |FILECOPY.BAS|         |   |FILECRPT.BAS|         |
 |FILEINFO.BAS|         |   |FILESORT.BAS|         |   |FILEVIEW.BAS|         |
 |FILL.BAS    | EXE     |   |FILLSCRN.BAS|         |   |FIND.BAS    | EXE     |
 |FINDLAST.BAS|         |   |FINDT.BAS   | EXE     |   |FLINPUT.BAS |         |
-|FLUSH.BAS   |         |   |FNOTHER.BAS | INCLUDE |   |FNSPREAD.BAS| INCLUDE |
+|FLUSH.BAS   |         |   |FNOTHER.BAS | LINK    |   |FNSPREAD.BAS| LINK    |
 |FORMAT.BAS  |         |   |FULLNAME.BAS|         |   |GASGAUGE.BAS|         |
 |GET1STR.BAS |         |   |GETATTR.BAS |         |   |GETCMOS.BAS |         |
 |GETCOLOR.BAS|         |   |GETDIR.BAS  |         |   |GETEQUIP.BAS|         |
@@ -56,8 +56,8 @@ This is a **work-in-progress project**. One of the desired goals with this proje
 |PARSESTR.BAS|         |   |PAUSE3.BAS  |         |   |PICKLIST.BAS|         |
 |PRO.BAS     | PRO.LIB |   |PRO.BI      | PRO.LIB |   |PRTSC.BAS   |         |
 |PULLDNMS.BAS|         |   |PULLDOWN.BAS|         |   |PUTVOL.BAS  |         |
-|QD.BAS      |         |   |QEDIT.BAS   |         |   |QEDIT7.BAS  |         |
-|QEDITS.BAS  |         |   |QEDITYPE.BI |         |   |QINSTR.BAS  |         |
+|QD.BAS      |         |   |QEDIT.BAS   | *       |   |QEDIT7.BAS  |         |
+|QEDITS.BAS  |         |   |QEDITYPE.BI | INCLUDE |   |QINSTR.BAS  |         |
 |QINSTRH.BAS |         |   |QPLEFT.BAS  |         |   |QPSOLVER.BAS|         |
 |QPSOUND.BAS |         |   |QPTRIM.BAS  |         |   |QSORT.BAS   |         |
 |READDIRS.BAS|         |   |READDIRT.BAS|         |   |READFILE.BAS|         |
@@ -69,14 +69,14 @@ This is a **work-in-progress project**. One of the desired goals with this proje
 |SETATTR.BAS |         |   |SETCNF.BI   |         |   |SHIFT.BAS   |         |
 |SORTI.BAS   |         |   |SORTSTR.BAS | EXE     |   |SORTT.BAS   | EXE*    |
 |SOUNDEX.BAS |         |   |SPELLNUM.BAS|         |   |SPLITNAM.BAS|         |
-|SPREAD.BAS  |         |   |SRCHPATH.BAS|         |   |STRREST.BAS |         |
+|SPREAD.BAS  |         |   |SRCHPATH.BAS|         |   |STRREST.BAS | LINK    |
 |STUFFBUF.BAS|         |   |TEST.BAS    |         |   |TEXTIN.BAS  |         |
 |TEXTSORT.BAS|         |   |TIME.BAS    |         |   |TRANSLAT.BAS|         |
 |UNIQUE.BAS  |         |   |VALID.BAS   |         |   |VERTMENT.BAS|         |
 |VERTMENU.BAS|         |   |VIEWFILE.BAS|         |   |VIRTUAL.BAS |         |
 |VLONG.BAS   |         |   |WEEKDAY.BAS |         |   |WINDOMGR.BAS| LINK    |
 |WINDOW.BAS  |         |   |WIPES.BAS   | EXE     |   |WORDWRAP.BAS|         |
-|YESNOB.BAS  |         |   |            |         |   |            |         |
+|YESNOB.BAS  | LINK    |   |            |         |   |            |         |
 
 Files marked with *INCLUDE* are meant to be included, while files marked as *EXE* are to be compiled as an executable (stand-alone example). The replacement of the PRO.LIB functionality is implemented in the *PRO.BAS* and *PRO.BI* source files. (Files marked with *N/A* are either hardware specific and/or simply "not possible" with the current release of FB. If you disagree, please discuss. Items marked with an asterisks *most likely need additional testing/improvements*.)
 

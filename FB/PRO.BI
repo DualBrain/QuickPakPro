@@ -225,6 +225,7 @@ DECLARE SUB NumOff
 DECLARE SUB NumOn
 DECLARE FUNCTION ScrlLock As Short
 DECLARE FUNCTION ShiftKey As Short
+DECLARE SUB HideCursor
 DECLARE SUB ShowCursor
 DECLARE SUB TextCursor(fg As Short, bg As Short)
 DECLARE FUNCTION WaitKey AS SHORT
@@ -252,6 +253,12 @@ DECLARE FUNCTION MaxLong (Num1 As Long, Num2 As Long) As Long
 DECLARE FUNCTION MinInt (num1 As Short, num2 As Short) As Short
 DECLARE FUNCTION MinLong (num1 As Long, num2 As Long) As Long
 DECLARE FUNCTION Num2Day(d As Short) As Short
+DECLARE FUNCTION NumStrings(array As Short Ptr, numBytes As Short) As Short
+DECLARE SUB StringSave (stringArray As String Ptr, shortArray As Short Ptr, numStr As Short)
+DECLARE FUNCTION FindLastSM (array As Short Ptr, numBytes As Long) As long
+DECLARE FUNCTION GetNext(array As Short Ptr, lastAddress As Short Ptr) As Short
+DECLARE SUB StringRest(stringArray As String Ptr, shortArray As Short Ptr, numStrings As Short)
+DECLARE FUNCTION StringSize(array As String Ptr, numStringEls As Short) As Long
 DECLARE SUB Pause(ticks AS SHORT)
 DECLARE SUB Pause3 (milliseconds As Short, fudg As long)
 DECLARE FUNCTION Peek1(segment As Short, address As Short) As Short
@@ -263,10 +270,14 @@ DECLARE FUNCTION TrapInt(value As Short, loLimit As Short, hiLimit As Short) As 
 ' ****************************************
 
 DECLARE FUNCTION ASCII (ch As String) AS Short
+DECLARE FUNCTION Blanks(work AS STRING) AS SHORT
 DECLARE FUNCTION FUsing(number As String, image As String) As String
 DECLARE FUNCTION InCount(source As String, searchValue As String) As Short
+DECLARE FUNCTION Null(work AS STRING) AS SHORT
 DECLARE FUNCTION QInstr(startPosition As Short, sourceValue As String, searchValue As String) As Short
 DECLARE FUNCTION QInstr2(startPosition As Short, sourceValue As String, searchValue As String) As Short
+DECLARE FUNCTION QInstrB(startPosition AS SHORT, sourceValue AS STRING, searchValue AS STRING) AS SHORT
+DECLARE FUNCTION QInstrB2(startPosition AS SHORT, sourceValue AS STRING, searchValue AS STRING) AS SHORT
 DECLARE FUNCTION QPLeft(text As String, numChars As Short) As String
 DECLARE FUNCTION QPMid(text As String, startChar As Short, numChars As Short) As String
 DECLARE FUNCTION QPRight(text As String, numChars As Short) As String

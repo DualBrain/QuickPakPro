@@ -1,3 +1,3 @@
 @echo off
-fbc32 wipes.bas pro.bas
-REM bcopyt.exe
+fbc32 edit.bas pro.bas dialog.bas qedit.bas
+REM edit.exe

@@ -2242,15 +2242,9 @@ END SUB
 ' bytes at a time. 
 SUB FGetA(handle As Short, array As Any Ptr, numBytes As Short)
 
-  ERROR 73 ' Feature Unavailable
-
-  ' DIM work(1 TO numBytes) AS _BYTE    ' prepare a byte array
-  ' GET # handle, , work()              ' read the number of bytes into memory
-  
-  ' DIM src AS _MEM                     ' copy the byte array to the memory block
-  ' src = _MEM(work())
-  ' _MEMCOPY src, src.OFFSET, src.SIZE TO block, block.OFFSET
-  ' _MEMFREE src
+  Dim work(1 TO numBytes) As Byte    ' prepare a byte array
+  GET # handle, , work()              ' read the number of bytes into memory
+  Var startAddress = FB_MEMCOPY (Byval array, Byval @work(0), numBytes)
 
 END SUB
 
@@ -2591,24 +2585,17 @@ END FUNCTION
 ' or the default drive. 
 FUNCTION GetDir(drive As String) As String
 
-  ERROR 73 ' Feature Unavailable
-
   ' Parameter may be given as either upper or lower case, and only the first character is considered
   ' Returns the complete directory name, minus the drive letter and colon.
 
-  ' ' _CWD$ (function) returns the current working directory as a STRING value.
-  ' ' _STARTDIR$ (function) returns the user's program calling path as a STRING.
-
-  ' VAR ch = MID$(_CWD$, 1, 1)
-  ' VAR a = ASC(UCASE$(ch))
-  ' SELECT CASE a
-  '   CASE ASC("A") TO ASC("Z")
-  '     GetDir = MID$(_CWD$, 3)
-  '   CASE ELSE
-  '     GetDir = _CWD$
-  ' END SELECT
-
-  GetDir = ""
+  VAR ch = MID$(CurDir, 1, 1)
+  VAR a = ASC(UCASE$(ch))
+  SELECT CASE a
+    CASE ASC("A") TO ASC("Z")
+      GetDir = MID$(CurDir, 3)
+    CASE ELSE
+      GetDir = CurDir
+  END SELECT
 
 END FUNCTION
 
@@ -4222,9 +4209,9 @@ END FUNCTION
 
 ' END SUB
 
-' SUB HideCursor
-'   _MOUSEHIDE
-' END SUB
+SUB HideCursor
+  '_MOUSEHIDE
+END SUB
 
 ' InitMouse is used both to determine if a mouse is present in the host 
 ' PC, and to reset the mouse driver software to its default values. 
@@ -5199,103 +5186,93 @@ END FUNCTION
 
 ' END SUB
 
-' ' Returns the number of strings stored in an integer array. 
-' FUNCTION NumStrings(array(), element, numBytes)
+' Returns the number of strings stored in an integer array. 
+FUNCTION NumStrings(array As Short Ptr, numBytes As Short) As Short
 
-'   'ORIGINAL: DIM Array$(NumStrings%(SEG Array%(1), NumBytes)) 
+  ' Once an array has been loaded from disk or copied from expanded 
+  ' memory, you will need to know how many strings it contains. This 
+  ' is what NumStrings% is for. If the array is going to be sent to 
+  ' QEdit for editing, you will probably want to include additional 
+  ' elements when dimensioning the string array. 
 
-'   ' Once an array has been loaded from disk or copied from expanded 
-'   ' memory, you will need to know how many strings it contains. This 
-'   ' is what NumStrings% is for. If the array is going to be sent to 
-'   ' QEdit for editing, you will probably want to include additional 
-'   ' elements when dimensioning the string array. 
+  ' write the code to determine how many CRLF are in the array....
+  Var prev = 0
+  Var count = 0
+  FOR index As Short = 0 TO numBytes - 1
+    Var value = *(array + index)
+    Var b1 = value AND &HFF
+    Var b2 = (value AND &HFF00) \ 256
+    IF prev = 13 AND b1 = 10 THEN ' CRLF?
+      count = count + 1
+    ELSEIF prev <> 13 AND b1 = 10 THEN ' Not CR but LF?
+      count = count + 1
+    ELSEIF b1 = 13 AND b2 = 10 THEN ' CRLF?
+      count = count + 1
+    ELSEIF b1 <> 13 AND b2 = 10 THEN ' Not CR but LF?
+      count = count + 1
+    END IF
+    prev = b2
+  NEXT
 
-'   ' write the code to determine how many CRLF are in the array....
-'   prev = 0
-'   count = 0
-'   FOR index = element TO UBOUND(array)
-'     value = array(index)
-'     b1 = value AND &HFF
-'     b2 = (value AND &HFF00) \ 256
-'     IF prev = 13 AND b1 = 10 THEN
-'       count = count + 1
-'     ELSEIF b1 = 13 AND b2 = 10 THEN
-'       count = count + 1
-'     END IF
-'     prev = b2
-'   NEXT
+  NumStrings = count
 
-'   NumStrings = count
+END FUNCTION
 
-' END FUNCTION
+' Copies all or part of a string array to an integer array. 
+SUB StringSave (stringArray As String Ptr, shortArray As Short Ptr, numStr As Short)
 
-' ' Copies all or part of a string array to an integer array. 
-' SUB StringSave (array$(), strElement, array(), intElement, numStr)
+  'ORIGINAL: CALL StringSave (BYVAL VARPTR(Array$(1)), SEG Array%(1), NumStrings%)
 
-'   'ORIGINAL: CALL StringSave (BYVAL VARPTR(Array$(1)), SEG Array%(1), NumStrings%)
+  ' Where Array$(1) is the first element in the string array, Array%(1) 
+  ' is the first element in the integer array, and NumStrings % is the 
+  ' number of string elements in Array$() to be saved. Of course, you 
+  ' would specify element zero instead of element one for either array 
+  ' if that is appropriate. It is essential that the integer array be 
+  ' sufficiently dimensioned to hold the string data. See the description 
+  ' for the StringSize function to see how to determine the number of 
+  ' elements needed. 
 
-'   ' Where Array$(1) is the first element in the string array, Array%(1) 
-'   ' is the first element in the integer array, and NumStrings % is the 
-'   ' number of string elements in Array$() to be saved. Of course, you 
-'   ' would specify element zero instead of element one for either array 
-'   ' if that is appropriate. It is essential that the integer array be 
-'   ' sufficiently dimensioned to hold the string data. See the description 
-'   ' for the StringSize function to see how to determine the number of 
-'   ' elements needed. 
+  'NOTE: Testing against the original found that a CR/LF are added to each string.
 
-'   'NOTE: Testing against the original found that a CR/LF are added to each string.
+  Dim index As Short, element As Short
+  Dim elementS As String, carry As String, char As Short, value As String
+  Dim l As Short, r As Short
 
-'   index = intElement
-'   FOR element = strElement TO strElement + numStr - 1
-'     element$ = carry$ + array$(element) + CHR$(13) + CHR$(10): carry$ = ""
-'     FOR char = 1 TO LEN(element$) STEP 2
-'       value$ = MID$(element$, char, 2)
-'       IF LEN(value$) = 1 THEN carry$ = value$: EXIT FOR
-'       l = ASC(LEFT$(value$, 1)): r = ASC(RIGHT$(value$, 1))
-'       array(index) = l + (r * 256): index = index + 1
-'     NEXT
-'   NEXT
-'   IF LEN(carry$) > 0 THEN
-'     l = ASC(carry$): r = 0
-'     array(index) = l + (r + 256)
-'   END IF
+  FOR element = 0 TO numStr - 1
+    elementS = carry + *(stringArray + element) + CHR$(13) + CHR$(10): carry = ""
+    FOR char = 1 TO LEN(elementS) STEP 2
+      value = MID$(elementS, char, 2)
+      IF LEN(value) = 1 THEN carry = value: EXIT FOR
+      l = ASC(LEFT$(value, 1)): r = ASC(RIGHT$(value, 1))
+      *(shortArray + index) = l + (r * 256): index = index + 1
+    NEXT
+  NEXT
+  IF LEN(carry) > 0 THEN
+    l = ASC(carry): r = 0
+    *(shortArray + index) = l + (r + 256)
+  END IF
 
-' END SUB
+END SUB
 
-' ' FindLastSM (SM stands for String Manager) determines the actual 
-' ' number of bytes occupied by strings in an integer storage array. 
-' FUNCTION FindLastSM& (array(), first, numBytes&)
+' FindLastSM (SM stands for String Manager) determines the actual 
+' number of bytes occupied by strings in an integer storage array. 
+FUNCTION FindLastSM (array As Short Ptr, numBytes As Long) As long
 
-'   ' di = numBytes - 1 ' not sure why this is here, but it does match the original behavior.
-'   ' b1 = -1
-'   ' b2 = -1
-'   ' FOR index = UBOUND(array) TO first STEP -1
-'   '   value = array(index) ' two bytes
-'   '   b1 = value AND &HFF
-'   '   b2 = (value AND &HFF00) \ 256
-'   '   IF b1 <> 0 THEN EXIT FOR ELSE di = di - 1
-'   '   IF b2 <> 0 THEN EXIT FOR ELSE di = di - 1
-'   ' NEXT
-'   ' IF (di MOD 2 = 0) AND b1 = 26 THEN di = di - 1
-'   ' IF (di MOD 2 = 1) AND b2 = 26 THEN di = di - 1
-'   ' FindLastSM = di
+  Var di = numBytes - 1 ' not sure why this is here, but it does match the original behavior.
+  Var b1 = -1
+  Var b2 = -1
+  FOR index As Long = numBytes - 1 TO 0 STEP -1
+    Var value = *(array + index) ' two bytes
+    b1 = value AND &HFF
+    b2 = (value AND &HFF00) \ 256
+    IF b1 <> 0 THEN EXIT FOR ELSE di = di - 1
+    IF b2 <> 0 THEN EXIT FOR ELSE di = di - 1
+  NEXT
+  IF (di MOD 2 = 0) AND b1 = 26 THEN di = di - 1
+  IF (di MOD 2 = 1) AND b2 = 26 THEN di = di - 1
+  FindLastSM = di
 
-'   totalSize = UBOUND(array) - LBOUND(array) + 1 ' how many bytes (total)?
-'   DIM work(1 TO totalSize * 2) AS _BYTE         ' prepare a byte array
-
-'   '---------------------------------------------  copy the integer array to the byte array
-'   DIM src AS _MEM: src = _MEM(array())
-'   DIM dst AS _MEM: dst = _MEM(work())
-'   _MEMCOPY src, src.OFFSET, src.SIZE TO dst, dst.OFFSET
-'   _MEMFREE dst: _MEMFREE src
-
-'   FOR index = UBOUND(work) TO 1 STEP - 1
-'     IF work(index) > 0 THEN FindLastSM& = index: EXIT FUNCTION
-'   NEXT
-
-'   FindLastSM& = -1
-
-' END FUNCTION
+END FUNCTION
 
 ' SUB Get1Str(work$, array(), element, strNumber)
 
@@ -5343,97 +5320,126 @@ END FUNCTION
 
 ' END SUB
 
-' ' Tells StringRestore the length of the next string to retrieve. GetN ext 
-' ' is a low-level routine that scans ahead in the integer storage array 
-' ' looking for the CHR$(13) that marks the end of the current string. 
-' ' Once it is found, the length of the string is calculated and returned 
-' ' to StringRestore. ThisAddress % is also modified to point to the next 
-' ' string element in storage for the next time it is called. It is 
-' ' extremely unlikely that you would need to call this routine directly. 
+' Tells StringRestore the length of the next string to retrieve. GetNext 
+' is a low-level routine that scans ahead in the integer storage array 
+' looking for the CHR$(13) that marks the end of the current string. 
+' Once it is found, the length of the string is calculated and returned 
+' to StringRestore. ThisAddress % is also modified to point to the next 
+' string element in storage for the next time it is called. It is 
+' extremely unlikely that you would need to call this routine directly. 
+FUNCTION GetNext(thisAddress As Short Ptr, lastAddress As Short Ptr) As Short
 
-' FUNCTION GetNext(segment, thisAddress, lastAddress)
+  ' Where ThisAddress% indicate where in 
+  ' the integer array GetNext is to begin scanning, and LastAddress% 
+  ' points to the last active byte in the integer array. 
 
-'   'ORIGINAL: Array$(X) = SPACE$(GetNext%(Segment%, ThisAddress%, LastAddress%)) 
+  Var prev = 0
+  Var count = 0
+  FOR index As Short Ptr = thisAddress TO lastAddress
+    Var value = *index
+    Var b1 = value AND &HFF
+    Var b2 = (value AND &HFF00) \ 256
+    IF prev = 13 AND b1 = 10 THEN
+      count = count + 1
+      IF count > 1 THEN 
+        GetNext = index - thisAddress
+        thisAddress = index
+        EXIT FUNCTION 
+      END IF
+    ELSEIF prev <> 13 AND b1 = 10 THEN
+      count = count + 1
+      IF count > 1 THEN 
+        GetNext = index - thisAddress
+        thisAddress = index
+        EXIT FUNCTION 
+      END IF
+    ELSEIF b1 = 13 AND b2 = 10 THEN
+      count = count + 1
+      IF count > 1 THEN 
+        GetNext = index - thisAddress
+        thisAddress = index
+        EXIT FUNCTION
+      END IF
+    ELSEIF b1 <> 13 AND b2 = 10 THEN
+      count = count + 1
+      IF count > 1 THEN 
+        GetNext = index - thisAddress
+        thisAddress = index
+        EXIT FUNCTION
+      END IF
+    END IF
+    prev = b2
+  NEXT
 
-'   ' Where Segment% and ThisAddress% indicate where in 
-'   ' the integer array GetNext is to begin scanning, and LastAddress% 
-'   ' points to the last active byte in the integer array. 
+  GetNext = &H8000
 
-'   ERROR 73 ' Feature Unavailable
+END FUNCTION
 
-' END FUNCTION
-
-' ' Copies strings from an integer array into a string array. This is a 
-' ' low-level routine used by the BASIC StringRestore subprogram, 
-' ' and it is very unlikely that you would need to call it directly. 
-' SUB StringRest(array$(), strElement, array(), intElement, numStr) 
+' Copies strings from an integer array into a string array. This is a 
+' low-level routine used by the BASIC StringRestore subprogram, 
+' and it is very unlikely that you would need to call it directly. 
+SUB StringRest(stringArray As String Ptr, shortArray As Short Ptr, numStr As Short)
   
-'   'ORIGINAL: CALL StringRest(BYVAL VARPTR(Array$(1)), SEG Array%(1), NumStrings%) 
+  'ORIGINAL: CALL StringRest(BYVAL VARPTR(Array$(1)), SEG Array%(1), NumStrings%) 
 
-'   ' Where Array$(1) is the first element in the string array, Array%(1) 
-'   ' is the first element in the integer array, and NumStrings% is the 
-'   ' number of string elements being restored. Of course, you would 
-'   ' specify element zero instead of element one for either array if that 
-'   ' is appropriate. StringRest requires that the correct number of 
-'   ' characters has already been set aside in each string element. 
+  ' Where stringArray(1) is the first element in the string array, shortArray(1) 
+  ' is the first element in the integer array, and NumStr is the 
+  ' number of string elements being restored. Of course, you would 
+  ' specify element zero instead of element one for either array if that 
+  ' is appropriate. StringRest requires that the correct number of 
+  ' characters has already been set aside in each string element. 
 
-'   totalSize = UBOUND(array) - LBOUND(array) + 1 ' how many bytes (total)?
-'   DIM work(1 TO totalSize * 2) AS _BYTE         ' prepare a byte array
+  'Dim source = shortArray
+  'Dim dest = stringArray
+  'For index As Short = 0 To numStr - 1
 
-'   '---------------------------------------------  copy the integer array to the byte array
-'   DIM src AS _MEM: src = _MEM(array())
-'   DIM dst AS _MEM: dst = _MEM(work())
-'   _MEMCOPY src, src.OFFSET, src.SIZE TO dst, dst.OFFSET
-'   _MEMFREE dst: _MEMFREE src
+  ''  Var startAddress = FB_MEMCOPY (Byval dest, Byval source, elSize)
+  ''  GetNext
 
-'   index = strElement
+  ''  Var offset = array + (x * elSize)
+  ''  Dim bytes(elSize - 1) As Byte
+  ''  Var dest = @bytes(0)
+  ''  Var s = Bytes2String(bytes())
+  ''  Var value = MID$(s, firstChar, numChars)
+  ''  QPrintRC value + SPACE$(numChars - LEN(value)), row, col, colr
 
-'   ch = 1
-'   DO
-'     c = work(ch)
-'     SELECT CASE c
-'       CASE 13
-'         index = index + 1
-'         ch = ch + 1: IF work(ch) = 10 THEN ch = ch + 1
-'       CASE ELSE
-'         array$(index) = array$(index) + CHR$(c)
-'         ch = ch + 1
-'     END SELECT
-'     IF ch > UBOUND(work) THEN EXIT DO
-'     IF index > UBOUND(array$) THEN EXIT DO
-'   LOOP
 
-' END SUB
+    ' for each string entry in stringArray...
+    ' determine length of the string using the shortArray (segment)...
 
-' ' Returns the number of bytes needed to store a string array in an integer array. 
-' FUNCTION StringSize&(array$(), start, numStringEls)
+  'Next 
+
+END SUB
+
+' Returns the number of bytes needed to store a string array in an integer array. 
+FUNCTION StringSize(array As String Ptr, numStringEls As Short) As Long
   
-'   'ORIGINAL: NumBytes = StringSize&(BYVAL VARPTR(Array$(Start)), NumStringEls%)
+  'ORIGINAL: NumBytes = StringSize&(BYVAL VARPTR(Array$(Start)), NumStringEls%)
 
-'   ' Where Array$(Start) is the first element to save in the string array, 
-'   ' and NumStringEls % is the number of elements in the string array to include. 
-'   '
-'   ' This function returns the number of bytes needed rather than the 
-'   ' number of elements, so you will know exactly how many bytes to 
-'   ' specify when saving the integer array to disk. To determine how 
-'   ' large to dimension the integer array to, simply divide the number of 
-'   ' bytes by two. If you intend to dimension the integer array starting at 
-'   ' element 1 (instead of 0), you should also add one extra element in 
-'   ' case the number of bytes is an odd number. 
-'   '
-'   '   DIM Array%(NumBytes \ 2)
-'   ' 
-'   ' or
-'   ' 
-'   '   DIM Array$(1 TO NumBytes \ 2 + 1)
+  ' Where Array$(Start) is the first element to save in the string array, 
+  ' and NumStringEls % is the number of elements in the string array to include. 
+  '
+  ' This function returns the number of bytes needed rather than the 
+  ' number of elements, so you will know exactly how many bytes to 
+  ' specify when saving the integer array to disk. To determine how 
+  ' large to dimension the integer array to, simply divide the number of 
+  ' bytes by two. If you intend to dimension the integer array starting at 
+  ' element 1 (instead of 0), you should also add one extra element in 
+  ' case the number of bytes is an odd number. 
+  '
+  '   DIM Array%(NumBytes \ 2)
+  ' 
+  ' or
+  ' 
+  '   DIM Array$(1 TO NumBytes \ 2 + 1)
 
-'   c& = numStringEls * 2 ' At least 2 bytes per array element (CRLF)...
-'   FOR x = start TO start + numStringEls - 1
-'     c& = c& + LEN(array$(x)) ' add the number of bytes that make of length for each string element
-'   NEXT
-'   StringSize& = c&
+  VAr c = numStringEls * 2 ' At least 2 bytes per array element (CRLF)...
+  FOR x As Short = 0 TO numStringEls - 1
+    c = c + LEN(*(array + x)) ' add the number of bytes that make of length for each string element
+  NEXT
+  StringSize = c
 
-' END FUNCTION
+END FUNCTION
 
 ' ' Returns the length of a single string stored in an integer array. 
 ' ' StrLength is a low-level routine used by the BASIC Get1String 
@@ -5963,25 +5969,26 @@ FUNCTION ASCII (ch As String) AS Short
   IF LEN(ch) THEN ASCII = ASC(ch) ELSE ASCII = -1
 END FUNCTION
 
-' ' Blanks will report the number of leading blanks in the specified 
-' ' string. Both CHR$(32) and the CHR$(0) "null" character are recognized. 
-' FUNCTION Blanks(work$)
-'   ' NumBlanks receives the number of leading blank and/or CHR$(0) 
-'   ' bytes in Work$. 
-'   IF work$ = "" THEN
-'     result = 0
-'   ELSE
-'     result = LEN(work$)
-'     FOR index = 1 TO LEN(work$)
-'       SELECT CASE ASC(MID$(work$, index, 1))
-'         CASE 0, 32
-'         CASE ELSE
-'           result = index - 1: EXIT FOR
-'       END SELECT
-'     NEXT
-'   END IF
-'   Blanks = result
-' END FUNCTION
+' Blanks will report the number of leading blanks in the specified 
+' string. Both CHR$(32) and the CHR$(0) "null" character are recognized. 
+FUNCTION Blanks(work AS STRING) AS SHORT
+  ' NumBlanks receives the number of leading blank and/or CHR$(0) 
+  ' bytes in Work$. 
+  DIM result AS SHORT = 0
+  IF work = "" THEN
+    result = 0
+  ELSE
+    result = LEN(work)
+    FOR index AS SHORT = 1 TO LEN(work)
+      SELECT CASE ASC(MID$(work, index, 1))
+        CASE 0, 32
+        CASE ELSE
+          result = index - 1: EXIT FOR
+      END SELECT
+    NEXT
+  END IF
+  Blanks = result
+END FUNCTION
 
 ' ' Compact compresses a string by removing all embedded blanks.
 ' FUNCTION Compact$(old$)
@@ -6375,21 +6382,21 @@ END FUNCTION
 
 ' END FUNCTION
 
-' ' Null will report if the specified string is either null, or is filled only 
-' ' with blank or CHR$(0) characters. 
-' FUNCTION Null(work$)
-'   result = -1
-'   IF work$ <> "" THEN
-'     FOR index = 1 TO LEN(work$)
-'       SELECT CASE ASC(MID$(work$, index, 1))
-'         CASE 0 ', 32
-'         CASE ELSE
-'           result = 0: EXIT FOR
-'       END SELECT
-'     NEXT
-'   END IF
-'   Null = result
-' END FUNCTION
+' Null will report if the specified string is either null, or is filled only 
+' with blank or CHR$(0) characters. 
+FUNCTION Null(work AS STRING) AS SHORT
+  VAR result = -1
+  IF work <> "" THEN
+    FOR index AS SHORT = 1 TO LEN(work)
+      SELECT CASE ASC(MID$(work, index, 1))
+        CASE 0 ', 32
+        CASE ELSE
+          result = 0: EXIT FOR
+      END SELECT
+    NEXT
+  END IF
+  Null = result
+END FUNCTION
 
 ' ' ParseString accepts a string containing delimited information, and 
 ' ' returns portions of that string each time it is invoked. 
@@ -6498,59 +6505,59 @@ FUNCTION QInstr2(startPosition As Short, sourceValue As String, searchValue As S
 
 END FUNCTION
 
-' ' QlnstrB is similar to the QuickPak Professional Qlnstr function, 
-' ' except it scans the source string backwards looking for a specified 
-' ' substring. Like Qlnstr, function accepts any number of "?" wild 
-' ' cards to match any character. 
-' FUNCTION QInstrB(startPosition, sourceValue$, searchValue$)
+' QInstrB is similar to the QuickPak Professional Qlnstr function, 
+' except it scans the source string backwards looking for a specified 
+' substring. Like Qlnstr, function accepts any number of "?" wild 
+' cards to match any character. 
+FUNCTION QInstrB(startPosition AS SHORT, sourceValue AS STRING, searchValue AS STRING) AS SHORT
 
-'   ' Setting position to 0 will return 0; matching QB behavior.
-'   IF startPosition = 0 THEN QInstrB = 0: EXIT FUNCTION
+  ' Setting position to 0 will return 0; matching QB behavior.
+  IF startPosition = 0 THEN QInstrB = 0: EXIT FUNCTION
 
-'   position = startPosition
-'   DO
-'     segment$ = MID$(sourceValue$, position, LEN(searchValue$))
-'     IF LEN(segment$) <> LEN(searchValue$) THEN EXIT DO
-'     isMatch = 1
-'     FOR index = 1 TO LEN(searchValue$)
-'       character$ = MID$(searchValue$, index, 1)
-'       IF character$ <> "?" THEN
-'         IF MID$(segment$, index, 1) <> character$ THEN isMatch = 0 : EXIT FOR
-'       END IF
-'     NEXT
-'     IF isMatch THEN QInstrB = position : EXIT FUNCTION
-'     position = position - 1
-'     IF position < 1 THEN EXIT DO
-'   LOOP
+  VAR position = startPosition
+  DO
+    VAR segment = MID$(sourceValue, position, LEN(searchValue))
+    IF LEN(segment) <> LEN(searchValue) THEN EXIT DO
+    VAR isMatch = 1
+    FOR index AS SHORT = 1 TO LEN(searchValue)
+      VAR character = MID$(searchValue, index, 1)
+      IF character <> "?" THEN
+        IF MID$(segment, index, 1) <> character THEN isMatch = 0 : EXIT FOR
+      END IF
+    NEXT
+    IF isMatch THEN QInstrB = position : EXIT FUNCTION
+    position = position - 1
+    IF position < 1 THEN EXIT DO
+  LOOP
 
-'   QInstrB = 0
+  QInstrB = 0
 
-' END FUNCTION
+END FUNCTION
 
-' FUNCTION QInstrB2(startPosition, sourceValue$, searchValue$)
+FUNCTION QInstrB2(startPosition AS SHORT, sourceValue AS STRING, searchValue AS STRING) AS SHORT
 
-'   ' Setting position to 0 will return 0; matching QB behavior.
-'   IF startPosition = 0 THEN QInstrB2 = 0: EXIT FUNCTION
+  ' Setting position to 0 will return 0; matching QB behavior.
+  IF startPosition = 0 THEN QInstrB2 = 0: EXIT FUNCTION
 
-'   position = startPosition
-'   DO
-'     segment$ = LCASE$(MID$(sourceValue$, position, LEN(searchValue$)))
-'     IF LEN(segment$) <> LEN(searchValue$) THEN EXIT DO
-'     isMatch = 1
-'     FOR index = 1 TO LEN(searchValue$)
-'       character$ = LCASE$(MID$(searchValue$, index, 1))
-'       IF character$ <> "?" THEN
-'         IF MID$(segment$, index, 1) <> character$ THEN isMatch = 0 : EXIT FOR
-'       END IF
-'     NEXT
-'     IF isMatch THEN QInstrB2 = position : EXIT FUNCTION
-'     position = position - 1
-'     IF position < 1 THEN EXIT DO
-'   LOOP
+  VAR position = startPosition
+  DO
+    VAR segment = LCASE$(MID$(sourceValue, position, LEN(searchValue)))
+    IF LEN(segment) <> LEN(searchValue) THEN EXIT DO
+    VAR isMatch = 1
+    FOR index AS SHORT = 1 TO LEN(searchValue)
+      VAR character = LCASE$(MID$(searchValue, index, 1))
+      IF character <> "?" THEN
+        IF MID$(segment, index, 1) <> character THEN isMatch = 0 : EXIT FOR
+      END IF
+    NEXT
+    IF isMatch THEN QInstrB2 = position : EXIT FUNCTION
+    position = position - 1
+    IF position < 1 THEN EXIT DO
+  LOOP
 
-'   QInstrB2 = 0
+  QInstrB2 = 0
 
-' END FUNCTION
+END FUNCTION
 
 ' SUB QInstrH(Segment, Address, SearchValue$, NumBytes&)
 '   ERROR 73 ' Feature Unavailable
